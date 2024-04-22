@@ -1,0 +1,9 @@
+{
+  "name": "easy-messe-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/easy-messe-e2e/src",
+  "tags": [],
+  "implicitDependencies": ["easy-messe"],
+  "// targets": "to see all targets run: nx show project easy-messe-e2e --web",
+  "targets": {}
+}
