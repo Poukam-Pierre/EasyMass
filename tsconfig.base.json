@@ -14,7 +14,16 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@easy-messe/libs/theme": ["libs/theme/src/index.ts"],
+      "@easy-messe/libs/theme/server": ["libs/theme/src/server.ts"],
+      "@easy-messe/libs/utils": ["libs/utils/src/index.ts"],
+      "@easy-messe/libs/utils/server": ["libs/utils/src/server.ts"],
+      "@easyMesse/theme": ["theme/src/index.ts"],
+      "@easyMesse/theme/server": ["theme/src/server.ts"],
+      "@easyMesseLibs/theme": ["libs/src/index.ts"],
+      "@easyMesseLibs/theme/server": ["libs/src/server.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
