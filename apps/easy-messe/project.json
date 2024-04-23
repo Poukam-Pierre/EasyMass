@@ -3,7 +3,56 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/easy-messe",
   "projectType": "application",
-  "tags": [],
-  "// targets": "to see all targets run: nx show project easy-messe --web",
-  "targets": {}
+  "targets": {
+    "build":{
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/easy-messe"
+      },
+      "configurations": {
+        "development":{
+          "outputPath": "apps/easy-messe"
+        },
+        "production": {}
+      }
+    },
+    "serve":{
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "easy-messe:build",
+        "dev": true
+      },
+      "configurations": {
+        "development":{
+          "buildTarget": "easy-messe:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "easy-messe:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export":{
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget":"easy-messe:build:production"
+      }
+    },
+    "test":{
+      "executor": "@nx/next:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig":"apps/easy-messe/jest.config.ts"
+      }
+    },
+    "lint":{
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags":[]
 }
