@@ -62,7 +62,7 @@ const App = ({
  * @param {React.ReactNode} children - children that'll consume the provided theme
  * @returns {JSX.Element}
  */
-export function LHALabsThemeProvider({
+export function EasyMassThemeProvider({
     children,
     theme,
     defaultLang,
@@ -89,4 +89,4 @@ export function LHALabsThemeProvider({
     );
 }
 
-export default LHALabsThemeProvider;
+export default EasyMassThemeProvider;
