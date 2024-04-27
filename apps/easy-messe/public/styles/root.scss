@@ -1,0 +1,46 @@
+:root {
+    /* COMMON COLORS */
+    --titleActive: #333333;
+    --body: #666666;
+    --label: #6E6D7A;
+    --placeholder: #A0A3BD;
+    --line: #E0E0E0;
+    --inputBackground: #F5F5F5;
+    --background: #F5F5F5;
+    --offWhite: '#FFFFFF';
+    --dialogBackground: var(--background);
+  
+    /* MAIN COLORS */
+    --primary: #A50000;
+    --secondary: #9E4CEB;
+    --error: #DD0303;
+    --success: #5CB360;
+    --warning:#F59300;
+  
+    /* SPACING */
+    --paragraph-spacing:10px
+  
+    
+    /* NEUTRALS */
+    --thin: 100;
+    --extraLight: 200;
+    --light: 300;
+    --regular: 400;
+    --medium: 500;
+    --semiBold: 600;
+    --bold: 700;
+    --extraBold: 800;
+    --black: 900;
+  
+  
+    /* TYPOGRAPHY */
+    --text-h1: 32.2px;
+    --text-h2: 27.3px;
+    --text-h3: 21.9px;
+    --text-h4: 17.5px;
+    --text-h5: 14px;
+    --text-h6: 13px;
+    --text-body: 14px;
+    --text-button: 14px;
+    --text-sm: 12px;
+  }
