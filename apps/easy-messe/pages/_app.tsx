@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import '../public/styles/global.scss';
-import '../public/styles/notifGlobalStyles.css';
+import '../public/styles/notifyGlobalStyles.css';
 import '../public/styles/reset.css';
 import '../public/styles/root.scss';
 import EasyMassLayout from '../components/layout';
