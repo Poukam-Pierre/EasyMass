@@ -12,7 +12,7 @@ import EasyMassLayout from '../components/layout';
 
 function CustomApp({ Component, pageProps }: AppProps) {
     return (
-        <EasyMassThemeProvider defaultLang="en">
+        <EasyMassThemeProvider defaultLang="fr">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Head>
                     <title>{"Let's Order a mass remotly - EasyMesse"}</title>
