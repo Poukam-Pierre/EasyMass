@@ -95,10 +95,13 @@ export function generateTheme(newTheme?: ThemeOptions): Theme {
     palette: {
       ...{
         primary: {
-          main: '#A50000',
+          main: '#026DA9',
         },
         secondary: {
-          main: '#CCCCCC',
+          main: '#9CD5F5',
+        },
+        ternary: {
+          main: '#FFB800',
         },
         error: {
           main: '#DD0303',
@@ -202,7 +205,7 @@ export function generateTheme(newTheme?: ThemeOptions): Theme {
         },
         styleOverrides: {
           root: ({ theme }) => ({
-            borderRadius: '20px',
+            borderRadius: '10px',
             textTransform: 'none',
             fontWeight: 'var(--semiBold)',
             lineHeight: '14px',
