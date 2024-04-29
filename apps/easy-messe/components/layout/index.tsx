@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import Header from './Header/Header';
 
 export default function EasyMassLayout({ children }: { children: JSX.Element }) {
     /* TODO: this function will receive
@@ -14,7 +15,7 @@ export default function EasyMassLayout({ children }: { children: JSX.Element }) 
                 rowGap: 1,
             }}
         >
-            <Typography>Layout Header</Typography>
+            <Header />
             {children}
             <Typography>Layout Footer</Typography>
         </Box>
