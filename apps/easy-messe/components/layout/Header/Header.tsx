@@ -1,8 +1,14 @@
-import { Box, Button } from "@mui/material"
-import Image from "next/image"
-import LogoMass from '../../../assets/LogoEasyMass.png'
-import { NavItem } from "./navitem"
-import LanguageSwapper from "../LanguageSwapper"
+import { Box, Button, IconButton, Toolbar } from "@mui/material";
+import Image from "next/image";
+import LogoMass from '../../../assets/LogoEasyMass.png';
+import { NavItem } from "./navitem";
+import LanguageSwapper from "../LanguageSwapper";
+import { Icon } from '@iconify/react';
+import MenuIcon from '@iconify-icons/fluent/line-horizontal-3-20-regular';
+import SideBar from "./SideBar/SideBar";
+import { useState } from "react";
+
+
 
 export interface INavItem {
     item: string,
@@ -10,46 +16,73 @@ export interface INavItem {
 }
 
 export default function Header() {
+    const [open, setOpen] = useState<boolean>(false)
     const navItems: INavItem[] = [
         { item: 'Accueil', route: '/' },
         { item: 'A propos', route: '#' }
     ]
     return (
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 90px'
-        }}>
-            <Box>
-                <Image
-                    src={LogoMass}
-                    alt='logo easy mass'
-                    style={{ width: '193px', height: '78px', cursor: 'pointer' }}
-                />
-            </Box>
+        <>
+
+            <SideBar open={open} toggleDrawer={setOpen} navItems={navItems} />
             <Box sx={{
-                display: 'grid',
-                gridAutoFlow: 'column',
-                columnGap: 3
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: '#F5F5F5',
+                padding: { laptop: '16px, 90px', mobile: '13px 21px' }
             }}>
-                {navItems.map((navItem, index) => (
-                    <NavItem navItem={navItem} key={index} />
-                ))}
+                <Toolbar sx={{
+                    width: '100%',
+                    justifyContent: 'space-between',
+                    padding: 0
+                }}>
+                    <Box sx={{ display: { laptop: 'block', mobile: 'none' } }}>
+                        <Image
+                            src={LogoMass}
+                            alt='logo easy mass'
+                            style={{ width: '193px', height: '78px', cursor: 'pointer' }}
+                        />
+                    </Box>
+                    <Box sx={{ display: { laptop: 'none', mobile: 'block' } }}>
+                        <Image
+                            src={LogoMass}
+                            alt='logo easy mass'
+                            style={{ width: '110px', height: '44px', cursor: 'pointer' }}
+                        />
+                    </Box>
+                    <Box sx={{
+                        display: { laptop: 'grid', mobile: 'none' },
+                        gridAutoFlow: 'column',
+                        columnGap: 3
+                    }}>
+                        {navItems.map((navItem, index) => (
+                            <NavItem navItem={navItem} key={index} />
+                        ))}
+                    </Box>
+                    <IconButton sx={{
+                        display: { laptop: 'none', mobile: 'block' }
+                    }}
+                        onClick={() => setOpen(true)}
+                    >
+                        <Icon icon={MenuIcon} color="#2F3A45" />
+                    </IconButton>
+                    <Box sx={{
+                        display: { laptop: 'grid', mobile: 'none' },
+                        gridAutoFlow: 'column',
+                        columnGap: 1,
+                    }}>
+                        <LanguageSwapper />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            disableElevation={false}>
+                            Offir une messe
+                        </Button>
+                    </Box>
+
+                </Toolbar>
             </Box>
-            <Box sx={{
-                display: 'grid',
-                gridAutoFlow: 'column',
-                columnGap: 1,
-            }}>
-                <LanguageSwapper />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    disableElevation={false}>
-                    Offir une messe
-                </Button>
-            </Box>
-        </Box>
+        </>
     )
 }
