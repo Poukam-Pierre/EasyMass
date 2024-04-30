@@ -6,12 +6,12 @@ import { theme } from "@easy-messe/libs/theme";
 
 interface INavItemProps {
     navItem: INavItem,
-    handleClick?: () => void
+    handleLink?: () => void
 }
 
 export function NavItem({
     navItem: { item, route },
-    handleClick
+    handleLink
 }: INavItemProps) {
     const { pathname } = useRouter()
 
@@ -45,7 +45,16 @@ export function NavItem({
                 }
             }}
         >
-            <Link href={route}>
+            <Link
+                href={route}
+                onClick={(e) => {
+                    if (handleLink) {
+                        e.preventDefault()
+                        handleLink()
+                    }
+
+                }}
+            >
                 {item}
             </Link>
         </Typography>
