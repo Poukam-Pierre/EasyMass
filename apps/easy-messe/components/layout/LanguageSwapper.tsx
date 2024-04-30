@@ -14,14 +14,14 @@ export default function LanguageSwapper() {
                 })
             }
             sx={{
-                '& .MuiFormControl-root': {
+                '&.MuiFormControl-root': {
                     background: 'transparent',
                 },
                 '& .MuiInputBase-root': {
                     background: 'transparent',
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
+                    border: 'none !important'
                 },
                 '& .MuiSelect-select': {
                     color: '#2F3A45',
