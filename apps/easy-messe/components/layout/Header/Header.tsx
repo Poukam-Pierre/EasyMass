@@ -7,6 +7,7 @@ import { Icon } from '@iconify/react';
 import MenuIcon from '@iconify-icons/fluent/line-horizontal-3-20-regular';
 import SideBar from "./SideBar/SideBar";
 import { useState } from "react";
+import { useIntl } from "react-intl";
 
 
 
@@ -17,9 +18,11 @@ export interface INavItem {
 
 export default function Header() {
     const [open, setOpen] = useState<boolean>(false)
+    const { formatMessage } = useIntl()
+
     const navItems: INavItem[] = [
-        { item: 'Accueil', route: '/' },
-        { item: 'A propos', route: '#' }
+        { item: 'home', route: '/' },
+        { item: 'aboutUs', route: '#' }
     ]
     return (
         <>
@@ -77,7 +80,7 @@ export default function Header() {
                             variant="contained"
                             color="primary"
                             disableElevation={false}>
-                            Offir une messe
+                            {formatMessage({ id: 'orderMass' })}
                         </Button>
                     </Box>
 

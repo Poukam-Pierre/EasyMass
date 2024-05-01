@@ -3,6 +3,8 @@ import { INavItem } from "./Header";
 import { Typography } from "@mui/material";
 import Link from "next/link";
 import { theme } from "@easy-messe/libs/theme";
+import { useIntl } from "react-intl";
+
 
 interface INavItemProps {
     navItem: INavItem,
@@ -14,6 +16,7 @@ export function NavItem({
     handleLink
 }: INavItemProps) {
     const { pathname } = useRouter()
+    const { formatMessage } = useIntl()
 
     const isActiveItem = route === pathname
 
@@ -52,10 +55,9 @@ export function NavItem({
                         e.preventDefault()
                         handleLink()
                     }
-
                 }}
             >
-                {item}
+                {formatMessage({ id: item })}
             </Link>
         </Typography>
     );

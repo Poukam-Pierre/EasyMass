@@ -5,6 +5,8 @@ import LanguageSwapper from "../../LanguageSwapper";
 import Image from "next/image";
 import LogoEasy from '../../../../assets/LogoEasyMass.png'
 import { useRouter } from "next/router";
+import { useIntl } from "react-intl";
+
 
 interface sideBarProps {
     open: boolean,
@@ -13,6 +15,7 @@ interface sideBarProps {
 }
 export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) {
     const { push } = useRouter()
+    const { formatMessage } = useIntl()
     return (
         <Drawer
             open={open}
@@ -65,7 +68,7 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                         color="primary"
                         disableElevation={false}
                     >
-                        Offrir une messe
+                        {formatMessage({ id: 'orderMass' })}
                     </Button>
                 </Box>
 
