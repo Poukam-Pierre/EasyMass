@@ -19,9 +19,10 @@ export default function Footer() {
                 <Image src={imgFooter} alt='imgFooter' style={{ width: '100px', height: 'auto' }} />
             </Divider>
             <Box sx={{
-                display: 'flex',
+                display: { laptop: 'flex', mobile: 'grid' },
                 justifyContent: 'space-between',
-                padding: '0 30px'
+                padding: { laptop: '0 30px', mobile: 0 },
+                rowGap: '35px'
             }}>
                 <GetInvolved />
                 <Organisation />

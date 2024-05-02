@@ -14,7 +14,8 @@ export default function GetInvolved() {
                 fontWeight: 600,
                 lineHeight: '32px',
                 letterSpacing: '-1.75%',
-                color: '#333333'
+                color: '#333333',
+                textAlign: { laptop: 'left', mobile: 'center' }
             }}>Devenir associé</Typography>
             <Typography sx={{
                 fontSize: '16px',
