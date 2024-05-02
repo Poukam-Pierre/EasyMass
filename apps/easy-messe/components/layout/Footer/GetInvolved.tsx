@@ -1,7 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
+import { useIntl } from "react-intl";
 
 export default function GetInvolved() {
-
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             display: 'grid',
@@ -16,22 +17,21 @@ export default function GetInvolved() {
                 letterSpacing: '-1.75%',
                 color: '#333333',
                 textAlign: { laptop: 'left', mobile: 'center' }
-            }}>Devenir associé</Typography>
+            }}>{formatMessage({ id: 'getInvolved' })}</Typography>
             <Typography sx={{
                 fontSize: '16px',
                 fontWeight: 600,
                 lineHeight: '28px',
                 color: '#666666'
 
-            }}>EasyMesse est la première platforme de demande de messes dans tout le térritoire Camerounais.
-                Il a pour objectif de faciliter la vie aux fidèles et à l’Eglise dans leurs tâches. </Typography>
+            }}>{formatMessage({ id: 'footerMessage' })}</Typography>
             <Box sx={{
                 display: 'grid',
                 gridAutoFlow: 'column',
                 columnGap: '10px'
             }}>
-                <Button variant="contained" disableElevation>Offrir une messe</Button>
-                <Button variant="outlined" disableElevation color="inherit">Nous contacter</Button>
+                <Button variant="contained" disableElevation>{formatMessage({ id: 'orderMass' })}</Button>
+                <Button variant="outlined" disableElevation color="inherit">{formatMessage({ id: 'getInTooch' })}</Button>
             </Box>
         </Box>
     );

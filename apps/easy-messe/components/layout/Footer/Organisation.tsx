@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import LogoPoukamTech from '../../../assets/LogoPoukamTech.png'
 import LogoOP from '../../../assets/LogoOP.png'
 import Image, { StaticImageData } from "next/image";
+import { useIntl } from "react-intl";
 interface partnerInfos {
     partnersImg: StaticImageData,
     description: string
@@ -10,6 +11,7 @@ interface partnerInfos {
 }
 
 export default function Organisation() {
+    const { formatMessage } = useIntl();
     const partnersInfos: partnerInfos[] = [
         {
             partnersImg: LogoPoukamTech,
@@ -28,6 +30,8 @@ export default function Organisation() {
         <Box sx={{
             display: 'grid',
             justifyContent: 'center',
+            height: 'fit-content',
+            rowGap: { laptop: '50px', mobile: '20px' }
         }}>
             <Typography sx={{
                 fontSize: '24px',
@@ -36,7 +40,7 @@ export default function Organisation() {
                 letterSpacing: '-1.75%',
                 color: '#333333',
                 textAlign: 'center'
-            }}>Nos Partenaires</Typography>
+            }}>{formatMessage({ id: 'partners' })}</Typography>
             <Box sx={{
                 display: 'grid',
                 gridAutoFlow: 'column',
