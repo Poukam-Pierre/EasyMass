@@ -1,8 +1,10 @@
 import { Box, Button, Typography } from "@mui/material";
 import HeroImage from "./HeroImage";
 import { theme } from "@easy-messe/libs/theme";
+import { useIntl } from "react-intl";
 
 export default function HeroSection() {
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             display: 'grid',
@@ -24,9 +26,7 @@ export default function HeroSection() {
                     color: theme.common.titleActive,
                     width: '900px'
                 }}>
-                    Croire au saint sacrifice,
-                    Rendre grâce au Seigneur,
-                    Aimer nos proches disparus.
+                    {formatMessage({ id: 'heroMessage' })}
                 </Typography>
                 <Typography variant="h4" sx={{
                     lineHeight: '28px',
@@ -35,10 +35,7 @@ export default function HeroSection() {
                     fontWeight: 700,
                     width: '750px'
                 }}>
-                    Demander qu&apos;une messe soit célébrée à une intension
-                    est un acte de fois en la puissance du sacrifice du christ.
-                    C&apos;est remettre entre les mains de Jesus les personnes vivantes et
-                    défunts que nous aimons ainsi que toutes nos intensions.
+                    {formatMessage({ id: 'subtitleHeroMessage' })}
                 </Typography>
                 <Button
                     variant="contained"
@@ -46,7 +43,10 @@ export default function HeroSection() {
                         width: 'fit-content',
                         height: 'fit-content'
                     }}
-                >Offrir une messe</Button>
+                >
+                    {formatMessage({ id: 'orderMass' })}
+
+                </Button>
             </Box>
             <HeroImage />
         </Box>
