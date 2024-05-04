@@ -8,7 +8,7 @@ export default function Footer() {
 
     return (
         <Box sx={{
-            p: '13px 30px',
+            p: '13px 90px',
             display: 'grid',
             rowGap: '50px'
         }}>
@@ -21,7 +21,6 @@ export default function Footer() {
             <Box sx={{
                 display: { laptop: 'flex', mobile: 'grid' },
                 justifyContent: 'space-between',
-                padding: { laptop: '0 30px', mobile: 0 },
                 rowGap: '35px'
             }}>
                 <GetInvolved />
