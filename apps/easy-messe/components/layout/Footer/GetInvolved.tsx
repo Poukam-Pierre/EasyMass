@@ -30,8 +30,18 @@ export default function GetInvolved() {
                 gridAutoFlow: 'column',
                 columnGap: '10px'
             }}>
-                <Button variant="contained" disableElevation>{formatMessage({ id: 'orderMass' })}</Button>
-                <Button variant="outlined" disableElevation color="inherit">{formatMessage({ id: 'getInTooch' })}</Button>
+                <Button
+                    variant="contained"
+                    disableElevation
+                >{formatMessage({ id: 'orderMass' })}
+                </Button>
+                <Button
+                    variant="outlined"
+                    disableElevation
+                    color="inherit"
+                >
+                    {formatMessage({ id: 'getInTooch' })}
+                </Button>
             </Box>
         </Box>
     );
