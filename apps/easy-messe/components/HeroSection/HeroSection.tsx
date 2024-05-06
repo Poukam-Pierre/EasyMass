@@ -52,15 +52,23 @@ export default function HeroSection() {
                     }}>
                     {formatMessage({ id: 'subtitleHeroMessage' })}
                 </Typography>
-                <Button
-                    variant="contained"
-                    sx={{
-                        width: 'fit-content',
-                        height: 'fit-content'
-                    }}
-                >
-                    {formatMessage({ id: 'orderMass' })}
-                </Button>
+                <Box sx={{
+                    display: 'grid',
+                    gridAutoFlow: 'column',
+                    alignItems: 'center',
+                    columnGap: 2,
+                    width: { laptop: 'fit-content', mobile: 'inherit', }
+                }}>
+                    <Button variant="contained">
+                        {formatMessage({ id: 'orderMass' })}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                    >
+                        {formatMessage({ id: 'getInTooch' })}
+                    </Button>
+                </Box>
             </Box>
             <HeroImage />
         </Box>
