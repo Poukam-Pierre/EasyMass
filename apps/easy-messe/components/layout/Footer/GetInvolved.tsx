@@ -22,7 +22,8 @@ export default function GetInvolved() {
                 fontSize: '16px',
                 fontWeight: 600,
                 lineHeight: '28px',
-                color: '#666666'
+                color: '#666666',
+                textAlign: { laptop: 'inherit', mobile: 'center' }
 
             }}>{formatMessage({ id: 'footerMessage' })}</Typography>
             <Box sx={{
