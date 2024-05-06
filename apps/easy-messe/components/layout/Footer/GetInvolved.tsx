@@ -8,7 +8,8 @@ export default function GetInvolved() {
             display: 'grid',
             height: 'fit-content',
             width: '330px',
-            rowGap: '20px'
+            rowGap: '20px',
+            justifySelf: 'center'
         }}>
             <Typography sx={{
                 fontSize: '24px',
