@@ -33,7 +33,7 @@ export default function Header() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 backgroundColor: '#F5F5F5',
-                padding: { laptop: '16px, 90px', mobile: '13px 21px' }
+                padding: { laptop: '16px 90px', mobile: '13px 21px' }
             }}>
                 <Toolbar sx={{
                     width: '100%',
