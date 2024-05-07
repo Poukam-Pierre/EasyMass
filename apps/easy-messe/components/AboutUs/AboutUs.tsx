@@ -69,7 +69,7 @@ export default function AboutUs() {
                             width: 'fit-content',
                             height: 'fit-content'
                         }}
-                    >{formatMessage({ id: 'getInTooch' })}</Button>
+                    >{formatMessage({ id: 'getMore' })}</Button>
                 </Box>
                 <Box sx={{
                     width: '402px',
