@@ -80,7 +80,7 @@ export default function AboutUs() {
                     >{formatMessage({ id: 'getMore' })}</Button>
                 </Box>
                 <Box sx={{
-                    width: '402px',
+                    width: { laptop: '402px', mobile: '100%' },
                     height: { laptop: '269px', mobile: '150px' },
                     bgcolor: theme.common.offWhite,
                     display: 'flex',
