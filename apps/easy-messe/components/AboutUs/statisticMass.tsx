@@ -14,7 +14,7 @@ export default function StatisticMass({ statisticElement: { label, value } }: st
             <Typography
                 variant='h1'
                 sx={{
-                    fontSize: '56px',
+                    fontSize: { laptop: '56px', mobile: '50px' },
                     fontWeight: 'bold',
                     lineHeight: '70.5px',
                     letterSpacing: '-0.02em',

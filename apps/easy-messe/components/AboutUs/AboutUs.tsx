@@ -28,10 +28,13 @@ export default function AboutUs() {
         <Box
             component='section'
             sx={{
-                padding: '20px 90px',
+                padding: {
+                    laptop: '20px 90px',
+                    tablet: '20px 21px',
+                    mobile: '20px 21px'
+                },
                 display: 'grid',
                 bgcolor: theme.common.background,
-                rowGap: '20px'
             }}
         >
             <Box sx={{
@@ -52,8 +55,13 @@ export default function AboutUs() {
             </Box>
             <Box sx={{
                 display: 'grid',
-                gridTemplateColumns: '1fr auto',
-                columnGap: '70px'
+                gridTemplateColumns: {
+                    laptop: '1.4fr 1fr',
+                    tablet: '1fr 1.2fr',
+                    mobile: 'none'
+                },
+                columnGap: { laptop: '70px', tablet: '30px', mobile: 0 },
+                rowGap: { laptop: 0, mobile: '30px' }
             }}>
                 <Box sx={{
                     display: 'grid',
@@ -73,13 +81,14 @@ export default function AboutUs() {
                 </Box>
                 <Box sx={{
                     width: '402px',
-                    height: '269px',
+                    height: { laptop: '269px', mobile: '150px' },
                     bgcolor: theme.common.offWhite,
                     display: 'flex',
                     flexWrap: 'wrap',
-                    padding: '10px 50px',
-                    columnGap: '100px',
-                    rowGap: '20px'
+                    padding: { laptop: '10px 50px', mobile: '10px 40px' },
+                    columnGap: { laptop: '100px', mobile: '24px' },
+                    rowGap: { laptop: '20px', mobile: 0 },
+                    justifySelf: 'center'
                 }}>
                     {statisticsMass.map((statisticsMass, index) => (
                         <StatisticMass statisticElement={statisticsMass} key={index} />
