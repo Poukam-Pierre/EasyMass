@@ -1,12 +1,14 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Box, Typography } from "@mui/material";
 import { statisticMasses } from "./AboutUs";
+import { useIntl } from "react-intl";
 
 interface statisticProps {
     statisticElement: statisticMasses
 }
 
 export default function StatisticMass({ statisticElement: { label, value } }: statisticProps) {
+    const { formatMessage } = useIntl()
     return (
         <Box>
             <Typography
@@ -29,7 +31,7 @@ export default function StatisticMass({ statisticElement: { label, value } }: st
                     fontWeight: '600',
                     width: 'fit-content'
                 }}
-            >{label}</Typography>
+            >{formatMessage({ id: label })}</Typography>
 
         </Box>
     );
