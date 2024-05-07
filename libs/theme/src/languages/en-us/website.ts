@@ -8,6 +8,7 @@ export const website = {
   orderMass: 'Order Mass',
   partners: 'Our Partners',
   getInvolved: 'Get Involved',
+  getMore: 'Read more',
   footerMessage:
     'EasyMesse is the first platform for requesting masses throughout Cameroon. Its aim is to make life easier for the faithful and the Church.',
   getInTooch: 'Get in tooch',

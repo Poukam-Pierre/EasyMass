@@ -5,6 +5,7 @@ export const website = {
   orderMass: 'Offrir une messe',
   masses: 'Messes',
   faithfull: 'Fidèles',
+  getMore: 'En savoir plus',
   parish: 'Paroisses',
   partners: 'Nos partenaires',
   getInvolved: 'Devenir Associé',
