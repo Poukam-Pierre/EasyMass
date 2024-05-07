@@ -63,7 +63,13 @@ export default function AboutUs() {
                     <Typography>
                         {formatMessage({ id: 'aboutUsMessage' })}
                     </Typography>
-                    <Button variant="contained">{formatMessage({ id: 'getInTooch' })}</Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            width: 'fit-content',
+                            height: 'fit-content'
+                        }}
+                    >{formatMessage({ id: 'getInTooch' })}</Button>
                 </Box>
                 <Box sx={{
                     width: '402px',
