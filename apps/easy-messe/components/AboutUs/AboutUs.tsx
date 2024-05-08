@@ -34,6 +34,7 @@ export default function AboutUs() {
                 },
                 display: 'grid',
                 bgcolor: theme.common.background,
+                rowGap: '20px'
             }}
         >
             <Box sx={{
@@ -65,7 +66,7 @@ export default function AboutUs() {
                 <Box sx={{
                     display: 'grid',
                     rowGap: '20px',
-                    paddingTop: '20px'
+                    paddingTop: { laptop: '20px', tablet: '20px', mobile: 0 }
                 }}>
                     <Typography>
                         {formatMessage({ id: 'aboutUsMessage' })}
@@ -87,7 +88,8 @@ export default function AboutUs() {
                     padding: { laptop: '10px 50px', mobile: '10px 40px' },
                     columnGap: { laptop: '100px', mobile: '24px' },
                     rowGap: { laptop: '20px', mobile: 0 },
-                    justifySelf: 'center'
+                    justifySelf: 'center',
+                    justifyContent: { laptop: 'initial', mobile: 'space-between' }
                 }}>
                     {statisticsMass.map((statisticsMass, index) => (
                         <StatisticMass statisticElement={statisticsMass} key={index} />
