@@ -52,7 +52,7 @@ export default function Organisation() {
                     <Box key={index} sx={{
                         width: '160px',
                         height: '147.6px',
-                        border: '1.5px solid var(--primary)',
+                        border: '1.5px solid var(--error)',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
