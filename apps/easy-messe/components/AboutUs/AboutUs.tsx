@@ -1,27 +1,26 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Box, Button, Divider, Typography } from "@mui/material";
-import { shortenNumber } from "@easy-messe/libs/utils"
 import StatisticMass from "./statisticMass";
 import { useIntl } from "react-intl";
 
 export interface statisticMasses {
     label: string
-    value: string
+    value: number
 }
 export default function AboutUs() {
     const { formatMessage } = useIntl()
     const statisticsMass: statisticMasses[] = [
         {
             label: 'masses',
-            value: `+${shortenNumber(50)}`
+            value: 50
         },
         {
             label: 'faithfull',
-            value: `+${shortenNumber(30)}`
+            value: 30
         },
         {
             label: 'parish',
-            value: `+${shortenNumber(60)}`
+            value: 60
         }
     ]
     return (

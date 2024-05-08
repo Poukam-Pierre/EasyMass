@@ -2,6 +2,7 @@ import { theme } from "@easy-messe/libs/theme";
 import { Box, Typography } from "@mui/material";
 import { statisticMasses } from "./AboutUs";
 import { useIntl } from "react-intl";
+import { shortenNumber } from "@easy-messe/libs/utils"
 
 interface statisticProps {
     statisticElement: statisticMasses
@@ -19,7 +20,7 @@ export default function StatisticMass({ statisticElement: { label, value } }: st
                     lineHeight: '70.5px',
                     letterSpacing: '-0.02em',
                     padding: 0
-                }}>{value}</Typography>
+                }}>{`+${shortenNumber(value)}`}</Typography>
             <Typography
                 variant="h5"
                 sx={{
