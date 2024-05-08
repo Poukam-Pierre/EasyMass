@@ -15,7 +15,7 @@ export default function HeroSection() {
                     tablet: '1fr 1.2fr',
                     mobile: 'none'
                 },
-                padding: { laptop: '0px 90px', mobile: '0px 21px' },
+                padding: { laptop: '20px 90px', mobile: '20px 21px' },
                 position: 'relative',
                 rowGap: '5px'
             }}
