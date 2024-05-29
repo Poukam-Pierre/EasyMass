@@ -16,7 +16,7 @@ export interface INavItem {
 }
 
 export default function Header() {
-    const [open, setOpen] = useState<boolean>(false)
+    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false)
     const { formatMessage } = useIntl()
 
     const navItems: INavItem[] = [
@@ -26,7 +26,7 @@ export default function Header() {
     return (
         <>
 
-            <SideBar open={open} toggleDrawer={setOpen} navItems={navItems} />
+            <SideBar open={isSideBarOpen} toggleDrawer={setIsSideBarOpen} navItems={navItems} />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -69,7 +69,7 @@ export default function Header() {
                     <IconButton sx={{
                         display: { laptop: 'none', mobile: 'block' }
                     }}
-                        onClick={() => setOpen(true)}
+                        onClick={() => setIsSideBarOpen(true)}
                     >
                         <Icon icon={MenuIcon} color="#2F3A45" />
                     </IconButton>
