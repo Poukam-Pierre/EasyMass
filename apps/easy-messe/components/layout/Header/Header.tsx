@@ -20,8 +20,8 @@ export default function Header() {
     const { formatMessage } = useIntl()
 
     const navItems: INavItem[] = [
-        { item: 'home', route: '/' },
-        { item: 'aboutUs', route: '#' }
+        { item: formatMessage({ id: 'home' }), route: '/' },
+        { item: formatMessage({ id: 'aboutUs' }), route: '#' }
     ]
     return (
         <>
@@ -83,7 +83,7 @@ export default function Header() {
                             variant="contained"
                             color="primary"
                             disableElevation={false}>
-                            {formatMessage({ id: 'orderMass' })}
+                            {formatMessage({ id: 'offerMass' })}
                         </Button>
                     </Box>
 

@@ -1,9 +1,8 @@
-import { useRouter } from "next/router";
-import { INavItem } from "./Header";
+import { theme } from "@easy-messe/libs/theme";
 import { Typography } from "@mui/material";
 import Link from "next/link";
-import { theme } from "@easy-messe/libs/theme";
-import { useIntl } from "react-intl";
+import { useRouter } from "next/router";
+import { INavItem } from "./Header";
 
 
 interface INavItemProps {
@@ -16,7 +15,6 @@ export function NavItem({
     handleLink
 }: INavItemProps) {
     const { pathname } = useRouter()
-    const { formatMessage } = useIntl()
 
     const isActiveItem = route === pathname
 
@@ -57,7 +55,7 @@ export function NavItem({
                     }
                 }}
             >
-                {formatMessage({ id: item })}
+                {item}
             </Link>
         </Typography>
     );
