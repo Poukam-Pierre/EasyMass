@@ -26,7 +26,7 @@ export default function Header() {
     return (
         <>
 
-            <SideBar open={isSideBarOpen} toggleDrawer={setIsSideBarOpen} navItems={navItems} />
+            <SideBar open={isSideBarOpen} closeSideBar={setIsSideBarOpen} navItems={navItems} />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',

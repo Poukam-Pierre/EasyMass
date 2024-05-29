@@ -5,20 +5,21 @@ import LanguageSwapper from "../../LanguageSwapper";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
+import { Dispatch, SetStateAction } from "react";
 
 
 interface sideBarProps {
     open: boolean,
-    toggleDrawer: (newOpen: boolean) => void,
+    closeSideBar: Dispatch<SetStateAction<boolean>>,
     navItems: INavItem[]
 }
-export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) {
+export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) {
     const { push } = useRouter()
     const { formatMessage } = useIntl()
     return (
         <Drawer
             open={open}
-            onClose={() => toggleDrawer(false)}
+            onClose={() => closeSideBar(false)}
             anchor="right"
         >
             <Box sx={{
@@ -49,7 +50,7 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                                 key={index}
                                 handleLink={() => {
                                     push(navItem.route)
-                                    toggleDrawer(false)
+                                    closeSideBar(false)
                                 }
                                 }
                             />
