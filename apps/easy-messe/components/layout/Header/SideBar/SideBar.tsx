@@ -70,7 +70,7 @@ export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) 
                         color="primary"
                         disableElevation={false}
                     >
-                        {formatMessage({ id: 'orderMass' })}
+                        {formatMessage({ id: 'offerMass' })}
                     </Button>
                 </Box>
 

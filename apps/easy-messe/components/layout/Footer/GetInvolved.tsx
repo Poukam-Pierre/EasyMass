@@ -35,7 +35,7 @@ export default function GetInvolved() {
                 <Button
                     variant="contained"
                     disableElevation
-                >{formatMessage({ id: 'orderMass' })}
+                >{formatMessage({ id: 'offerMass' })}
                 </Button>
                 <Button
                     variant="outlined"

@@ -60,7 +60,7 @@ export default function HeroSection() {
                     width: { laptop: 'fit-content', mobile: 'inherit', }
                 }}>
                     <Button variant="contained">
-                        {formatMessage({ id: 'orderMass' })}
+                        {formatMessage({ id: 'offerMass' })}
                     </Button>
                     <Button
                         variant="contained"
