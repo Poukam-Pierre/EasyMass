@@ -1,6 +1,6 @@
-import { Box, Typography } from '@mui/material';
-import Header from './Header/Header';
+import { Box } from '@mui/material';
 import Footer from './Footer/Footer';
+import Header from './Header/Header';
 
 export default function EasyMassLayout({ children }: { children: JSX.Element }) {
     /* TODO: this function will receive
@@ -13,7 +13,6 @@ export default function EasyMassLayout({ children }: { children: JSX.Element }) 
                 minHeight: '100svh',
                 display: 'grid',
                 gridTemplateRows: 'auto 1fr auto',
-                rowGap: 1,
             }}
         >
             <Header />
