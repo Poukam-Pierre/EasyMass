@@ -8,7 +8,8 @@ export default function GetInvolved() {
             display: 'grid',
             height: 'fit-content',
             width: '330px',
-            rowGap: '20px'
+            rowGap: '20px',
+            justifySelf: 'center'
         }}>
             <Typography sx={{
                 fontSize: '24px',
@@ -22,7 +23,8 @@ export default function GetInvolved() {
                 fontSize: '16px',
                 fontWeight: 600,
                 lineHeight: '28px',
-                color: '#666666'
+                color: '#666666',
+                textAlign: { laptop: 'inherit', mobile: 'center' }
 
             }}>{formatMessage({ id: 'footerMessage' })}</Typography>
             <Box sx={{
@@ -30,8 +32,18 @@ export default function GetInvolved() {
                 gridAutoFlow: 'column',
                 columnGap: '10px'
             }}>
-                <Button variant="contained" disableElevation>{formatMessage({ id: 'orderMass' })}</Button>
-                <Button variant="outlined" disableElevation color="inherit">{formatMessage({ id: 'getInTooch' })}</Button>
+                <Button
+                    variant="contained"
+                    disableElevation
+                >{formatMessage({ id: 'orderMass' })}
+                </Button>
+                <Button
+                    variant="outlined"
+                    disableElevation
+                    color="inherit"
+                >
+                    {formatMessage({ id: 'getInTooch' })}
+                </Button>
             </Box>
         </Box>
     );

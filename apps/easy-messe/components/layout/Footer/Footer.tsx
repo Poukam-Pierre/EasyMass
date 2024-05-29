@@ -8,9 +8,10 @@ export default function Footer() {
 
     return (
         <Box sx={{
-            p: '13px 30px',
+            p: { laptop: '13px 90px', mobile: '13px 21px' },
             display: 'grid',
-            rowGap: '50px'
+            rowGap: '50px',
+            height: 'fit-content'
         }}>
             <Divider sx={{
                 width: '90%',
@@ -20,8 +21,7 @@ export default function Footer() {
             </Divider>
             <Box sx={{
                 display: { laptop: 'flex', mobile: 'grid' },
-                justifyContent: 'space-between',
-                padding: { laptop: '0 30px', mobile: 0 },
+                justifyContent: { laptop: 'space-between', mobile: 'inherit' },
                 rowGap: '35px'
             }}>
                 <GetInvolved />
