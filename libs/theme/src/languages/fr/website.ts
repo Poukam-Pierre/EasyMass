@@ -2,7 +2,7 @@ export const website = {
   home: 'Accueil',
   aboutUs: 'A propos',
   subtitleAboutUs: 'Bienvenue sur le portail EasyMesse',
-  orderMass: 'Demander une messe',
+  offerMass: 'Offrir une messe',
   masses: 'Messes',
   faithfull: 'Fidèles',
   getMore: 'En savoir plus',

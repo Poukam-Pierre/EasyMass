@@ -5,7 +5,7 @@ export const website = {
   masses: 'Masses',
   faithfull: 'Faithfulls',
   parish: 'Parishes',
-  orderMass: 'Order Mass',
+  offerMass: 'Offer Mass',
   partners: 'Our Partners',
   getInvolved: 'Get Involved',
   getMore: 'Read more',
