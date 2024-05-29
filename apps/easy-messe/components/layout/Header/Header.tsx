@@ -17,7 +17,7 @@ export interface INavItem {
 }
 
 export default function Header() {
-    const [open, setOpen] = useState<boolean>(false)
+    const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false)
     const { formatMessage } = useIntl()
 
     const navItems: INavItem[] = [
