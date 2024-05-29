@@ -37,7 +37,8 @@ export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) 
                         src='/LogoEasyMass.png'
                         alt='logo Easy Messe'
                         width={150}
-                        style={{ height: 'auto', cursor: 'pointer' }}
+                        height={70}
+                        style={{ cursor: 'pointer' }}
                         onClick={() => push('/')}
                     />
                     <Box sx={{
