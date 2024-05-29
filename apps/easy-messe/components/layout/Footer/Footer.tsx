@@ -1,6 +1,5 @@
 import { Box, Divider } from '@mui/material'
 import Image from 'next/image'
-import imgFooter from '../../../assets/imgFooter.png'
 import GetInvolved from './GetInvolved'
 import Organisation from './Organisation'
 
@@ -17,7 +16,12 @@ export default function Footer() {
                 width: '90%',
                 justifySelf: 'center'
             }}>
-                <Image src={imgFooter} alt='imgFooter' style={{ width: '100px', height: 'auto' }} />
+                <Image
+                    src='/imgFooter.png'
+                    alt='imgFooter'
+                    width={100}
+                    height={45}
+                />
             </Divider>
             <Box sx={{
                 display: { laptop: 'flex', mobile: 'grid' },

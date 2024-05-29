@@ -1,29 +1,27 @@
 import { Box, Typography } from "@mui/material";
-import LogoPoukamTech from '../../../assets/LogoPoukamTech.png'
-import LogoOP from '../../../assets/LogoOP.png'
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { useIntl } from "react-intl";
 interface partnerInfos {
-    partnersImg: StaticImageData,
+    partnersImg: string,
     description: string
-    width: string
-    height: string
+    width: number
+    height: number
 }
 
 export default function Organisation() {
     const { formatMessage } = useIntl();
     const partnersInfos: partnerInfos[] = [
         {
-            partnersImg: LogoPoukamTech,
+            partnersImg: '/LogoPoukamTech.png',
             description: 'Logo partner Poukam Tech Sarl',
-            height: '73.82px',
-            width: '150px'
+            height: 73.82,
+            width: 150
         },
         {
-            partnersImg: LogoOP,
+            partnersImg: '/LogoOP.png',
             description: 'Logo partner OnlinePreps',
-            height: '94.8px',
-            width: '108px'
+            height: 94.8,
+            width: 108
         }
     ]
     return (
@@ -58,7 +56,12 @@ export default function Organisation() {
                         alignItems: 'center',
                         justifyContent: ' center'
                     }}>
-                        <Image src={partnersImg} alt={description} style={{ width: width, height: height }} />
+                        <Image
+                            src={partnersImg}
+                            alt={description}
+                            width={width}
+                            height={height}
+                        />
                     </Box>
                 )
                 )}

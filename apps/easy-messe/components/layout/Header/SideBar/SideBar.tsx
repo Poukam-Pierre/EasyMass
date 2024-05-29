@@ -3,7 +3,6 @@ import { INavItem } from "../Header";
 import { NavItem } from "../navitem";
 import LanguageSwapper from "../../LanguageSwapper";
 import Image from "next/image";
-import LogoEasy from '../../../../assets/LogoEasyMass.png'
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
 
@@ -34,9 +33,10 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                     gap: '45px'
                 }}>
                     <Image
-                        src={LogoEasy}
+                        src='/LogoEasyMass.png'
                         alt='logo Easy Messe'
-                        style={{ width: '150px', height: 'auto', cursor: 'pointer' }}
+                        width={150}
+                        style={{ height: 'auto', cursor: 'pointer' }}
                         onClick={() => push('/')}
                     />
                     <Box sx={{

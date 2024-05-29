@@ -1,6 +1,5 @@
 import { Box, Button, IconButton, Toolbar } from "@mui/material";
 import Image from "next/image";
-import LogoMass from '../../../assets/LogoEasyMass.png';
 import { NavItem } from "./navitem";
 import LanguageSwapper from "../LanguageSwapper";
 import { Icon } from '@iconify/react';
@@ -42,16 +41,20 @@ export default function Header() {
                 }}>
                     <Box sx={{ display: { laptop: 'block', mobile: 'none' } }}>
                         <Image
-                            src={LogoMass}
+                            src='/LogoEasyMass.png'
                             alt='logo easy mass'
-                            style={{ width: '193px', height: '78px', cursor: 'pointer' }}
+                            width={193}
+                            height={78}
+                            style={{ cursor: 'pointer' }}
                         />
                     </Box>
                     <Box sx={{ display: { laptop: 'none', mobile: 'block' } }}>
                         <Image
-                            src={LogoMass}
+                            src='/LogoEasyMass.png'
                             alt='logo easy mass'
-                            style={{ width: '110px', height: '44px', cursor: 'pointer' }}
+                            width={110}
+                            height={44}
+                            style={{ cursor: 'pointer' }}
                         />
                     </Box>
                     <Box sx={{

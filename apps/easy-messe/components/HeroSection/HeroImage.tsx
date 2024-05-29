@@ -1,6 +1,5 @@
 import { Box, Color, SxProps } from "@mui/material";
 import Image from "next/image";
-import heroImage from '../../assets/heroImage.png'
 import { theme } from "@easy-messe/libs/theme";
 
 interface shapeImage {
@@ -107,7 +106,12 @@ export default function HeroImage() {
                 justifySelf: 'center',
                 alignSelf: 'center',
             }}>
-                <Image src={heroImage} alt="hero image" style={{ width: '250px', height: 'auto' }} />
+                <Image
+                    src='/heroImage.png'
+                    alt="hero image"
+                    width={250}
+                    height={225}
+                />
             </Box>
             {shapeImageStyle.map((style, index) => (
                 <Box key={index} sx={{ ...style as SxProps }}></Box>
