@@ -37,7 +37,7 @@ export default function Prefooter() {
                 rowGap: 5,
                 position: 'absolute',
                 top: '190px',
-                left: '125px'
+                left: '90px'
             }}>
                 <QuoteMasses />
                 <Button
