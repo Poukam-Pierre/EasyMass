@@ -3,23 +3,23 @@ import { Box, Button, Divider, Typography } from "@mui/material";
 import StatisticMass from "./statisticMass";
 import { useIntl } from "react-intl";
 
-export interface statisticMasses {
+export interface StatisticMassProps {
     label: string
     value: number
 }
 export default function AboutUs() {
     const { formatMessage } = useIntl()
-    const statisticsMass: statisticMasses[] = [
+    const statisticsMass: StatisticMassProps[] = [
         {
-            label: 'masses',
+            label: formatMessage({ id: 'masses' }),
             value: 50
         },
         {
-            label: 'faithfull',
+            label: formatMessage({ id: 'faithfull' }),
             value: 30
         },
         {
-            label: 'parish',
+            label: formatMessage({ id: 'parish' }),
             value: 60
         }
     ]
@@ -91,8 +91,12 @@ export default function AboutUs() {
                     justifySelf: 'center',
                     justifyContent: { laptop: 'initial', mobile: 'space-between' }
                 }}>
-                    {statisticsMass.map((statisticsMass, index) => (
-                        <StatisticMass statisticElement={statisticsMass} key={index} />
+                    {statisticsMass.map(({ label, value }, index) => (
+                        <StatisticMass
+                            label={label}
+                            value={value}
+                            key={index}
+                        />
                     ))}
                 </Box>
             </Box>
