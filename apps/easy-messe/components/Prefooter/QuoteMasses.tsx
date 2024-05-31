@@ -5,16 +5,16 @@ import { Icon } from "@iconify/react";
 import { Box, IconButton, Typography } from "@mui/material";
 import { useState } from "react";
 
-interface quoteMasses {
+interface QuoteMass {
     quote: string;
     owner: string;
 }
 
 function QuoteMasses() {
-    const [indexOfChoosingQuote, setIndexOfChoosingQuote] = useState<number>(0)
+    const [selectedQuoteIndex, setSelectedQuoteIndex] = useState<number>(0)
 
 
-    const quoteNotes: quoteMasses[] = [
+    const quoteNotes: QuoteMass[] = [
         {
             quote: "La prière est l'élévation de l'âme vers Dieu.",
             owner: "Anonymous",
@@ -73,18 +73,18 @@ function QuoteMasses() {
         }
     ]
 
-    const moveForward = () => {
-        if (indexOfChoosingQuote >= quoteNotes.length - 1) {
-            setIndexOfChoosingQuote(0)
+    const handleOnNext = () => {
+        if (selectedQuoteIndex >= quoteNotes.length - 1) {
+            setSelectedQuoteIndex(0)
         } else {
-            setIndexOfChoosingQuote(indexOfChoosingQuote + 1)
+            setSelectedQuoteIndex(selectedQuoteIndex + 1)
         }
     }
-    const backForward = () => {
-        if (indexOfChoosingQuote <= 0) {
-            setIndexOfChoosingQuote(quoteNotes.length - 1)
+    const handleOnPrevious = () => {
+        if (selectedQuoteIndex <= 0) {
+            setSelectedQuoteIndex(quoteNotes.length - 1)
         } else {
-            setIndexOfChoosingQuote(indexOfChoosingQuote - 1)
+            setSelectedQuoteIndex(selectedQuoteIndex - 1)
         }
     }
     return (
@@ -104,7 +104,7 @@ function QuoteMasses() {
                         lineHeight: '30px'
                     }}
                 >
-                    {`" ${quoteNotes[indexOfChoosingQuote].quote} "`}
+                    {`" ${quoteNotes[selectedQuoteIndex].quote} "`}
                 </Typography>
                 <Typography
                     variant="body2"
@@ -113,7 +113,7 @@ function QuoteMasses() {
                         justifySelf: 'end'
                     }}
                 >
-                    {`- ${quoteNotes[indexOfChoosingQuote].owner} -`}
+                    {`- ${quoteNotes[selectedQuoteIndex].owner} -`}
                 </Typography>
             </Box>
             <Box sx={{
@@ -127,7 +127,7 @@ function QuoteMasses() {
                     sx={{
                         bgcolor: theme.palette.primary.contrastText
                     }}
-                    onClick={backForward}
+                    onClick={handleOnPrevious}
                 >
                     <Icon
                         icon={LeftIcon}
@@ -136,7 +136,7 @@ function QuoteMasses() {
                 </IconButton>
                 <IconButton
                     size="small"
-                    onClick={moveForward}
+                    onClick={handleOnNext}
                     sx={{
                         bgcolor: theme.palette.primary.contrastText
                     }}
