@@ -1,29 +1,24 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Box, Button } from "@mui/material";
-import Image from "next/image";
-import QuoteMasses from "./QuoteMasses";
 import { useIntl } from "react-intl";
+import QuoteMasses from "./QuoteMasses";
 
 export default function Prefooter() {
     const { formatMessage } = useIntl()
 
     return (
         <Box sx={{
+            backgroundImage: `url('/actionAreaBeforeFooterImg.jpg')`,
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
             height: '640px',
             position: 'relative',
+            display: 'grid'
         }}
             component='section'
 
         >
-            <Image
-                src='/actionAreaBeforeFooterImg.jpg'
-                layout="fill"
-                objectFit="cover"
-                alt="action image"
-            />
             <Box sx={{
                 width: '100%',
                 height: '100%',
@@ -35,10 +30,11 @@ export default function Prefooter() {
             <Box sx={{
                 display: 'grid',
                 rowGap: 5,
-                position: 'absolute',
-                top: { laptop: '190px', mobile: '150px', tablet: '160px' },
-                left: { laptop: '90px', mobile: '0px', tablet: '50px' },
-                padding: { laptop: 0, mobile: '0 15px', tablet: 0 }
+                padding: { laptop: '0 90px', mobile: '0 15px', tablet: 0 },
+                zIndex: 0,
+                width: 'fit-content',
+                height: 'fit-content',
+                alignSelf: 'center',
             }}>
                 <QuoteMasses />
                 <Button
