@@ -93,10 +93,11 @@ function QuoteMasses() {
             rowGap: 2
         }}>
             <Box sx={{
-                width: 'fit-content'
+                width: 'fit-content',
+                textAlign: { laptop: 'inherit', mobile: 'center' }
             }}>
                 <Typography
-                    variant='h4'
+                    variant='h3'
                     color={theme.palette.primary.contrastText}
                     sx={{
                         paddingBottom: '5px',
@@ -107,7 +108,7 @@ function QuoteMasses() {
                     {`" ${quoteNotes[selectedQuoteIndex].quote} "`}
                 </Typography>
                 <Typography
-                    variant="body2"
+                    variant="body1"
                     color={theme.palette.primary.contrastText}
                     sx={{
                         justifySelf: 'end'
@@ -120,10 +121,12 @@ function QuoteMasses() {
                 display: 'grid',
                 gridAutoFlow: 'column',
                 columnGap: 2,
-                width: 'fit-content'
+                width: 'fit-content',
+                justifySelf: { laptop: 'inherit', mobile: 'center' }
             }}>
                 <IconButton
                     size="small"
+                    disableRipple
                     sx={{
                         bgcolor: theme.palette.primary.contrastText
                     }}
@@ -136,6 +139,7 @@ function QuoteMasses() {
                 </IconButton>
                 <IconButton
                     size="small"
+                    disableRipple
                     onClick={handleOnNext}
                     sx={{
                         bgcolor: theme.palette.primary.contrastText

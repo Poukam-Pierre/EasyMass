@@ -36,8 +36,9 @@ export default function Prefooter() {
                 display: 'grid',
                 rowGap: 5,
                 position: 'absolute',
-                top: '190px',
-                left: '90px'
+                top: { laptop: '190px', mobile: '150px', tablet: '160px' },
+                left: { laptop: '90px', mobile: '0px', tablet: '50px' },
+                padding: { laptop: 0, mobile: '0 15px', tablet: 0 }
             }}>
                 <QuoteMasses />
                 <Button
@@ -46,7 +47,8 @@ export default function Prefooter() {
                     sx={{
                         bgcolor: theme.palette.primary.contrastText,
                         color: theme.palette.secondary.contrastText,
-                        width: 'fit-content'
+                        width: 'fit-content',
+                        justifySelf: { laptop: 'inherit', mobile: 'center' }
                     }}
                 >
                     {formatMessage({ id: 'offerMass' })}
