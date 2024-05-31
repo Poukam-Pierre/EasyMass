@@ -1,16 +1,15 @@
 import { Box, Button, Drawer } from "@mui/material";
-import { INavItem } from "../Header";
-import { NavItem } from "../navitem";
-import LanguageSwapper from "../../LanguageSwapper";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
-import { Dispatch, SetStateAction } from "react";
+import LanguageSwapper from "../../LanguageSwapper";
+import { INavItem } from "../Header";
+import { NavItem } from "../navitem";
 
 
 interface sideBarProps {
     open: boolean,
-    closeSideBar: Dispatch<SetStateAction<boolean>>,
+    closeSideBar: (newOpen: boolean) => void,
     navItems: INavItem[]
 }
 export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) {
