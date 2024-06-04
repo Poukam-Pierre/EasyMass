@@ -1,6 +1,8 @@
 import { Box, Typography } from "@mui/material";
+import { useIntl } from "react-intl";
 
 export default function HeroMass() {
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             backgroundImage: `url('/heroMassImg.png')`,
@@ -24,7 +26,7 @@ export default function HeroMass() {
                     textAlign: 'center',
                 }}
             >
-                Demander une messe , c est exprimer notre confiance à la puissance salvatrice du Christ...
+                {formatMessage({ id: 'OrderMassHeroMsg' })}
             </Typography>
         </Box>
     );
