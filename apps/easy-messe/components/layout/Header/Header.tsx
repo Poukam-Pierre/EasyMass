@@ -85,7 +85,7 @@ export default function Header() {
                             variant="contained"
                             color="primary"
                             disableElevation={false}
-                            onClick={() => push('/order-mass')}
+                            onClick={() => push('/offer-mass')}
                         >
                             {formatMessage({ id: 'offerMass' })}
                         </Button>
