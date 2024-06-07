@@ -10,9 +10,9 @@ export default function OrderMass() {
         <>
             <HeroMass />
             <Box sx={{
-                padding: '20px 90px'
+                padding: '40px 90px'
             }}>
-                <Typography> Demande de messe</Typography>
+                <Typography variant="h2"> Demande de messe</Typography>
                 <Divider />
                 <Box sx={{
                     display: 'grid',
