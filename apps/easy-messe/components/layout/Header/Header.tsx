@@ -25,10 +25,16 @@ export default function Header() {
         { item: formatMessage({ id: 'home' }), route: '/' },
         { item: formatMessage({ id: 'aboutUs' }), route: '#' }
     ]
+    const closeSideBar = () => {
+        setIsSideBarOpen(false)
+    }
+    const openSideBar = () => {
+        setIsSideBarOpen(true)
+    }
     return (
         <>
 
-            <SideBar open={isSideBarOpen} closeSideBar={setIsSideBarOpen} navItems={navItems} />
+            <SideBar open={isSideBarOpen} onClose={closeSideBar} navItems={navItems} />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -71,7 +77,7 @@ export default function Header() {
                     <IconButton sx={{
                         display: { laptop: 'none', mobile: 'block' }
                     }}
-                        onClick={() => setIsSideBarOpen(true)}
+                        onClick={() => openSideBar()}
                     >
                         <Icon icon={MenuIcon} color="#2F3A45" />
                     </IconButton>
