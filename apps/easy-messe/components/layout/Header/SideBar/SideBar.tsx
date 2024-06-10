@@ -9,16 +9,16 @@ import { NavItem } from "../navitem";
 
 interface sideBarProps {
     open: boolean,
-    closeSideBar: (newOpen: boolean) => void,
+    onClose: () => void,
     navItems: INavItem[]
 }
-export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) {
+export default function SideBar({ open, onClose, navItems }: sideBarProps) {
     const { push } = useRouter()
     const { formatMessage } = useIntl()
     return (
         <Drawer
             open={open}
-            onClose={() => closeSideBar(false)}
+            onClose={() => onClose()}
             anchor="right"
         >
             <Box sx={{
@@ -50,7 +50,7 @@ export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) 
                                 key={index}
                                 handleLink={() => {
                                     push(navItem.route)
-                                    closeSideBar(false)
+                                    onClose()
                                 }
                                 }
                             />
