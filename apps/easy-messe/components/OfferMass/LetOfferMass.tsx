@@ -9,7 +9,7 @@ import textFieldIcon from '@iconify-icons/material-symbols/text-fields';
 import DateTimeMassPicker from "./DateTimeMass";
 
 
-interface MassValueLoop {
+interface MassGroupCategory {
     label: string;
     valueLoop: number
 }
@@ -80,13 +80,15 @@ export default function LetOfferMass() {
                 display: 'flex',
                 flexWrap: 'wrap',
                 padding: '10px 10px 0 0',
+                rowGap: '10px',
+                columnGap: '14px',
             }}>
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: '50%'
+                    width: '49%'
                 }}>
                     <Icon icon={locationIcon} fontSize={32} />
                     <Autocomplete
@@ -105,7 +107,7 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: '50%'
+                    width: '49%'
                 }}>
                     <Icon icon={calendarIcon} fontSize={32} />
                     <DateTimeMassPicker />
@@ -115,7 +117,7 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: '50%'
+                    width: '49%'
                 }}>
                     <Icon icon={churchIcon} fontSize={32} />
                     <Autocomplete
@@ -131,7 +133,7 @@ export default function LetOfferMass() {
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
-                    columnGap: 0.5,
+                    columnGap: 1,
                     width: '100%'
                 }}>
                     <Icon icon={textFieldIcon} fontSize={32} />
@@ -147,7 +149,7 @@ export default function LetOfferMass() {
     );
 }
 
-const massLoop: MassValueLoop[] = [
+const massLoop: MassGroupCategory[] = [
     {
         label: 'Triduum',
         valueLoop: 3
