@@ -77,28 +77,35 @@ export default function LetOfferMass() {
             <Typography variant="h2">Information de messe</Typography>
             <Divider />
             <Box sx={{
-                // display: 'flex',
-                // flexWrap: 'wrap',
-                padding: '10px 10px 0 ',
+                display: 'flex',
+                flexWrap: 'wrap',
+                padding: '10px 10px 0 0',
             }}>
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    width: '50%'
                 }}>
                     <Icon icon={locationIcon} fontSize={32} />
                     <Autocomplete
                         disablePortal
                         options={city}
-                        renderInput={(params) => <TextField {...params} placeholder="City" />}
+                        renderInput={(params) => <TextField
+                            {...params}
+                            placeholder="City"
+                            size="small"
+                        />
+                        }
                     />
                 </Box>
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    width: '50%'
                 }}>
                     <Icon icon={calendarIcon} fontSize={32} />
                     <DateTimeMassPicker />
@@ -108,18 +115,24 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
+                    width: '50%'
                 }}>
                     <Icon icon={churchIcon} fontSize={32} />
                     <Autocomplete
                         disablePortal
                         options={Parish}
-                        renderInput={(params) => <TextField {...params} placeholder="Parish" />}
+                        renderInput={(params) => <TextField
+                            {...params}
+                            placeholder="Parish"
+                            size='small'
+                        />}
                     />
                 </Box>
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
-                    columnGap: 0.5
+                    columnGap: 0.5,
+                    width: '100%'
                 }}>
                     <Icon icon={textFieldIcon} fontSize={32} />
                     <TextField
