@@ -28,6 +28,7 @@ export default function DateTimeMassPicker() {
                 inputProps={{ readOnly: true }}
                 onClick={() => setOpenCalendarDialog(true)}
                 value={formattedDateTime.includes('undefined') ? '' : formattedDateTime}
+                size='small'
             />
             <Dialog
                 open={openCalendarDialog}
