@@ -1,25 +1,24 @@
 import { Box, Button, Drawer } from "@mui/material";
-import { INavItem } from "../Header";
-import { NavItem } from "../navitem";
-import LanguageSwapper from "../../LanguageSwapper";
 import Image from "next/image";
-import LogoEasy from '../../../../assets/LogoEasyMass.png'
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
+import LanguageSwapper from "../../LanguageSwapper";
+import { INavItem } from "../Header";
+import { NavItem } from "../navitem";
 
 
 interface sideBarProps {
     open: boolean,
-    toggleDrawer: (newOpen: boolean) => void,
+    closeSideBar: (newOpen: boolean) => void,
     navItems: INavItem[]
 }
-export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) {
+export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) {
     const { push } = useRouter()
     const { formatMessage } = useIntl()
     return (
         <Drawer
             open={open}
-            onClose={() => toggleDrawer(false)}
+            onClose={() => closeSideBar(false)}
             anchor="right"
         >
             <Box sx={{
@@ -34,9 +33,11 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                     gap: '45px'
                 }}>
                     <Image
-                        src={LogoEasy}
+                        src='/LogoEasyMass.png'
                         alt='logo Easy Messe'
-                        style={{ width: '150px', height: 'auto', cursor: 'pointer' }}
+                        width={150}
+                        height={70}
+                        style={{ cursor: 'pointer' }}
                         onClick={() => push('/')}
                     />
                     <Box sx={{
@@ -49,7 +50,7 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                                 key={index}
                                 handleLink={() => {
                                     push(navItem.route)
-                                    toggleDrawer(false)
+                                    closeSideBar(false)
                                 }
                                 }
                             />
@@ -68,7 +69,7 @@ export default function SideBar({ open, toggleDrawer, navItems }: sideBarProps) 
                         color="primary"
                         disableElevation={false}
                     >
-                        {formatMessage({ id: 'orderMass' })}
+                        {formatMessage({ id: 'offerMass' })}
                     </Button>
                 </Box>
 

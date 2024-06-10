@@ -1,6 +1,5 @@
 import { Box, Button, IconButton, Toolbar } from "@mui/material";
 import Image from "next/image";
-import LogoMass from '../../../assets/LogoEasyMass.png';
 import { NavItem } from "./navitem";
 import LanguageSwapper from "../LanguageSwapper";
 import { Icon } from '@iconify/react';
@@ -21,13 +20,13 @@ export default function Header() {
     const { formatMessage } = useIntl()
 
     const navItems: INavItem[] = [
-        { item: 'home', route: '/' },
-        { item: 'aboutUs', route: '#' }
+        { item: formatMessage({ id: 'home' }), route: '/' },
+        { item: formatMessage({ id: 'aboutUs' }), route: '#' }
     ]
     return (
         <>
 
-            <SideBar open={open} toggleDrawer={setOpen} navItems={navItems} />
+            <SideBar open={isSideBarOpen} closeSideBar={setIsSideBarOpen} navItems={navItems} />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -42,16 +41,20 @@ export default function Header() {
                 }}>
                     <Box sx={{ display: { laptop: 'block', mobile: 'none' } }}>
                         <Image
-                            src={LogoMass}
+                            src='/LogoEasyMass.png'
                             alt='logo easy mass'
-                            style={{ width: '193px', height: '78px', cursor: 'pointer' }}
+                            width={193}
+                            height={78}
+                            style={{ cursor: 'pointer' }}
                         />
                     </Box>
                     <Box sx={{ display: { laptop: 'none', mobile: 'block' } }}>
                         <Image
-                            src={LogoMass}
+                            src='/LogoEasyMass.png'
                             alt='logo easy mass'
-                            style={{ width: '110px', height: '44px', cursor: 'pointer' }}
+                            width={110}
+                            height={44}
+                            style={{ cursor: 'pointer' }}
                         />
                     </Box>
                     <Box sx={{
@@ -66,7 +69,7 @@ export default function Header() {
                     <IconButton sx={{
                         display: { laptop: 'none', mobile: 'block' }
                     }}
-                        onClick={() => setOpen(true)}
+                        onClick={() => setIsSideBarOpen(true)}
                     >
                         <Icon icon={MenuIcon} color="#2F3A45" />
                     </IconButton>
@@ -80,7 +83,7 @@ export default function Header() {
                             variant="contained"
                             color="primary"
                             disableElevation={false}>
-                            {formatMessage({ id: 'orderMass' })}
+                            {formatMessage({ id: 'offerMass' })}
                         </Button>
                     </Box>
 
