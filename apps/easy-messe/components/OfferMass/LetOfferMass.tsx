@@ -8,6 +8,7 @@ import { Icon, IconifyIcon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import DateTimeMassPicker from "./DateTimeMass";
 import { useIntl } from 'react-intl';
+import { useState } from 'react';
 
 
 interface MassGroupCategory {
@@ -21,6 +22,7 @@ interface inputProps {
 
 export default function LetOfferMass() {
     const { formatMessage } = useIntl();
+    const [isAnonym, setIsAnonym] = useState<boolean>(false)
 
     return (
         <Box sx={{
@@ -73,7 +75,10 @@ export default function LetOfferMass() {
             }}>
                 <FormControlLabel
                     control={
-                        <Switch />
+                        <Switch
+                            checked={isAnonym}
+                            onChange={(_) => setIsAnonym(_.target.checked)}
+                        />
                     }
                     label={formatMessage({ id: 'Anonymous' })}
                 />
@@ -98,6 +103,7 @@ export default function LetOfferMass() {
                             <TextField
                                 placeholder={formatMessage({ id: placeholder })}
                                 size="small"
+                                disabled={isAnonym}
                             />
                         </Box>
                     ))}
