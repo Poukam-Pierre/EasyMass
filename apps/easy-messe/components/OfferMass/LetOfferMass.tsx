@@ -7,6 +7,7 @@ import churchIcon from '@iconify-icons/ph/church-light';
 import { Icon, IconifyIcon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import DateTimeMassPicker from "./DateTimeMass";
+import { useIntl } from 'react-intl';
 
 
 interface MassGroupCategory {
@@ -19,6 +20,7 @@ interface inputProps {
 }
 
 export default function LetOfferMass() {
+    const { formatMessage } = useIntl();
 
     return (
         <Box sx={{
@@ -36,7 +38,7 @@ export default function LetOfferMass() {
                         key={index}
                         variant="outlined"
                     >
-                        {label}
+                        {formatMessage({ id: label })}
                     </Button>
                 ))}
             </Box>
@@ -55,11 +57,11 @@ export default function LetOfferMass() {
                             minWidth: { laptop: 'initial', mobile: '145px' }
                         }}
                     >
-                        {label}
+                        {formatMessage({ id: label })}
                     </Button>
                 ))}
             </Box>
-            <Typography variant="h2">Informations du requerant</Typography>
+            <Typography variant="h2">{formatMessage({ id: 'ApplicantInformation' })}</Typography>
             <Divider />
             <Box sx={{
                 display: 'grid',
@@ -73,7 +75,7 @@ export default function LetOfferMass() {
                     control={
                         <Switch />
                     }
-                    label='Anonymous'
+                    label={formatMessage({ id: 'Anonymous' })}
                 />
                 <Box sx={{
                     display: 'grid',
@@ -94,14 +96,14 @@ export default function LetOfferMass() {
                         >
                             <Icon icon={icon} fontSize={32} color="var(--offWhite)" />
                             <TextField
-                                placeholder={placeholder}
+                                placeholder={formatMessage({ id: placeholder })}
                                 size="small"
                             />
                         </Box>
                     ))}
                 </Box>
             </Box>
-            <Typography variant="h2">Information de messe</Typography>
+            <Typography variant="h2">{formatMessage({ id: 'MassInformations' })}</Typography>
             <Divider />
             <Box sx={{
                 display: 'flex',
@@ -123,7 +125,7 @@ export default function LetOfferMass() {
                         options={city}
                         renderInput={(params) => <TextField
                             {...params}
-                            placeholder="City"
+                            placeholder={formatMessage({ id: 'City' })}
                             size="small"
                         />
                         }
@@ -142,7 +144,7 @@ export default function LetOfferMass() {
                         options={Parish}
                         renderInput={(params) => <TextField
                             {...params}
-                            placeholder="Parish"
+                            placeholder={formatMessage({ id: 'Parish' })}
                             size='small'
                         />}
                     />
@@ -167,7 +169,7 @@ export default function LetOfferMass() {
                     <TextField
                         multiline
                         rows={5}
-                        placeholder="Mass intention"
+                        placeholder={formatMessage({ id: 'MassIntension' })}
                         fullWidth
                     />
                 </Box>
@@ -178,7 +180,7 @@ export default function LetOfferMass() {
                 sx={{
                     width: 'fit-content'
                 }}
-            >Ajouter à la liste</Button>
+            >{formatMessage({ id: 'AddToList' })}</Button>
         </Box>
     );
 }
@@ -189,26 +191,26 @@ const massLoop: MassGroupCategory[] = [
         valueLoop: 3
     },
     {
-        label: 'Septaine',
+        label: 'Seven',
         valueLoop: 7
     },
     {
-        label: 'Neuvaine',
+        label: 'Novena',
         valueLoop: 9
     },
     {
-        label: 'Trentaine',
+        label: 'Thirty',
         valueLoop: 30
     },
 ]
 
 const inputOfferData: inputProps[] = [
     {
-        placeholder: 'Nom et prenom',
+        placeholder: 'FullName',
         icon: editIcon
     },
     {
-        placeholder: 'Phone',
+        placeholder: 'PhoneNumber',
         icon: contactIcon
     },
 ]

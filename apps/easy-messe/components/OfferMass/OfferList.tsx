@@ -1,10 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
+import { useIntl } from "react-intl";
 
 interface OfferListProps {
     children: JSX.Element
 }
 
 export default function OfferList({ children }: OfferListProps) {
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             padding: '10px 10px 0px 10px',
@@ -12,7 +14,7 @@ export default function OfferList({ children }: OfferListProps) {
             gridTemplateRows: 'auto 1fr auto',
             height: { laptop: 'inherit', mobile: '50vh' }
         }}>
-            <Typography variant="h2">Liste de demandes</Typography>
+            <Typography variant="h2"> {formatMessage({ id: 'RequestList' })}</Typography>
             {children}
             <Button
                 variant="contained"
@@ -20,7 +22,7 @@ export default function OfferList({ children }: OfferListProps) {
                 sx={{
                     width: 'fit-content'
                 }}
-            >Payer</Button>
+            >{formatMessage({ id: 'Souscribe' })}</Button>
         </Box>
     );
 }

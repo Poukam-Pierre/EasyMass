@@ -5,11 +5,13 @@ import OfferList from "apps/easy-messe/components/OfferMass/OfferList";
 import { ReactNode, useState } from "react";
 import HeroMass from "../../components/OfferMass/HeroMass";
 import LetOfferMass from "../../components/OfferMass/LetOfferMass";
+import { useIntl } from 'react-intl';
 
 type TabComponent = Record<number, ReactNode>;
 export default function OrderMass() {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(1)
     const tabTitle = ['Liste de demande', 'Demande de messes']
+    const { formatMessage } = useIntl()
 
     const tabComponent: TabComponent = {
         0: (
@@ -21,7 +23,7 @@ export default function OrderMass() {
                     alignItems: 'center'
                 }}>
                     <Icon icon={warningIcon} fontSize={24} />
-                    <Typography variant='body2'>Aucune demande de messe en cours</Typography>
+                    <Typography variant='body2'>{formatMessage({ id: 'NoProcessMass' })} </Typography>
                 </Box>
             </OfferList>
         ),
@@ -37,7 +39,7 @@ export default function OrderMass() {
                 padding: '40px 90px',
                 display: { laptop: 'inherit', mobile: 'none' }
             }}>
-                <Typography variant="h2"> Demande de messe</Typography>
+                <Typography variant="h2">{formatMessage({ id: 'MassRequest' })}</Typography>
                 <Divider />
                 <Box sx={{
                     display: 'grid',
@@ -53,7 +55,7 @@ export default function OrderMass() {
                             alignItems: 'center'
                         }}>
                             <Icon icon={warningIcon} fontSize={24} />
-                            <Typography variant='body2'>Aucune demande de messe en cours</Typography>
+                            <Typography variant='body2'>{formatMessage({ id: 'NoProcessMass' })}</Typography>
                         </Box>
                     </OfferList>
                 </Box>
