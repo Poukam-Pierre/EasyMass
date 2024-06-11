@@ -1,3 +1,4 @@
+import { useLanguage } from '@easy-messe/libs/theme';
 import { Dialog } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { DateCalendar, DigitalClock, LocalizationProvider } from '@mui/x-date-pickers';
@@ -5,6 +6,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
 import { useState } from 'react';
+import { useIntl } from 'react-intl';
 
 
 export default function DateTimeMassPicker() {
@@ -12,6 +14,9 @@ export default function DateTimeMassPicker() {
     const [selectedDate, setSelectdDate] = useState<Dayjs | null>()
     const [openClockDialog, setOpenClockDialog] = useState<boolean>(false)
     const [selectedTime, setSelectdTime] = useState<Dayjs | null>()
+    const { formatMessage } = useIntl()
+    const { activeLanguage } = useLanguage()
+
 
     const handleSelectedDate = (date: Dayjs) => {
         setSelectdDate(date);
@@ -21,9 +26,9 @@ export default function DateTimeMassPicker() {
     const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='fr'>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
             <TextField
-                placeholder='Date et heure'
+                placeholder={formatMessage({ id: 'DateTime' })}
                 fullWidth
                 inputProps={{ readOnly: true }}
                 onClick={() => setOpenCalendarDialog(true)}
