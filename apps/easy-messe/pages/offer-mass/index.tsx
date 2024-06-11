@@ -1,15 +1,14 @@
-import { Box, Divider, Tabs, Typography, Tab } from "@mui/material";
+import warningIcon from '@iconify-icons/fluent/warning-24-regular';
+import { Icon } from "@iconify/react";
+import { Box, Divider, Tab, Tabs, Typography } from "@mui/material";
+import OfferList from "apps/easy-messe/components/OfferMass/OfferList";
+import { ReactNode, useState } from "react";
 import HeroMass from "../../components/OfferMass/HeroMass";
 import LetOfferMass from "../../components/OfferMass/LetOfferMass";
-import OfferList from "apps/easy-messe/components/OfferMass/OfferList";
-import warningIcon from '@iconify-icons/fluent/warning-24-regular'
-import { Icon } from "@iconify/react";
-import { ReactNode, useState } from "react";
-import { theme } from "@easy-messe/libs/theme";
 
 type TabComponent = Record<number, ReactNode>;
 export default function OrderMass() {
-    const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
+    const [activeTabIndex, setActiveTabIndex] = useState<number>(1)
     const tabTitle = ['Liste de demande', 'Demande de messes']
 
     const tabComponent: TabComponent = {

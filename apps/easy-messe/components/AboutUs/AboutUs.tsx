@@ -77,6 +77,8 @@ export default function AboutUs() {
                             width: 'fit-content',
                             height: 'fit-content'
                         }}
+                        href="https://telegram.me/POUKAMTECH"
+                        target="_blank"
                     >{formatMessage({ id: 'getMore' })}</Button>
                 </Box>
                 <Box sx={{

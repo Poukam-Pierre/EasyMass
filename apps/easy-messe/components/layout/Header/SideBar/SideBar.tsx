@@ -12,9 +12,11 @@ interface sideBarProps {
     onClose: () => void,
     navItems: INavItem[]
 }
+
 export default function SideBar({ open, onClose, navItems }: sideBarProps) {
-    const { push } = useRouter()
+    const { push, asPath } = useRouter()
     const { formatMessage } = useIntl()
+    const isActive = asPath.startsWith('/offer-mass')
     return (
         <Drawer
             open={open}
@@ -68,6 +70,12 @@ export default function SideBar({ open, onClose, navItems }: sideBarProps) {
                         variant="contained"
                         color="primary"
                         disableElevation={false}
+                        onClick={() => {
+                            push('/offer-mass');
+                            onClose();
+                        }
+                        }
+                        disabled={isActive}
                     >
                         {formatMessage({ id: 'offerMass' })}
                     </Button>
