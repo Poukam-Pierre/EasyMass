@@ -1,3 +1,4 @@
+import { theme } from "@easy-messe/libs/theme";
 import { Box, Typography } from "@mui/material";
 import { useIntl } from "react-intl";
 
@@ -9,7 +10,7 @@ export default function HeroMass() {
             backgroundPosition: 'center',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            height: '350px',
+            height: { laptop: '350px', mobile: '219px' },
             display: 'grid',
         }}>
             <Typography
@@ -24,6 +25,23 @@ export default function HeroMass() {
                     alignSelf: 'center',
                     justifySelf: 'center',
                     textAlign: 'center',
+                    display: { laptop: 'inherit', mobile: 'none' }
+                }}
+            >
+                {formatMessage({ id: 'OrderMassHeroMsg' })}
+            </Typography>
+            <Typography
+                variant="h3"
+                sx={{
+                    fontSize: '32px',
+                    lineHeight: '36px',
+                    paragraphSpacing: '20px',
+                    height: '180px',
+                    color: theme.common.background,
+                    alignSelf: 'center',
+                    justifySelf: 'center',
+                    textAlign: 'center',
+                    display: { laptop: 'none', mobile: 'inherit' }
                 }}
             >
                 {formatMessage({ id: 'OrderMassHeroMsg' })}

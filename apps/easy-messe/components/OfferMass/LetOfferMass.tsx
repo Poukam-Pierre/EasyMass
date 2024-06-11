@@ -1,11 +1,11 @@
-import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
-import { Icon, IconifyIcon } from '@iconify/react'
-import editIcon from '@iconify-icons/fluent/edit-24-regular';
 import contactIcon from '@iconify-icons/fluent/contact-card-24-regular';
+import editIcon from '@iconify-icons/fluent/edit-24-regular';
 import locationIcon from '@iconify-icons/fluent/location-24-regular';
-import churchIcon from '@iconify-icons/ph/church-light';
 import calendarIcon from '@iconify-icons/material-symbols/calendar-month-outline';
 import textFieldIcon from '@iconify-icons/material-symbols/text-fields';
+import churchIcon from '@iconify-icons/ph/church-light';
+import { Icon, IconifyIcon } from '@iconify/react';
+import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import DateTimeMassPicker from "./DateTimeMass";
 
 
@@ -17,12 +17,16 @@ interface inputProps {
     placeholder: string,
     icon: IconifyIcon
 }
+
 export default function LetOfferMass() {
+
     return (
-        <Box>
+        <Box sx={{
+            padding: '21px'
+        }}>
             <Box sx={{
                 padding: '10px 0 20px 0',
-                display: 'grid',
+                display: { laptop: 'grid', mobile: 'none' },
                 gridAutoFlow: 'column',
                 columnGap: 2,
                 width: 'fit-content'
@@ -36,12 +40,34 @@ export default function LetOfferMass() {
                     </Button>
                 ))}
             </Box>
+            <Box sx={{
+                display: { laptop: 'none', mobile: 'flex' },
+                flexWrap: 'wrap',
+                columnGap: '40px',
+                rowGap: '10px',
+                paddingBottom: '20px'
+            }}>
+                {massLoop.map(({ label, valueLoop }, index) => (
+                    <Button
+                        key={index}
+                        variant="outlined"
+                        sx={{
+                            minWidth: { laptop: 'initial', mobile: '145px' }
+                        }}
+                    >
+                        {label}
+                    </Button>
+                ))}
+            </Box>
             <Typography variant="h2">Informations du requerant</Typography>
             <Divider />
             <Box sx={{
                 display: 'grid',
                 rowGap: 2,
-                padding: '10px 10px 20px 0'
+                padding: {
+                    laptop: '10px 10px 20px 0',
+                    mobile: '10px 0 20px 0'
+                }
             }}>
                 <FormControlLabel
                     control={
@@ -51,9 +77,10 @@ export default function LetOfferMass() {
                 />
                 <Box sx={{
                     display: 'grid',
-                    gridAutoFlow: 'column',
+                    gridAutoFlow: { laptop: 'column', mobile: 'row' },
                     alignItems: 'center',
-                    columnGap: 2
+                    columnGap: 2,
+                    rowGap: '10px'
                 }}>
                     {inputOfferData.map(({ placeholder, icon }, index) => (
                         <Box
@@ -79,7 +106,7 @@ export default function LetOfferMass() {
             <Box sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                padding: '10px 10px 0 0',
+                padding: '10px 0px 30px 0',
                 rowGap: '10px',
                 columnGap: '14px',
             }}>
@@ -88,9 +115,9 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: '49%'
+                    width: '100%'
                 }}>
-                    <Icon icon={locationIcon} fontSize={32} />
+                    <Icon icon={locationIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
                         disablePortal
                         options={city}
@@ -107,19 +134,9 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: '49%'
+                    width: { laptop: '49%', mobile: '100%' }
                 }}>
-                    <Icon icon={calendarIcon} fontSize={32} />
-                    <DateTimeMassPicker />
-                </Box>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    columnGap: 1,
-                    alignItems: 'center',
-                    width: '49%'
-                }}>
-                    <Icon icon={churchIcon} fontSize={32} />
+                    <Icon icon={churchIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
                         disablePortal
                         options={Parish}
@@ -134,9 +151,19 @@ export default function LetOfferMass() {
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
+                    alignItems: 'center',
+                    width: { laptop: '49%', mobile: '100%' }
+                }}>
+                    <Icon icon={calendarIcon} fontSize={32} color="var(--offWhite)" />
+                    <DateTimeMassPicker />
+                </Box>
+                <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'auto 1fr',
+                    columnGap: 1,
                     width: '100%'
                 }}>
-                    <Icon icon={textFieldIcon} fontSize={32} />
+                    <Icon icon={textFieldIcon} fontSize={32} color="var(--offWhite)" />
                     <TextField
                         multiline
                         rows={5}
