@@ -145,6 +145,13 @@ export default function LetOfferMass() {
                     />
                 </Box>
             </Box>
+            <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                    width: 'fit-content'
+                }}
+            >Ajouter à la liste</Button>
         </Box>
     );
 }
