@@ -14,10 +14,11 @@ function Time({
 }: TimeProps) {
     return (
         <DigitalClock
+            skipDisabled
             value={selectedTime}
             timeStep={15}
             onChange={(newTime) => handleTime(newTime)}
-            shouldDisableTime={(time) => !isTimeAllowed(time.toDate()) as boolean}
+            shouldDisableTime={(newTime) => !isTimeAllowed(newTime.toDate()) as boolean}
         />
     );
 }
