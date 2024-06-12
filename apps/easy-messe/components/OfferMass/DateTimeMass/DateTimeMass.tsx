@@ -1,15 +1,23 @@
 import { useLanguage } from '@easy-messe/libs/theme';
 import { Dialog } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { DateCalendar, DigitalClock, LocalizationProvider } from '@mui/x-date-pickers';
+import { DigitalClock, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import { ParishDataFetch } from '../LetOfferMass';
+import { isSameDay } from 'date-fns/isSameDay';
+import Calendar from './Calendar';
+import Time from './TimeClock';
 
 
-export default function DateTimeMassPicker() {
+export default function DateTimeMassPicker({
+    parishDataFetch
+}: {
+    parishDataFetch: ParishDataFetch | undefined
+}) {
     const [openCalendarDialog, setOpenCalendarDialog] = useState<boolean>(false)
     const [selectedDate, setSelectdDate] = useState<Dayjs | null>()
     const [openClockDialog, setOpenClockDialog] = useState<boolean>(false)
@@ -22,16 +30,31 @@ export default function DateTimeMassPicker() {
         setSelectdDate(date);
         setOpenClockDialog(true)
     }
+    const handleSelectedTime = (time: Dayjs) => {
+        setSelectdTime(time);
+        setOpenClockDialog(false)
+        setOpenCalendarDialog(false)
+    }
 
     const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
+    const allMassDates = parishDataFetch?.massData.map((data) => data.dateTime)
 
+    const isDateAllowed = (date: Date) => {
+        return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
+    }
+    const isTimeAllowed = (time: Date) => {
+        if (selectedDate) {
+            const DateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDate.toDate()))
+            return DateSelected?.some((allowedTime) => allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
+        }
+    }
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
             <TextField
                 placeholder={formatMessage({ id: 'DateTime' })}
                 fullWidth
                 inputProps={{ readOnly: true }}
-                onClick={() => setOpenCalendarDialog(true)}
+                onClick={parishDataFetch ? () => setOpenCalendarDialog(true) : undefined}
                 value={formattedDateTime.includes('undefined') ? '' : formattedDateTime}
                 size='small'
             />
@@ -39,17 +62,19 @@ export default function DateTimeMassPicker() {
                 open={openCalendarDialog}
                 onClose={() => setOpenCalendarDialog(false)}
             >
-                <DateCalendar
-                    value={selectedDate}
-                    onChange={(newValue) => handleSelectedDate(newValue)}
+                <Calendar
+                    selectedDate={selectedDate as Dayjs}
+                    handleDate={handleSelectedDate}
+                    isDateAllowed={isDateAllowed}
                 />
                 <Dialog
                     open={openClockDialog}
                     onClose={() => setOpenClockDialog(false)}
                 >
-                    <DigitalClock
-                        value={selectedTime}
-                        onChange={(newTime) => setSelectdTime(newTime)}
+                    <Time
+                        selectedTime={selectedTime as Dayjs}
+                        handleTime={handleSelectedTime}
+                        isTimeAllowed={isTimeAllowed}
                     />
                 </Dialog>
 
