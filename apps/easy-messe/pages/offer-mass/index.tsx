@@ -1,7 +1,7 @@
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Icon } from "@iconify/react";
 import { Box, Divider, Tab, Tabs, Typography } from "@mui/material";
-import OfferList from "apps/easy-messe/components/OfferMass/OfferList";
+import OfferList from "../../components/OfferMass/OfferList";
 import { ReactNode, useState } from "react";
 import HeroMass from "../../components/OfferMass/HeroMass";
 import LetOfferMass from "../../components/OfferMass/LetOfferMass";
