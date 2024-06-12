@@ -37,15 +37,18 @@ export default function DateTimeMassPicker({
     }
 
     const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
+
     const allMassDates = parishDataFetch?.massData.map((data) => data.dateTime)
 
     const isDateAllowed = (date: Date) => {
         return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
     }
+
     const isTimeAllowed = (time: Date) => {
         if (selectedDate) {
-            const DateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDate.toDate()))
-            return DateSelected?.some((allowedTime) => allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
+            const dateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDate.toDate()))
+            return dateSelected?.some((allowedTime) =>
+                allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
         }
     }
     return (

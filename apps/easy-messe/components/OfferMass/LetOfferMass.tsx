@@ -56,6 +56,16 @@ export default function LetOfferMass() {
                 },
                 {
                     price: 2500,
+                    dateTime: new Date('2024-06-13T010:30:00'),
+                    massType: null
+                },
+                {
+                    price: 2500,
+                    dateTime: new Date('2024-06-13T12:00:00'),
+                    massType: null
+                },
+                {
+                    price: 2500,
                     dateTime: new Date('2024-06-16T17:00:00'),
                     massType: null
                 },
@@ -104,6 +114,36 @@ export default function LetOfferMass() {
             ]
         },
     ]
+    const massLoop: MassGroupCategory[] = [
+        {
+            label: 'Triduum',
+            valueLoop: 3
+        },
+        {
+            label: 'Seven',
+            valueLoop: 7
+        },
+        {
+            label: 'Novena',
+            valueLoop: 9
+        },
+        {
+            label: 'Thirty',
+            valueLoop: 30
+        },
+    ]
+
+    const inputOfferData: inputProps[] = [
+        {
+            placeholder: 'FullName',
+            icon: editIcon
+        },
+        {
+            placeholder: 'PhoneNumber',
+            icon: contactIcon
+        },
+    ]
+
     useEffect(() => {
         setParishDataFetch(parishDataFetched);
     }, [])
@@ -300,33 +340,4 @@ export default function LetOfferMass() {
     );
 }
 
-const massLoop: MassGroupCategory[] = [
-    {
-        label: 'Triduum',
-        valueLoop: 3
-    },
-    {
-        label: 'Seven',
-        valueLoop: 7
-    },
-    {
-        label: 'Novena',
-        valueLoop: 9
-    },
-    {
-        label: 'Thirty',
-        valueLoop: 30
-    },
-]
-
-const inputOfferData: inputProps[] = [
-    {
-        placeholder: 'FullName',
-        icon: editIcon
-    },
-    {
-        placeholder: 'PhoneNumber',
-        icon: contactIcon
-    },
-]
 
