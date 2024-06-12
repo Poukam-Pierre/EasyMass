@@ -6,9 +6,9 @@ import textFieldIcon from '@iconify-icons/material-symbols/text-fields';
 import churchIcon from '@iconify-icons/ph/church-light';
 import { Icon, IconifyIcon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
-import DateTimeMassPicker from "./DateTimeMass";
+import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
 import { useIntl } from 'react-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 interface MassGroupCategory {
@@ -19,11 +19,96 @@ interface inputProps {
     placeholder: string,
     icon: IconifyIcon
 }
+type MassType = 'Triduum' | 'Seven' | 'Novena' | 'Thirty' | null;
+interface MassDataType {
+    price: number,
+    dateTime: Date,
+    massType: MassType
+}
+export interface ParishDataFetch {
+    name: string,
+    city: string,
+    massData: MassDataType[]
+
+}
 
 export default function LetOfferMass() {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
+    const [parishDataFetch, setParishDataFetch] = useState<ParishDataFetch[]>()
+    const [selectedCity, setSelectedCity] = useState<string>()
+    const [selectedParish, setSelectedParish] = useState<string>()
 
+    const parishDataFetched: ParishDataFetch[] = [
+        {
+            name: 'Saint Pierre',
+            city: 'Douala',
+            massData: [
+                {
+                    price: 2500,
+                    dateTime: new Date('2024-06-13T06:30:00'),
+                    massType: null
+                },
+                {
+                    price: 2500,
+                    dateTime: new Date('2024-06-13T09:00:00'),
+                    massType: null
+                },
+                {
+                    price: 2500,
+                    dateTime: new Date('2024-06-16T17:00:00'),
+                    massType: null
+                },
+            ]
+        },
+        {
+            name: 'Saint Michel Archange',
+            city: 'Bafoussam',
+            massData: [
+                {
+                    price: 2000,
+                    dateTime: new Date('2024-06-12T08:30:00'),
+                    massType: null
+                },
+                {
+                    price: 2000,
+                    dateTime: new Date('2024-06-14T17:00:00'),
+                    massType: null
+                },
+                {
+                    price: 2000,
+                    dateTime: new Date('2024-06-16T06:30:00'),
+                    massType: null
+                },
+            ]
+        },
+        {
+            name: 'Saint Dominique Savio',
+            city: 'Yaoundé',
+            massData: [
+                {
+                    price: 3000,
+                    dateTime: new Date('2024-06-10T08:30:00'),
+                    massType: null
+                },
+                {
+                    price: 3000,
+                    dateTime: new Date('2024-06-12T09:00:00'),
+                    massType: null
+                },
+                {
+                    price: 3000,
+                    dateTime: new Date('2024-06-16T17:00:00'),
+                    massType: null
+                },
+            ]
+        },
+    ]
+    useEffect(() => {
+        setParishDataFetch(parishDataFetched);
+    }, [])
+
+    const matchingParishToCity = parishDataFetched.filter((parish) => parish.city === selectedCity)
     return (
         <Box sx={{
             padding: '21px'
@@ -124,17 +209,19 @@ export default function LetOfferMass() {
                     columnGap: 1,
                     alignItems: 'center',
                     width: '100%'
+
                 }}>
                     <Icon icon={locationIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
                         disablePortal
-                        options={city}
+                        options={parishDataFetch?.map((parish) => parish.city) as string[]}
                         renderInput={(params) => <TextField
                             {...params}
                             placeholder={formatMessage({ id: 'City' })}
                             size="small"
                         />
                         }
+                        onChange={(_, city) => setSelectedCity(city as string)}
                     />
                 </Box>
                 <Box sx={{
@@ -151,12 +238,13 @@ export default function LetOfferMass() {
                     <Icon icon={churchIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
                         disablePortal
-                        options={Parish}
+                        options={matchingParishToCity.map((parish) => parish.name)}
                         renderInput={(params) => <TextField
                             {...params}
                             placeholder={formatMessage({ id: 'Parish' })}
                             size='small'
                         />}
+                        onChange={(_, parish) => setSelectedParish(parish as string)}
                     />
                 </Box>
                 <Box sx={{
@@ -170,8 +258,17 @@ export default function LetOfferMass() {
                         tablet: '100%'
                     }
                 }}>
-                    <Icon icon={calendarIcon} fontSize={32} color="var(--offWhite)" />
-                    <DateTimeMassPicker />
+                    <Icon
+                        icon={calendarIcon}
+                        fontSize={32}
+                        color="var(--offWhite)"
+                    />
+                    <DateTimeMassPicker parishDataFetch={
+                        parishDataFetch?.find((parish) =>
+                            parish.name === selectedParish && parish.city === selectedCity
+                        )
+                    }
+                    />
                 </Box>
                 <Box sx={{
                     display: 'grid',
@@ -179,7 +276,11 @@ export default function LetOfferMass() {
                     columnGap: 1,
                     width: '100%'
                 }}>
-                    <Icon icon={textFieldIcon} fontSize={32} color="var(--offWhite)" />
+                    <Icon
+                        icon={textFieldIcon}
+                        fontSize={32}
+                        color="var(--offWhite)"
+                    />
                     <TextField
                         multiline
                         rows={5}
@@ -229,17 +330,3 @@ const inputOfferData: inputProps[] = [
     },
 ]
 
-const city: string[] = [
-    'Douala',
-    'Bafoussam',
-    'Yaoundé',
-    'Bangangté',
-    'Bandjoun',
-]
-const Parish: string[] = [
-    'Saint Pierre',
-    'Saint Michel Archange',
-    'Saint Dominique Savio',
-    'Saint Antoine de Tour',
-    'Saint Nioxé',
-]
