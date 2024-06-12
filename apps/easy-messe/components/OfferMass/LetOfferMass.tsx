@@ -114,7 +114,7 @@ export default function LetOfferMass() {
             <Box sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                padding: '10px 0px 30px 0',
+                padding: { laptop: '10px 10px 30px 0', mobile: '10px 0px 30px 0' },
                 rowGap: '10px',
                 columnGap: '14px',
             }}>
@@ -142,7 +142,11 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: { laptop: '49%', mobile: '100%' }
+                    width: {
+                        laptop: '49%',
+                        mobile: '100%',
+                        tablet: '100%'
+                    }
                 }}>
                     <Icon icon={churchIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
@@ -160,7 +164,11 @@ export default function LetOfferMass() {
                     gridTemplateColumns: 'auto 1fr',
                     columnGap: 1,
                     alignItems: 'center',
-                    width: { laptop: '49%', mobile: '100%' }
+                    width: {
+                        laptop: '49%',
+                        mobile: '100%',
+                        tablet: '100%'
+                    }
                 }}>
                     <Icon icon={calendarIcon} fontSize={32} color="var(--offWhite)" />
                     <DateTimeMassPicker />
