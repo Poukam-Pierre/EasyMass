@@ -1,14 +1,14 @@
 import { useLanguage } from '@easy-messe/libs/theme';
 import { Dialog } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { DigitalClock, LocalizationProvider } from '@mui/x-date-pickers';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { isSameDay } from 'date-fns/isSameDay';
 import { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { ParishDataFetch } from '../LetOfferMass';
-import { isSameDay } from 'date-fns/isSameDay';
 import Calendar from './Calendar';
 import Time from './TimeClock';
 
@@ -61,6 +61,7 @@ export default function DateTimeMassPicker({
                 value={formattedDateTime.includes('undefined') ? '' : formattedDateTime}
                 size='small'
             />
+
             <Dialog
                 open={openCalendarDialog}
                 onClose={() => setOpenCalendarDialog(false)}

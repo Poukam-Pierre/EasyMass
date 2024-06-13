@@ -8,6 +8,7 @@ import LetOfferMass from "../../components/OfferMass/LetOfferMass";
 import { useIntl } from 'react-intl';
 
 type TabComponent = Record<number, ReactNode>;
+
 export default function OrderMass() {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(1)
     const tabTitle = ['Liste de demande', 'Demande de messes']
