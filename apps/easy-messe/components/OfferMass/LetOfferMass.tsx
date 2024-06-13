@@ -333,7 +333,11 @@ export default function LetOfferMass() {
                 variant="contained"
                 disableElevation
                 sx={{
-                    width: 'fit-content'
+                    width: {
+                        laptop: 'fit-content',
+                        tablet: 'fir-content',
+                        mobile: '-webkit-fill-available'
+                    }
                 }}
             >{formatMessage({ id: 'AddToList' })}</Button>
         </Box>

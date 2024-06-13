@@ -35,7 +35,6 @@ export default function Calendar({
             slots={{
                 day: renderDay
             }}
-
         />
     )
 }
