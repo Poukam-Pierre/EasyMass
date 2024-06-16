@@ -1,3 +1,4 @@
+import { useOfferMass } from "@easy-messe/libs/theme";
 import { Box, Button, Typography } from "@mui/material";
 import { useIntl } from "react-intl";
 
@@ -7,6 +8,7 @@ interface OfferListProps {
 
 export default function OfferList({ children }: OfferListProps) {
     const { formatMessage } = useIntl()
+    const { massRequested } = useOfferMass()
     return (
         <Box sx={{
             padding: '10px 10px 0px 10px',
@@ -22,6 +24,7 @@ export default function OfferList({ children }: OfferListProps) {
                 sx={{
                     width: 'fit-content'
                 }}
+                disabled={massRequested === null ? true : false}
             >{formatMessage({ id: 'souscribe' })}</Button>
         </Box>
     );
