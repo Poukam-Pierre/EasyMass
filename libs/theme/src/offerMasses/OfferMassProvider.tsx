@@ -14,21 +14,7 @@ function OfferMassContextProvider({
 }: OfferMassContextProviderProps
 ): JSX.Element {
     const initialState: MassRequested = {
-        massRequested: {
-            faithInfos: {
-                name: '',
-                phone: '',
-                anonymous: false,
-            },
-            massInfos: [
-                {
-                    city: '',
-                    parish: '',
-                    dateTime: null,
-                    intension: '',
-                },
-            ],
-        },
+        massRequested: null,
         massRequestDispatch: () => null,
     }
     const [massRequestedState, massRequestDispatch] = useReducer(
