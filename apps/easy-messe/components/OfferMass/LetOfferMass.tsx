@@ -310,11 +310,12 @@ export default function LetOfferMass() {
                         fontSize={32}
                         color="var(--offWhite)"
                     />
-                    <DateTimeMassPicker parishData={
-                        parishDataFetch?.find((parish) =>
-                            parish.name === selectedParish && parish.city === selectedCity
-                        )
-                    }
+                    <DateTimeMassPicker
+                        parishData={
+                            parishDataFetch?.find((parish) =>
+                                parish.name === selectedParish && parish.city === selectedCity
+                            )
+                        }
                     />
                 </Box>
                 <Box sx={{

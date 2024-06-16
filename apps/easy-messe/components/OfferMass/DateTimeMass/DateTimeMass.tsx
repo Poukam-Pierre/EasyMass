@@ -13,11 +13,7 @@ import Calendar from './Calendar';
 import Time from './TimeClock';
 
 
-export default function DateTimeMassPicker({
-    parishData
-}: {
-    parishData: ParishData | undefined
-}) {
+export default function DateTimeMassPicker({ parishData }: { parishData: ParishData | undefined }) {
     const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
     const [selectedDate, setSelectdDate] = useState<Dayjs | null>()
     const [isClockDialog, setIsClockDialog] = useState<boolean>(false)
