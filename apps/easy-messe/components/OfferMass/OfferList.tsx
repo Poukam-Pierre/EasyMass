@@ -14,7 +14,7 @@ export default function OfferList({ children }: OfferListProps) {
             gridTemplateRows: 'auto 1fr auto',
             height: { laptop: 'inherit', mobile: '50vh' }
         }}>
-            <Typography variant="h2"> {formatMessage({ id: 'RequestList' })}</Typography>
+            <Typography variant="h2"> {formatMessage({ id: 'requestList' })}</Typography>
             {children}
             <Button
                 variant="contained"
@@ -22,7 +22,7 @@ export default function OfferList({ children }: OfferListProps) {
                 sx={{
                     width: 'fit-content'
                 }}
-            >{formatMessage({ id: 'Souscribe' })}</Button>
+            >{formatMessage({ id: 'souscribe' })}</Button>
         </Box>
     );
 }

@@ -19,7 +19,7 @@ interface inputProps {
     placeholder: string,
     icon: IconifyIcon
 }
-type MassType = 'Triduum' | 'Seven' | 'Novena' | 'Thirty' | null;
+type MassType = 'triduum' | 'seven' | 'novena' | 'thirty' | null;
 interface MassDataType {
     price: number,
     dateTime: Date,
@@ -116,30 +116,30 @@ export default function LetOfferMass() {
     ]
     const massLoop: MassGroupCategory[] = [
         {
-            label: 'Triduum',
+            label: 'triduum',
             valueLoop: 3
         },
         {
-            label: 'Seven',
+            label: 'seven',
             valueLoop: 7
         },
         {
-            label: 'Novena',
+            label: 'novena',
             valueLoop: 9
         },
         {
-            label: 'Thirty',
+            label: 'thirty',
             valueLoop: 30
         },
     ]
 
     const inputOfferData: inputProps[] = [
         {
-            placeholder: 'FullName',
+            placeholder: 'fullName',
             icon: editIcon
         },
         {
-            placeholder: 'PhoneNumber',
+            placeholder: 'phoneNumber',
             icon: contactIcon
         },
     ]
@@ -151,8 +151,10 @@ export default function LetOfferMass() {
     const matchingParishToCity = parishDataFetched.filter((parish) => parish.city === selectedCity)
     return (
         <Box sx={{
-            padding: '21px'
-        }}>
+            padding: '21px',
+        }}
+            component='form'
+        >
             <Box sx={{
                 padding: '10px 0 20px 0',
                 display: { laptop: 'grid', mobile: 'none' },
@@ -188,7 +190,7 @@ export default function LetOfferMass() {
                     </Button>
                 ))}
             </Box>
-            <Typography variant="h2">{formatMessage({ id: 'ApplicantInformation' })}</Typography>
+            <Typography variant="h2">{formatMessage({ id: 'applicantInformation' })}</Typography>
             <Divider />
             <Box sx={{
                 display: 'grid',
@@ -205,7 +207,7 @@ export default function LetOfferMass() {
                             onChange={(_) => setIsAnonym(_.target.checked)}
                         />
                     }
-                    label={formatMessage({ id: 'Anonymous' })}
+                    label={formatMessage({ id: 'anonymous' })}
                 />
                 <Box sx={{
                     display: 'grid',
@@ -234,7 +236,7 @@ export default function LetOfferMass() {
                     ))}
                 </Box>
             </Box>
-            <Typography variant="h2">{formatMessage({ id: 'MassInformations' })}</Typography>
+            <Typography variant="h2">{formatMessage({ id: 'massInformations' })}</Typography>
             <Divider />
             <Box sx={{
                 display: 'flex',
@@ -324,7 +326,7 @@ export default function LetOfferMass() {
                     <TextField
                         multiline
                         rows={5}
-                        placeholder={formatMessage({ id: 'MassIntension' })}
+                        placeholder={formatMessage({ id: 'massIntension' })}
                         fullWidth
                     />
                 </Box>
@@ -332,6 +334,7 @@ export default function LetOfferMass() {
             <Button
                 variant="contained"
                 disableElevation
+                type="submit"
                 sx={{
                     width: {
                         laptop: 'fit-content',
@@ -339,7 +342,7 @@ export default function LetOfferMass() {
                         mobile: '-webkit-fill-available'
                     }
                 }}
-            >{formatMessage({ id: 'AddToList' })}</Button>
+            >{formatMessage({ id: 'addToList' })}</Button>
         </Box>
     );
 }

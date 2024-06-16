@@ -28,7 +28,7 @@ export default function HeroMass() {
                     display: { laptop: 'inherit', mobile: 'none' }
                 }}
             >
-                {formatMessage({ id: 'OrderMassHeroMsg' })}
+                {formatMessage({ id: 'orderMassHeroMsg' })}
             </Typography>
             <Typography
                 variant="h3"
@@ -44,7 +44,7 @@ export default function HeroMass() {
                     display: { laptop: 'none', mobile: 'inherit' }
                 }}
             >
-                {formatMessage({ id: 'OrderMassHeroMsg' })}
+                {formatMessage({ id: 'orderMassHeroMsg' })}
             </Typography>
         </Box>
     );

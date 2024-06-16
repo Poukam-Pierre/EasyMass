@@ -54,7 +54,7 @@ export default function DateTimeMassPicker({
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
             <TextField
-                placeholder={formatMessage({ id: 'DateTime' })}
+                placeholder={formatMessage({ id: 'dateTime' })}
                 fullWidth
                 inputProps={{ readOnly: true }}
                 onClick={parishDataFetch ? () => setOpenCalendarDialog(true) : undefined}

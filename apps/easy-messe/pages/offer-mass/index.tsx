@@ -24,7 +24,7 @@ export default function OrderMass() {
                     alignItems: 'center'
                 }}>
                     <Icon icon={warningIcon} fontSize={24} />
-                    <Typography variant='body2'>{formatMessage({ id: 'NoProcessMass' })} </Typography>
+                    <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })} </Typography>
                 </Box>
             </OfferList>
         ),
@@ -40,7 +40,7 @@ export default function OrderMass() {
                 padding: '40px 90px',
                 display: { laptop: 'inherit', mobile: 'none' }
             }}>
-                <Typography variant="h2">{formatMessage({ id: 'MassRequest' })}</Typography>
+                <Typography variant="h2">{formatMessage({ id: 'massRequest' })}</Typography>
                 <Divider />
                 <Box sx={{
                     display: 'grid',
@@ -56,7 +56,7 @@ export default function OrderMass() {
                             alignItems: 'center'
                         }}>
                             <Icon icon={warningIcon} fontSize={24} />
-                            <Typography variant='body2'>{formatMessage({ id: 'NoProcessMass' })}</Typography>
+                            <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })}</Typography>
                         </Box>
                     </OfferList>
                 </Box>
