@@ -8,19 +8,19 @@ import { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { ParishDataFetch } from '../LetOfferMass';
+import { ParishData } from '../LetOfferMass';
 import Calendar from './Calendar';
 import Time from './TimeClock';
 
 
 export default function DateTimeMassPicker({
-    parishDataFetch
+    parishData
 }: {
-    parishDataFetch: ParishDataFetch | undefined
+    parishData: ParishData | undefined
 }) {
-    const [openCalendarDialog, setOpenCalendarDialog] = useState<boolean>(false)
+    const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
     const [selectedDate, setSelectdDate] = useState<Dayjs | null>()
-    const [openClockDialog, setOpenClockDialog] = useState<boolean>(false)
+    const [isClockDialog, setIsClockDialog] = useState<boolean>(false)
     const [selectedTime, setSelectdTime] = useState<Dayjs | null>()
     const { formatMessage } = useIntl()
     const { activeLanguage } = useLanguage()
@@ -28,17 +28,17 @@ export default function DateTimeMassPicker({
 
     const handleSelectedDate = (date: Dayjs) => {
         setSelectdDate(date);
-        setOpenClockDialog(true)
+        setIsClockDialog(true)
     }
     const handleSelectedTime = (time: Dayjs) => {
         setSelectdTime(time);
-        setOpenClockDialog(false)
-        setOpenCalendarDialog(false)
+        setIsClockDialog(false)
+        setIsCalendarDialog(false)
     }
 
     const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
 
-    const allMassDates = parishDataFetch?.massData.map((data) => data.dateTime)
+    const allMassDates = parishData?.massData.map((data) => data.dateTime)
 
     const isDateAllowed = (date: Date) => {
         return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
@@ -57,14 +57,14 @@ export default function DateTimeMassPicker({
                 placeholder={formatMessage({ id: 'dateTime' })}
                 fullWidth
                 inputProps={{ readOnly: true }}
-                onClick={parishDataFetch ? () => setOpenCalendarDialog(true) : undefined}
-                value={formattedDateTime.includes('undefined') ? '' : formattedDateTime}
+                onClick={parishData ? () => setIsCalendarDialog(true) : undefined}
+                value={selectedDate && selectedTime ? formattedDateTime : ''}
                 size='small'
             />
 
             <Dialog
-                open={openCalendarDialog}
-                onClose={() => setOpenCalendarDialog(false)}
+                open={isCalendarDialog}
+                onClose={() => setIsCalendarDialog(false)}
             >
                 <Calendar
                     selectedDate={selectedDate as Dayjs}
@@ -72,8 +72,8 @@ export default function DateTimeMassPicker({
                     isDateAllowed={isDateAllowed}
                 />
                 <Dialog
-                    open={openClockDialog}
-                    onClose={() => setOpenClockDialog(false)}
+                    open={isClockDialog}
+                    onClose={() => setIsClockDialog(false)}
                 >
                     <Time
                         selectedTime={selectedTime as Dayjs}
