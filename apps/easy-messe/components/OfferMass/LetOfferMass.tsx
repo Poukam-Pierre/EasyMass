@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 
 interface MassGroupCategory {
     label: string;
-    valueLoop: number
+    valueOrder: number
 }
 interface inputProps {
     placeholder: string,
@@ -119,22 +119,22 @@ export default function LetOfferMass() {
             ]
         },
     ]
-    const massLoop: MassGroupCategory[] = [
+    const massOrderCategory: MassGroupCategory[] = [
         {
             label: 'triduum',
-            valueLoop: 3
+            valueOrder: 3
         },
         {
             label: 'seven',
-            valueLoop: 7
+            valueOrder: 7
         },
         {
             label: 'novena',
-            valueLoop: 9
+            valueOrder: 9
         },
         {
             label: 'thirty',
-            valueLoop: 30
+            valueOrder: 30
         },
     ]
 
@@ -167,7 +167,7 @@ export default function LetOfferMass() {
                 columnGap: 2,
                 width: 'fit-content'
             }}>
-                {massLoop.map(({ label, valueLoop }, index) => (
+                {massOrderCategory.map(({ label, valueOrder }, index) => (
                     <Button
                         key={index}
                         variant="outlined"
@@ -183,7 +183,7 @@ export default function LetOfferMass() {
                 rowGap: '10px',
                 paddingBottom: '20px'
             }}>
-                {massLoop.map(({ label, valueLoop }, index) => (
+                {massOrderCategory.map(({ label, valueOrder }, index) => (
                     <Button
                         key={index}
                         variant="outlined"
