@@ -264,7 +264,7 @@ export default function LetOfferMass() {
                         options={parishDataFetch?.map((parish) => parish.city) as string[]}
                         renderInput={(params) => <TextField
                             {...params}
-                            placeholder={formatMessage({ id: 'City' })}
+                            placeholder={formatMessage({ id: 'city' })}
                             size="small"
                         />
                         }
@@ -288,7 +288,7 @@ export default function LetOfferMass() {
                         options={selectedCityParishes.map((parish) => parish.name)}
                         renderInput={(params) => <TextField
                             {...params}
-                            placeholder={formatMessage({ id: 'Parish' })}
+                            placeholder={formatMessage({ id: 'parish' })}
                             size='small'
                         />}
                         onChange={(_, parish) => setSelectedParish(parish as string)}
