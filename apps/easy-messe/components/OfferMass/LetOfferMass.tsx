@@ -25,7 +25,7 @@ interface MassDataType {
     dateTime: Date,
     massType: MassType
 }
-export interface ParishDataFetch {
+export interface ParishData {
     name: string,
     city: string,
     massData: MassDataType[]
@@ -35,11 +35,11 @@ export interface ParishDataFetch {
 export default function LetOfferMass() {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
-    const [parishDataFetch, setParishDataFetch] = useState<ParishDataFetch[]>()
+    const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
     const [selectedCity, setSelectedCity] = useState<string>()
     const [selectedParish, setSelectedParish] = useState<string>()
 
-    const parishDataFetched: ParishDataFetch[] = [
+    const parishDataFetched: ParishData[] = [
         {
             name: 'Saint Pierre',
             city: 'Douala',
@@ -204,7 +204,7 @@ export default function LetOfferMass() {
                     control={
                         <Switch
                             checked={isAnonym}
-                            onChange={(_) => setIsAnonym(_.target.checked)}
+                            onChange={(event) => setIsAnonym(event.target.checked)}
                         />
                     }
                     label={formatMessage({ id: 'anonymous' })}
@@ -305,7 +305,7 @@ export default function LetOfferMass() {
                         fontSize={32}
                         color="var(--offWhite)"
                     />
-                    <DateTimeMassPicker parishDataFetch={
+                    <DateTimeMassPicker parishData={
                         parishDataFetch?.find((parish) =>
                             parish.name === selectedParish && parish.city === selectedCity
                         )
