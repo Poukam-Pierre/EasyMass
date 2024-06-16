@@ -19,16 +19,21 @@ interface inputProps {
     placeholder: string,
     icon: IconifyIcon
 }
-type MassType = 'triduum' | 'seven' | 'novena' | 'thirty' | null;
-interface MassDataType {
+enum MassTypeEnum {
+    Triduum = 'triduum',
+    Seven = 'seven',
+    Novena = 'novena',
+    Thirty = 'thirty',
+}
+interface Mass {
     price: number,
     dateTime: Date,
-    massType: MassType
+    massType: MassTypeEnum | null
 }
 export interface ParishData {
     name: string,
     city: string,
-    massData: MassDataType[]
+    massData: Mass[]
 
 }
 
@@ -148,7 +153,7 @@ export default function LetOfferMass() {
         setParishDataFetch(parishDataFetched);
     }, [])
 
-    const matchingParishToCity = parishDataFetched.filter((parish) => parish.city === selectedCity)
+    const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
     return (
         <Box sx={{
             padding: '21px',
@@ -280,7 +285,7 @@ export default function LetOfferMass() {
                     <Icon icon={churchIcon} fontSize={32} color="var(--offWhite)" />
                     <Autocomplete
                         disablePortal
-                        options={matchingParishToCity.map((parish) => parish.name)}
+                        options={selectedCityParishes.map((parish) => parish.name)}
                         renderInput={(params) => <TextField
                             {...params}
                             placeholder={formatMessage({ id: 'Parish' })}
