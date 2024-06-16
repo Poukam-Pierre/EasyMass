@@ -22,7 +22,7 @@ export interface OfferMass {
 }
 
 export interface MassRequested {
-  massRequested: OfferMass;
+  massRequested: OfferMass | null;
   massRequestDispatch: React.Dispatch<OfferMass>;
 }
 
