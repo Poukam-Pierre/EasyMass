@@ -73,6 +73,7 @@ export default function DateTimeMassPicker({ parishData }: { parishData: ParishD
                 >
                     <Time
                         selectedTime={selectedTime as Dayjs}
+                        selectedDate={selectedDate as Dayjs}
                         handleTime={handleSelectedTime}
                         isTimeAllowed={isTimeAllowed}
                     />
