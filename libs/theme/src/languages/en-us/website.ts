@@ -45,7 +45,7 @@ export const website = {
     "To ask for a Mass is to recognise our constant need for divine grace. It means humbly placing our intentions in God's hands and trusting him to respond according to his wisdom.",
   quoteFourteen:
     'The request for Mass is an expression of the communion of saints, where the living and the dead are united in prayer and sacrifice for the good of the Church and the world.',
-  OrderMassHeroMsg:
+  orderMassHeroMsg:
     'Asking for a mass is an expression of trust in the saving power of Christ...',
   applicantInformation: "Applicant's details",
   massInformations: 'Mass Informations',
