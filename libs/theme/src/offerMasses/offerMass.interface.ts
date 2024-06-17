@@ -18,7 +18,7 @@ interface MassInformation {
 
 export interface OfferMass {
   faithInfos: Requester;
-  massInfos: MassInformation[];
+  massInfos: MassInformation;
 }
 
 export interface MassRequested {
