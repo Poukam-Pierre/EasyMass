@@ -29,6 +29,7 @@ export default function Calendar({
 
     return (
         <DateCalendar
+            disablePast
             value={selectedDate}
             onChange={(newDate) => handleDate(newDate)}
             shouldDisableDate={(date) => !isDateAllowed(date.toDate())}

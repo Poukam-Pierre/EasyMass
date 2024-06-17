@@ -14,6 +14,7 @@ function Time({
 }: TimeProps) {
     return (
         <DigitalClock
+            disablePast
             skipDisabled
             value={selectedTime}
             timeStep={15}
