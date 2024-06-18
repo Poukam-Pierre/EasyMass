@@ -15,19 +15,22 @@ import Time from './TimeClock';
 
 export default function DateTimeMassPicker({ parishData }: { parishData: ParishData | undefined }) {
     const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
-    const [selectedDate, setSelectdDate] = useState<Dayjs | null>()
+    const [selectedDateTime, setSelectedDateTime] = useState<DateTime>({ date: dayjs(), time: null })
     const [isClockDialog, setIsClockDialog] = useState<boolean>(false)
-    const [selectedTime, setSelectdTime] = useState<Dayjs | null>()
     const { formatMessage } = useIntl()
     const { activeLanguage } = useLanguage()
 
 
     const handleSelectedDate = (date: Dayjs) => {
-        setSelectdDate(date);
+        setSelectedDateTime(prevState => {
+            return { ...prevState, date: date }
+        });
         setIsClockDialog(true)
     }
     const handleSelectedTime = (time: Dayjs) => {
-        setSelectdTime(time);
+        setSelectedDateTime(prevState => {
+            return { ...prevState, time: time }
+        })
         setIsClockDialog(false)
         setIsCalendarDialog(false)
     }
