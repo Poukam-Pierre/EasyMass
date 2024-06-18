@@ -55,7 +55,7 @@ export default function DateTimeMassPicker({
         handleChange('dateTime', dateTime)
     }
 
-    const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
+    const formattedDateTime = `${selectedDateTime.date.format("DD MMMM YYYY")} - ${selectedDateTime.time?.format("HH:mm")}`
 
     const allMassDates = parishData?.massData.map((data) => data.dateTime)
 
@@ -74,11 +74,13 @@ export default function DateTimeMassPicker({
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
             <TextField
+                id={id}
+                name={name}
                 placeholder={formatMessage({ id: 'dateTime' })}
                 fullWidth
                 inputProps={{ readOnly: true }}
                 onClick={parishData ? () => setIsCalendarDialog(true) : undefined}
-                value={selectedDate && selectedTime ? formattedDateTime : ''}
+                value={selectedDateTime.date && selectedDateTime.time ? formattedDateTime : ''}
                 size='small'
             />
 
@@ -87,7 +89,7 @@ export default function DateTimeMassPicker({
                 onClose={() => setIsCalendarDialog(false)}
             >
                 <Calendar
-                    selectedDate={selectedDate as Dayjs}
+                    selectedDate={selectedDateTime.date}
                     handleDate={handleSelectedDate}
                     isDateAllowed={isDateAllowed}
                 />
@@ -96,8 +98,8 @@ export default function DateTimeMassPicker({
                     onClose={() => setIsClockDialog(false)}
                 >
                     <Time
-                        selectedTime={selectedTime as Dayjs}
-                        selectedDate={selectedDate as Dayjs}
+                        selectedTime={selectedDateTime.time as Dayjs}
+                        selectedDate={selectedDateTime.date}
                         handleTime={handleSelectedTime}
                         isTimeAllowed={isTimeAllowed}
                     />
