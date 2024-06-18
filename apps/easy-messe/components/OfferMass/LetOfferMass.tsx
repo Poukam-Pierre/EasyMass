@@ -11,7 +11,7 @@ import { useIntl } from 'react-intl';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import { useOfferMass } from '@easy-messe/libs/theme';
-import { OfferMass } from 'libs/theme/src/offerMasses/offerMass.interface';
+import { Dayjs } from 'dayjs';
 
 
 interface MassGroupCategory {
@@ -42,6 +42,16 @@ export interface ParishData {
 
 }
 
+export interface UseformikProps {
+    name: string | null,
+    phone: string | null,
+    anonymous: boolean,
+    city: string,
+    parish: string,
+    dateTime: Dayjs | null,
+    intension: string
+
+}
 const parishDataFetched: ParishData[] = [
     {
         name: 'Saint Pierre',
@@ -128,7 +138,7 @@ export default function LetOfferMass() {
     const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
     const [selectedCity, setSelectedCity] = useState<string>()
     const [selectedParish, setSelectedParish] = useState<string>()
-    const { massRequestDispatch, massRequested } = useOfferMass()
+    const { massRequestDispatch } = useOfferMass()
 
 
     const massOrderCategory: MassGroupCategory[] = [
@@ -171,23 +181,30 @@ export default function LetOfferMass() {
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, values, handleSubmit, setFieldValue } = useFormik<OfferMass>({
+    const { handleChange, values, handleSubmit, setFieldValue } = useFormik<UseformikProps>({
         initialValues: {
-            faithInfos: {
-                name: null,
-                phone: null,
-                anonymous: false,
-            },
-            massInfos: {
-                city: '',
-                parish: '',
-                dateTime: null,
-                intension: ''
-            }
+            name: null,
+            phone: null,
+            anonymous: false,
+            city: '',
+            parish: '',
+            dateTime: null,
+            intension: ''
         },
         onSubmit: (values) => {
-            massRequestDispatch(values);
-            console.log(values)
+            massRequestDispatch({
+                faithInfos: {
+                    name: values.name,
+                    phone: values.phone,
+                    anonymous: values.anonymous
+                },
+                massInfos: {
+                    city: values.city,
+                    parish: values.parish,
+                    dateTime: values.dateTime,
+                    intension: values.intension
+                }
+            });
         }
     })
 
@@ -203,7 +220,6 @@ export default function LetOfferMass() {
         setFieldValue('parish', parish)
         setSelectedParish(parish)
     }
-    console.log(massRequested)
     return (
         <Box sx={{
             padding: '21px',
