@@ -8,7 +8,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
 import { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { ParishData } from '../LetOfferMass';
+import { ParishData, UseformikProps } from '../LetOfferMass';
 import Calendar from './Calendar';
 import Time from './TimeClock';
 import { FormikErrors } from 'formik';
@@ -18,7 +18,7 @@ interface DateTimeMassPickerProps {
     id: string,
     name: string,
     parishData: ParishData | undefined
-    handleChange: (field: string, value: Dayjs) => Promise<FormikErrors<OfferMass>> | Promise<void>
+    handleChange: (field: string, value: Dayjs) => Promise<FormikErrors<UseformikProps>> | Promise<void>
 }
 interface DateTime {
     date: Dayjs,
