@@ -11,9 +11,26 @@ import { useIntl } from 'react-intl';
 import { ParishData } from '../LetOfferMass';
 import Calendar from './Calendar';
 import Time from './TimeClock';
+import { FormikErrors } from 'formik';
+import { OfferMass } from 'libs/theme/src/offerMasses/offerMass.interface';
 
+interface DateTimeMassPickerProps {
+    id: string,
+    name: string,
+    parishData: ParishData | undefined
+    handleChange: (field: string, value: Dayjs) => Promise<FormikErrors<OfferMass>> | Promise<void>
+}
+interface DateTime {
+    date: Dayjs,
+    time: Dayjs | null
+}
 
-export default function DateTimeMassPicker({ parishData }: { parishData: ParishData | undefined }) {
+export default function DateTimeMassPicker({
+    parishData,
+    id,
+    name,
+    handleChange
+}: DateTimeMassPickerProps) {
     const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
     const [selectedDateTime, setSelectedDateTime] = useState<DateTime>({ date: dayjs(), time: null })
     const [isClockDialog, setIsClockDialog] = useState<boolean>(false)
@@ -27,12 +44,15 @@ export default function DateTimeMassPicker({ parishData }: { parishData: ParishD
         });
         setIsClockDialog(true)
     }
+
     const handleSelectedTime = (time: Dayjs) => {
         setSelectedDateTime(prevState => {
             return { ...prevState, time: time }
         })
         setIsClockDialog(false)
         setIsCalendarDialog(false)
+        const dateTime = selectedDateTime.date.hour(time.hour()).minute(time.minute()).second(0)
+        handleChange('dateTime', dateTime)
     }
 
     const formattedDateTime = `${selectedDate?.format("DD MMMM YYYY")} - ${selectedTime?.format("HH:mm")}`
