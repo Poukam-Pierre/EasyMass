@@ -4,9 +4,9 @@ import TextField from '@mui/material/TextField';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { isSameDay } from 'date-fns/isSameDay';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { ParishData } from '../LetOfferMass';
 import Calendar from './Calendar';
@@ -59,17 +59,18 @@ export default function DateTimeMassPicker({
 
     const allMassDates = parishData?.massData.map((data) => data.dateTime)
 
-    const isDateAllowed = (date: Date) => {
+    const isDateAllowed = useCallback((date: Date) => {
         return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
-    }
+    }, [parishData])
 
-    const isTimeAllowed = (time: Date) => {
-        if (selectedDate) {
-            const dateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDate.toDate()))
+    const isTimeAllowed = useCallback((time: Date) => {
+        if (selectedDateTime.date) {
+            const dateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDateTime.date.toDate()))
             return dateSelected?.some((allowedTime) =>
                 allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
         }
-    }
+    }, [parishData])
+
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
             <TextField
