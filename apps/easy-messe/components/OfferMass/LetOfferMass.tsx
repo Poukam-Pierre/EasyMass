@@ -181,7 +181,7 @@ export default function LetOfferMass() {
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, values, handleSubmit, setFieldValue } = useFormik<UseformikProps>({
+    const { handleChange, handleSubmit, setFieldValue } = useFormik<UseformikProps>({
         initialValues: {
             name: null,
             phone: null,
@@ -220,6 +220,7 @@ export default function LetOfferMass() {
         setFieldValue('parish', parish)
         setSelectedParish(parish)
     }
+
     return (
         <Box sx={{
             padding: '21px',
@@ -234,7 +235,7 @@ export default function LetOfferMass() {
                 columnGap: 2,
                 width: 'fit-content'
             }}>
-                {massOrderCategory.map(({ label, valueOrder }, index) => (
+                {massOrderCategory.map(({ label }, index) => (
                     <Button
                         key={index}
                         variant="outlined"
@@ -281,6 +282,9 @@ export default function LetOfferMass() {
                         />
                     }
                     label={formatMessage({ id: 'anonymous' })}
+                    sx={{
+                        width: 'fit-content'
+                    }}
                 />
                 <Box sx={{
                     display: 'grid',
