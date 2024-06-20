@@ -61,7 +61,7 @@ export default function DateTimeMassPicker({
 
     const isDateAllowed = useCallback((date: Date) => {
         return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
-    }, [parishData])
+    }, [allMassDates])
 
     const isTimeAllowed = useCallback((time: Date) => {
         if (selectedDateTime.date) {
@@ -69,7 +69,7 @@ export default function DateTimeMassPicker({
             return dateSelected?.some((allowedTime) =>
                 allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
         }
-    }, [parishData])
+    }, [allMassDates])
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
