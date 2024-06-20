@@ -6,7 +6,10 @@ const OfferMassReducer: Reducer<MassRequested, OfferMass> = (
     state: State,
     payload: OfferMass
 ) => {
-    return { ...state, ...payload }
+    return {
+        ...state,
+        massRequested: { ...payload }
+    }
 }
 
 function OfferMassContextProvider({
