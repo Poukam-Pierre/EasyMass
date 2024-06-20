@@ -6,6 +6,8 @@ import { ReactNode, useState } from "react";
 import HeroMass from "../../components/OfferMass/HeroMass";
 import LetOfferMass from "../../components/OfferMass/LetOfferMass";
 import { useIntl } from 'react-intl';
+import { useOfferMass } from '@easy-messe/libs/theme';
+import OfferMassCart from '../../components/OfferMass/OfferMassCard';
 
 type TabComponent = Record<number, ReactNode>;
 
@@ -13,19 +15,26 @@ export default function OrderMass() {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(1)
     const tabTitle = ['Liste de demande', 'Demande de messes']
     const { formatMessage } = useIntl()
+    const { massRequested } = useOfferMass()
 
     const tabComponent: TabComponent = {
         0: (
             <OfferList>
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>
-                    <Icon icon={warningIcon} fontSize={24} />
-                    <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })} </Typography>
-                </Box>
+                {massRequested !== null ? (
+                    <OfferMassCart />
+
+                ) : (
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
+                        <Icon icon={warningIcon} fontSize={24} />
+                        <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })}</Typography>
+                    </Box>
+
+                )}
             </OfferList>
         ),
         1: (
@@ -49,15 +58,21 @@ export default function OrderMass() {
                     <LetOfferMass />
                     <Divider orientation="vertical" />
                     <OfferList>
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
-                            <Icon icon={warningIcon} fontSize={24} />
-                            <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })}</Typography>
-                        </Box>
+                        {massRequested !== null ? (
+                            <OfferMassCart />
+
+                        ) : (
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}>
+                                <Icon icon={warningIcon} fontSize={24} />
+                                <Typography variant='body2'>{formatMessage({ id: 'noProcessMass' })}</Typography>
+                            </Box>
+
+                        )}
                     </OfferList>
                 </Box>
             </Box>
