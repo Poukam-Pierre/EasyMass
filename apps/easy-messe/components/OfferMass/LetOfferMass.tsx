@@ -138,7 +138,7 @@ export default function LetOfferMass() {
     const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
     const [selectedCity, setSelectedCity] = useState<string>()
     const [selectedParish, setSelectedParish] = useState<string>()
-    const { massRequestDispatch } = useOfferMass()
+    const { massRequestDispatch, massRequested } = useOfferMass()
 
 
     const massOrderCategory: MassGroupCategory[] = [
@@ -192,19 +192,22 @@ export default function LetOfferMass() {
             intension: ''
         },
         onSubmit: (values) => {
-            massRequestDispatch({
-                faithInfos: {
-                    name: values.name,
-                    phone: values.phone,
-                    anonymous: values.anonymous
-                },
-                massInfos: {
-                    city: values.city,
-                    parish: values.parish,
-                    dateTime: values.dateTime,
-                    intension: values.intension
-                }
-            });
+            massRequestDispatch(
+                [
+                    ...massRequested,
+                    {
+                        faithInfos: {
+                            name: values.name,
+                            phone: values.phone,
+                            anonymous: values.anonymous
+                        },
+                        massInfos: {
+                            city: values.city,
+                            parish: values.parish,
+                            dateTime: values.dateTime,
+                            intension: values.intension
+                        }
+                    }]);
         }
     })
 
