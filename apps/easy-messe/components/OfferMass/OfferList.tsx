@@ -24,7 +24,7 @@ export default function OfferList({ children }: OfferListProps) {
                 sx={{
                     width: 'fit-content'
                 }}
-                disabled={massRequested === null ? true : false}
+                disabled={massRequested.length === 0 ? true : false}
             >{formatMessage({ id: 'souscribe' })}</Button>
         </Box>
     );

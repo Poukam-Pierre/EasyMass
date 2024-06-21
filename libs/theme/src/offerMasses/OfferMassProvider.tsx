@@ -2,13 +2,13 @@ import { Reducer, useContext, useReducer } from "react";
 import { MassRequested, OfferMass, OfferMassContextProviderProps, State } from "./offerMass.interface";
 import { MassOfferContext } from "./offerMass.Context";
 
-const OfferMassReducer: Reducer<MassRequested, OfferMass> = (
+const OfferMassReducer: Reducer<MassRequested, OfferMass[]> = (
     state: State,
-    payload: OfferMass
+    payload: OfferMass[]
 ) => {
     return {
         ...state,
-        massRequested: { ...payload }
+        massRequested: payload
     }
 }
 
@@ -17,7 +17,7 @@ function OfferMassContextProvider({
 }: OfferMassContextProviderProps
 ): JSX.Element {
     const initialState: MassRequested = {
-        massRequested: null,
+        massRequested: [],
         massRequestDispatch: () => null,
     }
     const [massRequestedState, massRequestDispatch] = useReducer(

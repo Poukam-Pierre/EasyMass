@@ -20,7 +20,7 @@ export default function OrderMass() {
     const tabComponent: TabComponent = {
         0: (
             <OfferList>
-                {massRequested !== null ? (
+                {massRequested.length !== 0 ? (
                     <OfferMassCart />
 
                 ) : (
@@ -58,7 +58,7 @@ export default function OrderMass() {
                     <LetOfferMass />
                     <Divider orientation="vertical" />
                     <OfferList>
-                        {massRequested !== null ? (
+                        {massRequested.length !== 0 ? (
                             <OfferMassCart />
 
                         ) : (

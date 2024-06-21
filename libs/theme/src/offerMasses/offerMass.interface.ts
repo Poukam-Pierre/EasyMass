@@ -22,8 +22,8 @@ export interface OfferMass {
 }
 
 export interface MassRequested {
-  massRequested: OfferMass | null;
-  massRequestDispatch: React.Dispatch<OfferMass>;
+  massRequested: OfferMass[] | [];
+  massRequestDispatch: React.Dispatch<OfferMass[]>;
 }
 
 export type State = MassRequested;
