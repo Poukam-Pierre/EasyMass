@@ -21,7 +21,7 @@ export default function OrderMass() {
         0: (
             <OfferList>
                 {massRequested.length !== 0 ? (
-                    <OfferMassCart />
+                    <OfferMassCart massInfos={massRequested} />
 
                 ) : (
                     <Box sx={{
@@ -59,7 +59,7 @@ export default function OrderMass() {
                     <Divider orientation="vertical" />
                     <OfferList>
                         {massRequested.length !== 0 ? (
-                            <OfferMassCart />
+                            <OfferMassCart massInfos={massRequested} />
 
                         ) : (
                             <Box sx={{
