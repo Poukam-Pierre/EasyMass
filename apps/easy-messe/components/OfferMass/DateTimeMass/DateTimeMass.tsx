@@ -13,6 +13,7 @@ import Calendar from './Calendar';
 import Time from './TimeClock';
 import { FormikErrors } from 'formik';
 import { OfferMass } from 'libs/theme/src/offerMasses/offerMass.interface';
+import { formattedDateTime } from '@easy-messe/libs/utils';
 
 interface DateTimeMassPickerProps {
     id: string,
@@ -59,8 +60,6 @@ export default function DateTimeMassPicker({
         handlePriceChange('price', price?.price as number)
     }
 
-    const formattedDateTime = `${selectedDateTime.date.format("DD MMMM YYYY")} - ${selectedDateTime.time?.format("HH:mm")}`
-
     const allMassDates = parishData?.massData.map((data) => data.dateTime)
 
     const isDateAllowed = useCallback((date: Date) => {
@@ -84,7 +83,14 @@ export default function DateTimeMassPicker({
                 fullWidth
                 inputProps={{ readOnly: true }}
                 onClick={parishData ? () => setIsCalendarDialog(true) : undefined}
-                value={selectedDateTime.date && selectedDateTime.time ? formattedDateTime : ''}
+                value={selectedDateTime.date && selectedDateTime.time ?
+                    formattedDateTime(
+                        selectedDateTime
+                            .date
+                            .hour(selectedDateTime.time.hour())
+                            .minute(selectedDateTime.time.minute())
+                            .second(0)
+                    ) : ''}
                 size='small'
             />
 
