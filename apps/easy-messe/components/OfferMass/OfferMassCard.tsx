@@ -1,97 +1,117 @@
+import { formattedDateTime } from "@easy-messe/libs/utils";
 import { Box, Divider, Grid, Paper, Typography } from "@mui/material";
+import { Dayjs } from "dayjs";
+import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
 
-export default function OfferMassCart() {
-    const arrayStaticData: string[] = ['Paroisse', 'Date et heure', 'Réquerant', 'Ville']
+interface OfferMassCartProps {
+    massInfos: OfferMass[]
+}
+
+export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.Element {
+
+    const arrayStaticData: string[] = ['Ville', 'Paroisse', 'Date et heure', 'Réquerant']
     return (
-        <Paper sx={{
-            height: 'fit-content',
-            padding: 1,
+        <Box sx={{
             display: 'grid',
-            gridAutoFlow: 'column',
-            bgcolor: 'var(--background)'
+            rowGap: 1
         }}>
-            <Grid
-                container
-                spacing={2}
-                direction="row"
-                sx={{
-                    width: 'fit-content'
-                }}
-            >
-                <Grid item >
-                    {arrayStaticData.map((element, index) => (
+            {massInfos.map((mass, index) => (
+                <Paper
+                    key={index}
+                    sx={{
+                        height: 'fit-content',
+                        padding: 1,
+                        display: 'grid',
+                        gridAutoFlow: 'column',
+                        bgcolor: 'var(--background)'
+                    }}>
+                    <Grid
+                        container
+                        spacing={2}
+                        direction="row"
+                        sx={{
+                            width: 'fit-content'
+                        }}
+                    >
+                        <Grid item >
+                            {arrayStaticData.map((element, index) => (
+                                <Typography
+                                    key={index}
+                                    variant="h4"
+                                    color="var(--body)"
+                                    sx={{
+                                        lineHeight: '28px',
+                                        letterSpacing: 0,
+                                        paddingBottom: 0,
+                                    }}
+                                >
+                                    {element} :
+                                </Typography>
+                            ))}
+                        </Grid>
+                        <Grid item>
+                            <Typography
+                                variant="body1"
+                                color="var(--body)"
+                                sx={{
+                                    padding: '2px 0 2px 0'
+                                }}
+                            >
+                                {mass.massInfos.city}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                color="var(--body)"
+                                sx={{
+                                    padding: '2px 0 2px 0'
+                                }}
+                            >
+                                {mass.massInfos.parish}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                color="var(--body)"
+                                sx={{
+                                    padding: '2px 0 2px 0'
+                                }}
+                            >
+                                {formattedDateTime(mass.massInfos.dateTime as Dayjs)}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                color="var(--body)"
+                                sx={{
+                                    padding: '2px 0 2px 0'
+                                }}
+                            >
+                                {mass.faithInfos.name === null ?
+                                    'Anonymous' : mass.faithInfos.name}
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                    <Divider orientation="vertical" />
+                    <Box sx={{
+                        display: 'grid',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>
                         <Typography
-                            key={index}
-                            variant="h4"
-                            color="var(--body)"
+                            variant="body2"
+                            textAlign="center"
+                        >Prix</Typography>
+                        <Typography
+                            variant="caption"
+                            textAlign="center"
                             sx={{
-                                lineHeight: '28px',
-                                letterSpacing: 0,
-                                paddingBottom: 0,
+                                fontWeight: 'bold',
                             }}
                         >
-                            {element} :
+                            {mass.massInfos.price !== null && `${mass.massInfos.price + (mass.massInfos.price * 0.1)} frc`}
                         </Typography>
-                    ))}
-                </Grid>
-                <Grid item>
-                    <Typography
-                        variant="body1"
-                        color="var(--body)"
-                        sx={{
-                            padding: '2px 0 2px 0'
-                        }}
-                    >
-                        Saint Paul Apôtre
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        color="var(--body)"
-                        sx={{
-                            padding: '2px 0 2px 0'
-                        }}
-                    >
-                        26 Janvier 2024 - 08h30
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        color="var(--body)"
-                        sx={{
-                            padding: '2px 0 2px 0'
-                        }}
-                    >
-                        Meulak Kouam
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        color="var(--body)"
-                        sx={{
-                            padding: '2px 0 2px 0'
-                        }}
-                    >
-                        Bangangté
-                    </Typography>
-                </Grid>
-            </Grid>
-            <Divider orientation="vertical" />
-            <Box sx={{
-                display: 'grid',
-                justifyContent: 'center',
-                alignItems: 'center'
-            }}>
-                <Typography
-                    variant="body2"
-                    textAlign="center"
-                >Prix</Typography>
-                <Typography
-                    variant="caption"
-                    textAlign="center"
-                    sx={{
-                        fontWeight: 'bold'
-                    }}
-                >
-                    3300 frs</Typography>
-            </Box>
-        </Paper>
+                    </Box>
+                </Paper>
+
+            ))}
+        </Box>
     );
 }
