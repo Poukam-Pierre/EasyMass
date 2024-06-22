@@ -14,6 +14,7 @@ interface MassInformation {
   parish: string;
   dateTime: Dayjs | null;
   intension: string;
+  price: number | null;
 }
 
 export interface OfferMass {

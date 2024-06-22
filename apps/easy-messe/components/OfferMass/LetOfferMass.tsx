@@ -49,7 +49,8 @@ export interface UseformikProps {
     city: string,
     parish: string,
     dateTime: Dayjs | null,
-    intension: string
+    intension: string,
+    price: number | null
 
 }
 const parishDataFetched: ParishData[] = [
@@ -117,6 +118,11 @@ const parishDataFetched: ParishData[] = [
             {
                 price: 3000,
                 dateTime: new Date('2024-06-30T08:30:00'),
+                massType: null
+            },
+            {
+                price: 5000,
+                dateTime: new Date('2024-06-30T17:30:00'),
                 massType: null
             },
             {
@@ -189,7 +195,8 @@ export default function LetOfferMass() {
             city: '',
             parish: '',
             dateTime: null,
-            intension: ''
+            intension: '',
+            price: null
         },
         onSubmit: (values) => {
             massRequestDispatch(
@@ -205,7 +212,8 @@ export default function LetOfferMass() {
                             city: values.city,
                             parish: values.parish,
                             dateTime: values.dateTime,
-                            intension: values.intension
+                            intension: values.intension,
+                            price: values.price
                         }
                     }]);
         }
@@ -399,7 +407,8 @@ export default function LetOfferMass() {
                                 parish.name === selectedParish && parish.city === selectedCity
                             )
                         }
-                        handleChange={setFieldValue}
+                        handleDateTimeChange={setFieldValue}
+                        handlePriceChange={setFieldValue}
                     />
                 </Box>
                 <Box sx={{
