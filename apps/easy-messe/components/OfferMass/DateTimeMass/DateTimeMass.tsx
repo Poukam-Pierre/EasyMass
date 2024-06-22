@@ -18,7 +18,8 @@ interface DateTimeMassPickerProps {
     id: string,
     name: string,
     parishData: ParishData | undefined
-    handleChange: (field: string, value: Dayjs) => Promise<FormikErrors<UseformikProps>> | Promise<void>
+    handleDateTimeChange: (field: string, value: Dayjs) => Promise<FormikErrors<UseformikProps>> | Promise<void>
+    handlePriceChange: (field: string, value: number) => Promise<FormikErrors<UseformikProps>> | Promise<void>
 }
 interface DateTime {
     date: Dayjs,
@@ -29,7 +30,8 @@ export default function DateTimeMassPicker({
     parishData,
     id,
     name,
-    handleChange
+    handleDateTimeChange,
+    handlePriceChange
 }: DateTimeMassPickerProps) {
     const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
     const [selectedDateTime, setSelectedDateTime] = useState<DateTime>({ date: dayjs(), time: null })
@@ -46,13 +48,15 @@ export default function DateTimeMassPicker({
     }
 
     const handleSelectedTime = (time: Dayjs) => {
+        const dateTime = selectedDateTime.date.hour(time.hour()).minute(time.minute()).second(0)
+        const price = parishData?.massData.find((mass) => dayjs(mass.dateTime).isSame(dateTime))
         setSelectedDateTime(prevState => {
             return { ...prevState, time: time }
         })
         setIsClockDialog(false)
         setIsCalendarDialog(false)
-        const dateTime = selectedDateTime.date.hour(time.hour()).minute(time.minute()).second(0)
-        handleChange('dateTime', dateTime)
+        handleDateTimeChange('dateTime', dateTime)
+        handlePriceChange('price', price?.price as number)
     }
 
     const formattedDateTime = `${selectedDateTime.date.format("DD MMMM YYYY")} - ${selectedDateTime.time?.format("HH:mm")}`
