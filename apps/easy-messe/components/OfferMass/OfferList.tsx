@@ -9,6 +9,11 @@ interface OfferListProps {
 export default function OfferList({ children }: OfferListProps) {
     const { formatMessage } = useIntl()
     const { massRequested } = useOfferMass()
+    const totalBillingAmount = massRequested.map(
+        ({ massInfos: { price } }) => price as number)
+        .reduce((prevValue, curValue) => prevValue + curValue,
+            0
+        )
     return (
         <Box sx={{
             padding: '10px 10px 0px 10px',
@@ -38,7 +43,16 @@ export default function OfferList({ children }: OfferListProps) {
                     }}
                     disabled={massRequested.length === 0 ? true : false}
                 >{formatMessage({ id: 'souscribe' })}</Button>
-                <Typography>Total à payer : </Typography>
+                <Typography
+                    variant="h5"
+                    sx={{
+                        paddingBottom: 0,
+                        fontWeight: 'bold',
+                        display: massRequested.length === 0 ? 'none' : 'inherit'
+                    }}
+                >
+                    Total à payer : {totalBillingAmount + (totalBillingAmount * 0.1)} frc CFA
+                </Typography>
             </Box>
         </Box>
     );
