@@ -88,7 +88,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                     padding: '2px 0 2px 0'
                                 }}
                             >
-                                {mass.faithInfos.name === null ?
+                                {mass.faithInfos.anonymous ?
                                     'Anonymous' : mass.faithInfos.name.split(' ')[0]}
                             </Typography>
                         </Grid>
