@@ -1,28 +1,23 @@
+import { useOfferMass } from '@easy-messe/libs/theme';
 import contactIcon from '@iconify-icons/fluent/contact-card-24-regular';
 import editIcon from '@iconify-icons/fluent/edit-24-regular';
 import locationIcon from '@iconify-icons/fluent/location-24-regular';
 import calendarIcon from '@iconify-icons/material-symbols/calendar-month-outline';
 import textFieldIcon from '@iconify-icons/material-symbols/text-fields';
 import churchIcon from '@iconify-icons/ph/church-light';
-import { Icon, IconifyIcon } from '@iconify/react';
+import { Icon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
-import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
-import { useIntl } from 'react-intl';
-import { useEffect, useState } from 'react';
-import { useFormik } from 'formik';
-import { useOfferMass } from '@easy-messe/libs/theme';
 import { Dayjs } from 'dayjs';
+import { useFormik } from 'formik';
+import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
+import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
+import { LetOfferMassSchema } from './letOfferMass.schema';
 
 
 interface MassGroupCategory {
     label: string;
     valueOrder: number
-}
-interface inputProps {
-    placeholder: string,
-    icon: IconifyIcon,
-    id: string,
-    name: string
 }
 enum MassTypeEnum {
     Triduum = 'triduum',
@@ -142,8 +137,8 @@ export default function LetOfferMass() {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
     const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
-    const [selectedCity, setSelectedCity] = useState<string>()
-    const [selectedParish, setSelectedParish] = useState<string>()
+    const [selectedCity, setSelectedCity] = useState<string>('')
+    const [selectedParish, setSelectedParish] = useState<string>('')
     const { massRequestDispatch, massRequested } = useOfferMass()
 
 
@@ -166,39 +161,24 @@ export default function LetOfferMass() {
         },
     ]
 
-    const inputOfferData: inputProps[] = [
-        {
-            placeholder: 'fullName',
-            icon: editIcon,
-            name: 'name',
-            id: 'name',
-        },
-        {
-            placeholder: 'phoneNumber',
-            icon: contactIcon,
-            name: 'phone',
-            id: 'phone',
-        },
-    ]
-
     useEffect(() => {
         setParishDataFetch(parishDataFetched);
     }, [])
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, handleSubmit, setFieldValue } = useFormik<UseformikProps>({
+    const { handleChange, handleSubmit, setFieldValue, errors, touched, values } = useFormik<UseformikProps>({
         initialValues: {
-            name: null,
-            phone: null,
-            anonymous: false,
-            city: '',
-            parish: '',
+            name: '',
+            phone: '',
+            anonymous: isAnonym,
+            city: selectedCity,
+            parish: selectedParish,
             dateTime: null,
             intension: '',
             price: null
         },
-        onSubmit: (values) => {
+        onSubmit: (values, { resetForm }) => {
             massRequestDispatch(
                 [
                     ...massRequested,
@@ -216,21 +196,10 @@ export default function LetOfferMass() {
                             price: values.price
                         }
                     }]);
-        }
+            resetForm()
+        },
+        validationSchema: LetOfferMassSchema
     })
-
-    const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFieldValue('anonymous', event.target.checked)
-        setIsAnonym(event.target.checked)
-    }
-    const handleCity = (city: string) => {
-        setFieldValue('city', city)
-        setSelectedCity(city)
-    }
-    const handleParish = (parish: string) => {
-        setFieldValue('parish', parish)
-        setSelectedParish(parish)
-    }
 
     return (
         <Box sx={{
@@ -289,7 +258,7 @@ export default function LetOfferMass() {
                         <Switch
                             name='anonymous'
                             id='anonymous'
-                            onChange={handleChecked}
+                            onChange={(event) => setIsAnonym(event.target.checked)}
                         />
                     }
                     label={formatMessage({ id: 'anonymous' })}
@@ -304,27 +273,45 @@ export default function LetOfferMass() {
                     columnGap: 2,
                     rowGap: '10px'
                 }}>
-                    {inputOfferData.map(({ placeholder, icon, id, name }, index) => (
-                        <Box
-                            key={index}
-                            sx={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr',
-                                alignItems: 'center',
-                                columnGap: 1
-                            }}
-                        >
-                            <Icon icon={icon} fontSize={32} color="var(--offWhite)" />
-                            <TextField
-                                name={name}
-                                id={id}
-                                placeholder={formatMessage({ id: placeholder })}
-                                size="small"
-                                disabled={isAnonym}
-                                onChange={handleChange}
-                            />
-                        </Box>
-                    ))}
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            alignItems: 'center',
+                            columnGap: 1
+                        }}
+                    >
+                        <Icon icon={editIcon} fontSize={32} color="var(--offWhite)" />
+                        <TextField
+                            name='name'
+                            id='name'
+                            type='text'
+                            placeholder={formatMessage({ id: 'fullName' })}
+                            size="small"
+                            disabled={isAnonym}
+                            onChange={handleChange}
+                            required={!isAnonym}
+                        />
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            alignItems: 'center',
+                            columnGap: 1
+                        }}
+                    >
+                        <Icon icon={contactIcon} fontSize={32} color="var(--offWhite)" />
+                        <TextField
+                            name='phone'
+                            id='phone'
+                            type='tel'
+                            placeholder={formatMessage({ id: 'phoneNumber' })}
+                            size="small"
+                            disabled={isAnonym}
+                            onChange={handleChange}
+                        />
+                    </Box>
                 </Box>
             </Box>
             <Typography variant="h2">{formatMessage({ id: 'massInformations' })}</Typography>
@@ -354,9 +341,11 @@ export default function LetOfferMass() {
                                 {...params}
                                 placeholder={formatMessage({ id: 'city' })}
                                 size="small"
+                                value={values.city}
+                                required
                             />
                         }
-                        onChange={(_, city) => handleCity(city as string)}
+                        onChange={(_, city) => setSelectedCity(city as string)}
                     />
                 </Box>
                 <Box sx={{
@@ -379,8 +368,10 @@ export default function LetOfferMass() {
                             {...params}
                             placeholder={formatMessage({ id: 'parish' })}
                             size='small'
+                            value={values.parish}
+                            required
                         />}
-                        onChange={(_, parish) => handleParish(parish as string)}
+                        onChange={(_, parish) => setSelectedParish(parish as string)}
                     />
                 </Box>
                 <Box sx={{
@@ -423,9 +414,13 @@ export default function LetOfferMass() {
                         color="var(--offWhite)"
                     />
                     <TextField
+                        value={values.intension}
+                        error={errors.intension && touched.intension ? true : false}
                         id='intension'
                         name='intension'
+                        type='text'
                         multiline
+                        helperText={(errors.intension && touched.intension) && errors.intension}
                         rows={5}
                         placeholder={formatMessage({ id: 'massIntension' })}
                         fullWidth
