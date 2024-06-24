@@ -9,7 +9,7 @@ import { Icon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import { Dayjs } from 'dayjs';
 import { useFormik } from 'formik';
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
 import { LetOfferMassSchema } from './letOfferMass.schema';
@@ -38,8 +38,8 @@ export interface ParishData {
 }
 
 export interface UseformikProps {
-    name: string | null,
-    phone: string | null,
+    name: string,
+    phone: string,
     anonymous: boolean,
     city: string,
     parish: string,
@@ -171,14 +171,15 @@ export default function LetOfferMass() {
         initialValues: {
             name: '',
             phone: '',
-            anonymous: isAnonym,
-            city: selectedCity,
-            parish: selectedParish,
+            anonymous: false,
+            city: '',
+            parish: '',
             dateTime: null,
             intension: '',
             price: null
         },
         onSubmit: (values, { resetForm }) => {
+            console.log(values)
             massRequestDispatch(
                 [
                     ...massRequested,
@@ -196,11 +197,23 @@ export default function LetOfferMass() {
                             price: values.price
                         }
                     }]);
-            resetForm()
         },
         validationSchema: LetOfferMassSchema
     })
 
+    const handleAnonymous = (event: ChangeEvent<HTMLInputElement>) => {
+        setFieldValue('anonymous', event.target.checked)
+        setIsAnonym(event.target.checked)
+    }
+    const handleCity = (city: string) => {
+        setFieldValue('city', city);
+        setSelectedCity(city)
+    }
+    const handleParish = (parish: string) => {
+        setFieldValue('parish', parish);
+        setSelectedParish(parish)
+
+    }
     return (
         <Box sx={{
             padding: '21px',
@@ -258,7 +271,7 @@ export default function LetOfferMass() {
                         <Switch
                             name='anonymous'
                             id='anonymous'
-                            onChange={(event) => setIsAnonym(event.target.checked)}
+                            onChange={handleAnonymous}
                         />
                     }
                     label={formatMessage({ id: 'anonymous' })}
@@ -345,7 +358,7 @@ export default function LetOfferMass() {
                                 required
                             />
                         }
-                        onChange={(_, city) => setSelectedCity(city as string)}
+                        onChange={(_, city) => handleCity(city as string)}
                     />
                 </Box>
                 <Box sx={{
@@ -371,7 +384,7 @@ export default function LetOfferMass() {
                             value={values.parish}
                             required
                         />}
-                        onChange={(_, parish) => setSelectedParish(parish as string)}
+                        onChange={(_, parish) => handleParish(parish as string)}
                     />
                 </Box>
                 <Box sx={{
