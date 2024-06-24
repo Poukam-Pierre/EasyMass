@@ -14,18 +14,32 @@ export default function OfferList({ children }: OfferListProps) {
             padding: '10px 10px 0px 10px',
             display: 'grid',
             gridTemplateRows: 'auto 1fr auto',
-            height: { laptop: 'inherit', mobile: '50vh' }
+            rowGap: '20px'
         }}>
-            <Typography variant="h2"> {formatMessage({ id: 'requestList' })}</Typography>
-            {children}
-            <Button
-                variant="contained"
-                disableElevation
+            <Typography
+                variant="h2"
                 sx={{
-                    width: 'fit-content'
+                    paddingBottom: 0
                 }}
-                disabled={massRequested.length === 0 ? true : false}
-            >{formatMessage({ id: 'souscribe' })}</Button>
+
+            > {formatMessage({ id: 'requestList' })}</Typography>
+            {children}
+            <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                alignItems: 'center',
+                columnGap: '10px'
+            }}>
+                <Button
+                    variant="contained"
+                    disableElevation
+                    sx={{
+                        width: 'fit-content',
+                    }}
+                    disabled={massRequested.length === 0 ? true : false}
+                >{formatMessage({ id: 'souscribe' })}</Button>
+                <Typography>Total à payer : </Typography>
+            </Box>
         </Box>
     );
 }
