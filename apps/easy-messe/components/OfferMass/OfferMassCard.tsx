@@ -4,13 +4,21 @@ import { Dayjs } from "dayjs";
 import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
 import cancelIcon from '@iconify-icons/material-symbols/cancel'
 import { Icon } from "@iconify/react";
+import { useOfferMass } from "@easy-messe/libs/theme";
 interface OfferMassCartProps {
     massInfos: OfferMass[]
 }
 
 export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.Element {
+    const { massRequested, massRequestDispatch } = useOfferMass()
 
     const arrayStaticData: string[] = ['Ville', 'Paroisse', 'Date et heure', 'Réquerant']
+
+    const removeMass = (index: number) => {
+        const massArray = massRequested;
+        massArray.splice(index, 1);
+        massRequestDispatch(massArray)
+    }
     return (
         <Box sx={{
             display: 'grid',
@@ -122,6 +130,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                             right: -7,
                             top: -15,
                         }}
+                        onClick={() => removeMass(index)}
                     >
                         <Icon icon={cancelIcon} fontSize={32} />
                     </IconButton>
