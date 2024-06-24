@@ -1,8 +1,9 @@
 import { formattedDateTime } from "@easy-messe/libs/utils";
-import { Box, Divider, Grid, Paper, Typography } from "@mui/material";
+import { Box, Divider, Grid, IconButton, Paper, Typography } from "@mui/material";
 import { Dayjs } from "dayjs";
 import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
-
+import cancelIcon from '@iconify-icons/material-symbols/cancel'
+import { Icon } from "@iconify/react";
 interface OfferMassCartProps {
     massInfos: OfferMass[]
 }
@@ -13,7 +14,8 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
     return (
         <Box sx={{
             display: 'grid',
-            rowGap: 1
+            rowGap: 1.5,
+            height: 'fit-content'
         }}>
             {massInfos.map((mass, index) => (
                 <Paper
@@ -23,8 +25,10 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         padding: 1,
                         display: 'grid',
                         gridAutoFlow: 'column',
-                        bgcolor: 'var(--background)'
-                    }}>
+                        bgcolor: 'var(--background)',
+                        position: 'relative'
+                    }}
+                >
                     <Grid
                         container
                         spacing={2}
@@ -85,7 +89,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                 }}
                             >
                                 {mass.faithInfos.name === null ?
-                                    'Anonymous' : mass.faithInfos.name}
+                                    'Anonymous' : mass.faithInfos.name.split(' ')[0]}
                             </Typography>
                         </Grid>
                     </Grid>
@@ -106,11 +110,22 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                 fontWeight: 'bold',
                             }}
                         >
-                            {mass.massInfos.price !== null && `${mass.massInfos.price + (mass.massInfos.price * 0.1)} frc`}
+                            {mass.massInfos.price !== null && `${mass.massInfos.price} frc`}
                         </Typography>
                     </Box>
+                    <IconButton
+                        disableFocusRipple
+                        edge="end"
+                        size="medium"
+                        sx={{
+                            position: 'absolute',
+                            right: -7,
+                            top: -15,
+                        }}
+                    >
+                        <Icon icon={cancelIcon} fontSize={32} />
+                    </IconButton>
                 </Paper>
-
             ))}
         </Box>
     );
