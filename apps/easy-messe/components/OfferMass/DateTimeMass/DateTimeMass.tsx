@@ -75,7 +75,7 @@ export default function DateTimeMassPicker({
     }, [allMassDates])
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
+        <>
             <TextField
                 id={id}
                 name={name}
@@ -93,7 +93,6 @@ export default function DateTimeMassPicker({
                     ) : ''}
                 size='small'
             />
-
             <Dialog
                 open={isCalendarDialog}
                 onClose={() => setIsCalendarDialog(false)}
@@ -116,8 +115,8 @@ export default function DateTimeMassPicker({
                 </Dialog>
 
             </Dialog>
+        </>
 
-        </LocalizationProvider>
     )
 }
 

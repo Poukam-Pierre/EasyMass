@@ -1,4 +1,4 @@
-import { EasyMassThemeProvider } from '@easy-messe/libs/theme';
+import { EasyMassThemeProvider, useLanguage } from '@easy-messe/libs/theme';
 import { Box } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,9 +11,11 @@ import '../public/styles/root.scss';
 import EasyMassLayout from '../components/layout';
 
 function CustomApp({ Component, pageProps }: AppProps) {
+    const { activeLanguage } = useLanguage()
+
     return (
         <EasyMassThemeProvider defaultLang="fr">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
                 <Head>
                     <title>{"Order masses remotely - EasyMesse"}</title>
                 </Head>
