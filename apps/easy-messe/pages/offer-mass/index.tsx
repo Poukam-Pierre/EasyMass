@@ -1,6 +1,6 @@
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Icon } from "@iconify/react";
-import { Box, Divider, Tab, Tabs, Typography } from "@mui/material";
+import { Badge, Box, Divider, Tab, Tabs, Typography } from "@mui/material";
 import OfferList from "../../components/OfferMass/OfferList";
 import { ReactNode, useState } from "react";
 import HeroMass from "../../components/OfferMass/HeroMass";
@@ -10,12 +10,30 @@ import { useOfferMass } from '@easy-messe/libs/theme';
 import OfferMassCart from '../../components/OfferMass/OfferMassCard';
 
 type TabComponent = Record<number, ReactNode>;
+interface TabTitle {
+    title: string;
+    badgeContent?: number;
+    color: 'primary';
+    invisible: boolean;
+}
 
 export default function OrderMass() {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(1)
-    const tabTitle = ['Liste de demande', 'Demande de messes']
-    const { formatMessage } = useIntl()
     const { massRequested } = useOfferMass()
+    const { formatMessage } = useIntl()
+    const tabTitle: TabTitle[] = [
+        {
+            title: 'Liste de demandes',
+            badgeContent: massRequested.length,
+            color: 'primary',
+            invisible: false
+        },
+        {
+            title: 'Demande de messes',
+            color: 'primary',
+            invisible: true
+        }
+    ]
 
     const tabComponent: TabComponent = {
         0: (
@@ -87,14 +105,35 @@ export default function OrderMass() {
                     centered
                 >
                     {
-                        tabTitle.map((tabTitle, index) => (
+                        tabTitle.map(({ title, color, invisible, badgeContent }, index) => (
                             <Tab
                                 disableRipple
                                 key={index}
-                                label={tabTitle}
+                                label={
+                                    <Badge
+                                        invisible={invisible}
+                                        color={color}
+                                        badgeContent={badgeContent}
+                                    >
+                                        {title}
+                                    </Badge>
+                                }
                             />
                         ))
                     }
+                    {/* {
+                        tabTitle.map(({ title, badgeContent, color }, index) => (
+                            <Badge
+                                key={index}
+                                badgeContent={badgeContent}
+                            >
+                                <Tab
+                                    disableRipple
+                                    label={title}
+                                />
+                            </Badge>
+                        ))
+                    } */}
                 </Tabs>
                 {tabComponent[activeTabIndex]}
             </Box>
