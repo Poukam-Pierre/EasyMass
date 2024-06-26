@@ -35,6 +35,10 @@ export default function OrderMass() {
         }
     ]
 
+    const handleTabIndex = (index: number) => {
+        setActiveTabIndex(index)
+    }
+
     const tabComponent: TabComponent = {
         0: (
             <OfferList>
@@ -56,7 +60,7 @@ export default function OrderMass() {
             </OfferList>
         ),
         1: (
-            <LetOfferMass />
+            <LetOfferMass handleIndexTab={handleTabIndex} />
         )
     }
 
@@ -99,7 +103,7 @@ export default function OrderMass() {
             }}>
                 <Tabs
                     value={activeTabIndex}
-                    onChange={(_, tabIndex) => setActiveTabIndex(tabIndex)}
+                    onChange={(_, tabIndex) => handleTabIndex(tabIndex)}
                     textColor='primary'
                     indicatorColor="primary"
                     centered

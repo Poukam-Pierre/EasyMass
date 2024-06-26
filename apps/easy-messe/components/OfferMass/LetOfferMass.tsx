@@ -48,6 +48,10 @@ export interface UseformikProps {
     price: number | null
 
 }
+
+interface LetOfferMassProps {
+    handleIndexTab?: (index: number) => void
+}
 const parishDataFetched: ParishData[] = [
     {
         name: 'Saint Pierre',
@@ -133,7 +137,7 @@ const parishDataFetched: ParishData[] = [
         ]
     },
 ]
-export default function LetOfferMass() {
+export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
     const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
@@ -162,12 +166,13 @@ export default function LetOfferMass() {
     ]
 
     useEffect(() => {
+        // TODO Fetch masses data from database
         setParishDataFetch(parishDataFetched);
     }, [])
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, handleSubmit, setFieldValue, errors, touched, values } = useFormik<UseformikProps>({
+    const { handleChange, handleSubmit, setFieldValue, errors, touched } = useFormik<UseformikProps>({
         initialValues: {
             name: '',
             phone: '',
@@ -196,7 +201,7 @@ export default function LetOfferMass() {
                             price: values.price
                         }
                     }]);
-            resetForm();
+            if (handleIndexTab) handleIndexTab(0)
         },
         validationSchema: LetOfferMassSchema
     })
@@ -354,7 +359,6 @@ export default function LetOfferMass() {
                                 {...params}
                                 placeholder={formatMessage({ id: 'city' })}
                                 size="small"
-                                value={values.city}
                                 required
                             />
                         }
@@ -381,7 +385,6 @@ export default function LetOfferMass() {
                             {...params}
                             placeholder={formatMessage({ id: 'parish' })}
                             size='small'
-                            value={values.parish}
                             required
                         />}
                         onChange={(_, parish) => handleParish(parish as string)}
@@ -427,7 +430,6 @@ export default function LetOfferMass() {
                         color="var(--offWhite)"
                     />
                     <TextField
-                        value={values.intension}
                         error={errors.intension && touched.intension ? true : false}
                         id='intension'
                         name='intension'
