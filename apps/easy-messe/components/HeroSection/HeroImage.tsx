@@ -94,6 +94,7 @@ export default function HeroImage() {
             width: '420px',
             display: 'grid',
             height: '440.8px',
+            justifySelf: 'center'
         }}>
             <Box sx={{
                 bgcolor: theme.common.goldChurch,

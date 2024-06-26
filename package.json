@@ -8,10 +8,16 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@iconify-icons/fluent": "^1.2.38",
+    "@iconify-icons/material-symbols": "^1.2.58",
+    "@iconify-icons/ph": "^1.2.5",
     "@iconify/react": "^4.1.1",
+    "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.15.15",
-    "@mui/x-date-pickers": "^7.3.1",
+    "@mui/x-date-pickers": "^7.6.2",
     "@tanstack/react-query": "^5.32.0",
+    "date-fns": "^3.6.0",
+    "dayjs": "^1.11.11",
+    "formik": "^2.4.6",
     "next": "14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -19,7 +25,8 @@
     "react-is": "18.2.0",
     "react-toastify": "^10.0.5",
     "styled-components": "5.3.6",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@nrwl/next": "^18.3.3",

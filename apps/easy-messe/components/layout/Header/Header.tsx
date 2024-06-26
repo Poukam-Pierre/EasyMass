@@ -7,6 +7,7 @@ import MenuIcon from '@iconify-icons/fluent/line-horizontal-3-20-regular';
 import SideBar from "./SideBar/SideBar";
 import { useState } from "react";
 import { useIntl } from "react-intl";
+import { useRouter } from "next/router"
 
 
 
@@ -18,15 +19,22 @@ export interface INavItem {
 export default function Header() {
     const [isSideBarOpen, setIsSideBarOpen] = useState<boolean>(false)
     const { formatMessage } = useIntl()
-
+    const { push, asPath } = useRouter()
+    const isActive = asPath.startsWith('/offer-mass')
     const navItems: INavItem[] = [
         { item: formatMessage({ id: 'home' }), route: '/' },
         { item: formatMessage({ id: 'aboutUs' }), route: '#' }
     ]
+    const closeSideBar = () => {
+        setIsSideBarOpen(false)
+    }
+    const openSideBar = () => {
+        setIsSideBarOpen(true)
+    }
     return (
         <>
 
-            <SideBar open={isSideBarOpen} closeSideBar={setIsSideBarOpen} navItems={navItems} />
+            <SideBar open={isSideBarOpen} onClose={closeSideBar} navItems={navItems} />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -69,7 +77,7 @@ export default function Header() {
                     <IconButton sx={{
                         display: { laptop: 'none', mobile: 'block' }
                     }}
-                        onClick={() => setIsSideBarOpen(true)}
+                        onClick={() => openSideBar()}
                     >
                         <Icon icon={MenuIcon} color="#2F3A45" />
                     </IconButton>
@@ -82,7 +90,10 @@ export default function Header() {
                         <Button
                             variant="contained"
                             color="primary"
-                            disableElevation={false}>
+                            disableElevation={false}
+                            onClick={() => push('/offer-mass')}
+                            disabled={isActive}
+                        >
                             {formatMessage({ id: 'offerMass' })}
                         </Button>
                     </Box>

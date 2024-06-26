@@ -2,9 +2,11 @@ import { theme } from "@easy-messe/libs/theme";
 import { Box, Button } from "@mui/material";
 import { useIntl } from "react-intl";
 import QuoteMasses from "./QuoteMasses";
+import { useRouter } from "next/router";
 
 export default function Prefooter() {
     const { formatMessage } = useIntl()
+    const { push } = useRouter()
 
     return (
         <Box sx={{
@@ -46,6 +48,7 @@ export default function Prefooter() {
                         width: 'fit-content',
                         justifySelf: { laptop: 'inherit', mobile: 'center' }
                     }}
+                    onClick={() => push('/offer-mass')}
                 >
                     {formatMessage({ id: 'offerMass' })}
                 </Button>
