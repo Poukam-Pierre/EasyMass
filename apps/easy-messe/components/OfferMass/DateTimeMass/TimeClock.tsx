@@ -1,3 +1,4 @@
+import { useLanguage } from "@easy-messe/libs/theme";
 import { DigitalClock } from "@mui/x-date-pickers";
 import { isSameDay } from "date-fns";
 import dayjs, { Dayjs } from "dayjs";
@@ -15,6 +16,8 @@ function Time({
     handleTime,
     isTimeAllowed
 }: TimeProps) {
+    const { activeLanguage } = useLanguage()
+
     return (
         <DigitalClock
             disablePast={isSameDay(dayjs().toDate(), selectedDate.toDate())}
@@ -23,6 +26,7 @@ function Time({
             timeStep={15}
             onChange={(newTime) => handleTime(newTime)}
             shouldDisableTime={(newTime) => !isTimeAllowed(newTime.toDate()) as boolean}
+            ampm={activeLanguage === 'fr' ? false : true}
         />
     );
 }
