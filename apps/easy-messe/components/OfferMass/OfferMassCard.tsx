@@ -32,9 +32,10 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         height: 'fit-content',
                         padding: 1,
                         display: 'grid',
-                        gridAutoFlow: 'column',
+                        gridAutoFlow: { laptop: 'column', mobile: 'row' },
                         bgcolor: 'var(--background)',
-                        position: 'relative'
+                        position: 'relative',
+                        rowGap: 1
                     }}
                 >
                     <Grid
@@ -42,7 +43,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         spacing={2}
                         direction="row"
                         sx={{
-                            width: 'fit-content'
+                            width: 'fit-content',
                         }}
                     >
                         <Grid item >
@@ -101,7 +102,18 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                             </Typography>
                         </Grid>
                     </Grid>
-                    <Divider orientation="vertical" />
+                    <Divider
+                        orientation="vertical"
+                        sx={{
+                            display: { laptop: 'block', mobile: 'none' },
+                        }}
+                    />
+                    <Divider
+                        orientation="horizontal"
+                        sx={{
+                            display: { laptop: 'none', mobile: 'block' },
+                        }}
+                    />
                     <Box sx={{
                         display: 'grid',
                         justifyContent: 'center',
@@ -110,15 +122,18 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         <Typography
                             variant="body2"
                             textAlign="center"
-                        >Prix</Typography>
+                        >
+                            Prix
+                        </Typography>
                         <Typography
                             variant="caption"
                             textAlign="center"
                             sx={{
                                 fontWeight: 'bold',
+                                maxWidth: { laptop: '60px', mobile: 'auto' },
                             }}
                         >
-                            {mass.massInfos.price !== null && `${mass.massInfos.price} frc`}
+                            {mass.massInfos.price !== null && `${mass.massInfos.price} frs CFA`}
                         </Typography>
                     </Box>
                     <IconButton
