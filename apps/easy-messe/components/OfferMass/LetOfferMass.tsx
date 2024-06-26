@@ -179,7 +179,6 @@ export default function LetOfferMass() {
             price: null
         },
         onSubmit: (values, { resetForm }) => {
-            console.log(values)
             massRequestDispatch(
                 [
                     ...massRequested,
@@ -197,6 +196,7 @@ export default function LetOfferMass() {
                             price: values.price
                         }
                     }]);
+            resetForm();
         },
         validationSchema: LetOfferMassSchema
     })
@@ -448,7 +448,6 @@ export default function LetOfferMass() {
                 sx={{
                     width: {
                         laptop: 'fit-content',
-                        tablet: 'fir-content',
                         mobile: '-webkit-fill-available'
                     }
                 }}
