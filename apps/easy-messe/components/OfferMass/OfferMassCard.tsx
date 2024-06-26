@@ -5,12 +5,15 @@ import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
 import cancelIcon from '@iconify-icons/material-symbols/cancel'
 import { Icon } from "@iconify/react";
 import { useOfferMass } from "@easy-messe/libs/theme";
+import { useIntl } from "react-intl";
 interface OfferMassCartProps {
     massInfos: OfferMass[]
 }
 
 export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.Element {
     const { massRequested, massRequestDispatch } = useOfferMass()
+    const { formatMessage, formatNumber } = useIntl()
+
 
     const arrayStaticData: string[] = ['Ville', 'Paroisse', 'Date et heure', 'Réquerant']
 
@@ -133,7 +136,12 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                 maxWidth: { laptop: '60px', mobile: 'auto' },
                             }}
                         >
-                            {mass.massInfos.price !== null && `${mass.massInfos.price} frs CFA`}
+
+                            {formatNumber(mass.massInfos.price !== null
+                                ? mass.massInfos.price : 0, {
+                                style: 'currency',
+                                currency: 'xaf'
+                            })}
                         </Typography>
                     </Box>
                     <IconButton
