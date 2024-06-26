@@ -121,19 +121,6 @@ export default function OrderMass() {
                             />
                         ))
                     }
-                    {/* {
-                        tabTitle.map(({ title, badgeContent, color }, index) => (
-                            <Badge
-                                key={index}
-                                badgeContent={badgeContent}
-                            >
-                                <Tab
-                                    disableRipple
-                                    label={title}
-                                />
-                            </Badge>
-                        ))
-                    } */}
                 </Tabs>
                 {tabComponent[activeTabIndex]}
             </Box>
