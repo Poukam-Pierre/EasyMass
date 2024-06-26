@@ -38,7 +38,6 @@ export default function DateTimeMassPicker({
     const [selectedDateTime, setSelectedDateTime] = useState<DateTime>({ date: dayjs(), time: null })
     const [isClockDialog, setIsClockDialog] = useState<boolean>(false)
     const { formatMessage } = useIntl()
-    const { activeLanguage } = useLanguage()
 
 
     const handleSelectedDate = (date: Dayjs) => {
@@ -96,6 +95,11 @@ export default function DateTimeMassPicker({
             <Dialog
                 open={isCalendarDialog}
                 onClose={() => setIsCalendarDialog(false)}
+                sx={{
+                    '& .MuiPaper-root': {
+                        maxWidth: 'fit-content',
+                    }
+                }}
             >
                 <Calendar
                     selectedDate={selectedDateTime.date}
