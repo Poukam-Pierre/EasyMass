@@ -9,8 +9,6 @@ interface Person {
   phone: string;
 }
 
-type Requester = Person | undefined;
-
 interface MassInformation {
   city: string;
   parish: string;
@@ -20,7 +18,7 @@ interface MassInformation {
 }
 
 export interface OfferMass {
-  faithInfos: Requester;
+  faithInfos: Person | undefined;
   massInfos: MassInformation;
 }
 
