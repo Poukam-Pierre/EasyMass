@@ -52,7 +52,7 @@ export default function OfferList({ children }: OfferListProps) {
                     sx={{
                         width: 'fit-content',
                     }}
-                    disabled={massRequested.length === 0 ? true : false}
+                    disabled={massRequested.length === 0}
                     onClick={handlePaymenDialogOpen}
                 >
                     {formatMessage({ id: 'souscribe' })}
@@ -62,7 +62,7 @@ export default function OfferList({ children }: OfferListProps) {
                     sx={{
                         paddingBottom: 0,
                         fontWeight: 'bold',
-                        display: massRequested.length === 0 ? 'none' : 'inherit'
+                        display: !massRequested.length ? 'none' : 'inherit'
                     }}
                 >
                     Total à payer : {formatNumber(totalBillingAmount + (totalBillingAmount * 0.1), {

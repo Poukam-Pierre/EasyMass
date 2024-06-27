@@ -26,7 +26,7 @@ function Time({
             timeStep={15}
             onChange={(newTime) => handleTime(newTime)}
             shouldDisableTime={(newTime) => !isTimeAllowed(newTime.toDate()) as boolean}
-            ampm={activeLanguage === 'fr' ? false : true}
+            ampm={activeLanguage === 'fr'}
         />
     );
 }
