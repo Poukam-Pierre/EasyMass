@@ -183,22 +183,26 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             intention: '',
             price: null
         },
-        onSubmit: (values, { resetForm }) => {
+        onSubmit: ({
+            name, phone, anonymous,
+            city, parish, dateTime,
+            intention, price
+        }) => {
             massRequestDispatch(
                 [
                     ...massRequested,
                     {
-                        faithInfos: {
-                            name: values.name,
-                            phone: values.phone,
-                            anonymous: values.anonymous
-                        },
+                        faithInfos: anonymous ?
+                            undefined : {
+                                name: name,
+                                phone: phone,
+                            },
                         massInfos: {
-                            city: values.city,
-                            parish: values.parish,
-                            dateTime: values.dateTime,
-                            intension: values.intension,
-                            price: values.price
+                            city: city,
+                            parish: parish,
+                            dateTime: dateTime,
+                            intention: intention,
+                            price: price
                         }
                     }]);
             if (handleIndexTab) handleIndexTab(0)
