@@ -44,7 +44,7 @@ export interface UseformikProps {
     city: string,
     parish: string,
     dateTime: Dayjs | null,
-    intension: string,
+    intention: string,
     price: number | null
 
 }
@@ -180,7 +180,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             city: '',
             parish: '',
             dateTime: null,
-            intension: '',
+            intention: '',
             price: null
         },
         onSubmit: (values, { resetForm }) => {
@@ -430,12 +430,12 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         color="var(--offWhite)"
                     />
                     <TextField
-                        error={errors.intension && touched.intension ? true : false}
-                        id='intension'
-                        name='intension'
+                        error={errors.intention && touched.intention ? true : false}
+                        id='intention'
+                        name='intention'
                         type='text'
                         multiline
-                        helperText={(errors.intension && touched.intension) && errors.intension}
+                        helperText={(errors.intention && touched.intention) && errors.intention}
                         rows={5}
                         placeholder={formatMessage({ id: 'massIntension' })}
                         fullWidth
