@@ -140,7 +140,7 @@ const parishDataFetched: ParishData[] = [
 export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
-    const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
+    const [parishData, setParishData] = useState<ParishData[]>()
     const [selectedCity, setSelectedCity] = useState<string>('')
     const [selectedParish, setSelectedParish] = useState<string>('')
     const { massRequestDispatch, massRequested } = useOfferMass()
@@ -167,7 +167,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     useEffect(() => {
         // TODO Fetch masses data from database
-        setParishDataFetch(parishDataFetched);
+        setParishData(parishDataFetched);
     }, [])
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
@@ -353,7 +353,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                     <Autocomplete
                         id='city'
                         disablePortal
-                        options={parishDataFetch?.map((parish) => parish.city) as string[]}
+                        options={parishData?.map((parish) => parish.city) as string[]}
                         renderInput={(params) =>
                             <TextField
                                 {...params}
@@ -410,7 +410,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         id='dateTime'
                         name='dateTime'
                         parishData={
-                            parishDataFetch?.find((parish) =>
+                            parishData?.find((parish) =>
                                 parish.name === selectedParish && parish.city === selectedCity
                             )
                         }
