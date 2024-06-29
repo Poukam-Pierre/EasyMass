@@ -152,8 +152,9 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         size="medium"
                         sx={{
                             position: 'absolute',
-                            right: -7,
-                            top: -15,
+                            padding: 0,
+                            right: 2,
+                            top: -10,
                         }}
                         onClick={() => removeMass(index)}
                     >
