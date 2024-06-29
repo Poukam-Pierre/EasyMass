@@ -1,6 +1,7 @@
 import { Box, Button, Dialog, Tab, Tabs, TextField, Typography } from "@mui/material";
 import Image from "next/image";
 import { ReactNode, useState } from "react";
+import { useIntl } from "react-intl";
 
 interface ModalPaymentProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ interface PaymentMethods {
 
 export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
+    const { formatMessage } = useIntl()
     const paymentMethod: PaymentMethods[] = [
         {
             serviceName: 'Orange Money',
@@ -79,7 +81,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                     columnGap: 1
                 }}>
                     <TextField
-                        placeholder="date d'expiration"
+                        placeholder={formatMessage({ id: 'expiredDate' })}
                         type='number'
                         size='small'
                         sx={{
@@ -125,7 +127,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                         display: { laptop: 'inherit', mobile: 'none' }
                     }}
                 >
-                    Envoyez via
+                    {formatMessage({ id: 'paymentMethod' })}
                 </Typography>
                 <Typography
                     variant="h2"
@@ -135,7 +137,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                         display: { laptop: 'none', mobile: 'inherit' }
                     }}
                 >
-                    Envoyez via
+                    {formatMessage({ id: 'paymentMethod' })}
                 </Typography>
                 <Box sx={{
                     display: 'grid',
@@ -162,7 +164,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                 <Button
                     variant="contained"
                 >
-                    Valider paiement
+                    {formatMessage({ id: 'confirmPayment' })}
                 </Button>
             </Box>
         </Dialog>
