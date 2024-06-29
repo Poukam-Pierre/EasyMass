@@ -112,7 +112,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
 
         >
             <Box sx={{
-                padding: '115px 40px',
+                padding: '80px 40px',
                 display: 'grid',
                 rowGap: 2
             }}>
