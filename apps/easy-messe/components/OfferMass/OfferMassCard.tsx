@@ -15,7 +15,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
     const { formatMessage, formatNumber } = useIntl()
 
 
-    const arrayStaticData: string[] = ['Ville', 'Paroisse', 'Date et heure', 'Réquerant']
+    const arrayStaticData: string[] = ['city', 'parish', 'dateTime', 'applicant']
 
     const removeMass = (index: number) => {
         const massArray = massInfos;
@@ -63,7 +63,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                         paddingBottom: 0,
                                     }}
                                 >
-                                    {element} :
+                                    {formatMessage({ id: element })} :
                                 </Typography>
                             ))}
                         </Grid>
@@ -128,7 +128,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                             variant="body2"
                             textAlign="center"
                         >
-                            Prix
+                            {formatMessage({ id: 'amount' })}
                         </Typography>
                         <Typography
                             variant="caption"

@@ -65,7 +65,7 @@ export default function OfferList({ children }: OfferListProps) {
                         display: !massRequested.length ? 'none' : 'inherit'
                     }}
                 >
-                    Total à payer : {formatNumber(totalBillingAmount + (totalBillingAmount * 0.1), {
+                    {formatMessage({ id: 'billing' })} : {formatNumber(totalBillingAmount + (totalBillingAmount * 0.1), {
                         style: 'currency',
                         currency: 'xaf',
                     })}
