@@ -107,12 +107,13 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
             sx={{
                 '& .MuiPaper-root': {
                     borderRadius: '15px',
+                    maxWidth: 'fit-content',
                 }
             }}
 
         >
             <Box sx={{
-                padding: '80px 40px',
+                padding: { laptop: '80px 40px', mobile: '40px 20px' },
                 display: 'grid',
                 rowGap: 2
             }}>
@@ -120,7 +121,18 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                     variant="h1"
                     textAlign='center'
                     sx={{
-                        paddingBottom: 0
+                        paddingBottom: 0,
+                        display: { laptop: 'inherit', mobile: 'none' }
+                    }}
+                >
+                    Envoyez via
+                </Typography>
+                <Typography
+                    variant="h2"
+                    textAlign='center'
+                    sx={{
+                        paddingBottom: 0,
+                        display: { laptop: 'none', mobile: 'inherit' }
                     }}
                 >
                     Envoyez via
