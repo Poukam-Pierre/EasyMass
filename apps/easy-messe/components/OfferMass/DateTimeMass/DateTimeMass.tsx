@@ -1,26 +1,26 @@
-import { useLanguage } from '@easy-messe/libs/theme';
+import { formattedDateTime } from '@easy-messe/libs/utils';
 import { Dialog } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { isSameDay } from 'date-fns/isSameDay';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/fr';
+import { FormikErrors } from 'formik';
 import { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { ParishData, UseformikProps } from '../LetOfferMass';
 import Calendar from './Calendar';
 import Time from './TimeClock';
-import { FormikErrors } from 'formik';
-import { OfferMass } from 'libs/theme/src/offerMasses/offerMass.interface';
-import { formattedDateTime } from '@easy-messe/libs/utils';
 
 interface DateTimeMassPickerProps {
     id: string,
     name: string,
     parishData: ParishData | undefined
-    handleDateTimeChange: (field: string, value: Dayjs) => Promise<FormikErrors<UseformikProps>> | Promise<void>
-    handlePriceChange: (field: string, value: number) => Promise<FormikErrors<UseformikProps>> | Promise<void>
+    handleDateTimeChange: (field: string, value: Dayjs) =>
+        Promise<FormikErrors<UseformikProps>> | Promise<void>
+    handlePriceChange: (field: string, value: number) =>
+        Promise<FormikErrors<UseformikProps>> | Promise<void>
+    error?: boolean,
+    helperText?: string
 }
 interface DateTime {
     date: Dayjs,
@@ -32,7 +32,9 @@ export default function DateTimeMassPicker({
     id,
     name,
     handleDateTimeChange,
-    handlePriceChange
+    handlePriceChange,
+    error,
+    helperText
 }: DateTimeMassPickerProps) {
     const [isCalendarDialog, setIsCalendarDialog] = useState<boolean>(false)
     const [selectedDateTime, setSelectedDateTime] = useState<DateTime>({ date: dayjs(), time: null })
@@ -71,7 +73,7 @@ export default function DateTimeMassPicker({
             return dateSelected?.some((allowedTime) =>
                 allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
         }
-    }, [allMassDates])
+    }, [allMassDates, selectedDateTime.date])
 
     return (
         <>
@@ -91,6 +93,8 @@ export default function DateTimeMassPicker({
                             .second(0)
                     ) : ''}
                 size='small'
+                error={error}
+                helperText={helperText}
             />
             <Dialog
                 open={isCalendarDialog}
