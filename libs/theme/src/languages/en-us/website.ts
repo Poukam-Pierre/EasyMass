@@ -62,6 +62,12 @@ export const website = {
   phoneNumber: 'Phone Number',
   anonymous: 'Anonymous',
   requestList: 'Request List',
-  souscribe: 'Souscribe',
+  souscribe: 'Pay Out',
   massRequest: 'Mass Requests',
+  billing: 'Total billing',
+  applicant: 'Requester',
+  amount: 'Amount',
+  paymentMethod: 'Payment Method',
+  confirmPayment: 'Confirm payment',
+  expiredDate: 'Expired date',
 };

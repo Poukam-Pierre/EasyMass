@@ -64,4 +64,10 @@ export const website = {
   requestList: 'Liste de demandes',
   souscribe: 'Payer',
   massRequest: 'Demande de messe',
+  billing: 'Total à payer',
+  applicant: 'Réquerant',
+  amount: 'Prix',
+  paymentMethod: 'Envoyer via',
+  confirmPayment: 'Valider paiement',
+  expiredDate: "Date d'expiration",
 };
