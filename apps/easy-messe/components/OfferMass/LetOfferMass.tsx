@@ -332,6 +332,8 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             size="small"
                             disabled={isAnonym}
                             onChange={handleChange}
+                            error={errors.phone && touched.phone ? true : false}
+                            helperText={(errors.phone && touched.phone) && errors.phone}
                         />
                     </Box>
                 </Box>
@@ -420,6 +422,8 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         }
                         handleDateTimeChange={setFieldValue}
                         handlePriceChange={setFieldValue}
+                        error={errors.dateTime && touched.dateTime ? true : false}
+                        helperText={(errors.dateTime && touched.dateTime) ? errors.dateTime : ''}
                     />
                 </Box>
                 <Box sx={{
@@ -434,16 +438,16 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         color="var(--offWhite)"
                     />
                     <TextField
-                        error={errors.intention && touched.intention ? true : false}
                         id='intention'
                         name='intention'
                         type='text'
                         multiline
-                        helperText={(errors.intention && touched.intention) && errors.intention}
                         rows={5}
                         placeholder={formatMessage({ id: 'massIntension' })}
                         fullWidth
                         onChange={handleChange}
+                        error={errors.intention && touched.intention ? true : false}
+                        helperText={(errors.intention && touched.intention) && errors.intention}
                     />
                 </Box>
             </Box>
