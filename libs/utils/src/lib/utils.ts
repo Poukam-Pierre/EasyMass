@@ -120,5 +120,6 @@ export function getFirstTwoNameInitials(name: string) {
  * @param {Dayjs} dateTime - the date and time for a mass
  */
 export function formattedDateTime(dateTime: Dayjs): string {
+  // TODO Adjust formating according to the current language
   return `${dateTime.format('DD MMMM YYYY')} - ${dateTime.format('HH:mm')}`;
 }

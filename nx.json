@@ -58,7 +58,9 @@
       }
     },
     "@nx/react": {
-      "library": {}
+      "library": {
+        "unitTestRunner": "jest"
+      }
     }
   },
   "nxCloudAccessToken": "MGQ2OTUzNjEtNmQ4Yy00YzE4LWJmYzEtYjViMjJiMTk2ZGEwfHJlYWQtd3JpdGU="
