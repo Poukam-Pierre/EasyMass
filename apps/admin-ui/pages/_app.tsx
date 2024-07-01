@@ -13,7 +13,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <EasyMassThemeProvider defaultLang="fr">
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
                 <Head>
-                    <title>{"Order masses remotely - EasyMesse"}</title>
+                    <title>{"EasyMesse"}</title>
                 </Head>
                 <Box component="main" className="app">
                     <Component {...pageProps} />
