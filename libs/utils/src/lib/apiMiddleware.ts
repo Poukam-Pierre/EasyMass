@@ -24,7 +24,7 @@ const apiMiddleware = ({
   const dataOrParams = ['GET', 'DELETE'].includes(method) ? 'params' : 'data';
 
   // axios default configs
-  axios.defaults.baseURL = process.env.REACT_APP_URL_REMOTE_LINK || '';
+  axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL || '';
   axios.defaults.headers.common['Content-Type'] = 'application/json';
   axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
