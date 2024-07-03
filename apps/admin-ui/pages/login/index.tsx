@@ -11,13 +11,16 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import Image from "next/image";
 import { useState } from "react";
+import HeroHeader from '../../components/HeroHeader';
+import { useRouter } from 'next/router';
 
 
 
 export default function Login() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
+    const { push } = useRouter()
+
     return (
         <Box sx={{
             height: '100svh',
@@ -32,41 +35,11 @@ export default function Login() {
                 justifySelf: 'center',
                 rowGap: 3
             }}>
-                <Box sx={{
-                    display: 'grid',
-                    justifyItems: 'center',
-                    rowGap: '8px'
-                }}>
-                    <Box textAlign='center'>
-                        <Image
-                            src='/assets/LogoEasyMass.png'
-                            height={153}
-                            width={350}
-                            alt="Logo easy messe"
-                        />
-                        <Typography
-                            variant='caption'
-                            sx={{
-                                lineHeight: '24px',
-                                fontWeight: 'var(--semiBold)'
-                            }}
-                        >
-                            La messe, la plus grande des prières</Typography>
-                    </Box>
-                    <Typography
-                        variant="h1"
-                        sx={{
-                            fontSize: '36px',
-                            lineHeight: '44px',
-                            padding: 0
-                        }}
-                    >
-                        Bon retour parmis nous!</Typography>
-                    <Typography
-                        variant='h5'
-                    >
-                        Entrez vos détails de connexion</Typography>
-                </Box>
+                <HeroHeader
+                    slogan='La messe, la plus grande des prières'
+                    greeting='Bon retour parmis nous!'
+                    getActionMsg='Entrez vos détails de connexion'
+                />
                 <Box
                     sx={{
                         display: 'grid',
@@ -110,6 +83,7 @@ export default function Login() {
                     <Button
                         variant='text'
                         disableRipple
+                        onClick={() => push('/recovery/new-password')}
                     >
                         Mot de passe oublié ?
                     </Button>
