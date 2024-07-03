@@ -83,7 +83,7 @@ export default function Login() {
                     <Button
                         variant='text'
                         disableRipple
-                        onClick={() => push('/recovery/new-password')}
+                        onClick={() => push('/recovery/verification')}
                     >
                         Mot de passe oublié ?
                     </Button>
