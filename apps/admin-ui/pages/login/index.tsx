@@ -90,7 +90,6 @@ export default function Login() {
                     </Button>
                 </Box>
             </Box>
-            <Divider />
             <Footer />
         </Box>
     );
