@@ -1,5 +1,6 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import HeroHeader from '../../../components/HeroHeader';
+import Footer from "../../../components/Layout/Footer/Footer";
 
 export default function MailVerification() {
     return (
@@ -36,7 +37,7 @@ export default function MailVerification() {
                     <Button variant="contained">Send</Button>
                 </Box>
             </Box>
-            <Typography>Footer</Typography>
+            <Footer />
         </Box>
 
     );

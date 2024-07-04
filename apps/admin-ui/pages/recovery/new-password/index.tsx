@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import invisibleIcon from '@iconify-icons/material-symbols/visibility-off-outline';
 import visibleIcon from '@iconify-icons/material-symbols/visibility-outline';
+import Footer from "../../../components/Layout/Footer/Footer";
 
 
 export default function ChangePassword() {
@@ -70,7 +71,7 @@ export default function ChangePassword() {
                     <Button variant="contained">Save</Button>
                 </Box>
             </Box>
-            <Typography>Footer</Typography>
+            <Footer />
         </Box>
 
     );
