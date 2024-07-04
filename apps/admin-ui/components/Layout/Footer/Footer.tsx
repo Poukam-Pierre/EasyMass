@@ -1,5 +1,8 @@
 import { Box, Divider, Typography } from "@mui/material";
 import LanguageSwapper from "./LanguageSwapper";
+import { Icon } from "@iconify/react";
+import ExternalLink from '@iconify-icons/fluent/open-20-regular'
+
 
 export default function Footer() {
     return (
@@ -11,13 +14,35 @@ export default function Footer() {
                 justifyContent: 'space-between',
                 padding: '0 140px'
             }}>
-                <Typography
-                    variant='h5'
+                <Box
                     sx={{
-                        padding: 0
+                        display: 'grid',
+                        gridTemplateColumns: 'auto 1fr',
+                        alignItems: 'center',
+                        columnGap: 0.5,
                     }}
-
-                >@EasyMass</Typography>
+                >
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            padding: 0
+                        }}
+                    >Powered by : </Typography>
+                    <Box
+                        component="a"
+                        href="#"
+                        target="_blank"
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'auto 1fr',
+                            columnGap: 0.5,
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Typography variant="body2">Poukam Tech</Typography>
+                        <Icon icon={ExternalLink} />
+                    </Box>
+                </Box>
                 <LanguageSwapper />
             </Box>
         </>
