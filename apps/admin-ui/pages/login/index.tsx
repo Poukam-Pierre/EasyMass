@@ -4,16 +4,17 @@ import { Icon } from '@iconify/react';
 import {
     Box,
     Button,
+    Divider,
     FormControl,
     IconButton,
     InputAdornment,
     OutlinedInput,
-    TextField,
-    Typography
+    TextField
 } from "@mui/material";
+import { useRouter } from 'next/router';
 import { useState } from "react";
 import HeroHeader from '../../components/HeroHeader';
-import { useRouter } from 'next/router';
+import Footer from '../../components/Layout/Footer/Footer';
 
 
 
@@ -89,7 +90,8 @@ export default function Login() {
                     </Button>
                 </Box>
             </Box>
-            <Typography>Footer</Typography>
+            <Divider />
+            <Footer />
         </Box>
     );
 }
