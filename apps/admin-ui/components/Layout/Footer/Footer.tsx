@@ -1,5 +1,5 @@
 import { Box, Divider, Typography } from "@mui/material";
-import LanguageSwapper from "./LanguageSwapper";
+import LanguageSwapper from "../LanguageSwapper";
 import { Icon } from "@iconify/react";
 import ExternalLink from '@iconify-icons/fluent/open-20-regular'
 
