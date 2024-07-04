@@ -5,10 +5,12 @@ import { Icon } from "@iconify/react";
 import invisibleIcon from '@iconify-icons/material-symbols/visibility-off-outline';
 import visibleIcon from '@iconify-icons/material-symbols/visibility-outline';
 import Footer from "../../../components/Layout/Footer/Footer";
+import { useIntl } from "react-intl";
 
 
 export default function ChangePassword() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
+    const { formatMessage } = useIntl()
 
     return (
         <Box sx={{
@@ -25,9 +27,9 @@ export default function ChangePassword() {
                 rowGap: 3
             }}>
                 <HeroHeader
-                    slogan='La messe, la plus grande des prières'
-                    greeting='Récupération du mot de passe!'
-                    getActionMsg='Entrez votre nouveau mot de passe'
+                    slogan={formatMessage({ id: 'slogan' })}
+                    greeting={formatMessage({ id: 'passwordRecovery' })}
+                    getActionMsg={formatMessage({ id: 'fillPassword' })}
                 />
                 <Box
                     sx={{
@@ -42,7 +44,7 @@ export default function ChangePassword() {
                     >
                         <OutlinedInput
                             id="outlined-adornment-password"
-                            placeholder='New password'
+                            placeholder={formatMessage({ id: 'newPassword' })}
                             type={isVisible ? 'text' : 'password'}
                             endAdornment={
                                 <InputAdornment position="end">
@@ -65,10 +67,14 @@ export default function ChangePassword() {
                     </FormControl>
                     <TextField
                         size="small"
-                        placeholder="Confirm password"
+                        placeholder={formatMessage({ id: 'confirmPassword' })}
                         type="password"
                     />
-                    <Button variant="contained">Save</Button>
+                    <Button
+                        variant="contained"
+                    >
+                        {formatMessage({ id: 'save' })}
+                    </Button>
                 </Box>
             </Box>
             <Footer />

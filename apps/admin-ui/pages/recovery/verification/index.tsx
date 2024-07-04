@@ -1,8 +1,10 @@
 import { Box, Button, TextField } from "@mui/material";
 import HeroHeader from '../../../components/HeroHeader';
 import Footer from "../../../components/Layout/Footer/Footer";
+import { useIntl } from "react-intl";
 
 export default function MailVerification() {
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             height: '100svh',
@@ -18,9 +20,9 @@ export default function MailVerification() {
                 rowGap: 3
             }}>
                 <HeroHeader
-                    slogan='La messe, la plus grande des prières'
-                    greeting='Récupération du mot de passe!'
-                    getActionMsg='Entrez votre adresse mail'
+                    slogan={formatMessage({ id: 'slogan' })}
+                    greeting={formatMessage({ id: 'passwordRecovery' })}
+                    getActionMsg={formatMessage({ id: 'fillEmail' })}
                 />
                 <Box
                     sx={{
@@ -34,7 +36,7 @@ export default function MailVerification() {
                         placeholder="Email"
                         type="email"
                     />
-                    <Button variant="contained">Send</Button>
+                    <Button variant="contained">{formatMessage({ id: 'send' })}</Button>
                 </Box>
             </Box>
             <Footer />
