@@ -12,7 +12,6 @@ export default function Breadcrumb({ breadcrumbs: {
 } }: BreadcrumbProps) {
     const { pathname } = useRouter()
     const pathnames = pathname.split('/').filter((x) => x)
-    console.log(pathname.split('/'), pathnames)
     return (
         <Box sx={{
             display: 'grid',
