@@ -20,7 +20,7 @@ export default function SideBar({ open, onClose, navItems }: sideBarProps) {
     return (
         <Drawer
             open={open}
-            onClose={() => onClose()}
+            onClose={onClose}
             anchor="right"
         >
             <Box sx={{
