@@ -3,7 +3,6 @@ import { Dialog } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { isSameDay } from 'date-fns/isSameDay';
 import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/locale/fr';
 import { FormikErrors } from 'formik';
 import { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';

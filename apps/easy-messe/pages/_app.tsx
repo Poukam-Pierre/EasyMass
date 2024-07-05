@@ -5,7 +5,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import EasyMassLayout from '../components/layout';
-import '@easy-messe/shared-ui'
+import '@easy-messe/shared-ui';
+import 'dayjs/locale/fr';
+
 
 function CustomApp({ Component, pageProps }: AppProps) {
     const { activeLanguage } = useLanguage()
