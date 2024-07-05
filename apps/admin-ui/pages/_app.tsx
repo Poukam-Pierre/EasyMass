@@ -4,7 +4,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-import EasyMassLayout from '../components/layout';
 import '@easy-messe/shared-ui'
 
 function CustomApp({ Component, pageProps }: AppProps) {
@@ -14,12 +13,10 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <EasyMassThemeProvider defaultLang="fr">
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
                 <Head>
-                    <title>{"Order masses remotely - EasyMesse"}</title>
+                    <title>{"EasyMesse"}</title>
                 </Head>
                 <Box component="main" className="app">
-                    <EasyMassLayout>
-                        <Component {...pageProps} />
-                    </EasyMassLayout>
+                    <Component {...pageProps} />
                 </Box>
             </LocalizationProvider>
         </EasyMassThemeProvider>
