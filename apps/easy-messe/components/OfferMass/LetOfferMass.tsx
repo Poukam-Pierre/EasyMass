@@ -44,7 +44,7 @@ export interface UseformikProps {
     city: string,
     parish: string,
     dateTime: Dayjs | null,
-    intension: string,
+    intention: string,
     price: number | null
 
 }
@@ -140,7 +140,7 @@ const parishDataFetched: ParishData[] = [
 export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
-    const [parishDataFetch, setParishDataFetch] = useState<ParishData[]>()
+    const [parishData, setParishData] = useState<ParishData[]>()
     const [selectedCity, setSelectedCity] = useState<string>('')
     const [selectedParish, setSelectedParish] = useState<string>('')
     const { massRequestDispatch, massRequested } = useOfferMass()
@@ -167,7 +167,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     useEffect(() => {
         // TODO Fetch masses data from database
-        setParishDataFetch(parishDataFetched);
+        setParishData(parishDataFetched);
     }, [])
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
@@ -180,25 +180,29 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             city: '',
             parish: '',
             dateTime: null,
-            intension: '',
+            intention: '',
             price: null
         },
-        onSubmit: (values, { resetForm }) => {
+        onSubmit: ({
+            name, phone, anonymous,
+            city, parish, dateTime,
+            intention, price
+        }) => {
             massRequestDispatch(
                 [
                     ...massRequested,
                     {
-                        faithInfos: {
-                            name: values.name,
-                            phone: values.phone,
-                            anonymous: values.anonymous
-                        },
+                        faithInfos: anonymous ?
+                            undefined : {
+                                name: name,
+                                phone: phone,
+                            },
                         massInfos: {
-                            city: values.city,
-                            parish: values.parish,
-                            dateTime: values.dateTime,
-                            intension: values.intension,
-                            price: values.price
+                            city: city,
+                            parish: parish,
+                            dateTime: dateTime,
+                            intention: intention,
+                            price: price
                         }
                     }]);
             if (handleIndexTab) handleIndexTab(0)
@@ -328,6 +332,8 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             size="small"
                             disabled={isAnonym}
                             onChange={handleChange}
+                            error={errors.phone && touched.phone ? true : false}
+                            helperText={(errors.phone && touched.phone) && errors.phone}
                         />
                     </Box>
                 </Box>
@@ -353,7 +359,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                     <Autocomplete
                         id='city'
                         disablePortal
-                        options={parishDataFetch?.map((parish) => parish.city) as string[]}
+                        options={parishData?.map((parish) => parish.city) as string[]}
                         renderInput={(params) =>
                             <TextField
                                 {...params}
@@ -410,12 +416,14 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         id='dateTime'
                         name='dateTime'
                         parishData={
-                            parishDataFetch?.find((parish) =>
+                            parishData?.find((parish) =>
                                 parish.name === selectedParish && parish.city === selectedCity
                             )
                         }
                         handleDateTimeChange={setFieldValue}
                         handlePriceChange={setFieldValue}
+                        error={errors.dateTime && touched.dateTime ? true : false}
+                        helperText={(errors.dateTime && touched.dateTime) ? errors.dateTime : ''}
                     />
                 </Box>
                 <Box sx={{
@@ -430,16 +438,16 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         color="var(--offWhite)"
                     />
                     <TextField
-                        error={errors.intension && touched.intension ? true : false}
-                        id='intension'
-                        name='intension'
+                        id='intention'
+                        name='intention'
                         type='text'
                         multiline
-                        helperText={(errors.intension && touched.intension) && errors.intension}
                         rows={5}
                         placeholder={formatMessage({ id: 'massIntension' })}
                         fullWidth
                         onChange={handleChange}
+                        error={errors.intention && touched.intention ? true : false}
+                        helperText={(errors.intention && touched.intention) && errors.intention}
                     />
                 </Box>
             </Box>

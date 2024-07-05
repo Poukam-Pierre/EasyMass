@@ -5,17 +5,20 @@ import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
 import cancelIcon from '@iconify-icons/material-symbols/cancel'
 import { Icon } from "@iconify/react";
 import { useOfferMass } from "@easy-messe/libs/theme";
+import { useIntl } from "react-intl";
 interface OfferMassCartProps {
     massInfos: OfferMass[]
 }
 
 export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.Element {
-    const { massRequested, massRequestDispatch } = useOfferMass()
+    const { massRequestDispatch } = useOfferMass()
+    const { formatMessage, formatNumber } = useIntl()
 
-    const arrayStaticData: string[] = ['Ville', 'Paroisse', 'Date et heure', 'Réquerant']
+
+    const arrayStaticData: string[] = ['city', 'parish', 'dateTime', 'applicant']
 
     const removeMass = (index: number) => {
-        const massArray = massRequested;
+        const massArray = massInfos;
         massArray.splice(index, 1);
         massRequestDispatch(massArray)
     }
@@ -25,7 +28,9 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
             rowGap: 1.5,
             height: 'fit-content'
         }}>
-            {massInfos.map((mass, index) => (
+            {massInfos.map(({
+                massInfos: { city, dateTime, parish, price },
+                faithInfos }, index) => (
                 <Paper
                     key={index}
                     sx={{
@@ -58,7 +63,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                         paddingBottom: 0,
                                     }}
                                 >
-                                    {element} :
+                                    {formatMessage({ id: element })} :
                                 </Typography>
                             ))}
                         </Grid>
@@ -70,7 +75,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                     padding: '2px 0 2px 0'
                                 }}
                             >
-                                {mass.massInfos.city}
+                                {city}
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -79,7 +84,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                     padding: '2px 0 2px 0'
                                 }}
                             >
-                                {mass.massInfos.parish}
+                                {parish}
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -88,7 +93,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                     padding: '2px 0 2px 0'
                                 }}
                             >
-                                {formattedDateTime(mass.massInfos.dateTime as Dayjs)}
+                                {formattedDateTime(dateTime as Dayjs)}
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -97,8 +102,8 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                     padding: '2px 0 2px 0'
                                 }}
                             >
-                                {mass.faithInfos.anonymous ?
-                                    'Anonymous' : mass.faithInfos.name.split(' ')[0]}
+                                {faithInfos ?
+                                    faithInfos.name.split(' ')[0] : 'Anonymous'}
                             </Typography>
                         </Grid>
                     </Grid>
@@ -123,7 +128,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                             variant="body2"
                             textAlign="center"
                         >
-                            Prix
+                            {formatMessage({ id: 'amount' })}
                         </Typography>
                         <Typography
                             variant="caption"
@@ -133,7 +138,12 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                                 maxWidth: { laptop: '60px', mobile: 'auto' },
                             }}
                         >
-                            {mass.massInfos.price !== null && `${mass.massInfos.price} frs CFA`}
+
+                            {formatNumber(
+                                price ? price : 0, {
+                                style: 'currency',
+                                currency: 'xaf'
+                            })}
                         </Typography>
                     </Box>
                     <IconButton
@@ -142,8 +152,9 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
                         size="medium"
                         sx={{
                             position: 'absolute',
-                            right: -7,
-                            top: -15,
+                            padding: 0,
+                            right: 2,
+                            top: -10,
                         }}
                         onClick={() => removeMass(index)}
                     >

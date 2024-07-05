@@ -4,21 +4,21 @@ export interface OfferMassContextProviderProps {
   children: JSX.Element;
 }
 
-interface Requester {
+interface Person {
   name: string;
   phone: string;
-  anonymous: boolean;
 }
+
 interface MassInformation {
   city: string;
   parish: string;
   dateTime: Dayjs | null;
-  intension: string;
+  intention: string;
   price: number | null;
 }
 
 export interface OfferMass {
-  faithInfos: Requester;
+  faithInfos: Person | undefined;
   massInfos: MassInformation;
 }
 
