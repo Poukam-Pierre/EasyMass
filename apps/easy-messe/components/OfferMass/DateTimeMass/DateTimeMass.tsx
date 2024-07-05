@@ -15,9 +15,7 @@ interface DateTimeMassPickerProps {
     id: string,
     name: string,
     parishData: ParishData | undefined
-    handleDateTimeChange: (field: string, value: Dayjs) =>
-        Promise<FormikErrors<UseformikProps>> | Promise<void>
-    handlePriceChange: (field: string, value: number) =>
+    handleChange: (field: string, value: Dayjs | number) =>
         Promise<FormikErrors<UseformikProps>> | Promise<void>
     error?: boolean,
     helperText?: string
@@ -31,8 +29,7 @@ export default function DateTimeMassPicker({
     parishData,
     id,
     name,
-    handleDateTimeChange,
-    handlePriceChange,
+    handleChange,
     error,
     helperText
 }: DateTimeMassPickerProps) {
@@ -57,8 +54,8 @@ export default function DateTimeMassPicker({
         })
         setIsClockDialog(false)
         setIsCalendarDialog(false)
-        handleDateTimeChange('dateTime', dateTime)
-        handlePriceChange('price', price?.price as number)
+        handleChange('dateTime', dateTime)
+        handleChange('price', price?.price as number)
     }
 
     const allMassDates = parishData?.massData.map((data) => data.dateTime)
