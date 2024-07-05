@@ -83,4 +83,8 @@ export const website = {
   send: 'Send',
   fillPassword: 'Enter your new password.',
   save: 'Save',
+  numberChecked: 'Must be a number',
+  dateTimeChecked: 'Date and time must select',
+  intensionChecked: 'Intention must filled in',
+  intentionNumberChecked: 'At most 300 words must be',
 };

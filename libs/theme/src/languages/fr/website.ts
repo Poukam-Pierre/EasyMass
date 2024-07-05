@@ -83,4 +83,8 @@ export const website = {
   send: 'Envoyer',
   fillPassword: 'Entrez votre nouveau mot de passe.',
   save: 'Enregistrer',
+  numberChecked: 'Dois être un nombre',
+  dateTimeChecked: "Date et l'heure obligatoire",
+  intensionChecked: 'Intention obligatoire',
+  intentionNumberChecked: 'Au 300 mots possible',
 };

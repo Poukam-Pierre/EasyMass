@@ -333,7 +333,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             disabled={isAnonym}
                             onChange={handleChange}
                             error={errors.phone && touched.phone ? true : false}
-                            helperText={(errors.phone && touched.phone) && errors.phone}
+                            helperText={(errors.phone && touched.phone) && formatMessage({ id: errors.phone })}
                         />
                     </Box>
                 </Box>
@@ -420,10 +420,10 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                                 parish.name === selectedParish && parish.city === selectedCity
                             )
                         }
-                        handleDateTimeChange={setFieldValue}
-                        handlePriceChange={setFieldValue}
+                        handleChange={setFieldValue}
                         error={errors.dateTime && touched.dateTime ? true : false}
-                        helperText={(errors.dateTime && touched.dateTime) ? errors.dateTime : ''}
+                        helperText={(errors.dateTime && touched.dateTime) ?
+                            formatMessage({ id: errors.dateTime }) : ''}
                     />
                 </Box>
                 <Box sx={{
@@ -447,7 +447,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         fullWidth
                         onChange={handleChange}
                         error={errors.intention && touched.intention ? true : false}
-                        helperText={(errors.intention && touched.intention) && errors.intention}
+                        helperText={(errors.intention && touched.intention) && formatMessage({ id: errors.intention })}
                     />
                 </Box>
             </Box>

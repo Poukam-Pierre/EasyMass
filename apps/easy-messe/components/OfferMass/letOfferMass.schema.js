@@ -1,10 +1,10 @@
 import * as yup from 'yup'
 
 export const LetOfferMassSchema = yup.object().shape({
-    phone: yup.number('Must be a number'),
-    dateTime: yup.string().required('Date and Time must select.'),
+    phone: yup.number('numberChecked'),
+    dateTime: yup.string().required('dateTimeChecked'),
     intention: yup
         .string()
-        .required('Entrez votre intension de messe')
-        .max(300, 'At most 300 words')
+        .required('intensionChecked')
+        .max(300, 'intentionNumberChecked')
 })
