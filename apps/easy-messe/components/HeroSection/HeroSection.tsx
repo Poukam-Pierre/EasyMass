@@ -2,9 +2,11 @@ import { Box, Button, Typography } from "@mui/material";
 import HeroImage from "./HeroImage";
 import { theme } from "@easy-messe/libs/theme";
 import { useIntl } from "react-intl";
+import { useRouter } from "next/router";
 
 export default function HeroSection() {
     const { formatMessage } = useIntl()
+    const { push } = useRouter()
     return (
         <Box
             component='section'
@@ -59,12 +61,17 @@ export default function HeroSection() {
                     columnGap: 2,
                     width: { laptop: 'fit-content', mobile: 'inherit', }
                 }}>
-                    <Button variant="contained">
+                    <Button
+                        variant="contained"
+                        onClick={() => push('/offer-mass')}
+                    >
                         {formatMessage({ id: 'offerMass' })}
                     </Button>
                     <Button
                         variant="contained"
                         color="secondary"
+                        href="https://telegram.me/POUKAMTECH"
+                        target="_blank"
                     >
                         {formatMessage({ id: 'getInTooch' })}
                     </Button>

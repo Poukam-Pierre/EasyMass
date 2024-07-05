@@ -15,6 +15,7 @@ import AppThemeContextProvider, {
 import enMessages from './languages/en-us';
 import frMessages from './languages/fr';
 import { theme } from './theme';
+import OfferMassContextProvider from './offerMasses/OfferMassProvider';
 
 const App = ({
     children,
@@ -81,9 +82,11 @@ export function EasyMassThemeProvider({
     return (
         <LanguageContextProvider defaultLang={defaultLang}>
             <QueryClientProvider client={queryClient}>
-                <AppThemeContextProvider>
-                    <App newTheme={theme}>{children}</App>
-                </AppThemeContextProvider>
+                <OfferMassContextProvider>
+                    <AppThemeContextProvider>
+                        <App newTheme={theme}>{children}</App>
+                    </AppThemeContextProvider>
+                </OfferMassContextProvider>
             </QueryClientProvider>
         </LanguageContextProvider>
     );

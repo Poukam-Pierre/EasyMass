@@ -1,3 +1,5 @@
+import { Dayjs } from 'dayjs';
+
 type NumberUnit = 'K' | 'M' | 'B' | 'T' | 'P' | 'E';
 
 export function shortenNumber(rawNumber: number) {
@@ -111,4 +113,12 @@ export function getFirstTwoNameInitials(name: string) {
     .splice(0, 2)
     .map((_) => _[0].toUpperCase())
     .join('');
+}
+
+/**
+ * Format a date and time elements from a dateTime value into a specific one as "dd month year - hh:mm"
+ * @param {Dayjs} dateTime - the date and time for a mass
+ */
+export function formattedDateTime(dateTime: Dayjs): string {
+  return `${dateTime.format('DD MMMM YYYY')} - ${dateTime.format('HH:mm')}`;
 }

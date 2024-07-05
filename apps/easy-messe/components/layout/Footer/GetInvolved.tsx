@@ -1,8 +1,12 @@
 import { Box, Button, Typography } from "@mui/material";
+import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
 
 export default function GetInvolved() {
     const { formatMessage } = useIntl()
+    const { push, asPath } = useRouter()
+    const isActive = asPath.startsWith('/offer-mass')
+
     return (
         <Box sx={{
             display: 'grid',
@@ -35,12 +39,16 @@ export default function GetInvolved() {
                 <Button
                     variant="contained"
                     disableElevation
+                    onClick={() => push('/offer-mass')}
+                    disabled={isActive}
                 >{formatMessage({ id: 'offerMass' })}
                 </Button>
                 <Button
                     variant="outlined"
                     disableElevation
                     color="inherit"
+                    href="https://telegram.me/POUKAMTECH"
+                    target="_blank"
                 >
                     {formatMessage({ id: 'getInTooch' })}
                 </Button>

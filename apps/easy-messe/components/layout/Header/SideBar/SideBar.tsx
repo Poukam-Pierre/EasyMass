@@ -9,16 +9,18 @@ import { NavItem } from "../navitem";
 
 interface sideBarProps {
     open: boolean,
-    closeSideBar: (newOpen: boolean) => void,
+    onClose: () => void,
     navItems: INavItem[]
 }
-export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) {
-    const { push } = useRouter()
+
+export default function SideBar({ open, onClose, navItems }: sideBarProps) {
+    const { push, asPath } = useRouter()
     const { formatMessage } = useIntl()
+    const isActive = asPath.startsWith('/offer-mass')
     return (
         <Drawer
             open={open}
-            onClose={() => closeSideBar(false)}
+            onClose={() => onClose()}
             anchor="right"
         >
             <Box sx={{
@@ -50,7 +52,7 @@ export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) 
                                 key={index}
                                 handleLink={() => {
                                     push(navItem.route)
-                                    closeSideBar(false)
+                                    onClose()
                                 }
                                 }
                             />
@@ -68,6 +70,12 @@ export default function SideBar({ open, closeSideBar, navItems }: sideBarProps) 
                         variant="contained"
                         color="primary"
                         disableElevation={false}
+                        onClick={() => {
+                            push('/offer-mass');
+                            onClose();
+                        }
+                        }
+                        disabled={isActive}
                     >
                         {formatMessage({ id: 'offerMass' })}
                     </Button>
