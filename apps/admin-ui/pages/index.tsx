@@ -1,9 +1,8 @@
+import Login from "./login";
 
 export function Index() {
     return (
-        <div>
-            Hello Admin!
-        </div>
+        <Login />
     );
 }
 
