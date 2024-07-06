@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { PropsWithChildren } from "react";
 import Header from "./Header/Header";
+import SideBar from "./Sidebar/SideBar";
 
 export default function AppLayout({ children }: PropsWithChildren) {
     return (
@@ -9,7 +10,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
             gridTemplateColumns: 'auto 1fr',
             height: '100svh'
         }}>
-            <Box>Side Bar</Box>
+            <SideBar />
             <Box sx={{
                 display: 'grid',
                 gridTemplateRows: 'auto 1fr'

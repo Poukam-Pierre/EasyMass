@@ -1,0 +1,77 @@
+import { Box, Divider, Grid } from "@mui/material";
+import Image from "next/image";
+import { ReactElement } from "react";
+import taskIcon from '@iconify-icons/material-symbols/task-outline'
+import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded'
+import financeIcon from '@iconify-icons/material-symbols/attach-money'
+import { Icon } from "@iconify/react";
+import NavBar from "./NavBar";
+import Profile from "./Profile";
+
+export interface sideBarItem {
+    label: string
+    icon: ReactElement
+    link: string
+}
+
+export interface sideBarSection {
+    title: string
+    sideBarItems: sideBarItem[]
+}
+
+export default function SideBar() {
+    const sideBarSectionParish: sideBarSection[] = [
+        {
+            title: 'Management',
+            sideBarItems: [
+                {
+                    label: 'Offre de messe',
+                    icon: <Icon icon={taskIcon} fontSize={24} />,
+                    link: '/massOffer'
+                },
+                {
+                    label: 'Messe',
+                    icon: <Icon icon={libraryIcon} fontSize={24} />,
+                    link: '/masses'
+                },
+                {
+                    label: 'Finances',
+                    icon: <Icon icon={financeIcon} fontSize={24} />,
+                    link: '/finances'
+                },
+            ]
+        },
+
+    ]
+    return (
+        <Box sx={{
+            width: '250px',
+            padding: '8px',
+            position: 'relative',
+            backgroundColor: 'var(--background)',
+            display: 'grid',
+            gridTemplateRows: 'auto auto 1fr'
+        }}>
+            <Box sx={{
+                display: 'grid',
+                rowGap: 2.5
+            }}>
+                <Image
+                    src='/assets/LogoEasyMass.png'
+                    alt="Logo"
+                    width={150}
+                    height={65.57}
+                />
+                <Divider />
+            </Box>
+
+            {sideBarSectionParish.map((sideBarNav, index) => (
+                <NavBar
+                    key={index}
+                    sideBarNav={sideBarNav}
+                />
+            ))}
+            <Profile />
+        </Box>
+    );
+}
