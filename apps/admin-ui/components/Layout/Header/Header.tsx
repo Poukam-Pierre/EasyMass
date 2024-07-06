@@ -38,7 +38,7 @@ export default function Header() {
         <Box sx={{
             display: 'grid',
             rowGap: 1,
-            padding: '0px 50px'
+            padding: '17px 50px 0'
         }}>
             <Box sx={{
                 display: 'flex',
