@@ -30,7 +30,7 @@ export default function Header() {
             title: 'Finances',
             links: {
                 '/finances': 'Finances',
-                'finances/widrawal': 'Widrawal',
+                'finances/withdrawal': 'Withdrawal',
             }
         },
     ]
