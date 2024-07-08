@@ -16,7 +16,9 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 gridTemplateRows: 'auto 1fr'
             }}>
                 <Header />
-                <Box>
+                <Box sx={{
+                    padding: '25px 50px 0'
+                }}>
                     {children}
                 </Box>
             </Box>
