@@ -93,5 +93,5 @@ export const website = {
   withdrawal: 'Withdrawal',
   create: 'Create',
   modify: 'Modify',
-  Cancel: 'Cancel',
+  cancel: 'Cancel',
 };
