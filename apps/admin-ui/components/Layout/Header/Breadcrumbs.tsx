@@ -3,12 +3,12 @@ import { BreadcrumbsNameMaps } from "./Header";
 import { useRouter } from "next/router";
 
 export default function Breadcrumb({
-    breadcrumbs: {
+    breadcrumb: {
         title,
         links
     }
 }: {
-    breadcrumbs: BreadcrumbsNameMaps
+    breadcrumb: BreadcrumbsNameMaps
 }) {
     const { pathname } = useRouter()
     const subPaths = pathname.split('/').filter((x) => x)

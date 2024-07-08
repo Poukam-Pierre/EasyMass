@@ -47,11 +47,12 @@ export default function Header() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
             }}>
-                <Breadcrumb breadcrumbs={
-                    breadcrumbsNameMap.find((BreadcrumbsNameMaps) =>
-                        BreadcrumbsNameMaps.links[pathname] !== undefined
-                    ) as BreadcrumbsNameMaps
-                } />
+                <Breadcrumb
+                    breadcrumb={
+                        breadcrumbsNameMap.find((BreadcrumbsNameMaps) =>
+                            BreadcrumbsNameMaps.links[pathname] !== undefined
+                        ) as BreadcrumbsNameMaps
+                    } />
                 <LanguageSwapper />
             </Box>
             <Divider />
