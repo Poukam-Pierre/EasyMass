@@ -6,6 +6,7 @@ export const website = {
   faithfull: 'Faithfulls',
   parish: 'Parishes',
   offerMass: 'Offer Mass',
+  massOffer: 'Masses supply',
   partners: 'Our Partners',
   getInvolved: 'Get Involved',
   getMore: 'Read more',
@@ -87,4 +88,10 @@ export const website = {
   dateTimeChecked: 'Date and time must select',
   intensionChecked: 'Intention must filled in',
   intentionNumberChecked: 'At most 300 words must be',
+  finances: 'Finances',
+  logout: 'Deconnection',
+  withdrawal: 'Withdrawal',
+  create: 'Create',
+  modify: 'Modify',
+  Cancel: 'Cancel',
 };
