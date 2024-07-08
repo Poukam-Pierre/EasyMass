@@ -2,6 +2,7 @@ import { Box, Divider } from "@mui/material";
 import Breadcrumb from "./Breadcrumbs";
 import { useRouter } from "next/router";
 import LanguageSwapper from "../LanguageSwapper";
+import { useIntl } from "react-intl";
 
 export interface BreadcrumbsNameMaps {
     title: string;
@@ -9,28 +10,29 @@ export interface BreadcrumbsNameMaps {
 }
 export default function Header() {
     const { pathname } = useRouter()
+    const { formatMessage } = useIntl()
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: 'Mass Offer',
+            title: formatMessage({ id: 'massOffer' }),
             links: {
-                '/massOffer': 'Mass offer',
+                '/massOffer': formatMessage({ id: 'massOffer' }),
             }
         },
         {
-            title: 'Masses',
+            title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': 'Masses',
-                '/masses/create': 'Create',
-                '/masses/modify': 'Modify',
-                '/masses/delete': 'Cancel',
+                '/masses/create': formatMessage({ id: 'create' }),
+                '/masses/modify': formatMessage({ id: 'modify' }),
+                '/masses/delete': formatMessage({ id: 'cancel' }),
             }
         },
         {
-            title: 'Finances',
+            title: formatMessage({ id: 'finances' }),
             links: {
-                '/finances': 'Finances',
-                'finances/withdrawal': 'Withdrawal',
+                '/finances': formatMessage({ id: 'finances' }),
+                'finances/withdrawal': formatMessage({ id: 'withdrawal' }),
             }
         },
     ]
