@@ -7,6 +7,7 @@ import financeIcon from '@iconify-icons/material-symbols/attach-money'
 import { Icon } from "@iconify/react";
 import NavBar from "./NavBar";
 import Profile from "./Profile";
+import { useIntl } from "react-intl";
 
 export interface sideBarItem {
     label: string
@@ -20,22 +21,23 @@ export interface sideBarSection {
 }
 
 export default function SideBar() {
+    const { formatMessage } = useIntl()
     const sideBarSectionParish: sideBarSection[] = [
         {
             title: 'Management',
             sideBarItems: [
                 {
-                    label: 'Offre de messe',
+                    label: formatMessage({ id: 'massOffer' }),
                     icon: <Icon icon={taskIcon} fontSize={24} />,
                     link: '/massOffer'
                 },
                 {
-                    label: 'Messe',
+                    label: formatMessage({ id: 'masses' }),
                     icon: <Icon icon={libraryIcon} fontSize={24} />,
                     link: '/masses'
                 },
                 {
-                    label: 'Finances',
+                    label: formatMessage({ id: 'finances' }),
                     icon: <Icon icon={financeIcon} fontSize={24} />,
                     link: '/finances'
                 },

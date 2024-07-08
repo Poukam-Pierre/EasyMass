@@ -1,6 +1,8 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
+import { useIntl } from "react-intl";
 
 export default function Profile() {
+    const { formatMessage } = useIntl()
     return (
         <Box sx={{
             display: 'grid',
@@ -38,7 +40,9 @@ export default function Profile() {
             </Box>
             <Button
                 variant='outlined'
-            >Deconnexion</Button>
+            >
+                {formatMessage({ id: 'logout' })}
+            </Button>
         </Box>
     );
 }
