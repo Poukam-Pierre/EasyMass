@@ -2,14 +2,14 @@ import { Box, Breadcrumbs, Link, Typography } from "@mui/material";
 import { BreadcrumbsNameMaps } from "./Header";
 import { useRouter } from "next/router";
 
-interface BreadcrumbProps {
+export default function Breadcrumb({
+    breadcrumbs: {
+        title,
+        links
+    }
+}: {
     breadcrumbs: BreadcrumbsNameMaps
-}
-
-export default function Breadcrumb({ breadcrumbs: {
-    title,
-    links
-} }: BreadcrumbProps) {
+}) {
     const { pathname } = useRouter()
     const pathnames = pathname.split('/').filter((x) => x)
     return (
