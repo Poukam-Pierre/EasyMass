@@ -11,8 +11,8 @@ export default function LanguageSwapper() {
         'en': 'English'
     }
     enum supportedLanguages {
-        french = 'Français',
         english = 'English',
+        french = 'Français',
     }
     const { activeLanguage, languageDispatch } = useLanguage()
     return (
