@@ -12,13 +12,15 @@ interface MassOwnerTableMenuProps {
     anchorEl: HTMLElement | null;
     setAnchorEl: (anchor: HTMLElement | null) => void;
     handleModify: () => void;
+    handleCancel: () => void;
 }
 
 
 export default function MassOwnerTableMenu({
     anchorEl,
     setAnchorEl,
-    handleModify
+    handleModify,
+    handleCancel
 }: MassOwnerTableMenuProps) {
     const menuItem: MenuItemForMassOwner[] = [
         {
@@ -39,7 +41,7 @@ export default function MassOwnerTableMenu({
                 handleModify();
                 break;
             case 'Delete':
-
+                handleCancel()
                 break
         }
     }

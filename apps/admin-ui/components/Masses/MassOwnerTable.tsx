@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
 import MassesDialog from "./Dialogs/Masses";
+import CancelMassDialog from "./Dialogs/CanceMass";
 
 export interface TableData {
     id: number;
@@ -21,6 +22,8 @@ export default function MassOwnerTable() {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
     const [selectedData, setSelectedData] = useState<number | undefined>()
+    const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
+
 
     const tableData: TableData[] = [
         {
@@ -52,6 +55,9 @@ export default function MassOwnerTable() {
     const handleMassModifyDialog = () => {
         setIsMassModify((prev) => !prev)
     }
+    const handleCancelClose = () => {
+        setIsOpenDelete((prev) => !prev)
+    }
 
     return (
         <>
@@ -59,6 +65,7 @@ export default function MassOwnerTable() {
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
                 handleModify={handleMassModifyDialog}
+                handleCancel={handleCancelClose}
             />
             <MassesDialog
                 title="Modifier une messe"
@@ -67,6 +74,10 @@ export default function MassOwnerTable() {
                 isOpen={isMassModify}
                 handleClose={handleMassModifyDialog}
                 massData={tableData.find((data) => data.id === selectedData)}
+            />
+            <CancelMassDialog
+                isOpen={isOpenDelete}
+                handleClose={handleCancelClose}
             />
 
             <Table>
