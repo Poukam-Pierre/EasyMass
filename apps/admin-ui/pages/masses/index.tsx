@@ -8,10 +8,12 @@ import { useState } from "react";
 import MassOwnerTable from "../../components/Masses/MassOwnerTable";
 import MassMenu, { MenuIntem } from "../../components/Menus/MassMenu";
 import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
+import CreateMassesDialog from "../../components/Masses/Dialogs/CreateMasses";
 
 
 export default function Masses() {
     const { formatMessage } = useIntl()
+    const [isMassCreation, setIsMassCreation] = useState<boolean>(false)
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     const menuItem: MenuIntem[] = [
         {
@@ -28,12 +30,19 @@ export default function Masses() {
         }
     ]
 
+    const handleMassCreationDialog = () => {
+        setIsMassCreation((prev) => !prev)
+    }
     return (
         <AppLayout>
             <MassMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
                 menuItem={menuItem}
+            />
+            <CreateMassesDialog
+                isOpen={isMassCreation}
+                handleOpen={handleMassCreationDialog}
             />
             <Box sx={{
                 padding: '0 16px 8px'
@@ -52,6 +61,7 @@ export default function Masses() {
                     >Liste de messe</Typography>
                     <Button
                         variant="contained"
+                        onClick={handleMassCreationDialog}
                     >
                         + Ajouter une messe
                     </Button>
