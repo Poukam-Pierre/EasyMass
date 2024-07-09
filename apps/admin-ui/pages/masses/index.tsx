@@ -1,19 +1,19 @@
-import { Box, Button, InputBase, Typography } from "@mui/material";
-import AppLayout from "../../components/Layout";
-import { Icon } from "@iconify/react";
-import { useIntl } from "react-intl";
+import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
 import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
+import { Icon } from "@iconify/react";
+import { Box, Button, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
+import { useIntl } from "react-intl";
+import AppLayout from "../../components/Layout";
+import MassesDialog from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable from "../../components/Masses/MassOwnerTable";
 import MassMenu, { MenuIntem } from "../../components/Menus/MassMenu";
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
-import MassesDialog from "../../components/Masses/Dialogs/Masses";
 
 
 export default function Masses() {
     const { formatMessage } = useIntl()
-    const [isMassCreation, setIsMassCreation] = useState<boolean>(false)
+    const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     const menuItem: MenuIntem[] = [
         {
@@ -31,7 +31,7 @@ export default function Masses() {
     ]
 
     const handleMassCreationDialog = () => {
-        setIsMassCreation((prev) => !prev)
+        setIsOpenModify((prev) => !prev)
     }
     return (
         <AppLayout>
@@ -44,7 +44,7 @@ export default function Masses() {
                 title="Créer une messe"
                 replicatLabel="Reproduire sur toutes les semaines"
                 labelBtn="Créer"
-                isOpen={isMassCreation}
+                isOpen={isOpenModify}
                 handleClose={handleMassCreationDialog}
             />
             <Box sx={{
