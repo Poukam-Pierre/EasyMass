@@ -2,6 +2,7 @@ import { Box, Menu, MenuItem } from "@mui/material";
 import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
 import { Icon, IconifyIcon } from "@iconify/react";
 import { useState } from "react";
+import { useIntl } from "react-intl";
 
 interface MenuIntem {
     title: string;
@@ -15,17 +16,18 @@ export default function MassOfferMenu({
     setAnchorEl: (anchor: HTMLAnchorElement | null) => void;
 }) {
     const [selectedIndex, setSelectedIndex] = useState<number>(0)
+    const { formatMessage } = useIntl()
     const menuItem: MenuIntem[] = [
         {
-            title: 'Année',
+            title: formatMessage({ id: 'year' }),
             icon: checkmarkIcon
         },
         {
-            title: 'Mois',
+            title: formatMessage({ id: 'month' }),
             icon: checkmarkIcon
         },
         {
-            title: 'Semaine',
+            title: formatMessage({ id: 'week' }),
             icon: checkmarkIcon
         }
     ]
@@ -42,6 +44,7 @@ export default function MassOfferMenu({
             {menuItem.map(({ title, icon }, index) => (
                 <MenuItem
                     disableGutters
+                    dense
                     key={index}
                     value={title}
                     onClick={() => handleMenuChange(index, title)}

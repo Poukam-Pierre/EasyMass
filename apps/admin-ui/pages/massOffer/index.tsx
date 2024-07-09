@@ -6,10 +6,12 @@ import searchIcon from '@iconify-icons/fluent/search-24-regular'
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import MassOfferMenu from "../../components/Menus/MassOfferMenu";
+import { useIntl } from "react-intl";
 
 
 
 export default function MassOrder() {
+    const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     return (
         <AppLayout>
@@ -33,7 +35,7 @@ export default function MassOrder() {
                             paddingBottom: 0
                         }}
                     >
-                        Liste des différentes offres de messe
+                        {formatMessage({ id: 'listOfMassSupply' })}
                     </Typography>
                     <Box sx={{
                         display: 'grid',
@@ -43,7 +45,7 @@ export default function MassOrder() {
                     }}>
                         <Icon icon={searchIcon} fontSize={20} />
                         <InputBase
-                            placeholder="Rechercher"
+                            placeholder={formatMessage({ id: 'search' })}
                         />
                     </Box>
                     <Box sx={{
@@ -58,7 +60,9 @@ export default function MassOrder() {
                         <Icon icon={filterIcon} fontSize={20} />
                         <Typography
                             variant='body2'
-                        >Filtrer</Typography>
+                        >
+                            {formatMessage({ id: 'filter' })}
+                        </Typography>
                     </Box>
                 </Box>
                 <MassOfferTable />

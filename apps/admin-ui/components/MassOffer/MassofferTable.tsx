@@ -1,5 +1,6 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { useIntl } from "react-intl";
 
 interface TableData {
     id: number;
@@ -11,7 +12,8 @@ interface TableData {
     status: string
 }
 export default function MassOfferTable() {
-    const titles = ['No', 'name', "DATE D'ENREGISTREMENT", 'TYPE DE MESSE', 'DATE DEBUT', 'DATE DE FIN', 'STATUS']
+    const titles = ['No', 'name', 'registrationDate', 'massType', 'startDate', 'endDate', 'status']
+    const { formatMessage } = useIntl()
 
     const tableDate: TableData[] = [
         {
@@ -53,7 +55,7 @@ export default function MassOfferTable() {
                                 bgcolor: theme.palette.secondary.main
                             }}
                         >
-                            {title.toUpperCase()}
+                            {formatMessage({ id: title }).toUpperCase()}
                         </TableCell>
                     ))}
                 </TableRow>
