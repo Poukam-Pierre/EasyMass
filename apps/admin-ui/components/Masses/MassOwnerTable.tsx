@@ -7,7 +7,7 @@ import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
 import MassesDialog from "./Dialogs/Masses";
 
-interface TableData {
+export interface TableData {
     id: number;
     dayOfMass: string;
     massHour: string;
@@ -20,8 +20,9 @@ export default function MassOwnerTable() {
     const titles = ['No', 'dayOfMass', 'massHour', 'massType', 'price', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
+    const [selectedData, setSelectedData] = useState<number | undefined>()
 
-    const tableDate: TableData[] = [
+    const tableData: TableData[] = [
         {
             id: 1,
             dayOfMass: 'Lundi',
@@ -45,7 +46,8 @@ export default function MassOwnerTable() {
         },
     ]
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
-        setAnchorEl(event.currentTarget)
+        setAnchorEl(event.currentTarget);
+        setSelectedData(id)
     }
     const handleMassModifyDialog = () => {
         setIsMassModify((prev) => !prev)
@@ -64,6 +66,7 @@ export default function MassOwnerTable() {
                 replicatLabel="Appliquer sur toutes les occurences"
                 isOpen={isMassModify}
                 handleClose={handleMassModifyDialog}
+                massData={tableData.find((data) => data.id === selectedData)}
             />
 
             <Table>
@@ -82,7 +85,7 @@ export default function MassOwnerTable() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {tableDate.map(({
+                    {tableData.map(({
                         id, dayOfMass, massHour,
                         massType, price
 

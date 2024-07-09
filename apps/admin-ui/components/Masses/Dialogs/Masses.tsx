@@ -1,5 +1,6 @@
 import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextField, Typography } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
+import { TableData } from "../MassOwnerTable";
 
 enum MassTypeEnum {
     One = 'unique',
@@ -14,6 +15,7 @@ interface MassGroupCategory {
 }
 
 interface CreateMassesDialogProps {
+    massData?: TableData;
     replicatLabel?: string;
     title?: string;
     labelBtn?: string;
@@ -28,7 +30,8 @@ export default function MassesDialog({
     handleClose,
     title,
     labelBtn,
-    replicatLabel
+    replicatLabel,
+    massData
 }: CreateMassesDialogProps) {
     const massOrderCategory: MassGroupCategory[] = [
         {
