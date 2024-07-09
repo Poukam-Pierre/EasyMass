@@ -5,7 +5,7 @@ import { Box, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
-import MassOfferTable from "../../components/MassOffer/MassofferTable";
+import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
 import MassOfferMenu from "../../components/Menus/MassOfferMenu";
 
 
