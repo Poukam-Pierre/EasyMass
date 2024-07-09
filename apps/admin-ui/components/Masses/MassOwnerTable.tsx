@@ -3,8 +3,8 @@ import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@m
 import { useIntl } from "react-intl";
 import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
 import { Icon } from "@iconify/react";
-import { useState } from "react";
-import MassOwnerMenu from "../Menus/MassOwnerTableMenu";
+import { MouseEvent, useState } from "react";
+import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
 
 interface TableData {
     id: number;
@@ -42,9 +42,12 @@ export default function MassOwnerTable() {
             price: 3000
         },
     ]
+    const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
+        setAnchorEl(event.currentTarget)
+    }
     return (
         <>
-            <MassOwnerMenu
+            <MassOwnerTableMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
             />
@@ -94,7 +97,7 @@ export default function MassOwnerTable() {
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => setAnchorEl(event.currentTarget)}
+                                    onClick={(event) => handleActionOnRow(event, id)}
                                 >
                                     <Icon icon={verticalDotsIcon} fontSize={18} />
                                 </IconButton>
