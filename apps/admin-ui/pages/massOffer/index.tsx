@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, InputAdornment, InputBase, TextField, Typography } from "@mui/material";
 import AppLayout from "../../components/Layout";
 import MassOfferTable from "../../components/MassOffer/MassofferTable";
 import filterIcon from '@iconify-icons/fluent/filter-24-regular'
@@ -29,6 +29,9 @@ export default function MassOrder() {
                     <Typography
                         variant='h3'
                         color='primary'
+                        sx={{
+                            paddingBottom: 0
+                        }}
                     >
                         Liste des différentes offres de messe
                     </Typography>
@@ -39,9 +42,9 @@ export default function MassOrder() {
                         columnGap: 1
                     }}>
                         <Icon icon={searchIcon} fontSize={20} />
-                        <Typography
-                            variant='body2'
-                        >Recherche</Typography>
+                        <InputBase
+                            placeholder="Rechercher"
+                        />
                     </Box>
                     <Box sx={{
                         display: 'grid',
@@ -55,7 +58,7 @@ export default function MassOrder() {
                         <Icon icon={filterIcon} fontSize={20} />
                         <Typography
                             variant='body2'
-                        >Filtres</Typography>
+                        >Filtrer</Typography>
                     </Box>
                 </Box>
                 <MassOfferTable />
