@@ -5,6 +5,7 @@ import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill
 import { Icon } from "@iconify/react";
 import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
+import MassesDialog from "./Dialogs/Masses";
 
 interface TableData {
     id: number;
@@ -18,6 +19,7 @@ export default function MassOwnerTable() {
     const { formatMessage, formatNumber } = useIntl()
     const titles = ['No', 'dayOfMass', 'massHour', 'massType', 'price', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [isMassModify, setIsMassModify] = useState<boolean>(false)
 
     const tableDate: TableData[] = [
         {
@@ -45,12 +47,25 @@ export default function MassOwnerTable() {
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget)
     }
+    const handleMassModifyDialog = () => {
+        setIsMassModify((prev) => !prev)
+    }
+
     return (
         <>
             <MassOwnerTableMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
+                handleModify={handleMassModifyDialog}
             />
+            <MassesDialog
+                title="Modifier une messe"
+                labelBtn="Modifier"
+                replicatLabel="Appliquer sur toutes les occurences"
+                isOpen={isMassModify}
+                handleClose={handleMassModifyDialog}
+            />
+
             <Table>
                 <TableHead>
                     <TableRow>

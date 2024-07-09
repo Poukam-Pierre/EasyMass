@@ -8,7 +8,7 @@ import { useState } from "react";
 import MassOwnerTable from "../../components/Masses/MassOwnerTable";
 import MassMenu, { MenuIntem } from "../../components/Menus/MassMenu";
 import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
-import CreateMassesDialog from "../../components/Masses/Dialogs/CreateMasses";
+import MassesDialog from "../../components/Masses/Dialogs/Masses";
 
 
 export default function Masses() {
@@ -40,9 +40,12 @@ export default function Masses() {
                 setAnchorEl={setAnchorEl}
                 menuItem={menuItem}
             />
-            <CreateMassesDialog
+            <MassesDialog
+                title="Créer une messe"
+                replicatLabel="Reproduire sur toutes les semaines"
+                labelBtn="Créer"
                 isOpen={isMassCreation}
-                handleOpen={handleMassCreationDialog}
+                handleClose={handleMassCreationDialog}
             />
             <Box sx={{
                 padding: '0 16px 8px'
