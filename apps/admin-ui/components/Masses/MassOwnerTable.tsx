@@ -1,3 +1,109 @@
+import { theme } from "@easy-messe/libs/theme";
+import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { useIntl } from "react-intl";
+import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
+import { Icon } from "@iconify/react";
+import { useState } from "react";
+import MassOwnerMenu from "../Menus/MassOwnerTableMenu";
+
+interface TableData {
+    id: number;
+    dayOfMass: string;
+    massHour: string;
+    massType: string;
+    price: number;
+}
+
 export default function MassOwnerTable() {
-    return (<></>);
+    const { formatMessage, formatNumber } = useIntl()
+    const titles = ['No', 'dayOfMass', 'massHour', 'massType', 'price', 'action']
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+    const tableDate: TableData[] = [
+        {
+            id: 1,
+            dayOfMass: 'Lundi',
+            massHour: '10h30',
+            massType: 'Simple',
+            price: 2000
+        },
+        {
+            id: 2,
+            dayOfMass: 'Samedi',
+            massHour: '08h30',
+            massType: 'Simple',
+            price: 5000
+        },
+        {
+            id: 3,
+            dayOfMass: '-',
+            massHour: '-',
+            massType: 'Tridum',
+            price: 3000
+        },
+    ]
+    return (
+        <>
+            <MassOwnerMenu
+                anchorEl={anchorEl}
+                setAnchorEl={setAnchorEl}
+            />
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        {titles.map((title, index) => (
+                            <TableCell
+                                key={index}
+                                sx={{
+                                    bgcolor: theme.palette.secondary.main
+                                }}
+                            >
+                                {formatMessage({ id: title }).toUpperCase()}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {tableDate.map(({
+                        id, dayOfMass, massHour,
+                        massType, price
+
+                    }, index) => (
+                        <TableRow
+                            key={`${index} + ${id} + ${dayOfMass}`}
+                            sx={{
+                                color: 'var(--label)'
+                            }}
+                        >
+                            <TableCell>{id}</TableCell>
+                            <TableCell sx={{
+                                fontWeight: 600,
+                                color: 'var(--label)'
+                            }}>
+                                {dayOfMass.toUpperCase()}
+                            </TableCell>
+                            <TableCell>{massHour}</TableCell>
+                            <TableCell>{massType}</TableCell>
+                            <TableCell sx={{
+                                fontWeight: 600,
+                                color: 'var(--label)'
+                            }}>{formatNumber(price, {
+                                style: 'currency',
+                                currency: 'xaf'
+                            })}</TableCell>
+                            <TableCell align='right'>
+                                <IconButton
+                                    size="small"
+                                    onClick={(event) => setAnchorEl(event.currentTarget)}
+                                >
+                                    <Icon icon={verticalDotsIcon} fontSize={18} />
+                                </IconButton>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </>
+
+    );
 }
