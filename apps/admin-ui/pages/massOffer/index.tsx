@@ -1,14 +1,13 @@
+import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
 import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon, IconifyIcon } from "@iconify/react";
+import { Icon } from "@iconify/react";
 import { Box, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
 import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
-import { MenuIntem } from "../../components/Menus/MassMenu";
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
-import MassMenu from '../../components/Menus/MassMenu';
+import MassMenu, { MenuIntem } from '../../components/Menus/MassMenu';
 
 
 export default function MassOffer() {
