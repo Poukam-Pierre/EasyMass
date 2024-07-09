@@ -5,14 +5,36 @@ import { useIntl } from "react-intl";
 import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { useState } from "react";
+import MassOwnerTable from "../../components/Masses/MassOwnerTable";
+import MassMenu, { MenuIntem } from "../../components/Menus/MassMenu";
+import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
 
 
 export default function Masses() {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const menuItem: MenuIntem[] = [
+        {
+            title: formatMessage({ id: 'day' }),
+            icon: checkmarkIcon
+        },
+        {
+            title: formatMessage({ id: 'hour' }),
+            icon: checkmarkIcon
+        },
+        {
+            title: formatMessage({ id: 'massType' }),
+            icon: checkmarkIcon
+        }
+    ]
 
     return (
         <AppLayout>
+            <MassMenu
+                anchorEl={anchorEl}
+                setAnchorEl={setAnchorEl}
+                menuItem={menuItem}
+            />
             <Box sx={{
                 padding: '0 16px 8px'
             }}>
@@ -70,6 +92,7 @@ export default function Masses() {
                     </Box>
                 </Box>
             </Box>
+            <MassOwnerTable />
         </AppLayout>
     );
 }
