@@ -44,6 +44,7 @@ export default function MassOwnerTableMenu({
                 <MenuItem
                     key={index}
                     value={title}
+                    onClick={() => setAnchorEl(null)}
                 >
                     <Box sx={{
                         display: 'grid',
