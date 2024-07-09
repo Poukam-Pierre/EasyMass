@@ -1,6 +1,7 @@
 import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextField, Typography } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { TableData } from "../MassOwnerTable";
+import { useIntl } from "react-intl";
 
 enum MassTypeEnum {
     One = 'unique',
@@ -33,6 +34,7 @@ export default function MassesDialog({
     replicatLabel,
     massData
 }: CreateMassesDialogProps) {
+    const { formatMessage } = useIntl()
     const massOrderCategory: MassGroupCategory[] = [
         {
             label: MassTypeEnum.One,
@@ -92,7 +94,7 @@ export default function MassesDialog({
                         renderInput={(params) =>
                             <TextField
                                 {...params}
-                                placeholder='Entrez le type de messe'
+                                placeholder={formatMessage({ id: 'massTypeHolder' })}
                                 size="small"
                                 required
                             />
@@ -104,7 +106,7 @@ export default function MassesDialog({
                         slotProps={{
                             textField: {
                                 size: 'small',
-                                placeholder: 'Entrez le jour'
+                                placeholder: formatMessage({ id: 'massDayHolder' })
                             }
                         }}
                     />
@@ -114,14 +116,14 @@ export default function MassesDialog({
                         slotProps={{
                             textField: {
                                 size: 'small',
-                                placeholder: "Entrez l'heure"
+                                placeholder: formatMessage({ id: 'massTimeHolder' })
                             }
                         }}
                     />
                     <TextField
                         size="small"
                         type="number"
-                        placeholder="Entrez le montant de la messe"
+                        placeholder={formatMessage({ id: 'massPriceHolder' })}
                     />
                     <FormControlLabel
                         label={replicatLabel}
@@ -138,7 +140,9 @@ export default function MassesDialog({
                         <Button
                             variant='outlined'
                             onClick={handleClose}
-                        >Annuler</Button>
+                        >
+                            {formatMessage({ id: 'cancel' })}
+                        </Button>
                         <Button variant='contained'>{labelBtn}</Button>
                     </Box>
                 </Box>

@@ -41,9 +41,9 @@ export default function Masses() {
                 menuItem={menuItem}
             />
             <MassesDialog
-                title="Créer une messe"
-                replicatLabel="Reproduire sur toutes les semaines"
-                labelBtn="Créer"
+                title={formatMessage({ id: 'createMass' })}
+                replicatLabel={formatMessage({ id: 'duplicateAll' })}
+                labelBtn={formatMessage({ id: 'create' })}
                 isOpen={isOpenModify}
                 handleClose={handleMassCreationDialog}
             />
@@ -56,17 +56,19 @@ export default function Masses() {
                     justifyContent: 'space-between',
                 }}>
                     <Typography
-                        variant="h2"
+                        variant="h3"
                         color='primary'
                         sx={{
                             paddingBottom: 0
                         }}
-                    >Liste de messe</Typography>
+                    >
+                        {formatMessage({ id: 'listOfMasses' })}
+                    </Typography>
                     <Button
                         variant="contained"
                         onClick={handleMassCreationDialog}
                     >
-                        + Ajouter une messe
+                        + {formatMessage({ id: 'addMass' })}
                     </Button>
                 </Box>
                 <Box sx={{

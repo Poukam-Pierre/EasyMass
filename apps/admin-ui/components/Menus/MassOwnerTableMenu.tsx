@@ -1,3 +1,4 @@
+import { Icon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
 import { MenuItemForMassOwner } from "../Masses/MassOwnerTable";
 import { useIntl } from "react-intl";
@@ -23,10 +24,10 @@ export default function MassOwnerTableMenu({
     const handleModalDialog = (title: string) => {
         setAnchorEl(null)
         switch (title) {
-            case 'Modify':
+            case formatMessage({ id: 'modify' }):
                 handleModify();
                 break;
-            case 'Delete':
+            case formatMessage({ id: 'delete' }):
                 handleCancel()
                 break
         }

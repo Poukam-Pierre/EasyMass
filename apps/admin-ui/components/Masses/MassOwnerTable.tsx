@@ -47,14 +47,14 @@ export default function MassOwnerTable() {
     const tableData: TableData[] = [
         {
             id: 1,
-            dayOfMass: 'Lundi',
+            dayOfMass: formatMessage({ id: 'monday' }),
             massHour: '10h30',
             massType: 'Simple',
             price: 2000
         },
         {
             id: 2,
-            dayOfMass: 'Samedi',
+            dayOfMass: formatMessage({ id: 'saturday' }),
             massHour: '08h30',
             massType: 'Simple',
             price: 5000
@@ -63,7 +63,7 @@ export default function MassOwnerTable() {
             id: 3,
             dayOfMass: '-',
             massHour: '-',
-            massType: 'Tridum',
+            massType: formatMessage({ id: 'triduum' }),
             price: 3000
         },
     ]
@@ -85,11 +85,12 @@ export default function MassOwnerTable() {
                 setAnchorEl={setAnchorEl}
                 handleModify={handleMassModifyDialog}
                 handleCancel={handleCancelClose}
+                menuItem={menuItem}
             />
             <MassesDialog
-                title="Modifier une messe"
-                labelBtn="Modifier"
-                replicatLabel="Appliquer sur toutes les occurences"
+                title={formatMessage({ id: 'massModify' })}
+                labelBtn={formatMessage({ id: 'modify' })}
+                replicatLabel={formatMessage({ id: 'applyAll' })}
                 isOpen={isMassModify}
                 handleClose={handleMassModifyDialog}
                 massData={tableData.find((data) => data.id === selectedData)}
