@@ -1,23 +1,40 @@
 import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
+import { Icon, IconifyIcon } from "@iconify/react";
 import { Box, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
 import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
-import MassOfferMenu from "../../components/Menus/MassOfferMenu";
-
+import { MenuIntem } from "../../components/Menus/MassMenu";
+import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular'
+import MassMenu from '../../components/Menus/MassMenu';
 
 
 export default function MassOffer() {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const menuItem: MenuIntem[] = [
+        {
+            title: formatMessage({ id: 'year' }),
+            icon: checkmarkIcon
+        },
+        {
+            title: formatMessage({ id: 'month' }),
+            icon: checkmarkIcon
+        },
+        {
+            title: formatMessage({ id: 'week' }),
+            icon: checkmarkIcon
+        }
+    ]
+
     return (
         <AppLayout>
-            <MassOfferMenu
+            <MassMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
+                menuItem={menuItem}
             />
             <Box sx={{
                 display: 'flex',
