@@ -8,13 +8,18 @@ interface MenuItemForMassOwner extends MenuIntem {
     color?: string
 }
 
+interface MassOwnerTableMenuProps {
+    anchorEl: HTMLElement | null;
+    setAnchorEl: (anchor: HTMLElement | null) => void;
+    handleModify: () => void;
+}
+
+
 export default function MassOwnerTableMenu({
     anchorEl,
     setAnchorEl,
-}: {
-    anchorEl: HTMLElement | null;
-    setAnchorEl: (anchor: HTMLElement | null) => void;
-}) {
+    handleModify
+}: MassOwnerTableMenuProps) {
     const menuItem: MenuItemForMassOwner[] = [
         {
             title: 'Modify',
@@ -26,6 +31,19 @@ export default function MassOwnerTableMenu({
             color: 'var(--error)'
         },
     ]
+
+    const handleModalDialog = (title: string) => {
+        setAnchorEl(null)
+        switch (title) {
+            case 'Modify':
+                handleModify();
+                break;
+            case 'Delete':
+
+                break
+        }
+    }
+
     return (
         <Menu
             anchorEl={anchorEl}
@@ -44,7 +62,7 @@ export default function MassOwnerTableMenu({
                 <MenuItem
                     key={index}
                     value={title}
-                    onClick={() => setAnchorEl(null)}
+                    onClick={() => handleModalDialog(title)}
                 >
                     <Box sx={{
                         display: 'grid',
