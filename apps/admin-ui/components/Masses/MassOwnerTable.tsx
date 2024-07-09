@@ -7,6 +7,10 @@ import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
 import MassesDialog from "./Dialogs/Masses";
 import CancelMassDialog from "./Dialogs/CanceMass";
+import { MenuIntem } from "../Menus/MassMenu";
+import trashIcon from '@iconify-icons/ph/trash-light';
+import editIcon from '@iconify-icons/fluent/edit-28-regular';
+
 
 export interface TableData {
     id: number;
@@ -14,6 +18,10 @@ export interface TableData {
     massHour: string;
     massType: string;
     price: number;
+}
+
+export interface MenuItemForMassOwner extends MenuIntem {
+    color?: string
 }
 
 export default function MassOwnerTable() {
@@ -24,6 +32,17 @@ export default function MassOwnerTable() {
     const [selectedData, setSelectedData] = useState<number | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
 
+    const menuItem: MenuItemForMassOwner[] = [
+        {
+            title: formatMessage({ id: 'modify' }),
+            icon: editIcon
+        },
+        {
+            title: formatMessage({ id: 'delete' }),
+            icon: trashIcon,
+            color: 'var(--error)'
+        },
+    ]
 
     const tableData: TableData[] = [
         {

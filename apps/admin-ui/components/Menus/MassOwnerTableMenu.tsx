@@ -1,18 +1,14 @@
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
-import trashIcon from '@iconify-icons/ph/trash-light'
-import editIcon from '@iconify-icons/fluent/edit-28-regular'
-import { Icon } from "@iconify/react";
-import { MenuIntem } from "./MassMenu";
+import { MenuItemForMassOwner } from "../Masses/MassOwnerTable";
+import { useIntl } from "react-intl";
 
-interface MenuItemForMassOwner extends MenuIntem {
-    color?: string
-}
 
 interface MassOwnerTableMenuProps {
     anchorEl: HTMLElement | null;
     setAnchorEl: (anchor: HTMLElement | null) => void;
     handleModify: () => void;
     handleCancel: () => void;
+    menuItem: MenuItemForMassOwner[]
 }
 
 
@@ -20,20 +16,10 @@ export default function MassOwnerTableMenu({
     anchorEl,
     setAnchorEl,
     handleModify,
-    handleCancel
+    handleCancel,
+    menuItem
 }: MassOwnerTableMenuProps) {
-    const menuItem: MenuItemForMassOwner[] = [
-        {
-            title: 'Modify',
-            icon: editIcon
-        },
-        {
-            title: 'Delete',
-            icon: trashIcon,
-            color: 'var(--error)'
-        },
-    ]
-
+    const { formatMessage } = useIntl()
     const handleModalDialog = (title: string) => {
         setAnchorEl(null)
         switch (title) {
