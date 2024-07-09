@@ -4,13 +4,20 @@ import MassOfferTable from "../../components/MassOffer/MassofferTable";
 import filterIcon from '@iconify-icons/fluent/filter-24-regular'
 import searchIcon from '@iconify-icons/fluent/search-24-regular'
 import { Icon } from "@iconify/react";
+import { useState } from "react";
+import MassOfferMenu from "../../components/Menus/MassOfferMenu";
 
 
 
 export default function MassOrder() {
+    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     return (
         <AppLayout>
             <Box>
+                <MassOfferMenu
+                    anchorEl={anchorEl}
+                    setAnchorEl={setAnchorEl}
+                />
                 <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -40,8 +47,11 @@ export default function MassOrder() {
                         display: 'grid',
                         gridTemplateColumns: 'auto 1fr',
                         alignItems: 'center',
-                        columnGap: 1
-                    }}>
+                        columnGap: 1,
+                        cursor: 'pointer',
+                    }}
+                        onClick={(event) => setAnchorEl(event.target as HTMLAnchorElement)}
+                    >
                         <Icon icon={filterIcon} fontSize={20} />
                         <Typography
                             variant='body2'
