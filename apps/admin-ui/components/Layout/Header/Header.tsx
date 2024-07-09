@@ -22,7 +22,7 @@ export default function Header() {
         {
             title: formatMessage({ id: 'masses' }),
             links: {
-                '/masses': 'Masses',
+                '/masses': formatMessage({ id: 'masses' }),
                 '/masses/create': formatMessage({ id: 'create' }),
                 '/masses/modify': formatMessage({ id: 'modify' }),
                 '/masses/delete': formatMessage({ id: 'cancel' }),
