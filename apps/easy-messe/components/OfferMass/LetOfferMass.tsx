@@ -16,16 +16,17 @@ import * as yup from 'yup'
 
 
 
-interface MassGroupCategory {
-    label: string;
-    valueOrder: number
-}
 enum MassTypeEnum {
     Triduum = 'triduum',
     Seven = 'seven',
     Novena = 'novena',
     Thirty = 'thirty',
 }
+interface MassGroupCategory {
+    label: MassTypeEnum;
+    valueOrder: number
+}
+
 interface Mass {
     price: number,
     dateTime: Date,
@@ -149,19 +150,19 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const massOrderCategory: MassGroupCategory[] = [
         {
-            label: 'triduum',
+            label: MassTypeEnum.Triduum,
             valueOrder: 3
         },
         {
-            label: 'seven',
+            label: MassTypeEnum.Seven,
             valueOrder: 7
         },
         {
-            label: 'novena',
+            label: MassTypeEnum.Novena,
             valueOrder: 9
         },
         {
-            label: 'thirty',
+            label: MassTypeEnum.Thirty,
             valueOrder: 30
         },
     ]
