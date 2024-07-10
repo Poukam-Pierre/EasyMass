@@ -1,13 +1,13 @@
-import { Box, Divider, Grid } from "@mui/material";
+import financeIcon from '@iconify-icons/material-symbols/attach-money';
+import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded';
+import taskIcon from '@iconify-icons/material-symbols/task-outline';
+import { Icon } from "@iconify/react";
+import { Box, Divider } from "@mui/material";
 import Image from "next/image";
 import { ReactElement } from "react";
-import taskIcon from '@iconify-icons/material-symbols/task-outline'
-import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded'
-import financeIcon from '@iconify-icons/material-symbols/attach-money'
-import { Icon } from "@iconify/react";
+import { useIntl } from "react-intl";
 import NavBar from "./NavBar";
 import Profile from "./Profile";
-import { useIntl } from "react-intl";
 
 export interface sideBarItem {
     label: string
