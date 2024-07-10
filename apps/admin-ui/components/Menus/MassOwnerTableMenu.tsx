@@ -29,7 +29,7 @@ export default function MassOwnerTableMenu({
                 break;
             case formatMessage({ id: 'delete' }):
                 handleCancel()
-                break
+                break;
         }
     }
 
