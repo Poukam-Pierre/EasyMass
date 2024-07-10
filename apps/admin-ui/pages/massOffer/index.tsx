@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react";
 import { Box, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import AppLayout from "../../components/Layout";
 import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
 import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
 
@@ -29,7 +28,7 @@ export default function MassOffer() {
     ]
 
     return (
-        <AppLayout>
+        <>
             <MassMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
@@ -81,6 +80,6 @@ export default function MassOffer() {
                 </Box>
             </Box>
             <MassOfferTable />
-        </AppLayout>
+        </>
     );
 }

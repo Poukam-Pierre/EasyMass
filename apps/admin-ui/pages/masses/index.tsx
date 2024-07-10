@@ -5,7 +5,6 @@ import { Icon } from "@iconify/react";
 import { Box, Button, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
 import { useIntl } from "react-intl";
-import AppLayout from "../../components/Layout";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable from "../../components/Masses/MassOwnerTable";
 import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
@@ -34,7 +33,7 @@ export default function Masses() {
         setIsOpenModify((prev) => !prev)
     }
     return (
-        <AppLayout>
+        <>
             <MassMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
@@ -108,6 +107,6 @@ export default function Masses() {
                 </Box>
             </Box>
             <MassOwnerTable />
-        </AppLayout>
+        </>
     );
 }

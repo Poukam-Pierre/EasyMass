@@ -1,13 +1,12 @@
-import { Box, Button, InputBase, Typography } from "@mui/material";
-import AppLayout from "../../components/Layout";
-import { useIntl } from "react-intl";
-import { Icon } from "@iconify/react";
+import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
 import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import FinanceTable from "../../components/Finances/FinanceTable";
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
+import { Icon } from "@iconify/react";
+import { Box, Button, InputBase, Typography } from "@mui/material";
 import { useState } from "react";
+import { useIntl } from "react-intl";
+import FinanceTable from "../../components/Finances/FinanceTable";
+import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 
 
 
@@ -39,7 +38,7 @@ export default function Finances() {
     ]
 
     return (
-        <AppLayout>
+        <>
             <MassMenu
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
@@ -121,6 +120,6 @@ export default function Finances() {
                     <FinanceTable />
                 </Box>
             </Box>
-        </AppLayout>
+        </>
     );
 }
