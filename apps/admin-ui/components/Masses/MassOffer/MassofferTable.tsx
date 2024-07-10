@@ -12,7 +12,7 @@ interface TableData {
     status: string
 }
 export default function MassOfferTable() {
-    const titles = ['No', 'name', 'registrationDate', 'massType', 'startDate', 'endDate', 'status']
+    const titles = ['name', 'registrationDate', 'massType', 'startDate', 'endDate', 'status']
     const { formatMessage } = useIntl()
 
     const tableDate: TableData[] = [
@@ -48,6 +48,12 @@ export default function MassOfferTable() {
         <Table>
             <TableHead>
                 <TableRow>
+                    <TableCell sx={{
+                        bgcolor: theme.palette.secondary.main
+                    }}
+                    >
+                        No
+                    </TableCell>
                     {titles.map((title, index) => (
                         <TableCell
                             key={index}

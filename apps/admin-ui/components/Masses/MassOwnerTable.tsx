@@ -26,7 +26,7 @@ export interface MenuItemForMassOwner extends MenuIntem {
 
 export default function MassOwnerTable() {
     const { formatMessage, formatNumber } = useIntl()
-    const titles = ['No', 'dayOfMass', 'massHour', 'massType', 'price', 'action']
+    const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
     const [selectedData, setSelectedData] = useState<number | undefined>()
@@ -103,6 +103,12 @@ export default function MassOwnerTable() {
             <Table>
                 <TableHead>
                     <TableRow>
+                        <TableCell sx={{
+                            bgcolor: theme.palette.secondary.main
+                        }}
+                        >
+                            No
+                        </TableCell>
                         {titles.map((title, index) => (
                             <TableCell
                                 key={index}
