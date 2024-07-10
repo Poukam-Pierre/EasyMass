@@ -8,14 +8,14 @@ import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable from "../../components/Masses/MassOwnerTable";
-import MassMenu, { MenuIntem } from "../../components/Menus/MassMenu";
+import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 
 
 export default function Masses() {
     const { formatMessage } = useIntl()
     const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
-    const menuItem: MenuIntem[] = [
+    const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'day' }),
             icon: checkmarkIcon

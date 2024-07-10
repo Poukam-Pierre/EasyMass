@@ -7,7 +7,7 @@ import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
 import MassesDialog from "./Dialogs/Masses";
 import CancelMassDialog from "./Dialogs/CanceMass";
-import { MenuIntem } from "../Menus/MassMenu";
+import { MenuItem } from "../Menus/MassMenu";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
 
@@ -20,7 +20,7 @@ export interface TableData {
     price: number;
 }
 
-export interface MenuItemForMassOwner extends MenuIntem {
+export interface MenuItemForMassOwner extends MenuItem {
     color?: string
 }
 

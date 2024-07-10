@@ -7,13 +7,13 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
 import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
-import MassMenu, { MenuIntem } from '../../components/Menus/MassMenu';
+import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
 
 
 export default function MassOffer() {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
-    const menuItem: MenuIntem[] = [
+    const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'year' }),
             icon: checkmarkIcon

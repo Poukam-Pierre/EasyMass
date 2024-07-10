@@ -2,7 +2,7 @@ import { Icon, IconifyIcon } from "@iconify/react";
 import { Box, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
 
-export interface MenuIntem {
+export interface MenuItem {
     title: string;
     icon: IconifyIcon
 }
@@ -13,7 +13,7 @@ export default function MassMenu({
 }: {
     anchorEl: HTMLAnchorElement | null;
     setAnchorEl: (anchor: HTMLAnchorElement | null) => void;
-    menuItem: MenuIntem[]
+    menuItem: MenuItem[]
 }) {
     const [selectedIndex, setSelectedIndex] = useState<number>(0)
 
