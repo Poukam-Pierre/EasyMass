@@ -80,13 +80,15 @@ export default function FinanceTable() {
             <TableHead>
                 <TableRow>
                     <TableCell sx={{
-                        bgcolor: theme.palette.secondary.main
+                        bgcolor: theme.palette.secondary.main,
+                        fontWeight: 600
                     }}>
                         No
                     </TableCell>
                     {titles.map((title, index) => (
                         <TableCell sx={{
-                            bgcolor: theme.palette.secondary.main
+                            bgcolor: theme.palette.secondary.main,
+                            fontWeight: 600
                         }}
                             key={index}
                         >

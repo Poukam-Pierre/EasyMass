@@ -104,7 +104,8 @@ export default function MassOwnerTable() {
                 <TableHead>
                     <TableRow>
                         <TableCell sx={{
-                            bgcolor: theme.palette.secondary.main
+                            bgcolor: theme.palette.secondary.main,
+                            fontWeight: 600
                         }}
                         >
                             No
@@ -113,7 +114,8 @@ export default function MassOwnerTable() {
                             <TableCell
                                 key={index}
                                 sx={{
-                                    bgcolor: theme.palette.secondary.main
+                                    bgcolor: theme.palette.secondary.main,
+                                    fontWeight: 600
                                 }}
                             >
                                 {formatMessage({ id: title }).toUpperCase()}
