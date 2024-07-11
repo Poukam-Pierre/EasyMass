@@ -1,13 +1,23 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
+import { useIntl } from "react-intl";
 
+interface CancelMassDialogProps {
+    isOpen: boolean;
+    handleClose: () => void;
+    idSelected: number | undefined;
+}
 
 export default function CancelMassDialog({
     isOpen,
-    handleClose
-}: {
-    isOpen: boolean,
-    handleClose: () => void
-}) {
+    handleClose,
+    idSelected
+}: CancelMassDialogProps) {
+    const { formatMessage } = useIntl()
+    const handleDeleteMass = () => {
+        // TODO update data by deleting mass selected
+        console.log(idSelected)
+    }
+
     return (
         <Dialog
             open={isOpen}
@@ -57,7 +67,7 @@ export default function CancelMassDialog({
                     <Button
                         variant='contained'
                         color="error"
-                        onClick={handleCancelMass}
+                        onClick={handleDeleteMass}
                     >
                         {formatMessage({ id: 'delete' })}
                     </Button>
