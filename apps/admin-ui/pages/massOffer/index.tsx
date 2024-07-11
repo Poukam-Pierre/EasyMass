@@ -3,17 +3,19 @@ import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { Icon } from "@iconify/react";
 import { Box, InputBase, Typography } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
+import MassOfferTable, { TableData } from "../../components/Masses/MassOffer/MassofferTable";
 import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
 import AppLayout from '../../components/Layout';
 import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 
 
+
 export default function MassOffer() {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const [massDate, setMassData] = useState<TableData[]>([])
     const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'year' }),
@@ -28,7 +30,40 @@ export default function MassOffer() {
             icon: checkmarkIcon
         }
     ]
+    const tableDate: TableData[] = [
+        {
+            id: 1,
+            name: 'Meulak Kouam',
+            registrationDate: '2015-01-01',
+            massType: 'single',
+            startDate: '2015-01-01',
+            endDate: '2015-01-01',
+            status: '1/1'
+        },
+        {
+            id: 2,
+            name: 'Ngamaleu Pierre',
+            registrationDate: '2015-01-01',
+            massType: 'Tridum',
+            startDate: '2015-01-01',
+            endDate: '2015-01-01',
+            status: '1/2'
+        },
+        {
+            id: 3,
+            name: 'Poukam irénée',
+            registrationDate: '2015-01-01',
+            massType: 'Neuvaine',
+            startDate: '2015-01-01',
+            endDate: '2015-01-01',
+            status: '1/9'
+        }
+    ]
 
+    useEffect(() => (
+        // TODO fetch data for all masses ordered into the church.
+        setMassData(tableDate)
+    ), [])
     return (
         <>
             <MassMenu
@@ -81,7 +116,7 @@ export default function MassOffer() {
                     </Typography>
                 </Box>
             </Box>
-            <MassOfferTable />
+            <MassOfferTable massDataTable={massDate} />
         </>
     );
 }
