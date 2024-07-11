@@ -6,10 +6,11 @@ import { Box, Button, InputBase, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
-import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/MassOwnerTable";
+import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
 import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import AppLayout from '../../components/Layout';
+import dayjs from 'dayjs';
 
 
 export default function Masses() {
@@ -35,23 +36,23 @@ export default function Masses() {
     const tableData: TableMassOwnerData[] = [
         {
             id: 1,
-            dayOfMass: formatMessage({ id: 'monday' }),
-            massHour: '10h30',
-            massType: 'Simple',
+            dayOfMass: dayjs('2024-07-22'),
+            massTime: dayjs(),
+            massType: 'unique',
             price: 2000
         },
         {
             id: 2,
-            dayOfMass: formatMessage({ id: 'saturday' }),
-            massHour: '08h30',
-            massType: 'Simple',
+            dayOfMass: dayjs('2024-07-15'),
+            massTime: dayjs(),
+            massType: 'unique',
             price: 5000
         },
         {
             id: 3,
-            dayOfMass: '-',
-            massHour: '-',
-            massType: formatMessage({ id: 'triduum' }),
+            dayOfMass: null,
+            massTime: null,
+            massType: 'triduum',
             price: 3000
         },
     ]
