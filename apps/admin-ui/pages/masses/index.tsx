@@ -3,10 +3,10 @@ import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { Icon } from "@iconify/react";
 import { Box, Button, InputBase, Typography } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
-import MassOwnerTable from "../../components/Masses/MassOwnerTable";
+import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/MassOwnerTable";
 import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import AppLayout from '../../components/Layout';
@@ -16,6 +16,7 @@ export default function Masses() {
     const { formatMessage } = useIntl()
     const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const [massData, setMassData] = useState<TableMassOwnerData[]>([])
     const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'day' }),
@@ -30,6 +31,35 @@ export default function Masses() {
             icon: checkmarkIcon
         }
     ]
+
+    const tableData: TableMassOwnerData[] = [
+        {
+            id: 1,
+            dayOfMass: formatMessage({ id: 'monday' }),
+            massHour: '10h30',
+            massType: 'Simple',
+            price: 2000
+        },
+        {
+            id: 2,
+            dayOfMass: formatMessage({ id: 'saturday' }),
+            massHour: '08h30',
+            massType: 'Simple',
+            price: 5000
+        },
+        {
+            id: 3,
+            dayOfMass: '-',
+            massHour: '-',
+            massType: formatMessage({ id: 'triduum' }),
+            price: 3000
+        },
+    ]
+
+    useEffect(() => (
+        // TODO fetch data for all masses ordered into the church.
+        setMassData(tableData)
+    ), [])
 
     const handleMassCreationDialog = () => {
         setIsOpenModify((prev) => !prev)
@@ -108,7 +138,7 @@ export default function Masses() {
                     </Box>
                 </Box>
             </Box>
-            <MassOwnerTable />
+            <MassOwnerTable massDataTable={massData} />
         </>
     );
 }

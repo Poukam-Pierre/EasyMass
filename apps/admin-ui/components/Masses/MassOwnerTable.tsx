@@ -1,5 +1,5 @@
 import { theme } from "@easy-messe/libs/theme";
-import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+import { Box, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { useIntl } from "react-intl";
 import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
 import { Icon } from "@iconify/react";
@@ -10,9 +10,11 @@ import CancelMassDialog from "./Dialogs/CanceMass";
 import { MenuItem } from "../Menus/MassMenu";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
+import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 
 
-export interface TableData {
+
+export interface TableMassOwnerData {
     id: number;
     dayOfMass: string;
     massHour: string;
@@ -24,7 +26,11 @@ export interface MenuItemForMassOwner extends MenuItem {
     color?: string
 }
 
-export default function MassOwnerTable() {
+export default function MassOwnerTable({
+    massDataTable
+}: {
+    massDataTable: TableMassOwnerData[]
+}) {
     const { formatMessage, formatNumber } = useIntl()
     const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -44,29 +50,6 @@ export default function MassOwnerTable() {
         },
     ]
 
-    const tableData: TableData[] = [
-        {
-            id: 1,
-            dayOfMass: formatMessage({ id: 'monday' }),
-            massHour: '10h30',
-            massType: 'Simple',
-            price: 2000
-        },
-        {
-            id: 2,
-            dayOfMass: formatMessage({ id: 'saturday' }),
-            massHour: '08h30',
-            massType: 'Simple',
-            price: 5000
-        },
-        {
-            id: 3,
-            dayOfMass: '-',
-            massHour: '-',
-            massType: formatMessage({ id: 'triduum' }),
-            price: 3000
-        },
-    ]
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget);
         setSelectedData(id)
@@ -93,7 +76,7 @@ export default function MassOwnerTable() {
                 replicatLabel={formatMessage({ id: 'applyAll' })}
                 isOpen={isMassModify}
                 handleClose={handleMassModifyDialog}
-                massData={tableData.find((data) => data.id === selectedData)}
+                massData={massDataTable.find((data) => data.id === selectedData)}
             />
             <CancelMassDialog
                 isOpen={isOpenDelete}
@@ -124,7 +107,7 @@ export default function MassOwnerTable() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {tableData.map(({
+                    {massDataTable.map(({
                         id, dayOfMass, massHour,
                         massType, price
 
@@ -163,6 +146,24 @@ export default function MassOwnerTable() {
                     ))}
                 </TableBody>
             </Table>
+            {
+                !massDataTable.length && (
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '50%'
+                    }}>
+                        <Icon icon={warningIcon} fontSize={24} />
+                        <Typography variant='body2'>
+                            Aucune messe créée pour le moment.
+                            {/* {formatMessage({ id: 'noProcessMass' })} */}
+                        </Typography>
+                    </Box>
+
+                )
+            }
         </>
 
     );
