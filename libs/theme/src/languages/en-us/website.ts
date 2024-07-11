@@ -134,4 +134,6 @@ export const website = {
   transactionHistory: 'Transactions history',
   transactionId: 'Transaction ID#',
   warningMassCreation: 'Aucune messe créée pour le moment.',
+  deleteMass: 'Delete a mass !',
+  deleteMassMsg: 'Are you sure you want to abolish this mass ?',
 };

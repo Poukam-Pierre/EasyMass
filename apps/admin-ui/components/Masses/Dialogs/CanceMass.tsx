@@ -33,13 +33,14 @@ export default function CancelMassDialog({
                     variant='h1'
                     textAlign='center'
                 >
-                    Supprimer une messe
+                    {formatMessage({ id: 'deleteMass' })}
                 </Typography>
                 <Typography
                     variant="body1"
                     textAlign='center'
                 >
-                    Etes vous sûre de vouloir supprimer cette messe ?
+                    {formatMessage({ id: 'deleteMassMsg' })}
+
                 </Typography>
                 <Box sx={{
                     display: "grid",
@@ -50,12 +51,15 @@ export default function CancelMassDialog({
                     <Button
                         variant='outlined'
                         onClick={handleClose}
-                    >Annuler</Button>
+                    >
+                        {formatMessage({ id: 'cancel' })}
+                    </Button>
                     <Button
                         variant='contained'
                         color="error"
+                        onClick={handleCancelMass}
                     >
-                        Supprimer
+                        {formatMessage({ id: 'delete' })}
                     </Button>
                 </Box>
             </Box>

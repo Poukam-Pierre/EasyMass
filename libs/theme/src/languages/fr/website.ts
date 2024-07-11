@@ -135,4 +135,6 @@ export const website = {
   transactionHistory: 'Historique de transactions',
   transactionId: 'Transaction ID#',
   warningMassCreation: 'Aucune messe créée pour le moment.',
+  deleteMass: 'Supprimer une messe !',
+  deleteMassMsg: 'Etes vous dsûre de vouloir supprimer cette messe ?',
 };
