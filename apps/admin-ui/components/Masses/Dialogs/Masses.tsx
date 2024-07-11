@@ -59,6 +59,26 @@ export default function MassesDialog({
         },
     ]
 
+    const { handleChange, handleSubmit,
+        errors, touched, setFieldValue
+    } = useFormik<FormikProps>({
+        initialValues: {
+            massType: null,
+            dayOfMass: null,
+            massTime: null,
+            price: null,
+            replicate: false,
+        },
+        onSubmit: (values) => {
+            console.log(values)
+        },
+        validationSchema: yup.object().shape({
+            massType: yup.string().required('Should choose a mass type'),
+            dayOfMass: yup.date().required('Should choose a day'),
+            massTime: yup.date().required('Should choose a time'),
+            price: yup.number().required('Should choose a price'),
+        })
+    })
     return (
         <Dialog
             open={isOpen}
@@ -87,8 +107,12 @@ export default function MassesDialog({
                 </Typography>
                 <Box sx={{
                     display: 'grid',
-                    rowGap: 2
-                }}>
+                    rowGap: 2,
+                }}
+                    component='form'
+                    onSubmit={handleSubmit}
+
+                >
                     <Autocomplete
                         options={massOrderCategory.map((massType) => massType.label)}
                         renderInput={(params) =>
