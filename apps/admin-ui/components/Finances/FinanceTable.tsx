@@ -17,8 +17,8 @@ interface TableData {
     transactionId: string;
 }
 export default function FinanceTable() {
-    const { formatNumber } = useIntl()
-    const titles = ['amount', 'numero de payement', 'date', 'status', 'transaction id#']
+    const { formatNumber, formatMessage } = useIntl()
+    const titles = ['amount', 'paymentMethod', 'date', 'status', 'transactionId']
     const tableData: TableData[] = [
         {
             id: 1,
@@ -92,7 +92,7 @@ export default function FinanceTable() {
                         }}
                             key={index}
                         >
-                            {title.toUpperCase()}
+                            {formatMessage({ id: title }).toUpperCase()}
                         </TableCell>
                     ))}
                 </TableRow>

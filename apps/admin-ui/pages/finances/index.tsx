@@ -57,7 +57,9 @@ export default function Finances() {
                     <Box>
                         <Typography
                             variant='body2'
-                        >Font de caisse</Typography>
+                        >
+                            {formatMessage({ id: 'cashRegister' })}
+                        </Typography>
                         <Typography
                             variant="h1"
                         >
@@ -67,7 +69,7 @@ export default function Finances() {
                     <Button
                         variant="contained"
                     >
-                        Faire le retrait
+                        {formatMessage({ id: 'withdrawal' })}
                     </Button>
                 </Box>
                 <Box sx={{
@@ -88,8 +90,8 @@ export default function Finances() {
                                 padding: '10px 0'
                             }}
                         >
-                            Historique des transactions
-                            {/* {formatMessage({ id: 'listOfMassSupply' })} */}
+
+                            {formatMessage({ id: 'transactionHistory' })}
                         </Typography>
                         <Box sx={{
                             display: 'grid',
