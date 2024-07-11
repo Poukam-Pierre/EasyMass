@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
-import { MenuItemForMassOwner } from "../Masses/MassOwnerTable";
+import { MenuItemForMassOwner } from "../Masses/tableMassOwnerData";
 import { useIntl } from "react-intl";
 
 
