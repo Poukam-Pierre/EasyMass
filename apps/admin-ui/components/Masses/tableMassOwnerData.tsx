@@ -11,13 +11,14 @@ import { MenuItem } from "../Menus/MassMenu";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
+import { Dayjs } from "dayjs";
 
 
 
 export interface TableMassOwnerData {
     id: number;
-    dayOfMass: string;
-    massHour: string;
+    dayOfMass: Dayjs | null;
+    massTime: Dayjs | null;
     massType: string;
     price: number;
 }
@@ -37,6 +38,16 @@ export default function MassOwnerTable({
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
     const [selectedData, setSelectedData] = useState<number | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
+    const [massSelected, setMassSelected] = useState<TableMassOwnerData>()
+    const dayOfWeek: Record<number, string> = {
+        1: 'monday',
+        2: 'tuesday',
+        3: 'wednesday',
+        4: 'thursday',
+        5: 'friday',
+        6: 'saturday',
+        7: 'sunday',
+    }
 
     const menuItem: MenuItemForMassOwner[] = [
         {
@@ -108,7 +119,7 @@ export default function MassOwnerTable({
                 </TableHead>
                 <TableBody>
                     {massDataTable.map(({
-                        id, dayOfMass, massHour,
+                        id, dayOfMass, massTime,
                         massType, price
 
                     }, index) => (
@@ -123,9 +134,11 @@ export default function MassOwnerTable({
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>
-                                {dayOfMass.toUpperCase()}
+                                {dayOfMass ? formatMessage({ id: dayOfWeek[dayOfMass.day()] })
+                                    .toUpperCase() : '-'
+                                }
                             </TableCell>
-                            <TableCell>{massHour}</TableCell>
+                            <TableCell>{massTime ? massTime.format('HH:mm') : '-'}</TableCell>
                             <TableCell>{massType}</TableCell>
                             <TableCell sx={{
                                 fontWeight: 600,
