@@ -133,4 +133,5 @@ export const website = {
   cashRegister: 'Cash register',
   transactionHistory: 'Transactions history',
   transactionId: 'Transaction ID#',
+  warningMassCreation: 'Aucune messe créée pour le moment.',
 };

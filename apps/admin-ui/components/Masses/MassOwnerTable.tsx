@@ -157,11 +157,9 @@ export default function MassOwnerTable({
                     }}>
                         <Icon icon={warningIcon} fontSize={24} />
                         <Typography variant='body2'>
-                            Aucune messe créée pour le moment.
-                            {/* {formatMessage({ id: 'noProcessMass' })} */}
+                            {formatMessage({ id: 'warningMassCreation' })}
                         </Typography>
                     </Box>
-
                 )
             }
         </>
