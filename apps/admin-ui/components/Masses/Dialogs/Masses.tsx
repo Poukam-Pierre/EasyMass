@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import { TableMassOwnerData } from "../tableMassOwnerData";
+import { useLanguage } from "@easy-messe/libs/theme";
 
 
 enum MassTypeEnum {
@@ -46,6 +47,7 @@ export default function MassesDialog({
     massData
 }: CreateMassesDialogProps) {
     const { formatMessage } = useIntl()
+    const { activeLanguage } = useLanguage()
     const massOrderCategory: MassGroupCategory[] = [
         {
             label: MassTypeEnum.One,
@@ -166,8 +168,10 @@ export default function MassesDialog({
                         onChange={(date) => setFieldValue('dayOfMass', date)}
                     />
                     <TimePicker
+                        skipDisabled
                         name='massTime'
-                        ampm
+                        ampm={activeLanguage !== 'fr'}
+                        timeSteps={{ minutes: 15 }}
                         closeOnSelect
                         slotProps={{
                             textField: {
