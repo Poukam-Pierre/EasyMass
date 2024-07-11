@@ -90,7 +90,7 @@ export const website = {
   intentionNumberChecked: 'Au 300 mots possible',
   finances: 'Finances',
   logout: 'Deconnexion',
-  withdrawal: 'Retrait',
+  withdrawal: 'Faire le Retrait',
   create: 'Créer',
   modify: 'Modifier',
   modification: 'Modification',
@@ -131,4 +131,7 @@ export const website = {
   massTimeHolder: "Entrez l'heure",
   massPriceHolder: 'Entrez le montant de la messe',
   duplicateAll: 'Reproduire dur toutes les semaines',
+  cashRegister: 'Font de caisse',
+  transactionHistory: 'Historique de transactions',
+  transactionId: 'Transaction ID#',
 };

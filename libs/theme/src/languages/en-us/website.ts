@@ -130,4 +130,7 @@ export const website = {
   massTimeHolder: 'Enter time',
   massPriceHolder: 'Enter the mass amount',
   duplicateAll: 'Reproduce hard weekly',
+  cashRegister: 'Cash register',
+  transactionHistory: 'Transactions history',
+  transactionId: 'Transaction ID#',
 };
