@@ -66,12 +66,12 @@ export default function MassOwnerTable({
         setSelectedData(id)
     }
     const handleMassModifyDialog = () => {
-        setIsMassModify((prev) => !prev)
+        setIsMassModify(true);
+        setMassSelected(massDataTable.find((data) => data.id === selectedData))
     }
     const handleCancelClose = () => {
         setIsOpenDelete((prev) => !prev)
     }
-
     return (
         <>
             <MassOwnerTableMenu
@@ -86,8 +86,8 @@ export default function MassOwnerTable({
                 labelBtn={formatMessage({ id: 'modify' })}
                 replicatLabel={formatMessage({ id: 'applyAll' })}
                 isOpen={isMassModify}
-                handleClose={handleMassModifyDialog}
-                massData={massDataTable.find((data) => data.id === selectedData)}
+                handleClose={() => setIsMassModify(false)}
+                massData={massSelected}
             />
             <CancelMassDialog
                 isOpen={isOpenDelete}
