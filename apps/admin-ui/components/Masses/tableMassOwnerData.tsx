@@ -36,7 +36,7 @@ export default function MassOwnerTable({
     const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
-    const [selectedData, setSelectedData] = useState<number | undefined>()
+    const [idSelected, setIdSelected] = useState<number | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
     const [massSelected, setMassSelected] = useState<TableMassOwnerData>()
     const dayOfWeek: Record<number, string> = {
@@ -63,11 +63,11 @@ export default function MassOwnerTable({
 
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget);
-        setSelectedData(id)
+        setIdSelected(id)
     }
     const handleMassModifyDialog = () => {
         setIsMassModify(true);
-        setMassSelected(massDataTable.find((data) => data.id === selectedData))
+        setMassSelected(massDataTable.find((data) => data.id === idSelected))
     }
     const handleCancelClose = () => {
         setIsOpenDelete((prev) => !prev)
@@ -92,6 +92,7 @@ export default function MassOwnerTable({
             <CancelMassDialog
                 isOpen={isOpenDelete}
                 handleClose={handleCancelClose}
+                idSelected={idSelected}
             />
 
             <Table>
