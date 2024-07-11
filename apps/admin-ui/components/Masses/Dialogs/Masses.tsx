@@ -1,10 +1,10 @@
 import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextField, Typography } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
-import { TableMassOwnerData } from "../tableMassOwnerData";
-import { useIntl } from "react-intl";
+import dayjs, { Dayjs } from "dayjs";
 import { useFormik } from "formik";
-import * as yup from 'yup'
-import { Dayjs } from "dayjs";
+import { useIntl } from "react-intl";
+import * as yup from 'yup';
+import { TableMassOwnerData } from "../tableMassOwnerData";
 
 
 enum MassTypeEnum {
@@ -45,7 +45,6 @@ export default function MassesDialog({
     replicatLabel,
     massData
 }: CreateMassesDialogProps) {
-
     const { formatMessage } = useIntl()
     const massOrderCategory: MassGroupCategory[] = [
         {
@@ -71,7 +70,8 @@ export default function MassesDialog({
     ]
 
     const { handleChange, handleSubmit,
-        errors, touched, setFieldValue
+        errors, touched, setFieldValue,
+        values
     } = useFormik<FormikProps>({
         initialValues: {
             massType: null,
@@ -88,7 +88,7 @@ export default function MassesDialog({
             dayOfMass: yup.date().required('Should choose a day'),
             massTime: yup.date().required('Should choose a time'),
             price: yup.number().required('Should choose a price'),
-        })
+        }),
     })
     return (
         <Dialog
@@ -127,6 +127,7 @@ export default function MassesDialog({
                     <Autocomplete
                         id="massType"
                         options={massOrderCategory.map((massType) => massType.label)}
+                        value={values.massType ?? massData?.massType}
                         size="small"
                         renderInput={(params) =>
                             <TextField
@@ -153,7 +154,8 @@ export default function MassesDialog({
                                 size: 'small',
                                 placeholder: formatMessage({ id: 'massDayHolder' }),
                                 error: errors.dayOfMass && touched.dayOfMass ? true : false,
-                                helperText: (errors.dayOfMass && touched.dayOfMass) && errors.dayOfMass
+                                helperText: (errors.dayOfMass && touched.dayOfMass) && errors.dayOfMass,
+                                value: values.dayOfMass ?? (massData && massData.dayOfMass)
                             }
                         }}
                         sx={{
@@ -173,7 +175,8 @@ export default function MassesDialog({
                                 size: 'small',
                                 placeholder: formatMessage({ id: 'massTimeHolder' }),
                                 error: errors.massTime && touched.massTime ? true : false,
-                                helperText: (errors.massTime && touched.massTime) && errors.massTime
+                                helperText: (errors.massTime && touched.massTime) && errors.massTime,
+                                value: values.massTime ?? (massData && massData.massTime)
                             }
                         }}
                         sx={{
@@ -190,6 +193,7 @@ export default function MassesDialog({
                         type="number"
                         placeholder={formatMessage({ id: 'massPriceHolder' })}
                         onChange={handleChange}
+                        value={values.price ?? massData?.price}
                         error={errors.price && touched.price ? true : false}
                         helperText={(errors.price && touched.price) && errors.price}
                         sx={{
