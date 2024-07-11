@@ -2,6 +2,10 @@ import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextFiel
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { TableMassOwnerData } from "../tableMassOwnerData";
 import { useIntl } from "react-intl";
+import { useFormik } from "formik";
+import * as yup from 'yup'
+import { Dayjs } from "dayjs";
+
 
 enum MassTypeEnum {
     One = 'unique',
@@ -26,6 +30,13 @@ interface CreateMassesDialogProps {
     handleClose: () => void;
 }
 
+interface FormikProps {
+    massType: MassTypeEnum | null;
+    dayOfMass: Dayjs | null;
+    massTime: Dayjs | null;
+    price: number | null;
+    replicate: boolean;
+}
 export default function MassesDialog({
     isOpen,
     handleClose,
@@ -96,8 +107,8 @@ export default function MassesDialog({
         >
             <Box sx={{
                 padding: '60px 100px',
-                width: '634px',
-                height: '478px'
+                minWidth: '634px',
+                minHeight: '478px'
             }}>
                 <Typography
                     variant='h1'
@@ -114,45 +125,87 @@ export default function MassesDialog({
 
                 >
                     <Autocomplete
+                        id="massType"
                         options={massOrderCategory.map((massType) => massType.label)}
+                        size="small"
                         renderInput={(params) =>
                             <TextField
                                 {...params}
                                 placeholder={formatMessage({ id: 'massTypeHolder' })}
-                                size="small"
-                                required
+                                error={errors.massType && touched.massType ? true : false}
+                                helperText={(errors.massType && touched.massType) && errors.massType}
                             />
                         }
+                        onChange={(_, type) => setFieldValue('massType', type)}
+                        sx={{
+                            '& .MuiFormControl-root': {
+                                bgcolor: 'transparent'
+                            }
+                        }}
                     />
                     <DatePicker
+                        name='dayOfMass'
                         closeOnSelect
                         disablePast
                         slotProps={{
                             textField: {
+                                id: 'dayOfMass',
                                 size: 'small',
-                                placeholder: formatMessage({ id: 'massDayHolder' })
+                                placeholder: formatMessage({ id: 'massDayHolder' }),
+                                error: errors.dayOfMass && touched.dayOfMass ? true : false,
+                                helperText: (errors.dayOfMass && touched.dayOfMass) && errors.dayOfMass
                             }
                         }}
+                        sx={{
+                            '&.MuiFormControl-root': {
+                                bgcolor: 'transparent'
+                            }
+                        }}
+                        onChange={(date) => setFieldValue('dayOfMass', date)}
                     />
                     <TimePicker
+                        name='massTime'
                         ampm
                         closeOnSelect
                         slotProps={{
                             textField: {
+                                id: 'massTime',
                                 size: 'small',
-                                placeholder: formatMessage({ id: 'massTimeHolder' })
+                                placeholder: formatMessage({ id: 'massTimeHolder' }),
+                                error: errors.massTime && touched.massTime ? true : false,
+                                helperText: (errors.massTime && touched.massTime) && errors.massTime
                             }
                         }}
+                        sx={{
+                            '&.MuiFormControl-root': {
+                                bgcolor: 'transparent'
+                            }
+                        }}
+                        onChange={(time) => setFieldValue('massTime', time)}
                     />
                     <TextField
+                        name="price"
+                        id="price"
                         size="small"
                         type="number"
                         placeholder={formatMessage({ id: 'massPriceHolder' })}
+                        onChange={handleChange}
+                        error={errors.price && touched.price ? true : false}
+                        helperText={(errors.price && touched.price) && errors.price}
+                        sx={{
+                            '&.MuiFormControl-root': {
+                                bgcolor: 'transparent'
+                            }
+                        }}
                     />
                     <FormControlLabel
                         label={replicatLabel}
                         control={
-                            <Checkbox />
+                            <Checkbox
+                                id='replicate'
+                                name='replicate'
+                                onChange={(event) => setFieldValue('replicate', event.target.checked)}
+                            />
                         }
                     />
                     <Box sx={{
@@ -167,7 +220,12 @@ export default function MassesDialog({
                         >
                             {formatMessage({ id: 'cancel' })}
                         </Button>
-                        <Button variant='contained'>{labelBtn}</Button>
+                        <Button
+                            variant='contained'
+                            type='submit'
+                        >
+                            {labelBtn}
+                        </Button>
                     </Box>
                 </Box>
             </Box>
