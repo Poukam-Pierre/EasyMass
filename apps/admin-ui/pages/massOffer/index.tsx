@@ -3,10 +3,12 @@ import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { Icon } from "@iconify/react";
 import { Box, InputBase, Typography } from "@mui/material";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useIntl } from "react-intl";
 import MassOfferTable from "../../components/Masses/MassOffer/MassofferTable";
 import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
+import AppLayout from '../../components/Layout';
+import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 
 
 export default function MassOffer() {
@@ -83,3 +85,13 @@ export default function MassOffer() {
         </>
     );
 }
+
+MassOffer.getLayout = function getLayout(page: ReactNode) {
+    return (
+        <EasyMassAdminLayout>
+            <AppLayout>
+                {page}
+            </AppLayout>
+        </EasyMassAdminLayout>
+    );
+};
