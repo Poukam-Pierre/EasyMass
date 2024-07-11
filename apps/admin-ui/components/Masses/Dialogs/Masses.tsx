@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextField, Typography } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
-import { TableData } from "../MassOwnerTable";
+import { TableMassOwnerData } from "../tableMassOwnerData";
 import { useIntl } from "react-intl";
 
 enum MassTypeEnum {
@@ -16,10 +16,10 @@ interface MassGroupCategory {
 }
 
 interface CreateMassesDialogProps {
-    massData?: TableData;
-    replicatLabel?: string;
-    title?: string;
-    labelBtn?: string;
+    massData?: TableMassOwnerData;
+    replicatLabel: string;
+    title: string;
+    labelBtn: string;
     link?: string;
     id?: number;
     isOpen: boolean;
@@ -34,6 +34,7 @@ export default function MassesDialog({
     replicatLabel,
     massData
 }: CreateMassesDialogProps) {
+
     const { formatMessage } = useIntl()
     const massOrderCategory: MassGroupCategory[] = [
         {
@@ -89,7 +90,6 @@ export default function MassesDialog({
                     rowGap: 2
                 }}>
                     <Autocomplete
-                        disablePortal
                         options={massOrderCategory.map((massType) => massType.label)}
                         renderInput={(params) =>
                             <TextField
