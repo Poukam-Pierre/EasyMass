@@ -1,5 +1,6 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
 
@@ -19,6 +20,7 @@ interface TableData {
 export default function FinanceTable() {
     const { formatNumber, formatMessage } = useIntl()
     const titles = ['amount', 'paymentMethod', 'date', 'status', 'transactionId']
+    const [dataTransactions, setDataTransactions] = useState<TableData[]>([])
     const tableData: TableData[] = [
         {
             id: 1,
@@ -45,6 +47,12 @@ export default function FinanceTable() {
             transactionId: 'JDUFL25461UBHS'
         },
     ]
+
+    useEffect(() => (
+        // TODO fetch data for transactions or transfert.
+        setDataTransactions(tableData)
+    ), [])
+
     const showTransactionStatus = (label: string) => {
         switch (label) {
             case 'valide':
@@ -75,6 +83,7 @@ export default function FinanceTable() {
                 )
         }
     }
+
     return (
         <Table>
             <TableHead>
@@ -98,7 +107,7 @@ export default function FinanceTable() {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {tableData.map(({
+                {dataTransactions.map(({
                     id, amount, paymentType,
                     date, status, transactionId
                 }, index) => (

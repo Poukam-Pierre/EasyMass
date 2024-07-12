@@ -3,7 +3,7 @@ import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { Icon } from "@iconify/react";
 import { Box, Button, InputBase, Typography } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import FinanceTable from "../../components/Finances/FinanceTable";
 import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
@@ -15,6 +15,7 @@ import AppLayout from '../../components/Layout';
 export default function Finances() {
     const { formatNumber, formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const [amountReceived, setAmountReceived] = useState<number>(0);
 
     const menuItem: MenuItem[] = [
         {
@@ -38,7 +39,10 @@ export default function Finances() {
             icon: checkmarkIcon
         }
     ]
-
+    useEffect(() => (
+        // TODO fetch data amount received.
+        setAmountReceived(0)
+    ), [])
     return (
         <>
             <MassMenu
@@ -63,11 +67,12 @@ export default function Finances() {
                         <Typography
                             variant="h1"
                         >
-                            {formatNumber(105000, { style: 'currency', currency: 'xaf' })}
+                            {formatNumber(amountReceived, { style: 'currency', currency: 'xaf' })}
                         </Typography>
                     </Box>
                     <Button
                         variant="contained"
+                        disabled
                     >
                         {formatMessage({ id: 'withdrawal' })}
                     </Button>
