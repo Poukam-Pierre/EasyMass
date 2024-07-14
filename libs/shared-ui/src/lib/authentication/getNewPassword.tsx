@@ -36,7 +36,6 @@ export function GetNewPassword() {
                 .oneOf([yup.ref('newPassword'), undefined], formatMessage({ id: 'Mot de passe non identique' }))
                 .required(formatMessage({ id: 'Entrer votre nouveau mot de passe' })),
         }),
-        enableReinitialize: true
     })
 
     return (

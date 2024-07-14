@@ -20,7 +20,7 @@ import HeroHeader from "./HeroHeader";
 
 
 
-export function Login() {
+export function LoginCretentials() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
     const { formatMessage } = useIntl()
     const { push } = useRouter()
@@ -48,7 +48,6 @@ export function Login() {
                 })
                 .required(formatMessage({ id: 'Should provide password' }))
         }),
-        enableReinitialize: true
     })
     return (
         <Box sx={{

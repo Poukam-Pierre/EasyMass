@@ -19,7 +19,6 @@ export function GetMailVerification() {
         validationSchema: yup.object().shape({
             email: yup.string().required('Should provide email')
         }),
-        enableReinitialize: true
     })
     return (
         <Box sx={{
@@ -48,7 +47,6 @@ export function GetMailVerification() {
                     size="small"
                     placeholder="Email"
                     type="email"
-                    required
                     onChange={handleChange}
                     error={errors.email && touched.email ? true : false}
                     helperText={(errors.email && touched.email) && errors.email}
