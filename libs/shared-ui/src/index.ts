@@ -4,3 +4,6 @@ export * from './lib/adminLayout/Header/Header';
 export * from './lib/adminLayout/SideBar/SideBar';
 export * from './lib/adminLayout/SideBar/Profile';
 export * from './lib/adminLayout/Footer';
+export * from './lib/authentication/Login';
+export * from './lib/authentication/getMailVerification';
+export * from './lib/authentication/getNewPassword';
