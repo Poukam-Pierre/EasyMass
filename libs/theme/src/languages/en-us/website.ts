@@ -136,4 +136,8 @@ export const website = {
   warningMassCreation: 'Aucune messe créée pour le moment.',
   deleteMass: 'Delete a mass !',
   deleteMassMsg: 'Are you sure you want to abolish this mass ?',
+  minPassword: ' At least 5 caracters !',
+  passwordCarateristics: '1 uppercase, 1 lowercase et 1 digit',
+  comparePassword: 'Non identical password !',
+  passwordVisible: 'Get password visible.',
 };

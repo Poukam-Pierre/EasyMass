@@ -136,5 +136,9 @@ export const website = {
   transactionId: 'Transaction ID#',
   warningMassCreation: 'Aucune messe créée pour le moment.',
   deleteMass: 'Supprimer une messe !',
-  deleteMassMsg: 'Etes vous dsûre de vouloir supprimer cette messe ?',
+  deleteMassMsg: 'Etes vous sûre de vouloir supprimer cette messe ?',
+  minPassword: ' Au moins 5 caractères !',
+  passwordCarateristics: '1 magiscule, 1 minuscule et 1 chiffre',
+  comparePassword: 'Mot de passe non identique !',
+  passwordVisible: 'Voir mot de passe.',
 };
