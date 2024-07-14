@@ -27,8 +27,8 @@ export default function Profile({
                 columnGap: 1
             }}>
                 <Avatar
-                    alt="Saint Martin de Tour"
-                    src="Saint Martin de Tour"
+                    alt={name}
+                    src={name}
                 />
                 <Box>
                     <Typography
