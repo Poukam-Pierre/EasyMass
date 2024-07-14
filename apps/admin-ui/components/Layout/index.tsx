@@ -50,9 +50,6 @@ export default function AppLayout({ children }: PropsWithChildren) {
             title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': formatMessage({ id: 'masses' }),
-                '/masses/create': formatMessage({ id: 'create' }),
-                '/masses/modify': formatMessage({ id: 'modify' }),
-                '/masses/delete': formatMessage({ id: 'cancel' }),
             }
         },
         {
