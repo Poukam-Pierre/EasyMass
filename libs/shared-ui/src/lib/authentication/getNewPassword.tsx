@@ -11,14 +11,21 @@ export function GetNewPassword() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
 
 
-    const { handleChange, handleSubmit, errors, touched } = useFormik({
+    const {
+        handleChange,
+        handleSubmit,
+        errors,
+        touched,
+        values
+    } = useFormik({
         initialValues: {
             newPassword: '',
             confirmPassword: ''
         },
-        onSubmit: (values) => {
+        onSubmit: (values, { resetForm }) => {
             // TODO send password data to API to change password
             console.log(values)
+            resetForm()
         },
         validationSchema: yup.object().shape({
             newPassword: yup
@@ -63,6 +70,7 @@ export function GetNewPassword() {
                 <TextField
                     name="newPassword"
                     size="small"
+                    value={values.newPassword}
                     placeholder={formatMessage({ id: 'newPassword' })}
                     type={isVisible ? 'text' : 'password'}
                     error={errors.newPassword && touched.newPassword ? true : false}
@@ -73,6 +81,7 @@ export function GetNewPassword() {
                 <TextField
                     name="confirmPassword"
                     size="small"
+                    value={values.confirmPassword}
                     placeholder={formatMessage({ id: 'confirmPassword' })}
                     type={isVisible ? 'text' : 'password'}
                     error={errors.confirmPassword && touched.confirmPassword ? true : false}

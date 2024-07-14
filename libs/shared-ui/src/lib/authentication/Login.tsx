@@ -29,15 +29,17 @@ export function LoginCretentials() {
         handleSubmit,
         errors,
         touched,
-        handleChange
+        handleChange,
+        values
     } = useFormik({
         initialValues: {
             email: '',
             password: '',
         },
-        onSubmit: (values) => {
+        onSubmit: (values, { resetForm }) => {
             // TODO fetch data to API for authentication
             console.log(values)
+            resetForm()
         },
         validationSchema: yup.object().shape({
             email: yup.string().required(formatMessage({ id: 'Should provide email' })),
@@ -76,6 +78,7 @@ export function LoginCretentials() {
                     size="small"
                     placeholder="Email"
                     type="email"
+                    value={values.email}
                     error={errors.email && touched.email ? true : false}
                     helperText={(errors.email && touched.email) && errors.email}
                     onChange={handleChange}
@@ -89,6 +92,7 @@ export function LoginCretentials() {
                         name="password"
                         placeholder={formatMessage({ id: 'password' })}
                         type={isVisible ? 'text' : 'password'}
+                        value={values.password}
                         endAdornment={
                             <InputAdornment position="end">
                                 <IconButton
