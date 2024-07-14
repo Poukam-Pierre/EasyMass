@@ -42,13 +42,13 @@ export function LoginCretentials() {
             resetForm()
         },
         validationSchema: yup.object().shape({
-            email: yup.string().required(formatMessage({ id: 'Should provide email' })),
+            email: yup.string().required(formatMessage({ id: 'fillEmail' })),
             password: yup.string()
-                .min(5, formatMessage({ id: 'At least 5 caracters' }))
+                .min(5, formatMessage({ id: 'minPassword' }))
                 .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/, {
-                    message: formatMessage({ id: '1 magiscule, 1 minuscule et 1 chiffre' })
+                    message: formatMessage({ id: 'passwordCarateristics' })
                 })
-                .required(formatMessage({ id: 'Should provide password' }))
+                .required(formatMessage({ id: 'fillPassword' }))
         }),
     })
     return (

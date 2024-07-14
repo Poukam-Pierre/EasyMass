@@ -17,7 +17,8 @@ export function GetMailVerification() {
             console.log(values)
         },
         validationSchema: yup.object().shape({
-            email: yup.string().required('Should provide email')
+            email: yup.string()
+                .required(formatMessage({ id: 'fillEmail' }))
         }),
     })
     return (

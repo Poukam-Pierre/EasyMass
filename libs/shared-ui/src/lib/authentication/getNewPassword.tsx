@@ -30,18 +30,15 @@ export function GetNewPassword() {
         validationSchema: yup.object().shape({
             newPassword: yup
                 .string()
-                .min(5,
-                    formatMessage({ id: 'min 5 caractères,au moins 1 lettre et 1 chiffre' })
-                )
-                .max(10, formatMessage({ id: 'Max 10 caratères, au moins 1 lettre et 1 chiffre' }))
-                .matches(/^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d][A-Za-z\d!@#$%^&*()_+]{4,10}$/, {
-                    message: formatMessage({ id: 'Au moins 1 lettre et 1 chiffre' }),
+                .min(5, formatMessage({ id: 'minPassword' }))
+                .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/, {
+                    message: formatMessage({ id: 'passwordCarateristics' })
                 })
-                .required(formatMessage({ id: 'Nouveau mot de passe obligatoire' })),
+                .required(formatMessage({ id: 'fillPassword' })),
             confirmPassword: yup
                 .string()
-                .oneOf([yup.ref('newPassword'), undefined], formatMessage({ id: 'Mot de passe non identique' }))
-                .required(formatMessage({ id: 'Entrer votre nouveau mot de passe' })),
+                .oneOf([yup.ref('newPassword'), undefined], formatMessage({ id: 'comparePassword' }))
+                .required(formatMessage({ id: 'fillPassword' })),
         }),
     })
 
@@ -90,7 +87,7 @@ export function GetNewPassword() {
 
                 />
                 <FormControlLabel
-                    label={formatMessage({ id: 'Get password visible' })}
+                    label={formatMessage({ id: 'passwordVisible' })}
                     control={
                         <Checkbox
                             checked={isVisible}
