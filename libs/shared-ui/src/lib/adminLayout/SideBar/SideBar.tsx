@@ -1,7 +1,7 @@
 import { Box, Divider } from "@mui/material";
 import Image from "next/image";
 import { ReactElement } from "react";
-import NavBar from "./Navbar";
+import NavBar from "./NavBar";
 import Profile, { ProfileProps } from "./Profile";
 
 export interface SideBarItem {
@@ -21,7 +21,7 @@ interface SideBarProps {
 }
 
 
-export default function SideBar({
+export function SideBar({
     sideBarSection,
     profile,
 }: SideBarProps) {

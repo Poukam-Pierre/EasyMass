@@ -7,7 +7,7 @@ export interface BreadcrumbsNameMaps {
     title: string;
     links: { [key: string]: string }
 }
-export default function Header({
+export function Header({
     breadcrumbsNameMap
 }: {
     breadcrumbsNameMap: BreadcrumbsNameMaps[]

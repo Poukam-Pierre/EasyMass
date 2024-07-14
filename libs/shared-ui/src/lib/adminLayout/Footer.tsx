@@ -4,7 +4,7 @@ import ExternalLink from '@iconify-icons/fluent/open-20-regular'
 import LanguageSwapper from "./LanguageSwapper";
 
 
-export default function Footer() {
+export function Footer() {
     return (
         <>
             <Divider />
