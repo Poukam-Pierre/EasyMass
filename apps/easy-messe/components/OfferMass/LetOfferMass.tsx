@@ -212,11 +212,11 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         },
         validationSchema: yup.object().shape({
             phone: yup.number(),
-            dateTime: yup.string().required('dateTimeChecked'),
+            dateTime: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
             intention: yup
                 .string()
-                .required('intensionChecked')
-                .max(300, 'intentionNumberChecked')
+                .required(formatMessage({ id: 'intensionChecked' }))
+                .max(300, formatMessage({ id: 'intentionNumberChecked' }))
         })
     })
 
@@ -343,7 +343,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             disabled={isAnonym}
                             onChange={handleChange}
                             error={errors.phone && touched.phone ? true : false}
-                            helperText={(errors.phone && touched.phone) && formatMessage({ id: errors.phone })}
+                            helperText={(errors.phone && touched.phone) && errors.phone}
                         />
                     </Box>
                 </Box>
@@ -433,7 +433,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         handleChange={setFieldValue}
                         error={errors.dateTime && touched.dateTime ? true : false}
                         helperText={(errors.dateTime && touched.dateTime) ?
-                            formatMessage({ id: errors.dateTime }) : ''}
+                            errors.dateTime : ''}
                     />
                 </Box>
                 <Box sx={{
@@ -457,7 +457,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         fullWidth
                         onChange={handleChange}
                         error={errors.intention && touched.intention ? true : false}
-                        helperText={(errors.intention && touched.intention) && formatMessage({ id: errors.intention })}
+                        helperText={(errors.intention && touched.intention) && errors.intention}
                     />
                 </Box>
             </Box>
