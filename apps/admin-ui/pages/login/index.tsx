@@ -14,7 +14,7 @@ import { useRouter } from 'next/router';
 import { useState } from "react";
 import { useIntl } from 'react-intl';
 import HeroHeader from '../../components/HeroHeader';
-import Footer from '../../components/Layout/Footer/Footer';
+import { Footer } from '@easy-messe/shared-ui';
 
 
 

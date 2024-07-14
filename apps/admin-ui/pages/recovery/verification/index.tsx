@@ -1,7 +1,7 @@
 import { Box, Button, TextField } from "@mui/material";
 import HeroHeader from '../../../components/HeroHeader';
-import Footer from "../../../components/Layout/Footer/Footer";
 import { useIntl } from "react-intl";
+import { Footer } from "@easy-messe/shared-ui";
 
 export default function MailVerification() {
     const { formatMessage } = useIntl()
