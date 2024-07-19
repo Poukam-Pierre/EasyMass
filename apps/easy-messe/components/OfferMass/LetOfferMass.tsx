@@ -12,7 +12,8 @@ import { useFormik } from 'formik';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
-import { LetOfferMassSchema } from './letOfferMass.schema';
+import * as yup from 'yup'
+
 
 
 interface MassGroupCategory {
@@ -172,6 +173,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
 
+
     const { handleChange, handleSubmit, setFieldValue, errors, touched } = useFormik<UseformikProps>({
         initialValues: {
             name: '',
@@ -207,7 +209,14 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                     }]);
             if (handleIndexTab) handleIndexTab(0)
         },
-        validationSchema: LetOfferMassSchema
+        validationSchema: yup.object().shape({
+            phone: yup.number(),
+            dateTime: yup.string().required('dateTimeChecked'),
+            intention: yup
+                .string()
+                .required('intensionChecked')
+                .max(300, 'intentionNumberChecked')
+        })
     })
 
     const handleAnonymous = (event: ChangeEvent<HTMLInputElement>) => {

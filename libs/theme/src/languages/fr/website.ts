@@ -3,6 +3,7 @@ export const website = {
   aboutUs: 'A propos',
   subtitleAboutUs: 'Bienvenue sur le portail EasyMesse',
   offerMass: 'Offrir une messe',
+  massOffer: 'Offre de messes',
   masses: 'Messes',
   faithfull: 'Fidèles',
   getMore: 'En savoir plus',
@@ -87,4 +88,10 @@ export const website = {
   dateTimeChecked: "Date et l'heure obligatoire",
   intensionChecked: 'Intention obligatoire',
   intentionNumberChecked: 'Au 300 mots possible',
+  finances: 'Finances',
+  logout: 'Deconnexion',
+  withdrawal: 'Retrait',
+  create: 'Creation',
+  modify: 'Modification',
+  cancel: 'Suppression',
 };

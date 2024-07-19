@@ -2,6 +2,7 @@ import { Box, Divider } from "@mui/material";
 import Breadcrumb from "./Breadcrumbs";
 import { useRouter } from "next/router";
 import LanguageSwapper from "../LanguageSwapper";
+import { useIntl } from "react-intl";
 
 export interface BreadcrumbsNameMaps {
     title: string;
@@ -9,28 +10,29 @@ export interface BreadcrumbsNameMaps {
 }
 export default function Header() {
     const { pathname } = useRouter()
+    const { formatMessage } = useIntl()
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: 'Mass Offer',
+            title: formatMessage({ id: 'massOffer' }),
             links: {
-                '/massOffer': 'Mass offer',
+                '/massOffer': formatMessage({ id: 'massOffer' }),
             }
         },
         {
-            title: 'Masses',
+            title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': 'Masses',
-                '/masses/create': 'Create',
-                '/masses/modify': 'Modify',
-                '/masses/delete': 'Cancel',
+                '/masses/create': formatMessage({ id: 'create' }),
+                '/masses/modify': formatMessage({ id: 'modify' }),
+                '/masses/delete': formatMessage({ id: 'cancel' }),
             }
         },
         {
-            title: 'Finances',
+            title: formatMessage({ id: 'finances' }),
             links: {
-                '/finances': 'Finances',
-                'finances/widrawal': 'Widrawal',
+                '/finances': formatMessage({ id: 'finances' }),
+                'finances/withdrawal': formatMessage({ id: 'withdrawal' }),
             }
         },
     ]
@@ -38,18 +40,19 @@ export default function Header() {
         <Box sx={{
             display: 'grid',
             rowGap: 1,
-            padding: '0px 50px'
+            padding: '17px 50px 0'
         }}>
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
             }}>
-                <Breadcrumb breadcrumbs={
-                    breadcrumbsNameMap.find((BreadcrumbsNameMaps) =>
-                        BreadcrumbsNameMaps.links[pathname] !== undefined
-                    ) as BreadcrumbsNameMaps
-                } />
+                <Breadcrumb
+                    breadcrumb={
+                        breadcrumbsNameMap.find((BreadcrumbsNameMaps) =>
+                            BreadcrumbsNameMaps.links[pathname] !== undefined
+                        ) as BreadcrumbsNameMaps
+                    } />
                 <LanguageSwapper />
             </Box>
             <Divider />

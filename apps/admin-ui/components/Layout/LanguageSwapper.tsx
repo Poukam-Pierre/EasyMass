@@ -8,11 +8,13 @@ type CorrespondingShortLanguage = Record<string, string>;
 export default function LanguageSwapper() {
     const correspondingShortLanguage: CorrespondingShortLanguage = {
         'fr': 'Français',
-        'en': 'Anglais'
+        'en': 'English'
     }
-    const supportedLanguages: string[] = ['Français', 'Anglais']
+    enum supportedLanguages {
+        english = 'English',
+        french = 'Français',
+    }
     const { activeLanguage, languageDispatch } = useLanguage()
-
     return (
         <Box sx={{
             display: 'grid',
@@ -48,7 +50,7 @@ export default function LanguageSwapper() {
                     },
                 }}
             >
-                {supportedLanguages.map((language, index) => (
+                {Object.values(supportedLanguages).map((language, index) => (
                     <MenuItem key={index} value={language}>
                         {language}
                     </MenuItem>

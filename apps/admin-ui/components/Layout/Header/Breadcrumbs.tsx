@@ -2,16 +2,16 @@ import { Box, Breadcrumbs, Link, Typography } from "@mui/material";
 import { BreadcrumbsNameMaps } from "./Header";
 import { useRouter } from "next/router";
 
-interface BreadcrumbProps {
-    breadcrumbs: BreadcrumbsNameMaps
-}
-
-export default function Breadcrumb({ breadcrumbs: {
-    title,
-    links
-} }: BreadcrumbProps) {
+export default function Breadcrumb({
+    breadcrumb: {
+        title,
+        links
+    }
+}: {
+    breadcrumb: BreadcrumbsNameMaps
+}) {
     const { pathname } = useRouter()
-    const pathnames = pathname.split('/').filter((x) => x)
+    const subPaths = pathname.split('/').filter((x) => x)
     return (
         <Box sx={{
             display: 'grid',
@@ -34,22 +34,22 @@ export default function Breadcrumb({ breadcrumbs: {
                 >
                     Management
                 </Link>
-                {pathnames.map((_, index) => {
-                    const last = index === pathnames.length - 1;
-                    const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-                    return last ? (
-                        <Typography key={to} color='primary'>
-                            {links[to]}
+                {subPaths.map((_, index) => {
+                    const islastPath = index === subPaths.length - 1;
+                    const pathRoute = `/${subPaths.slice(0, index + 1).join('/')}`;
+                    return islastPath ? (
+                        <Typography key={pathRoute} color='primary'>
+                            {links[pathRoute]}
                         </Typography>
                     ) : (
                         <Link
-                            key={to}
+                            key={pathRoute}
                             variant="body2"
                             underline="hover"
                             color="inherit"
-                            href={to}
+                            href={pathRoute}
                         >
-                            {links[to]}
+                            {links[pathRoute]}
                         </Link>
                     )
                 })}
