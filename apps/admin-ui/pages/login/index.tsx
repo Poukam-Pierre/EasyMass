@@ -8,18 +8,20 @@ import {
     IconButton,
     InputAdornment,
     OutlinedInput,
-    TextField,
-    Typography
+    TextField
 } from "@mui/material";
-import { useState } from "react";
-import HeroHeader from '../../components/HeroHeader';
 import { useRouter } from 'next/router';
+import { useState } from "react";
+import { useIntl } from 'react-intl';
+import HeroHeader from '../../components/HeroHeader';
+import Footer from '../../components/Layout/Footer/Footer';
 
 
 
 export default function Login() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
     const { push } = useRouter()
+    const { formatMessage } = useIntl()
 
     return (
         <Box sx={{
@@ -36,9 +38,9 @@ export default function Login() {
                 rowGap: 3
             }}>
                 <HeroHeader
-                    slogan='La messe, la plus grande des prières'
-                    greeting='Bon retour parmis nous!'
-                    getActionMsg='Entrez vos détails de connexion'
+                    slogan={formatMessage({ id: 'slogan' })}
+                    greeting={formatMessage({ id: 'greeting' })}
+                    getActionMsg={formatMessage({ id: 'logInMsg' })}
                 />
                 <Box
                     sx={{
@@ -58,7 +60,7 @@ export default function Login() {
                     >
                         <OutlinedInput
                             id="outlined-adornment-password"
-                            placeholder='Mot de passe'
+                            placeholder={formatMessage({ id: 'password' })}
                             type={isVisible ? 'text' : 'password'}
                             endAdornment={
                                 <InputAdornment position="end">
@@ -79,17 +81,17 @@ export default function Login() {
                             }}
                         />
                     </FormControl>
-                    <Button variant="contained">connexion</Button>
+                    <Button variant="contained">{formatMessage({ id: 'connexion' })}</Button>
                     <Button
                         variant='text'
                         disableRipple
                         onClick={() => push('/recovery/verification')}
                     >
-                        Mot de passe oublié ?
+                        {formatMessage({ id: 'forgotPassword' })}
                     </Button>
                 </Box>
             </Box>
-            <Typography>Footer</Typography>
+            <Footer />
         </Box>
     );
 }

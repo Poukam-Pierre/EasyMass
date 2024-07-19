@@ -77,7 +77,7 @@ export default function Header() {
                     <IconButton sx={{
                         display: { laptop: 'none', mobile: 'block' }
                     }}
-                        onClick={() => openSideBar()}
+                        onClick={openSideBar}
                     >
                         <Icon icon={MenuIcon} color="#2F3A45" />
                     </IconButton>

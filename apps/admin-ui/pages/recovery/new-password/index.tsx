@@ -1,13 +1,13 @@
-import { Box, Button, FormControl, IconButton, InputAdornment, OutlinedInput, TextField, Typography } from "@mui/material";
-import HeroHeader from '../../../components/HeroHeader';
+import { Box, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { useState } from "react";
-import { Icon } from "@iconify/react";
-import invisibleIcon from '@iconify-icons/material-symbols/visibility-off-outline';
-import visibleIcon from '@iconify-icons/material-symbols/visibility-outline';
+import { useIntl } from "react-intl";
+import HeroHeader from '../../../components/HeroHeader';
+import Footer from "../../../components/Layout/Footer/Footer";
 
 
 export default function ChangePassword() {
     const [isVisible, setIsVisible] = useState<boolean>(false)
+    const { formatMessage } = useIntl()
 
     return (
         <Box sx={{
@@ -24,9 +24,9 @@ export default function ChangePassword() {
                 rowGap: 3
             }}>
                 <HeroHeader
-                    slogan='La messe, la plus grande des prières'
-                    greeting='Récupération du mot de passe!'
-                    getActionMsg='Entrez votre nouveau mot de passe'
+                    slogan={formatMessage({ id: 'slogan' })}
+                    greeting={formatMessage({ id: 'passwordRecovery' })}
+                    getActionMsg={formatMessage({ id: 'fillPassword' })}
                 />
                 <Box
                     sx={{
@@ -35,42 +35,33 @@ export default function ChangePassword() {
                     }}
                     component='form'
                 >
-                    <FormControl
-                        variant="outlined"
-                        size='small'
-                    >
-                        <OutlinedInput
-                            id="outlined-adornment-password"
-                            placeholder='New password'
-                            type={isVisible ? 'text' : 'password'}
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={() => setIsVisible((val) => !val)}
-                                        edge="end"
-                                    >
-                                        {isVisible ?
-                                            <Icon icon={visibleIcon} fontSize={24} /> :
-                                            <Icon icon={invisibleIcon} fontSize={24} />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
-                            sx={{
-                                '& .MuiOutlinedInput-notchedOutline': {
-                                    borderRadius: '8px'
-                                }
-                            }}
-                        />
-                    </FormControl>
                     <TextField
                         size="small"
-                        placeholder="Confirm password"
-                        type="password"
+                        placeholder={formatMessage({ id: 'newPassword' })}
+                        type={isVisible ? 'text' : 'password'}
                     />
-                    <Button variant="contained">Save</Button>
+                    <TextField
+                        size="small"
+                        placeholder={formatMessage({ id: 'confirmPassword' })}
+                        type={isVisible ? 'text' : 'password'}
+                    />
+                    <FormControlLabel
+                        label='Get password visible'
+                        control={
+                            <Checkbox
+                                checked={isVisible}
+                                onChange={(event) => setIsVisible(event.target.checked)}
+                            />
+                        }
+                    />
+                    <Button
+                        variant="contained"
+                    >
+                        {formatMessage({ id: 'save' })}
+                    </Button>
                 </Box>
             </Box>
-            <Typography>Footer</Typography>
+            <Footer />
         </Box>
 
     );
