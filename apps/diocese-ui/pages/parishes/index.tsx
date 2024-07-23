@@ -1,31 +1,42 @@
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
-import { Box, Typography } from "@mui/material";
-import AppLayout from "../../components/Layout";
+import { Box, Button, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { useIntl } from "react-intl";
+import AppLayout from "../../components/Layout";
+import ParishesTable from "../../components/Parishes/ParishesTables";
+
+
 
 export default function Parishes() {
     const { formatMessage } = useIntl()
     return (
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 16px',
-            marginBottom: 1
-
-        }}>
-            <Typography
-                variant='h3'
-                color='primary'
-                sx={{
-                    paddingBottom: 0
-                }}
-            >
-
-                {formatMessage({ id: 'listOfMassSupply' })}
-            </Typography>
-        </Box>
+        <>
+            <Box sx={{
+                padding: '0 16px 40px 0'
+            }}>
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}>
+                    <Typography
+                        variant="h3"
+                        color='primary'
+                        sx={{
+                            paddingBottom: 0
+                        }}
+                    >
+                        Liste des différentes paroisses
+                    </Typography>
+                    <Button
+                        variant="contained"
+                    >
+                        + Ajouter une paroisse
+                    </Button>
+                </Box>
+            </Box>
+            <ParishesTable />
+        </>
 
     );
 }
