@@ -7,7 +7,7 @@ export const website = {
   masses: 'Messes',
   faithfull: 'Fidèles',
   getMore: 'En savoir plus',
-  parish: 'Paroisses',
+  parishes: 'Paroisses',
   partners: 'Nos partenaires',
   getInvolved: 'Devenir Associé',
   footerMessage:

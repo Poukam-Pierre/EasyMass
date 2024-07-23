@@ -4,7 +4,7 @@ export const website = {
   subtitleAboutUs: 'Welcome to the EasyMesse portal',
   masses: 'Masses',
   faithfull: 'Faithfulls',
-  parish: 'Parishes',
+  parishes: 'Parishes',
   offerMass: 'Offer Mass',
   massOffer: 'Masses requested',
   partners: 'Our Partners',
