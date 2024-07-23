@@ -1,14 +1,42 @@
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
 import { Box, Button, Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import AppLayout from "../../components/Layout";
-import ParishesTable from "../../components/Parishes/ParishesTables";
+import ParishesTable, { ParishData } from "../../components/Parishes/ParishesTables";
 
 
 
 export default function Parishes() {
     const { formatMessage } = useIntl()
+    const [parishData, setParishData] = useState<ParishData[]>([])
+
+
+    const parishesData: ParishData[] = [
+        {
+            name: 'Saint Paul Apôtre',
+            city: 'Bangangté',
+            email: 'saintp@gmail.com',
+            contact: '+237 680 090 489'
+        },
+        {
+            name: 'Marie Reine des apôtres de Kamtop',
+            city: 'Baafoussam',
+            email: 'marier@gmail.com',
+            contact: '+237 680 090 489'
+        },
+        {
+            name: 'Notre dame des sept douleur de Bangangté',
+            city: 'Bangangté',
+            email: 'notred@gmail.com',
+            contact: '+237 680 090 489'
+        },
+    ]
+
+    useEffect(() => {
+        setParishData(parishesData)
+    }, [])
+
     return (
         <>
             <Box sx={{
@@ -35,7 +63,7 @@ export default function Parishes() {
                     </Button>
                 </Box>
             </Box>
-            <ParishesTable />
+            <ParishesTable parishDataTable={parishData} />
         </>
 
     );
