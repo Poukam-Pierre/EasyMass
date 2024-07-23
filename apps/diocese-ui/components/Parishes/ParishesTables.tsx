@@ -1,29 +1,39 @@
-import { Icon } from "@iconify/react";
+import { theme } from "@easy-messe/libs/theme";
+import editIcon from '@iconify-icons/fluent/edit-28-regular';
+import searchIcon from '@iconify-icons/fluent/search-24-regular';
+import refreshIcon from '@iconify-icons/material-symbols/refresh';
+import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill';
+import trashIcon from '@iconify-icons/ph/trash-light';
+import { Icon, IconifyIcon } from "@iconify/react";
 import {
     Box,
+    IconButton,
     InputBase,
     Table,
-    Typography,
-    IconButton,
     TableBody,
     TableCell,
     TableHead,
     TableRow,
+    Typography,
 } from "@mui/material";
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import refreshIcon from '@iconify-icons/material-symbols/refresh';
+import { MouseEvent, useState } from "react";
 import { useIntl } from "react-intl";
-import { theme } from "@easy-messe/libs/theme";
-import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
-
+import ParishTableMenu from "../Menu/ParishTableMenu";
 
 
 export interface ParishData {
+    id: number;
     name: string;
     city: string;
     email: string;
     contact: string;
 
+}
+
+export interface MenuItems {
+    title: string;
+    icon: IconifyIcon;
+    color?: string;
 }
 
 export default function ParishesTable({
@@ -32,10 +42,37 @@ export default function ParishesTable({
     parishDataTable: ParishData[]
 }) {
     const { formatMessage } = useIntl()
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [idSelected, setIdSelected] = useState<number | undefined>();
+
 
     const titles: string[] = ['name', 'city', 'email', 'contact', 'action']
+
+    const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
+        setAnchorEl(event.currentTarget);
+        setIdSelected(id)
+    }
+
+    const menuItem: MenuItems[] = [
+        {
+            title: formatMessage({ id: 'modify' }),
+            icon: editIcon
+        },
+        {
+            title: formatMessage({ id: 'delete' }),
+            icon: trashIcon,
+            color: 'var(--error)'
+        },
+    ]
+
+
     return (
         <>
+            <ParishTableMenu
+                anchorEl={anchorEl}
+                setAnchorEl={setAnchorEl}
+                menuItem={menuItem}
+            />
             <Box sx={{
                 display: 'grid',
                 gridAutoFlow: 'column',
@@ -88,7 +125,7 @@ export default function ParishesTable({
                 </TableHead>
                 <TableBody>
                     {parishDataTable.map(({
-                        name, city,
+                        name, city, id,
                         email, contact
                     }, index) => (
                         <TableRow
@@ -118,6 +155,7 @@ export default function ParishesTable({
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"
+                                    onClick={(event) => handleActionOnRow(event, id)}
                                 >
                                     <Icon icon={verticalDotsIcon} fontSize={18} />
                                 </IconButton>
@@ -126,7 +164,6 @@ export default function ParishesTable({
                     ))}
                 </TableBody>
             </Table>
-
         </>
 
     );
