@@ -134,10 +134,18 @@ export default function ParishesTable({
                                 color: 'var(--label)'
                             }}
                         >
-                            <TableCell sx={{
-                                fontWeight: 600,
-                                color: 'var(--label)'
-                            }}>{name}</TableCell>
+                            <TableCell>
+                                <Typography sx={{
+                                    width: '400px',
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    fontWeight: 600,
+                                    color: 'var(--label)'
+                                }}>
+                                    {name}
+                                </Typography>
+                            </TableCell>
                             <TableCell sx={{
                                 fontWeight: 600,
                                 color: 'var(--label)'

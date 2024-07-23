@@ -27,7 +27,7 @@ export default function Parishes() {
         },
         {
             id: 3,
-            name: 'Notre dame des sept douleur de Bangangté',
+            name: 'Immaculée Conception de la Vierge Marie de Briqueterie',
             city: 'Bangangté',
             email: 'notred@gmail.com',
             contact: '+237 680 090 489'
