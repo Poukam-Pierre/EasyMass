@@ -19,6 +19,7 @@ import {
 import { MouseEvent, useState } from "react";
 import { useIntl } from "react-intl";
 import ParishTableMenu from "../Menu/ParishTableMenu";
+import ParishesDialog from "./Dialog/Parishes";
 
 
 export interface ParishData {
@@ -27,6 +28,7 @@ export interface ParishData {
     city: string;
     email: string;
     contact: string;
+    leadName: string;
 
 }
 
@@ -44,6 +46,8 @@ export default function ParishesTable({
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [idSelected, setIdSelected] = useState<number | undefined>();
+    const [isOpenDialogModif, setIsOpenDialogModif] = useState<boolean>(false);
+    const [parishSelected, setParishSelected] = useState<ParishData>()
 
 
     const titles: string[] = ['name', 'city', 'email', 'contact', 'action']
@@ -51,6 +55,14 @@ export default function ParishesTable({
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget);
         setIdSelected(id)
+    }
+
+    const handleParishshModif = () => {
+        setIsOpenDialogModif(true);
+        setParishSelected(parishDataTable.find((data) => data.id === idSelected))
+    }
+    const handleCancelClose = () => {
+        return
     }
 
     const menuItem: MenuItems[] = [
@@ -72,6 +84,15 @@ export default function ParishesTable({
                 anchorEl={anchorEl}
                 setAnchorEl={setAnchorEl}
                 menuItem={menuItem}
+                handleModify={handleParishshModif}
+                handleCancel={handleCancelClose}
+            />
+            <ParishesDialog
+                title='Modifier une paroisse'
+                labelBtn='Enredistrer'
+                isOpen={isOpenDialogModif}
+                handleClose={() => setIsOpenDialogModif(false)}
+                parishData={parishSelected}
             />
             <Box sx={{
                 display: 'grid',
