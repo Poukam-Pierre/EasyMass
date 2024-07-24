@@ -19,7 +19,7 @@ export interface TableMassOwnerData {
     id: number;
     dayOfMass: Dayjs | null;
     massTime: Dayjs | null;
-    massType: string;
+    massType: MassTypeEnum;
     price: number;
 }
 

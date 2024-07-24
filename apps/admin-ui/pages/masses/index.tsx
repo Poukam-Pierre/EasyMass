@@ -5,7 +5,7 @@ import { Icon } from "@iconify/react";
 import { Box, Button, InputBase, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import MassesDialog from "../../components/Masses/Dialogs/Masses";
+import MassesDialog, { MassTypeEnum } from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
 import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
@@ -38,21 +38,21 @@ export default function Masses() {
             id: 1,
             dayOfMass: dayjs('2024-07-22'),
             massTime: dayjs(),
-            massType: 'unique',
+            massType: MassTypeEnum.One,
             price: 2000
         },
         {
             id: 2,
             dayOfMass: dayjs('2024-07-15'),
             massTime: dayjs(),
-            massType: 'unique',
+            massType: MassTypeEnum.One,
             price: 5000
         },
         {
             id: 3,
             dayOfMass: null,
             massTime: null,
-            massType: 'triduum',
+            massType: MassTypeEnum.Triduum,
             price: 3000
         },
     ]

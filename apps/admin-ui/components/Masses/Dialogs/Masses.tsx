@@ -1,14 +1,14 @@
+import { useLanguage } from "@easy-messe/libs/theme";
 import { Autocomplete, Box, Button, Checkbox, Dialog, FormControlLabel, TextField, Typography } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import { TableMassOwnerData } from "../tableMassOwnerData";
-import { useLanguage } from "@easy-messe/libs/theme";
 
 
-enum MassTypeEnum {
+export enum MassTypeEnum {
     One = 'unique',
     Triduum = 'triduum',
     Seven = 'seven',
@@ -32,10 +32,10 @@ interface CreateMassesDialogProps {
 }
 
 interface FormikProps {
-    massType: MassTypeEnum | null;
-    dayOfMass: Dayjs | null;
-    massTime: Dayjs | null;
-    price: number | null;
+    massType: MassTypeEnum | undefined;
+    dayOfMass: Dayjs | null | undefined;
+    massTime: Dayjs | null | undefined;
+    price: number | undefined;
     replicate: boolean;
 }
 export default function MassesDialog({
@@ -76,10 +76,10 @@ export default function MassesDialog({
         values
     } = useFormik<FormikProps>({
         initialValues: {
-            massType: null,
-            dayOfMass: null,
-            massTime: null,
-            price: null,
+            massType: massData?.massType,
+            dayOfMass: massData?.dayOfMass,
+            massTime: massData?.massTime,
+            price: massData?.price,
             replicate: false,
         },
         onSubmit: (values) => {
@@ -129,7 +129,7 @@ export default function MassesDialog({
                     <Autocomplete
                         id="massType"
                         options={massOrderCategory.map((massType) => massType.label)}
-                        value={values.massType ?? massData?.massType}
+                        value={values.massType}
                         size="small"
                         renderInput={(params) =>
                             <TextField
@@ -157,7 +157,7 @@ export default function MassesDialog({
                                 placeholder: formatMessage({ id: 'massDayHolder' }),
                                 error: errors.dayOfMass && touched.dayOfMass ? true : false,
                                 helperText: (errors.dayOfMass && touched.dayOfMass) && errors.dayOfMass,
-                                value: values.dayOfMass ?? (massData && massData.dayOfMass)
+                                value: values.dayOfMass ?? null
                             }
                         }}
                         sx={{
@@ -180,7 +180,7 @@ export default function MassesDialog({
                                 placeholder: formatMessage({ id: 'massTimeHolder' }),
                                 error: errors.massTime && touched.massTime ? true : false,
                                 helperText: (errors.massTime && touched.massTime) && errors.massTime,
-                                value: values.massTime ?? (massData && massData.massTime)
+                                value: values.massTime ?? null
                             }
                         }}
                         sx={{
@@ -197,7 +197,7 @@ export default function MassesDialog({
                         type="number"
                         placeholder={formatMessage({ id: 'massPriceHolder' })}
                         onChange={handleChange}
-                        value={values.price ?? massData?.price}
+                        value={values.price}
                         error={errors.price && touched.price ? true : false}
                         helperText={(errors.price && touched.price) && errors.price}
                         sx={{
