@@ -20,6 +20,7 @@ import { MouseEvent, useState } from "react";
 import { useIntl } from "react-intl";
 import ParishTableMenu from "../Menu/ParishTableMenu";
 import ParishesDialog from "./Dialog/Parishes";
+import CancelParishDialog from "./Dialog/CancelParish";
 
 
 export interface ParishData {
@@ -47,6 +48,7 @@ export default function ParishesTable({
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [idSelected, setIdSelected] = useState<number | undefined>();
     const [isOpenDialogModif, setIsOpenDialogModif] = useState<boolean>(false);
+    const [isOpenDialogDelete, setIsOpenDialogDelete] = useState<boolean>(false);
     const [parishSelected, setParishSelected] = useState<ParishData>()
 
 
@@ -62,7 +64,7 @@ export default function ParishesTable({
         setParishSelected(parishDataTable.find((data) => data.id === idSelected))
     }
     const handleCancelClose = () => {
-        return
+        setIsOpenDialogDelete((prev) => !prev)
     }
 
     const menuItem: MenuItems[] = [
@@ -93,6 +95,11 @@ export default function ParishesTable({
                 isOpen={isOpenDialogModif}
                 handleClose={() => setIsOpenDialogModif(false)}
                 parishData={parishSelected}
+            />
+            <CancelParishDialog
+                isOpen={isOpenDialogDelete}
+                handleClose={handleCancelClose}
+                idSelected={idSelected}
             />
             <Box sx={{
                 display: 'grid',
