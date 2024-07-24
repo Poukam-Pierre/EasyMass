@@ -99,7 +99,7 @@ export default function ParishesDialog({
                         id="name"
                         size="small"
                         type="text"
-                        placeholder='ENtrez le nom'
+                        placeholder={formatMessage({ id: 'parishName' })}
                         onChange={handleChange}
                         value={values.name}
                         error={errors.name && touched.name ? true : false}
@@ -119,7 +119,7 @@ export default function ParishesDialog({
                         renderInput={(params) =>
                             <TextField
                                 {...params}
-                                placeholder='Entrez la ville'
+                                placeholder={formatMessage({ id: 'parishCity' })}
                                 error={errors.city && touched.city ? true : false}
                                 helperText={(errors.city && touched.city) && errors.city}
                             />
@@ -136,7 +136,7 @@ export default function ParishesDialog({
                         id="leadName"
                         size="small"
                         type="text"
-                        placeholder='Entrez le nom du responsable'
+                        placeholder={formatMessage({ id: 'leadParishName' })}
                         onChange={handleChange}
                         value={values.leadName}
                         error={errors.leadName && touched.leadName ? true : false}
@@ -152,7 +152,7 @@ export default function ParishesDialog({
                         id="email"
                         size="small"
                         type="email"
-                        placeholder="Entrez l'email"
+                        placeholder={formatMessage({ id: 'parishMailAddress' })}
                         onChange={handleChange}
                         value={values.email}
                         error={errors.email && touched.email ? true : false}
@@ -168,7 +168,7 @@ export default function ParishesDialog({
                         id="tel"
                         size="small"
                         type="tel"
-                        placeholder="Entrez le numéro du responsable"
+                        placeholder={formatMessage({ id: 'parishPhoneNumber' })}
                         onChange={handleChange}
                         value={values.tel}
                         error={errors.tel && touched.tel ? true : false}

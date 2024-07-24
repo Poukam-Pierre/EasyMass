@@ -4,10 +4,12 @@ import { ReactNode, useEffect, useState } from "react";
 import AppLayout from "../../components/Layout";
 import ParishesTable, { ParishData } from "../../components/Parishes/ParishesTables";
 import ParishesDialog from "../../components/Parishes/Dialog/Parishes";
+import { useIntl } from "react-intl";
 
 
 
 export default function Parishes() {
+    const { formatMessage } = useIntl()
     const [parishData, setParishData] = useState<ParishData[]>([])
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
 
@@ -50,8 +52,8 @@ export default function Parishes() {
     return (
         <>
             <ParishesDialog
-                title='Créer une paroisse'
-                labelBtn='Créer'
+                title={formatMessage({ id: 'createParish' })}
+                labelBtn={formatMessage({ id: 'create' })}
                 isOpen={isOpenCreate}
                 handleClose={handleParishCreationDialog}
             />
