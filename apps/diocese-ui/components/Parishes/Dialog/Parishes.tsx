@@ -9,9 +9,11 @@ import {
 import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
+import { ParishData } from "../ParishesTables";
 
 
 interface CreateMassesDialogProps {
+    parishData?: ParishData
     title: string;
     labelBtn: string;
     link?: string;
@@ -32,19 +34,19 @@ export default function ParishesDialog({
     handleClose,
     title,
     labelBtn,
+    parishData
 }: CreateMassesDialogProps) {
     const { formatMessage } = useIntl()
-
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
         values
     } = useFormik<FormikProps>({
         initialValues: {
-            name: '',
-            city: '',
-            leadName: '',
-            email: '',
-            tel: ''
+            name: parishData?.name,
+            city: parishData?.city,
+            leadName: parishData?.leadName,
+            email: parishData?.email,
+            tel: parishData?.contact
         },
         onSubmit: (values) => {
             console.log(values)
