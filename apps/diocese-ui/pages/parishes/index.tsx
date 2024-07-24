@@ -3,11 +3,13 @@ import { Box, Button, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import AppLayout from "../../components/Layout";
 import ParishesTable, { ParishData } from "../../components/Parishes/ParishesTables";
+import ParishesDialog from "../../components/Parishes/Dialog/Parishes";
 
 
 
 export default function Parishes() {
     const [parishData, setParishData] = useState<ParishData[]>([])
+    const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
 
 
     const parishesData: ParishData[] = [
@@ -34,12 +36,22 @@ export default function Parishes() {
         },
     ]
 
+    const handleParishCreationDialog = () => {
+        setIsOpenCreate((prev) => !prev)
+    }
+
     useEffect(() => {
         setParishData(parishesData)
     }, [])
 
     return (
         <>
+            <ParishesDialog
+                title='Créer une paroisse'
+                labelBtn='Créer'
+                isOpen={isOpenCreate}
+                handleClose={handleParishCreationDialog}
+            />
             <Box sx={{
                 padding: '0 16px 40px 0'
             }}>
@@ -59,6 +71,7 @@ export default function Parishes() {
                     </Typography>
                     <Button
                         variant="contained"
+                        onClick={handleParishCreationDialog}
                     >
                         + Ajouter une paroisse
                     </Button>
