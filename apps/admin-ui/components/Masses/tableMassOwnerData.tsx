@@ -1,18 +1,26 @@
 import { theme } from "@easy-messe/libs/theme";
-import { Box, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import {
+    Box,
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    Typography
+} from "@mui/material";
 import { useIntl } from "react-intl";
 import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
 import { Icon } from "@iconify/react";
 import { MouseEvent, useState } from "react";
 import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
-import MassesDialog from "./Dialogs/Masses";
+import MassesDialog, { MassTypeEnum } from "./Dialogs/Masses";
 import CancelMassDialog from "./Dialogs/CanceMass";
 import { MenuItem } from "../Menus/MassMenu";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
-
 
 
 export interface TableMassOwnerData {
