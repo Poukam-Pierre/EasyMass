@@ -18,21 +18,24 @@ export default function Parishes() {
             name: 'Saint Paul Apôtre',
             city: 'Bangangté',
             email: 'saintp@gmail.com',
-            contact: '+237 680 090 489'
+            contact: '+237 680 090 489',
+            leadName: 'Père tata',
         },
         {
             id: 2,
             name: 'Marie Reine des apôtres de Kamtop',
             city: 'Bafoussam',
             email: 'marier@gmail.com',
-            contact: '+237 680 090 489'
+            contact: '+237 680 090 489',
+            leadName: 'Père toto',
         },
         {
             id: 3,
             name: 'Immaculée Conception de la Vierge Marie de Briqueterie',
             city: 'Bangangté',
             email: 'notred@gmail.com',
-            contact: '+237 680 090 489'
+            contact: '+237 680 090 489',
+            leadName: 'Père titi',
         },
     ]
 
