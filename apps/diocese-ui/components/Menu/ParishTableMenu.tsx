@@ -1,23 +1,36 @@
 import { Icon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
 import { MenuItems } from "../Parishes/ParishesTables";
+import { useIntl } from "react-intl";
 
 
 interface ParishTableMenuProps {
     anchorEl: HTMLElement | null;
     setAnchorEl: (anchor: HTMLElement | null) => void;
-    menuItem: MenuItems[]
+    menuItem: MenuItems[];
+    handleModify: () => void;
+    handleCancel: () => void;
 }
 
 
 export default function ParishTableMenu({
     anchorEl,
     setAnchorEl,
-    menuItem
+    menuItem,
+    handleModify,
+    handleCancel
 }: ParishTableMenuProps) {
-
+    const { formatMessage } = useIntl()
     const handleMenuDialog = (title: string) => {
         setAnchorEl(null)
+        switch (title) {
+            case formatMessage({ id: 'modify' }):
+                handleModify();
+                break;
+            case formatMessage({ id: 'delete' }):
+                handleCancel()
+                break;
+        }
     }
 
     return (
