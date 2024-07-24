@@ -140,4 +140,10 @@ export const website = {
   passwordCarateristics: '1 uppercase, 1 lowercase et 1 digit',
   comparePassword: 'Non identical password !',
   passwordVisible: 'Get password visible.',
+  parishName: 'Enter name',
+  parishCity: 'Enter city',
+  leadParishName: "Enter the manager's name",
+  parishMailAddress: 'Enter email',
+  parishPhoneNumber: 'Enter phone number',
+  createParish: 'Create parish',
 };

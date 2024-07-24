@@ -141,4 +141,10 @@ export const website = {
   passwordCarateristics: '1 magiscule, 1 minuscule et 1 chiffre',
   comparePassword: 'Mot de passe non identique !',
   passwordVisible: 'Voir mot de passe.',
+  parishName: 'Entrez le nom',
+  parishCity: 'Entrez la ville',
+  leadParishName: 'Entrez le nom du responsable',
+  parishMailAddress: "Entrez l'email",
+  parishPhoneNumber: 'Entrez le numéro',
+  createParish: 'Créer une paroisse',
 };
