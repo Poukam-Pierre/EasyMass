@@ -1,4 +1,3 @@
-import { useLanguage } from "@easy-messe/libs/theme";
 import {
     Autocomplete,
     Box,
@@ -13,7 +12,6 @@ import * as yup from 'yup';
 
 
 interface CreateMassesDialogProps {
-    parishData?: TableMassOwnerData;
     title: string;
     labelBtn: string;
     link?: string;
@@ -34,10 +32,8 @@ export default function ParishesDialog({
     handleClose,
     title,
     labelBtn,
-    parishData
 }: CreateMassesDialogProps) {
     const { formatMessage } = useIntl()
-    const { activeLanguage } = useLanguage()
 
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
@@ -60,6 +56,7 @@ export default function ParishesDialog({
             email: yup.string().required('Should filled email'),
             tel: yup.string().required('Should filled phone number'),
         }),
+        enableReinitialize: true
     })
     return (
         <Dialog
@@ -102,7 +99,7 @@ export default function ParishesDialog({
                         type="text"
                         placeholder='ENtrez le nom'
                         onChange={handleChange}
-                        value={values.name ?? parishData?.name}
+                        value={values.name}
                         error={errors.name && touched.name ? true : false}
                         helperText={(errors.name && touched.name) && errors.name}
                         sx={{
@@ -115,7 +112,7 @@ export default function ParishesDialog({
                     <Autocomplete
                         id="city"
                         options={[]}
-                        value={values.city ?? parishData?.city}
+                        value={values.city}
                         size="small"
                         renderInput={(params) =>
                             <TextField
@@ -139,7 +136,7 @@ export default function ParishesDialog({
                         type="text"
                         placeholder='Entrez le nom du responsable'
                         onChange={handleChange}
-                        value={values.leadName ?? parishData?.leadName}
+                        value={values.leadName}
                         error={errors.leadName && touched.leadName ? true : false}
                         helperText={(errors.leadName && touched.leadName) && errors.leadName}
                         sx={{
@@ -155,7 +152,7 @@ export default function ParishesDialog({
                         type="email"
                         placeholder="Entrez l'email"
                         onChange={handleChange}
-                        value={values.email ?? parishData?.email}
+                        value={values.email}
                         error={errors.email && touched.email ? true : false}
                         helperText={(errors.email && touched.email) && errors.email}
                         sx={{
@@ -171,7 +168,7 @@ export default function ParishesDialog({
                         type="tel"
                         placeholder="Entrez le numéro du responsable"
                         onChange={handleChange}
-                        value={values.tel ?? parishData?.tel}
+                        value={values.tel}
                         error={errors.tel && touched.tel ? true : false}
                         helperText={(errors.tel && touched.tel) && errors.tel}
                         sx={{
