@@ -146,4 +146,10 @@ export const website = {
   parishMailAddress: 'Enter email',
   parishPhoneNumber: 'Enter phone number',
   createParish: 'Create parish',
+  listOfParish: 'List of parishes',
+  addParish: 'Add parish',
+  reload: 'Reload',
+  parishModify: 'Modify a parish',
+  deleleParish: 'Delete parish',
+  deleteParishMsg: 'Are you sure you want to abolish this parish ?',
 };

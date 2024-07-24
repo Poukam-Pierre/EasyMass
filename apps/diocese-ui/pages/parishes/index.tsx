@@ -72,13 +72,13 @@ export default function Parishes() {
                             paddingBottom: 0
                         }}
                     >
-                        Liste des différentes paroisses
+                        {formatMessage({ id: 'listOfParish' })}
                     </Typography>
                     <Button
                         variant="contained"
                         onClick={handleParishCreationDialog}
                     >
-                        + Ajouter une paroisse
+                        + {formatMessage({ id: 'addParish' })}
                     </Button>
                 </Box>
             </Box>

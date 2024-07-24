@@ -90,8 +90,8 @@ export default function ParishesTable({
                 handleCancel={handleCancelClose}
             />
             <ParishesDialog
-                title='Modifier une paroisse'
-                labelBtn='Enredistrer'
+                title={formatMessage({ id: 'parishModify' })}
+                labelBtn={formatMessage({ id: 'save' })}
                 isOpen={isOpenDialogModif}
                 handleClose={() => setIsOpenDialogModif(false)}
                 parishData={parishSelected}
@@ -119,7 +119,7 @@ export default function ParishesTable({
                     <Typography
                         variant='body2'
                     >
-                        Reload
+                        {formatMessage({ id: 'reload' })}
                     </Typography>
                 </Box>
 

@@ -147,4 +147,10 @@ export const website = {
   parishMailAddress: "Entrez l'email",
   parishPhoneNumber: 'Entrez le numéro',
   createParish: 'Créer une paroisse',
+  listOfParish: 'Liste des différentes paroisses',
+  addParish: 'Ajouter une paroisse',
+  reload: 'Recharger',
+  parishModify: 'Modifier une paroisse',
+  deleleParish: 'Supprimer une paroisse',
+  deleteParishMsg: 'Etes vous sûre de vouloir supprimer cette paroisse ?',
 };

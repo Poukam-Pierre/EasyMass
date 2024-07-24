@@ -43,13 +43,13 @@ export default function CancelParishDialog({
                     variant='h1'
                     textAlign='center'
                 >
-                    {formatMessage({ id: 'deleteMass' })}
+                    {formatMessage({ id: 'deleleParish' })}
                 </Typography>
                 <Typography
                     variant="body1"
                     textAlign='center'
                 >
-                    {formatMessage({ id: 'deleteMassMsg' })}
+                    {formatMessage({ id: 'deleteParishMsg' })}
 
                 </Typography>
                 <Box sx={{
