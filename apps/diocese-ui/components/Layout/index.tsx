@@ -3,6 +3,7 @@ import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-r
 import taskIcon from '@iconify-icons/material-symbols/task-outline';
 import { Icon } from "@iconify/react";
 import { Box } from "@mui/material";
+import { useRouter } from 'next/router';
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         email: ''
     })
 
+    const { query: { name } } = useRouter()
     const sideBarSectionParish: SideBarSection[] = [
         {
             title: 'Management',
@@ -44,7 +46,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
             title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': formatMessage({ id: 'masses' }),
-                '/masses/[id]': 'Saint Paul Apôtre',
+                '/masses/[parishId]': `${name}`,
             }
         },
     ]
