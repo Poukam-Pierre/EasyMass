@@ -1,11 +1,12 @@
 import { Box, Typography } from "@mui/material";
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
 import AppLayout from "../../components/Layout";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import FinancialTableParishes, { FinanceParish } from "../../components/Masses/FinancialTableParishes";
 
 
 export default function Masses() {
+    const [parishData, setParishData] = useState<FinanceParish[]>([])
     const financeParishData: FinanceParish[] = [
         {
             id: 1,
@@ -30,6 +31,12 @@ export default function Masses() {
         },
 
     ]
+
+    useEffect(() => (
+        // TODO fetch data parish related to mass financy.
+        setParishData(financeParishData)
+    ), [])
+
     return (
         <>
             <Box sx={{
@@ -51,7 +58,7 @@ export default function Masses() {
                     </Typography>
                 </Box>
             </Box>
-            <FinancialTableParishes financeParishData={financeParishData} />
+            <FinancialTableParishes financeParishData={parishData} />
         </>
     );
 }
