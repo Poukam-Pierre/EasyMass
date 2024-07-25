@@ -56,6 +56,7 @@ export default function FinancialTableParishes({
                     }
                 ]}
                 idSelected={idSelected as number}
+                parishData={financeParishData.find((data) => data.id === idSelected)}
             />
             <Box sx={{
                 display: 'grid',

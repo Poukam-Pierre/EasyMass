@@ -1,5 +1,7 @@
 import { Icon, IconifyIcon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
+import { useRouter } from "next/router";
+import { FinanceParish } from "../Masses/FinancialTableParishes";
 
 export interface MenuItem {
     title: string;
@@ -11,12 +13,14 @@ interface FinancialTableMenuProps {
     setAnchorEl: (anchor: HTMLElement | null) => void;
     menuItem: MenuItem[];
     idSelected: number;
+    parishData: FinanceParish | undefined
 }
 export default function FinancialTableMenu({
     anchorEl,
     setAnchorEl,
     menuItem,
     idSelected,
+    parishData
 }: FinancialTableMenuProps) {
     const handleModalDialog = () => {
         setAnchorEl(null)
