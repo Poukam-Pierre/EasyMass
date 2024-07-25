@@ -16,6 +16,7 @@ import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill
 import { MouseEvent, useState } from "react";
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import refreshIcon from '@iconify-icons/material-symbols/refresh';
+import overviewIcon from '@iconify-icons/material-symbols/overview-outline';
 import FinancialTableMenu from "../Menu/FinancialTableMenu";
 
 
@@ -51,7 +52,7 @@ export default function FinancialTableParishes({
                 menuItem={[
                     {
                         title: 'Stat de Messes.',
-                        icon: refreshIcon
+                        icon: overviewIcon
                     }
                 ]}
                 idSelected={idSelected as number}
