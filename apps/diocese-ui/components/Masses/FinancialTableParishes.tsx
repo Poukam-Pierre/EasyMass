@@ -1,7 +1,9 @@
 import { theme } from "@easy-messe/libs/theme";
 import { Icon } from "@iconify/react";
 import {
+    Box,
     IconButton,
+    InputBase,
     Table,
     TableBody,
     TableCell,
@@ -12,6 +14,10 @@ import {
 import { useIntl } from "react-intl";
 import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill';
 import { MouseEvent, useState } from "react";
+import searchIcon from '@iconify-icons/fluent/search-24-regular';
+import refreshIcon from '@iconify-icons/material-symbols/refresh';
+import FinancialTableMenu from "../Menu/FinancialTableMenu";
+
 
 export interface FinanceParish {
     id: number;
@@ -38,77 +44,125 @@ export default function FinancialTableParishes({
     }
 
     return (
-        <Table>
-            <TableHead>
-                <TableRow>
-                    {titles.map((title, index) => (
-                        <TableCell
-                            key={index}
+        <>
+            <FinancialTableMenu
+                anchorEl={anchorEl}
+                setAnchorEl={setAnchorEl}
+                menuItem={[
+                    {
+                        title: 'Stat de Messes.',
+                        icon: refreshIcon
+                    }
+                ]}
+                idSelected={idSelected as number}
+            />
+            <Box sx={{
+                display: 'grid',
+                gridAutoFlow: 'column',
+                width: 'fit-content',
+                columnGap: 2
+            }}>
+                <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'auto 1fr',
+                    alignItems: 'center',
+                    columnGap: 0.5,
+                    cursor: 'pointer',
+                }}
+                >
+                    <Icon icon={refreshIcon} fontSize={20} />
+                    <Typography
+                        variant='body2'
+                    >
+                        {formatMessage({ id: 'reload' })}
+                    </Typography>
+                </Box>
+
+                <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'auto 1fr',
+                    alignItems: 'center',
+                    columnGap: 0.5
+                }}>
+                    <Icon icon={searchIcon} fontSize={20} />
+                    <InputBase
+                        placeholder={formatMessage({ id: 'search' })}
+                    />
+                </Box>
+            </Box>
+
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        {titles.map((title, index) => (
+                            <TableCell
+                                key={index}
+                                sx={{
+                                    bgcolor: theme.palette.secondary.main,
+                                    fontWeight: 600
+                                }}
+                            >
+                                {formatMessage({ id: title }).toUpperCase()}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {financeParishData.map(({
+                        id, name, city,
+                        massType, price
+                    }, index) => (
+                        <TableRow
+                            key={`${index} + ${name}`}
                             sx={{
-                                bgcolor: theme.palette.secondary.main,
-                                fontWeight: 600
+                                color: 'var(--label)'
                             }}
                         >
-                            {formatMessage({ id: title }).toUpperCase()}
-                        </TableCell>
-                    ))}
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {financeParishData.map(({
-                    id, name, city,
-                    massType, price
-                }, index) => (
-                    <TableRow
-                        key={`${index} + ${name}`}
-                        sx={{
-                            color: 'var(--label)'
-                        }}
-                    >
-                        <TableCell>
-                            <Typography sx={{
-                                width: '400px',
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                                whiteSpace: "nowrap",
+                            <TableCell>
+                                <Typography sx={{
+                                    width: '400px',
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                    fontWeight: 600,
+                                    color: 'var(--label)'
+                                }}>
+                                    {name}
+                                </Typography>
+                            </TableCell>
+                            <TableCell sx={{
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>
-                                {name}
-                            </Typography>
-                        </TableCell>
-                        <TableCell sx={{
-                            fontWeight: 600,
-                            color: 'var(--label)'
-                        }}>
-                            {city}
-                        </TableCell>
-                        <TableCell sx={{
-                            fontWeight: 600,
-                            color: 'var(--label)'
-                        }}>{massType}</TableCell>
-                        <TableCell sx={{
-                            fontWeight: 600,
-                            color: 'var(--label)'
-                        }}>
-                            {formatNumber(price, {
-                                style: 'currency',
-                                currency: 'xaf'
-                            })}
-                        </TableCell>
-                        <TableCell align='right'>
-                            <IconButton
-                                size="small"
-                                onClick={(event) => handleActionOnRow(event, id)}
-                            >
-                                <Icon icon={verticalDotsIcon} fontSize={18} />
-                            </IconButton>
-                        </TableCell>
+                                {city}
+                            </TableCell>
+                            <TableCell sx={{
+                                fontWeight: 600,
+                                color: 'var(--label)'
+                            }}>{massType}</TableCell>
+                            <TableCell sx={{
+                                fontWeight: 600,
+                                color: 'var(--label)'
+                            }}>
+                                {formatNumber(price, {
+                                    style: 'currency',
+                                    currency: 'xaf'
+                                })}
+                            </TableCell>
+                            <TableCell align='right'>
+                                <IconButton
+                                    size="small"
+                                    onClick={(event) => handleActionOnRow(event, id)}
+                                >
+                                    <Icon icon={verticalDotsIcon} fontSize={18} />
+                                </IconButton>
+                            </TableCell>
 
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </>
 
     );
 }
