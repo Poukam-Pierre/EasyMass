@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
 import AppLayout from "../../components/Layout";
 import { ReactNode } from "react";
-import FinancialTableParishes, { FinanceParish } from "../../components/Masses/FinancialParishes";
+import FinancialTableParishes, { FinanceParish } from "../../components/Masses/FinancialTableParishes";
 
 
 export default function Masses() {
