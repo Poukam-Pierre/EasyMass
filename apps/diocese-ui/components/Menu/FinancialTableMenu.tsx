@@ -22,9 +22,14 @@ export default function FinancialTableMenu({
     idSelected,
     parishData
 }: FinancialTableMenuProps) {
+    const { push } = useRouter()
+
     const handleModalDialog = () => {
-        setAnchorEl(null)
-        console.log(idSelected)
+        setAnchorEl(null);
+        push({
+            pathname: `/masses/${idSelected}`,
+            query: { name: parishData?.name }
+        });
     }
 
     return (
