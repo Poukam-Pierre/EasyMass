@@ -152,4 +152,5 @@ export const website = {
   parishModify: 'Modify a parish',
   deleleParish: 'Delete parish',
   deleteParishMsg: 'Are you sure you want to abolish this parish ?',
+  history: 'History',
 };

@@ -153,4 +153,5 @@ export const website = {
   parishModify: 'Modifier une paroisse',
   deleleParish: 'Supprimer une paroisse',
   deleteParishMsg: 'Etes vous sûre de vouloir supprimer cette paroisse ?',
+  history: 'Historique',
 };

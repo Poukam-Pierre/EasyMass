@@ -19,6 +19,7 @@ import CancelMassDialog from "./Dialogs/CanceMass";
 import { MenuItem } from "../Menus/MassMenu";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
+import historyIcon from '@iconify-icons/fluent/history-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
 import { showTransactionStatus } from "../Finances/FinanceTable";
@@ -63,6 +64,10 @@ export default function MassOwnerTable({
         {
             title: formatMessage({ id: 'modify' }),
             icon: editIcon
+        },
+        {
+            title: formatMessage({ id: 'history' }),
+            icon: historyIcon
         },
         {
             title: formatMessage({ id: 'delete' }),
