@@ -153,4 +153,5 @@ export const website = {
   deleleParish: 'Delete parish',
   deleteParishMsg: 'Are you sure you want to abolish this parish ?',
   history: 'History',
+  deleteMassMsgWarning: 'All linked data will be deleted.',
 };
