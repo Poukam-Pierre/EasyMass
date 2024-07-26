@@ -41,9 +41,9 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: formatMessage({ id: 'massOffer' }),
+            title: formatMessage({ id: 'massRequest' }),
             links: {
-                '/massOffer': formatMessage({ id: 'massOffer' }),
+                '/massOffer': formatMessage({ id: 'massRequest' }),
             }
         },
         {
