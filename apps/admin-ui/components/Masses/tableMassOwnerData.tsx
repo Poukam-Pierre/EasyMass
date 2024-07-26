@@ -29,7 +29,7 @@ export interface TableMassOwnerData {
     id: number;
     dayOfMass: Dayjs | null;
     massTime: Dayjs | null;
-    massType: MassTypeEnum;
+    massType: MassTypeEnum | string;
     price: number;
     status?: string
 }
@@ -96,6 +96,7 @@ export default function MassOwnerTable({
                 handleModify={handleMassModifyDialog}
                 handleCancel={handleCancelClose}
                 menuItem={menuItem}
+                idSelected={idSelected}
             />
             <MassesDialog
                 title={formatMessage({ id: 'massModify' })}
