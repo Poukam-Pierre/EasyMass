@@ -21,6 +21,7 @@ import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
+import { showTransactionStatus } from "../Finances/FinanceTable";
 
 
 export interface TableMassOwnerData {
@@ -29,6 +30,7 @@ export interface TableMassOwnerData {
     massTime: Dayjs | null;
     massType: MassTypeEnum;
     price: number;
+    status?: string
 }
 
 export interface MenuItemForMassOwner extends MenuItem {
@@ -41,7 +43,7 @@ export default function MassOwnerTable({
     massDataTable: TableMassOwnerData[]
 }) {
     const { formatMessage, formatNumber } = useIntl()
-    const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'action']
+    const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'status', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
     const [idSelected, setIdSelected] = useState<number | undefined>()
@@ -80,6 +82,7 @@ export default function MassOwnerTable({
     const handleCancelClose = () => {
         setIsOpenDelete((prev) => !prev)
     }
+
     return (
         <>
             <MassOwnerTableMenu
@@ -129,7 +132,7 @@ export default function MassOwnerTable({
                 <TableBody>
                     {massDataTable.map(({
                         id, dayOfMass, massTime,
-                        massType, price
+                        massType, price, status
 
                     }, index) => (
                         <TableRow
@@ -156,6 +159,10 @@ export default function MassOwnerTable({
                                 style: 'currency',
                                 currency: 'xaf'
                             })}</TableCell>
+                            <TableCell>
+                                {showTransactionStatus(status as string)}
+                            </TableCell>
+
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"
