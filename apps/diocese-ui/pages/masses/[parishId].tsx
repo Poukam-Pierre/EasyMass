@@ -18,7 +18,7 @@ interface ParishDataWithoutId {
 export default function ParishOverview() {
     const staticData: string[] = ['name', 'city', 'Email', 'Responsable', 'phoneNumber']
     const { formatMessage } = useIntl()
-    const [parishData, setParishData] = useState<ParishDataWithoutId>()
+    const [parishData, setParishData] = useState<ParishData>()
     const { query: { parishId } } = useRouter()
     const parishinfo: ParishDataWithoutId = {
         name: 'Saint Paul Apôtre',
@@ -33,6 +33,15 @@ export default function ParishOverview() {
     ), [parishId])
 
     return (
+        <>
+            <ParishesDialog
+                title={formatMessage({ id: 'parishModify' })}
+                labelBtn={formatMessage({ id: 'save' })}
+                isOpen={isOpenDialogModif}
+                handleClose={() => setIsOpenDialogModif(false)}
+                parishData={parishData}
+            />
+
         <Box sx={{
             display: 'grid',
             gap: 2
@@ -67,6 +76,7 @@ export default function ParishOverview() {
                         borderRadius: '30px',
                         padding: '5px'
                     }}
+                        onClick={() => setIsOpenDialogModif(true)}
                 >
                     Edit
                 </Button>
@@ -91,7 +101,10 @@ export default function ParishOverview() {
                     ))}
                 </Grid>
                 <Grid item>
-                    {parishData && Object.values(parishData).map((value, index) => (
+                        {parishData && Object
+                            .values(parishData)
+                            .slice(1)
+                            .map((value, index) => (
                         <Typography
                             variant="h5"
                             color="var(--body)"
