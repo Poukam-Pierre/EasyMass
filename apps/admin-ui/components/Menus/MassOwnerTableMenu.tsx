@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
 import { MenuItemForMassOwner } from "../Masses/tableMassOwnerData";
 import { useIntl } from "react-intl";
+import { useRouter } from "next/router";
 
 
 interface MassOwnerTableMenuProps {
@@ -10,6 +11,7 @@ interface MassOwnerTableMenuProps {
     handleModify: () => void;
     handleCancel: () => void;
     menuItem: MenuItemForMassOwner[]
+    idSelected?: number;
 }
 
 
@@ -18,9 +20,11 @@ export default function MassOwnerTableMenu({
     setAnchorEl,
     handleModify,
     handleCancel,
-    menuItem
+    menuItem,
+    idSelected
 }: MassOwnerTableMenuProps) {
     const { formatMessage } = useIntl()
+    const { push } = useRouter()
     const handleModalDialog = (title: string) => {
         setAnchorEl(null)
         switch (title) {
@@ -29,6 +33,14 @@ export default function MassOwnerTableMenu({
                 break;
             case formatMessage({ id: 'delete' }):
                 handleCancel()
+                break;
+            case formatMessage({ id: 'history' }):
+                push({
+                    pathname: `/masses/${idSelected}`,
+                    query: {
+                        rubrics: 'History'
+                    }
+                })
                 break;
         }
     }
