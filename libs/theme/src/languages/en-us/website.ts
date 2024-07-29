@@ -117,7 +117,7 @@ export const website = {
   tuesday: 'Tuesday',
   wednesday: 'Wednesday',
   thursday: 'Thursday',
-  Friday: 'Friday',
+  friday: 'Friday',
   saturday: 'Saturday',
   sunday: ' Sunday',
   day: 'Jours',
@@ -154,4 +154,5 @@ export const website = {
   deleteParishMsg: 'Are you sure you want to abolish this parish ?',
   history: 'History',
   deleteMassMsgWarning: 'All linked data will be deleted.',
+  date: 'Date',
 };
