@@ -56,7 +56,7 @@ export const website = {
   novena: 'Neuvaine',
   thirty: 'Trentaine',
   fullName: 'Nom et prénom',
-  city: 'Ville',
+  city: 'Villes',
   dateTime: 'Date et heure',
   massIntention: 'Intention de messe',
   noProcessMass: 'Aucune demande de messe en cours.',
@@ -160,4 +160,9 @@ export const website = {
   noIntentionMass: 'Aucune demande de messes réçu pour le moment.',
   dateOfMass: 'Date de messes',
   massTime: 'Temps de messes',
+  parishInformations: 'Informations Personnelles',
+  edit: 'modifier',
+  massStatistics: 'Statistique des messes',
+  period: 'Période',
+  massNumber: ' Nombre de messes',
 };

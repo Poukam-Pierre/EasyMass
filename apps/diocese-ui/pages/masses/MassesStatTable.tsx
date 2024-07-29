@@ -15,7 +15,7 @@ interface StatisticsData {
 }
 export default function MassesStatTable() {
     const { formatMessage, formatNumber } = useIntl()
-    const titles = ['Période', 'Nombre de messe', 'Montant']
+    const titles = ['period', 'massNumber', 'amount']
     const [statData, setStatData] = useState<StatisticsData[]>([])
 
     const statisticsData: StatisticsData[] = [
@@ -55,8 +55,7 @@ export default function MassesStatTable() {
                         paddingBottom: 0
                     }}
                 >
-                    Statistiques des messes
-                    {/* {formatMessage({ id: 'listOfMassSupply' })} */}
+                    {formatMessage({ id: 'massStatistics' })}
                 </Typography>
                 <Box sx={{
                     display: 'grid',

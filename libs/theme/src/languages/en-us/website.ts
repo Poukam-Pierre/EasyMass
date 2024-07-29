@@ -56,7 +56,7 @@ export const website = {
   novena: 'Novena',
   thirty: 'Thirty',
   fullName: 'Full Name',
-  city: 'City',
+  city: 'Cities',
   dateTime: 'Date & Time',
   massIntention: 'Mass Intention',
   noProcessMass: 'No request for a mass.',
@@ -159,4 +159,9 @@ export const website = {
   noIntentionMass: 'No request for masses have received yet.',
   dateOfMass: 'Masses Date',
   massTime: 'Masses Time',
+  parishInformations: 'Personal informations',
+  edit: 'edit',
+  massStatistics: 'Statistic of masses',
+  period: 'Period',
+  massNumber: 'Number of masses',
 };

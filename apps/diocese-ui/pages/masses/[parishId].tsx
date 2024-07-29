@@ -60,7 +60,7 @@ export default function ParishOverview() {
                         }}
 
                     >
-                        Informations Personnelles
+                        {formatMessage({ id: 'parishInformations' })}
                     </Typography>
                     <Button
                         startIcon={
@@ -76,7 +76,8 @@ export default function ParishOverview() {
                         }}
                         onClick={() => setIsOpenDialogModif(true)}
                     >
-                        Edit
+                        {formatMessage({ id: 'edit' })}
+
                     </Button>
                 </Box>
                 <Grid
