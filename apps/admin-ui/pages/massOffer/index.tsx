@@ -75,7 +75,6 @@ export default function MassOffer() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 16px',
                 marginBottom: 1
 
             }}>
@@ -97,23 +96,8 @@ export default function MassOffer() {
                     <Icon icon={searchIcon} fontSize={20} />
                     <InputBase
                         placeholder={formatMessage({ id: 'search' })}
+                        size='small'
                     />
-                </Box>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    alignItems: 'center',
-                    columnGap: 1,
-                    cursor: 'pointer',
-                }}
-                    onClick={(event) => setAnchorEl(event.target as HTMLAnchorElement)}
-                >
-                    <Icon icon={filterIcon} fontSize={20} />
-                    <Typography
-                        variant='body2'
-                    >
-                        {formatMessage({ id: 'filter' })}
-                    </Typography>
                 </Box>
             </Box>
             <MassOfferTable massDataTable={massDate} />

@@ -126,23 +126,6 @@ export default function Masses() {
                         display: 'grid',
                         gridTemplateColumns: 'auto 1fr',
                         alignItems: 'center',
-                        columnGap: 1,
-                        cursor: 'pointer',
-                    }}
-                        onClick={(event) => setAnchorEl(event.target as HTMLAnchorElement)}
-                    >
-                        <Icon icon={filterIcon} fontSize={20} />
-                        <Typography
-                            variant='body2'
-                        >
-                            {formatMessage({ id: 'filter' })}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'auto 1fr',
-                        alignItems: 'center',
                         columnGap: 1
                     }}>
                         <Icon icon={searchIcon} fontSize={20} />
