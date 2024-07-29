@@ -9,10 +9,11 @@ import { ReactNode, useEffect, useState } from "react";
 import AppLayout from "../../components/Layout";
 import IntentionMassesTable from "../../components/Masses/IntentionMassesTable";
 import { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
+import { useIntl } from "react-intl";
 
 export default function Historics() {
     const [massDateTime, setMassDateTime] = useState<TableMassOwnerData[]>([])
-
+    const { formatMessage } = useIntl()
     const { query: { massesId } } = useRouter()
 
     const tableData: TableMassOwnerData[] = [
@@ -66,14 +67,12 @@ export default function Historics() {
                             paddingBottom: 0
                         }}
                     >
-                        Intention de messe
-                        {/* {formatMessage({ id: 'listOfMasses' })} */}
+                        {formatMessage({ id: 'massIntention' })}
                     </Typography>
                     <Button
                         variant="contained"
                     >
-                        Download All
-                        {/* + {formatMessage({ id: 'addMass' })} */}
+                        {formatMessage({ id: 'downloadAll' })}
                     </Button>
                 </Box>
                 <Box sx={{
@@ -92,7 +91,7 @@ export default function Historics() {
                     >
                         <Icon icon={calendarIcon} fontSize={24} />
                         <DesktopDatePicker
-                            label='Rechercher'
+                            label={formatMessage({ id: 'search' })}
                             closeOnSelect
                             slotProps={{
                                 textField: {

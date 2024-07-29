@@ -14,7 +14,7 @@ export default function IntentionMassesTable({
     massDateTime: TableMassOwnerData[]
 }) {
     const { formatMessage } = useIntl()
-    const titles: string[] = ['dateOfMass', 'massTimes', 'actions']
+    const titles: string[] = ['dateOfMass', 'massTime', 'actions']
 
     return (
         <>
@@ -87,7 +87,7 @@ export default function IntentionMassesTable({
                     }}>
                         <Icon icon={warningIcon} fontSize={24} />
                         <Typography variant='body2'>
-                            Aucune demande de messes reçu pour le moment.
+                            {formatMessage({ id: 'noIntentionMass' })}
                         </Typography>
                     </Box>
                 )

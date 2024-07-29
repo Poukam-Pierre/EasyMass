@@ -16,7 +16,7 @@ export const website = {
   heroMessage:
     'Croire au saint sacrifice, Rendre grâce au Seigneur, Aimer nos proches disparus.',
   subtitleHeroMessage:
-    "Demander qu'une messe soit célébrée à une intension est un acte de fois en la puissance du sacrifice du christ. C'est remettre entre les mains de Jesus les personnes vivantes et défunts que nous aimons ainsi que toutes nos intensions.",
+    "Demander qu'une messe soit célébrée à une intention est un acte de fois en la puissance du sacrifice du christ. C'est remettre entre les mains de Jesus les personnes vivantes et défunts que nous aimons ainsi que toutes nos intentions.",
   aboutUsMessage:
     "EasyMesse est un platforme de demande rapide de messe sur tout l'étendu de térritoire national et international. Connecter à presque toutes les paroisses sur le térritoire et ailleurs, vous pouvez offrir une messe de votre choix selon vos intentions et dans la paroisse de votre choix. Nous faire confiance c'est pouvoir demander une messe de n'importe où jusqu'à 1h avant la messe et être sûr que votre demande sera exhaussé.",
   quoteOne: "La prière est l'élévation de l'âme vers Dieu.",
@@ -58,7 +58,7 @@ export const website = {
   fullName: 'Nom et prénom',
   city: 'Ville',
   dateTime: 'Date et heure',
-  massIntension: 'Intension de messe',
+  massIntention: 'Intention de messe',
   noProcessMass: 'Aucune demande de messe en cours.',
   phoneNumber: 'Téléphone',
   anonymous: 'Anonyme',
@@ -86,7 +86,7 @@ export const website = {
   save: 'Enregistrer',
   numberChecked: 'Dois être un nombre',
   dateTimeChecked: "Date et l'heure obligatoire",
-  intensionChecked: 'Intention obligatoire',
+  intentionChecked: 'Intention obligatoire',
   intentionNumberChecked: 'Au 300 mots possible',
   finances: 'Finances',
   logout: 'Deconnexion',
@@ -156,4 +156,8 @@ export const website = {
   history: 'Historique',
   deleteMassMsgWarning: 'Toutes les données liées seront supprimées.',
   date: 'Date',
+  downloadAll: 'Télécharger tout',
+  noIntentionMass: 'Aucune demande de messes réçu pour le moment.',
+  dateOfMass: 'Date de messes',
+  massTime: 'Temps de messes',
 };
