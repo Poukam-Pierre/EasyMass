@@ -164,4 +164,8 @@ export const website = {
   massStatistics: 'Statistic of masses',
   period: 'Period',
   massNumber: 'Number of masses',
+  massTypeWarningMsg: 'Should choose a mass type',
+  dayOfMassWarningMsg: 'Should choose a day',
+  massTimeWarningMsg: 'Should choose a time',
+  priceWarningMsg: 'Should choose a price',
 };

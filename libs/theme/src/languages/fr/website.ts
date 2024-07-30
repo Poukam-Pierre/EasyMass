@@ -165,4 +165,8 @@ export const website = {
   massStatistics: 'Statistique des messes',
   period: 'Période',
   massNumber: ' Nombre de messes',
+  massTypeWarningMsg: 'Choix obligatoire de type de messe',
+  dayOfMassWarningMsg: 'Choix obligatoire de date',
+  massTimeWarningMsg: "Choix obligatoire de l'heure",
+  priceWarningMsg: 'Honoraire obligatoire',
 };
