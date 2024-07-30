@@ -1,7 +1,18 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
 import { useIntl } from "react-intl";
 
-export default function Profile() {
+export interface ProfileProps {
+    name: string;
+    email: string;
+}
+export default function Profile({
+    profile: {
+        name,
+        email
+    }
+}: {
+    profile: ProfileProps
+}) {
     const { formatMessage } = useIntl()
     return (
         <Box sx={{
@@ -16,8 +27,8 @@ export default function Profile() {
                 columnGap: 1
             }}>
                 <Avatar
-                    alt="Saint Martin de Tour"
-                    src="Saint Martin de Tour"
+                    alt={name}
+                    src={name}
                 />
                 <Box>
                     <Typography
@@ -26,7 +37,7 @@ export default function Profile() {
                             fontWeight: 700
                         }}
                     >
-                        Saint Martin de Tour
+                        {name}
                     </Typography>
                     <Typography
                         variant='caption'
@@ -34,7 +45,7 @@ export default function Profile() {
                             fontWeight: 500
                         }}
                     >
-                        saintmartin@gmail.com
+                        {email}
                     </Typography>
                 </Box>
             </Box>

@@ -1,9 +1,9 @@
 import { Box, Typography } from "@mui/material";
-import NavBarItem from "./NavBarItem";
-import { sideBarSection } from "./SideBar";
+import NavBarItem from "./NavbarItem";
+import { SideBarSection } from "./SideBar";
 
 interface navBarProps {
-    sideBarNav: sideBarSection
+    sideBarNav: SideBarSection
 }
 
 export default function NavBar({

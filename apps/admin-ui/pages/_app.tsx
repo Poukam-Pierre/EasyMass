@@ -1,25 +1,23 @@
-import { EasyMassThemeProvider, useLanguage } from '@easy-messe/libs/theme';
-import { Box } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import '@easy-messe/shared-ui';
+import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import { AppProps } from 'next/app';
-import Head from 'next/head';
-import '@easy-messe/shared-ui'
 
-function CustomApp({ Component, pageProps }: AppProps) {
-    const { activeLanguage } = useLanguage()
+type NextPageWithoutLayout = AppProps & {
+    Component: AppProps['Component'] & {
+        getLayout?: (page: React.ReactNode) => React.ReactNode;
+    };
+};
 
-    return (
-        <EasyMassThemeProvider defaultLang="fr">
-            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
-                <Head>
-                    <title>{"EasyMesse"}</title>
-                </Head>
-                <Box component="main" className="app">
-                    <Component {...pageProps} />
-                </Box>
-            </LocalizationProvider>
-        </EasyMassThemeProvider>
+function CustomApp({ Component, pageProps }: NextPageWithoutLayout) {
+    const getLayout = Component.getLayout ??
+        ((page) =>
+            <EasyMassAdminLayout>
+                {page}
+            </EasyMassAdminLayout>
+        );
+
+    return getLayout(
+        <Component {...pageProps} />
     );
 }
 

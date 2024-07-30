@@ -16,16 +16,17 @@ import * as yup from 'yup'
 
 
 
-interface MassGroupCategory {
-    label: string;
-    valueOrder: number
-}
 enum MassTypeEnum {
     Triduum = 'triduum',
     Seven = 'seven',
     Novena = 'novena',
     Thirty = 'thirty',
 }
+interface MassGroupCategory {
+    label: MassTypeEnum;
+    valueOrder: number
+}
+
 interface Mass {
     price: number,
     dateTime: Date,
@@ -149,19 +150,19 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const massOrderCategory: MassGroupCategory[] = [
         {
-            label: 'triduum',
+            label: MassTypeEnum.Triduum,
             valueOrder: 3
         },
         {
-            label: 'seven',
+            label: MassTypeEnum.Seven,
             valueOrder: 7
         },
         {
-            label: 'novena',
+            label: MassTypeEnum.Novena,
             valueOrder: 9
         },
         {
-            label: 'thirty',
+            label: MassTypeEnum.Thirty,
             valueOrder: 30
         },
     ]
@@ -211,11 +212,11 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         },
         validationSchema: yup.object().shape({
             phone: yup.number(),
-            dateTime: yup.string().required('dateTimeChecked'),
+            dateTime: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
             intention: yup
                 .string()
-                .required('intensionChecked')
-                .max(300, 'intentionNumberChecked')
+                .required(formatMessage({ id: 'intensionChecked' }))
+                .max(300, formatMessage({ id: 'intentionNumberChecked' }))
         })
     })
 
@@ -342,7 +343,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             disabled={isAnonym}
                             onChange={handleChange}
                             error={errors.phone && touched.phone ? true : false}
-                            helperText={(errors.phone && touched.phone) && formatMessage({ id: errors.phone })}
+                            helperText={(errors.phone && touched.phone) && errors.phone}
                         />
                     </Box>
                 </Box>
@@ -432,7 +433,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         handleChange={setFieldValue}
                         error={errors.dateTime && touched.dateTime ? true : false}
                         helperText={(errors.dateTime && touched.dateTime) ?
-                            formatMessage({ id: errors.dateTime }) : ''}
+                            errors.dateTime : ''}
                     />
                 </Box>
                 <Box sx={{
@@ -456,7 +457,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         fullWidth
                         onChange={handleChange}
                         error={errors.intention && touched.intention ? true : false}
-                        helperText={(errors.intention && touched.intention) && formatMessage({ id: errors.intention })}
+                        helperText={(errors.intention && touched.intention) && errors.intention}
                     />
                 </Box>
             </Box>

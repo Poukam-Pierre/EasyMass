@@ -1,9 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/router";
-import { sideBarItem } from "./SideBar";
+import { SideBarItem } from "./SideBar";
 
 interface navBarItemProps {
-    navEl: sideBarItem
+    navEl: SideBarItem
 }
 export default function NavBarItem({
     navEl: {
