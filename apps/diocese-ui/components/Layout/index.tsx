@@ -1,5 +1,4 @@
 import { BreadcrumbsNameMaps, Header, ProfileProps, SideBar, SideBarSection } from '@easy-messe/shared-ui';
-import financeIcon from '@iconify-icons/material-symbols/attach-money';
 import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded';
 import taskIcon from '@iconify-icons/material-symbols/task-outline';
 import { Icon } from "@iconify/react";
@@ -20,19 +19,14 @@ export default function AppLayout({ children }: PropsWithChildren) {
             title: 'Management',
             sideBarItems: [
                 {
-                    label: formatMessage({ id: 'massOffer' }),
+                    label: formatMessage({ id: 'Parishes' }),
                     icon: <Icon icon={taskIcon} fontSize={24} />,
-                    link: '/massOffer'
+                    link: '/parishes'
                 },
                 {
                     label: formatMessage({ id: 'masses' }),
                     icon: <Icon icon={libraryIcon} fontSize={24} />,
                     link: '/masses'
-                },
-                {
-                    label: formatMessage({ id: 'finances' }),
-                    icon: <Icon icon={financeIcon} fontSize={24} />,
-                    link: '/finances'
                 },
             ]
         },
@@ -41,22 +35,16 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: formatMessage({ id: 'massOffer' }),
+            title: formatMessage({ id: 'Parishes' }),
             links: {
-                '/massOffer': formatMessage({ id: 'massOffer' }),
+                '/parishes': formatMessage({ id: 'parishes' }),
             }
         },
         {
             title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': formatMessage({ id: 'masses' }),
-            }
-        },
-        {
-            title: formatMessage({ id: 'finances' }),
-            links: {
-                '/finances': formatMessage({ id: 'finances' }),
-                'finances/withdrawal': formatMessage({ id: 'withdrawal' }),
+                '/masses/[id]': 'Saint Paul Apôtre',
             }
         },
     ]
@@ -64,8 +52,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
     useEffect(() => (
         // TODO fetch data profile from API
         setProfileData({
-            name: 'Saint Martin de Tour',
-            email: 'saintmartin@gmail.com'
+            name: 'Diocèse de Bafoussam',
+            email: 'diocèsedebaf@gmail.com'
         })
 
     ), [])

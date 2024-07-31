@@ -1,0 +1,9 @@
+{
+  "name": "diocese-ui-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/diocese-ui-e2e/src",
+  "tags": [],
+  "implicitDependencies": ["diocese-ui"],
+  "// targets": "to see all targets run: nx show project diocese-ui-e2e --web",
+  "targets": {}
+}
