@@ -19,7 +19,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
             title: 'Management',
             sideBarItems: [
                 {
-                    label: formatMessage({ id: 'Parishes' }),
+                    label: formatMessage({ id: 'parishes' }),
                     icon: <Icon icon={taskIcon} fontSize={24} />,
                     link: '/parishes'
                 },
@@ -35,7 +35,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: formatMessage({ id: 'Parishes' }),
+            title: formatMessage({ id: 'parishes' }),
             links: {
                 '/parishes': formatMessage({ id: 'parishes' }),
             }

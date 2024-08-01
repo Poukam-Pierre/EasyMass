@@ -71,7 +71,7 @@ const parishDataFetched: ParishData[] = [
             },
             {
                 price: 2500,
-                dateTime: new Date('2024-06-19T10:30:00'),
+                dateTime: new Date('2024-07-19T10:30:00'),
                 massType: null
             },
             {
