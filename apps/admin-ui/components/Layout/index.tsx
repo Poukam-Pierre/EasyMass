@@ -4,6 +4,7 @@ import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-r
 import taskIcon from '@iconify-icons/material-symbols/task-outline';
 import { Icon } from "@iconify/react";
 import { Box } from "@mui/material";
+import { useRouter } from 'next/router';
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -14,6 +15,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
         name: '',
         email: ''
     })
+
+    const { query: { rubrics } } = useRouter()
 
     const sideBarSectionParish: SideBarSection[] = [
         {
@@ -41,15 +44,17 @@ export default function AppLayout({ children }: PropsWithChildren) {
 
     const breadcrumbsNameMap: BreadcrumbsNameMaps[] = [
         {
-            title: formatMessage({ id: 'massOffer' }),
+            title: formatMessage({ id: 'massRequest' }),
             links: {
-                '/massOffer': formatMessage({ id: 'massOffer' }),
+                '/massOffer': formatMessage({ id: 'massRequest' }),
             }
         },
         {
             title: formatMessage({ id: 'masses' }),
             links: {
                 '/masses': formatMessage({ id: 'masses' }),
+                '/masses/[massesId]': `${rubrics}`,
+
             }
         },
         {

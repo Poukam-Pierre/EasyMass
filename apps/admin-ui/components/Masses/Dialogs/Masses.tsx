@@ -32,7 +32,7 @@ interface CreateMassesDialogProps {
 }
 
 interface FormikProps {
-    massType: MassTypeEnum | undefined;
+    massType: MassTypeEnum | undefined | string;
     dayOfMass: Dayjs | null | undefined;
     massTime: Dayjs | null | undefined;
     price: number | undefined;
@@ -86,11 +86,16 @@ export default function MassesDialog({
             console.log(values)
         },
         validationSchema: yup.object().shape({
-            massType: yup.string().required('Should choose a mass type'),
-            dayOfMass: yup.date().required('Should choose a day'),
-            massTime: yup.date().required('Should choose a time'),
-            price: yup.number().required('Should choose a price'),
+            massType: yup.string()
+                .required(formatMessage({ id: 'massTypeWarningMsg' })),
+            dayOfMass: yup.date()
+                .required(formatMessage({ id: 'dayOfMassWarningMsg' })),
+            massTime: yup.date()
+                .required(formatMessage({ id: 'massTimeWarningMsg' })),
+            price: yup.number()
+                .required(formatMessage({ id: 'priceWarningMsg' })),
         }),
+        enableReinitialize: true
     })
     return (
         <Dialog

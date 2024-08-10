@@ -215,7 +215,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             dateTime: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
             intention: yup
                 .string()
-                .required(formatMessage({ id: 'intensionChecked' }))
+                .required(formatMessage({ id: 'intentionChecked' }))
                 .max(300, formatMessage({ id: 'intentionNumberChecked' }))
         })
     })
@@ -453,7 +453,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         type='text'
                         multiline
                         rows={5}
-                        placeholder={formatMessage({ id: 'massIntension' })}
+                        placeholder={formatMessage({ id: 'massIntention' })}
                         fullWidth
                         onChange={handleChange}
                         error={errors.intention && touched.intention ? true : false}

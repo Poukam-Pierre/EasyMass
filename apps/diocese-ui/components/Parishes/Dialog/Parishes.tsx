@@ -10,6 +10,7 @@ import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import { ParishData } from "../ParishesTables";
+import { useEffect, useState } from "react";
 
 
 interface CreateMassesDialogProps {
@@ -36,7 +37,9 @@ export default function ParishesDialog({
     labelBtn,
     parishData
 }: CreateMassesDialogProps) {
+
     const { formatMessage } = useIntl()
+
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
         values
@@ -60,6 +63,15 @@ export default function ParishesDialog({
         }),
         enableReinitialize: true
     })
+
+    const [cities, setCities] = useState<string[]>([])
+
+    useEffect(() => (
+        // TODO Fetch cities from API
+        setCities(['Bangangté', 'Bafoussam', 'Bouda'])
+    ), [])
+
+
     return (
         <Dialog
             open={isOpen}
@@ -113,7 +125,7 @@ export default function ParishesDialog({
 
                     <Autocomplete
                         id="city"
-                        options={[]}
+                        options={cities}
                         value={values.city}
                         size="small"
                         renderInput={(params) =>

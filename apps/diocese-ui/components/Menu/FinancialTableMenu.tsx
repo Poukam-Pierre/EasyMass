@@ -1,48 +1,35 @@
-import { Icon } from "@iconify/react";
+import { Icon, IconifyIcon } from "@iconify/react";
 import { Box, Menu, MenuItem, Typography } from "@mui/material";
-import { MenuItemForMassOwner } from "../Masses/tableMassOwnerData";
-import { useIntl } from "react-intl";
 import { useRouter } from "next/router";
+import { FinanceParish } from "../Masses/FinancialTableParishes";
 
-
-interface MassOwnerTableMenuProps {
-    anchorEl: HTMLElement | null;
-    setAnchorEl: (anchor: HTMLElement | null) => void;
-    handleModify: () => void;
-    handleCancel: () => void;
-    menuItem: MenuItemForMassOwner[]
-    idSelected?: number;
+export interface MenuItem {
+    title: string;
+    icon: IconifyIcon
 }
 
-
-export default function MassOwnerTableMenu({
+interface FinancialTableMenuProps {
+    anchorEl: HTMLElement | null;
+    setAnchorEl: (anchor: HTMLElement | null) => void;
+    menuItem: MenuItem[];
+    idSelected: number;
+    parishData: FinanceParish | undefined
+}
+export default function FinancialTableMenu({
     anchorEl,
     setAnchorEl,
-    handleModify,
-    handleCancel,
     menuItem,
-    idSelected
-}: MassOwnerTableMenuProps) {
-    const { formatMessage } = useIntl()
+    idSelected,
+    parishData
+}: FinancialTableMenuProps) {
     const { push } = useRouter()
-    const handleModalDialog = (title: string) => {
-        setAnchorEl(null)
-        switch (title) {
-            case formatMessage({ id: 'modify' }):
-                handleModify();
-                break;
-            case formatMessage({ id: 'delete' }):
-                handleCancel()
-                break;
-            case formatMessage({ id: 'history' }):
-                push({
-                    pathname: `/masses/${idSelected}`,
-                    query: {
-                        rubrics: 'History'
-                    }
-                })
-                break;
-        }
+
+    const handleModalDialog = () => {
+        setAnchorEl(null);
+        push({
+            pathname: `/masses/${idSelected}`,
+            query: { name: parishData?.name }
+        });
     }
 
     return (
@@ -59,18 +46,18 @@ export default function MassOwnerTableMenu({
                 horizontal: 'right',
             }}
         >
-            {menuItem.map(({ title, icon, color }, index) => (
+            {menuItem.map(({ title, icon }, index) => (
                 <MenuItem
                     key={index}
                     value={title}
-                    onClick={() => handleModalDialog(title)}
+                    onClick={() => handleModalDialog()}
+
                 >
                     <Box sx={{
                         display: 'grid',
                         gridTemplateColumns: 'auto 1fr',
                         columnGap: 1,
                         alignItems: 'center',
-                        color: color,
                     }}>
                         <Icon
                             icon={icon}

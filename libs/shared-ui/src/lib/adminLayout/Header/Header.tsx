@@ -13,7 +13,6 @@ export function Header({
     breadcrumbsNameMap: BreadcrumbsNameMaps[]
 }) {
     const { pathname } = useRouter()
-
     return (
         <Box sx={{
             display: 'grid',

@@ -52,6 +52,16 @@ export default function CancelMassDialog({
                     {formatMessage({ id: 'deleteMassMsg' })}
 
                 </Typography>
+                <Typography
+                    variant="body2"
+                    textAlign='center'
+                    sx={{
+                        color: 'var(--error)'
+                    }}
+                >
+                    {formatMessage({ id: 'deleteMassMsgWarning' })}
+
+                </Typography>
                 <Box sx={{
                     display: "grid",
                     gridTemplateColumns: '1fr 1fr',

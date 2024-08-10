@@ -12,7 +12,6 @@ import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import AppLayout from '../../components/Layout';
 import dayjs from 'dayjs';
 
-
 export default function Masses() {
     const { formatMessage } = useIntl()
     const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
@@ -39,26 +38,40 @@ export default function Masses() {
             dayOfMass: dayjs('2024-07-22'),
             massTime: dayjs(),
             massType: MassTypeEnum.One,
-            price: 2000
+            price: 2000,
+            status: 'done'
         },
         {
             id: 2,
-            dayOfMass: dayjs('2024-07-15'),
+            dayOfMass: dayjs('2024-07-20'),
             massTime: dayjs(),
             massType: MassTypeEnum.One,
-            price: 5000
+            price: 3500,
+            status: 'in process',
         },
         {
             id: 3,
+            dayOfMass: dayjs('2024-07-19'),
+            massTime: dayjs(),
+            massType: MassTypeEnum.One,
+            price: 2500,
+            status: 'locked',
+        },
+        {
+            id: 4,
             dayOfMass: null,
             massTime: null,
             massType: MassTypeEnum.Triduum,
-            price: 3000
+            price: 3000,
         },
     ]
 
     useEffect(() => (
         // TODO fetch data for all masses ordered into the church.
+        /**
+         * To do so, use SOCKET for more interactions with API calls.
+         * This will allow us to stay tunned from API actions.
+         */
         setMassData(tableData)
     ), [])
 
@@ -109,23 +122,6 @@ export default function Masses() {
                     width: 'fit-content',
                     columnGap: 3
                 }}>
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'auto 1fr',
-                        alignItems: 'center',
-                        columnGap: 1,
-                        cursor: 'pointer',
-                    }}
-                        onClick={(event) => setAnchorEl(event.target as HTMLAnchorElement)}
-                    >
-                        <Icon icon={filterIcon} fontSize={20} />
-                        <Typography
-                            variant='body2'
-                        >
-                            {formatMessage({ id: 'filter' })}
-                        </Typography>
-                    </Box>
-
                     <Box sx={{
                         display: 'grid',
                         gridTemplateColumns: 'auto 1fr',
