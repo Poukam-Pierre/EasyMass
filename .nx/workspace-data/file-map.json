@@ -1,0 +1,1737 @@
+{
+  "version": "6.0",
+  "nxVersion": "19.5.7",
+  "deps": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@iconify-icons/fluent": "^1.2.38",
+    "@iconify-icons/material-symbols": "^1.2.58",
+    "@iconify-icons/ph": "^1.2.5",
+    "@iconify/react": "^4.1.1",
+    "@mui/lab": "^5.0.0-alpha.170",
+    "@mui/material": "^5.15.15",
+    "@mui/x-date-pickers": "^7.6.2",
+    "@nestjs/common": "^10.0.2",
+    "@nestjs/core": "^10.0.2",
+    "@nestjs/platform-express": "^10.0.2",
+    "@prisma/client": "^5.18.0",
+    "@tanstack/react-query": "^5.32.0",
+    "axios": "^1.6.0",
+    "date-fns": "^3.6.0",
+    "dayjs": "^1.11.11",
+    "formik": "^2.4.6",
+    "next": "14.2.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-intl": "^6.6.5",
+    "react-is": "18.3.1",
+    "react-toastify": "^10.0.5",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0",
+    "styled-components": "5.3.6",
+    "tslib": "^2.3.0",
+    "yup": "^1.4.0",
+    "@babel/core": "^7.14.5",
+    "@babel/preset-react": "^7.14.5",
+    "@nestjs/schematics": "^10.0.1",
+    "@nestjs/testing": "^10.0.2",
+    "@nrwl/next": "19.5.7",
+    "@nrwl/workspace": "19.5.7",
+    "@nx/cypress": "19.5.7",
+    "@nx/eslint": "19.5.7",
+    "@nx/eslint-plugin": "19.5.7",
+    "@nx/jest": "19.5.7",
+    "@nx/js": "19.5.7",
+    "@nx/nest": "^19.5.7",
+    "@nx/next": "^19.5.7",
+    "@nx/node": "19.5.7",
+    "@nx/react": "19.5.7",
+    "@nx/web": "19.5.7",
+    "@nx/webpack": "19.5.7",
+    "@nx/workspace": "19.5.7",
+    "@swc-node/register": "1.9.2",
+    "@swc/cli": "0.3.14",
+    "@swc/core": "1.5.7",
+    "@swc/helpers": "0.5.12",
+    "@swc/plugin-styled-components": "^1.5.67",
+    "@testing-library/react": "15.0.6",
+    "@types/jest": "^29.4.0",
+    "@types/node": "18.16.9",
+    "@types/react": "18.3.1",
+    "@types/react-dom": "18.3.0",
+    "@types/react-is": "18.3.0",
+    "@types/styled-components": "5.1.26",
+    "@typescript-eslint/eslint-plugin": "7.16.0",
+    "@typescript-eslint/parser": "7.16.0",
+    "babel-jest": "^29.4.1",
+    "babel-plugin-styled-components": "1.10.7",
+    "cypress": "13.13.0",
+    "eslint": "~8.57.0",
+    "eslint-config-next": "14.2.3",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-cypress": "^2.13.4",
+    "eslint-plugin-import": "2.27.5",
+    "eslint-plugin-jsx-a11y": "6.7.1",
+    "eslint-plugin-react": "7.32.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "jest": "^29.4.1",
+    "jest-environment-jsdom": "^29.4.1",
+    "jest-environment-node": "^29.4.1",
+    "nx": "19.5.7",
+    "prettier": "^2.6.2",
+    "prisma": "^5.18.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "10.9.1",
+    "typescript": "5.5.4",
+    "webpack-cli": "^5.1.4"
+  },
+  "pathMappings": {
+    "@easy-messe/libs/theme": [
+      "libs/theme/src/index.ts"
+    ],
+    "@easy-messe/libs/theme/server": [
+      "libs/theme/src/server.ts"
+    ],
+    "@easy-messe/libs/utils": [
+      "libs/utils/src/index.ts"
+    ],
+    "@easy-messe/libs/utils/server": [
+      "libs/utils/src/server.ts"
+    ],
+    "@easy-messe/shared-ui": [
+      "libs/shared-ui/src/index.ts"
+    ],
+    "@easyMesse/theme": [
+      "theme/src/index.ts"
+    ],
+    "@easyMesse/theme/server": [
+      "theme/src/server.ts"
+    ],
+    "@easyMesseLibs/theme": [
+      "libs/src/index.ts"
+    ],
+    "@easyMesseLibs/theme/server": [
+      "libs/src/server.ts"
+    ]
+  },
+  "nxJsonPlugins": [
+    {
+      "name": "@nx/next/plugin",
+      "options": {
+        "startTargetName": "start",
+        "buildTargetName": "build",
+        "devTargetName": "dev",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "name": "@nx/cypress/plugin",
+      "options": {
+        "targetName": "e2e",
+        "openTargetName": "open-cypress",
+        "componentTestingTargetName": "component-test",
+        "ciTargetName": "e2e-ci"
+      }
+    },
+    {
+      "name": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "name": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
+    },
+    {
+      "name": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview"
+      }
+    }
+  ],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "'~/.npm-global'/better-branch.ps1",
+        "hash": "7524653750135427649"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init.cmd",
+        "hash": "15497449486842377589"
+      },
+      {
+        "file": "README.md",
+        "hash": "1844809074738531768"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "17866138117546000433"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init.ps1",
+        "hash": "4078383204798953721"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "4046662201205315906"
+      },
+      {
+        "file": "nx.json",
+        "hash": "2126185698708739720"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": ".vscode/extensions.json",
+        "hash": "4934098906304722861"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init",
+        "hash": "17503740099951035908"
+      },
+      {
+        "file": "package.json",
+        "hash": "4295547131891197197"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "hash": "14018532791733860670"
+      },
+      {
+        "file": ".editorconfig",
+        "hash": "5443105041930014821"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch.cmd",
+        "hash": "10772025752390581339"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "437603964215774181"
+      },
+      {
+        "file": "migrations.json",
+        "hash": "13321344729743655184"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "jest.config.ts",
+        "hash": "3494843969422251966"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "14756638002015608702"
+      },
+      {
+        "file": "jest.preset.js",
+        "hash": "9430166341120122740"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch",
+        "hash": "199653772355522664"
+      }
+    ],
+    "projectFileMap": {
+      "theme": [
+        {
+          "file": "libs/theme/.eslintrc.json",
+          "hash": "11012487992710232822"
+        },
+        {
+          "file": "libs/theme/README.md",
+          "hash": "3359207826875452305"
+        },
+        {
+          "file": "libs/theme/project.json",
+          "hash": "3459324222374896896"
+        },
+        {
+          "file": "libs/theme/src/EasyMesseThemeProvider.tsx",
+          "hash": "4211305563169299755",
+          "deps": [
+            "npm:@mui/material",
+            "npm:@tanstack/react-query",
+            "npm:react",
+            "npm:react-intl",
+            "npm:react-toastify"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/language/language.interface.ts",
+          "hash": "9603599055881829481"
+        },
+        {
+          "file": "libs/theme/src/contexts/language/languageContext.ts",
+          "hash": "17824644253539521453",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/language/languageContextProvider.tsx",
+          "hash": "9172730863408717709",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/themeContext/AppThemeContext.ts",
+          "hash": "3831644524918233729",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/themeContext/AppThemeContextProvider.tsx",
+          "hash": "5338375295148733154",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/index.ts",
+          "hash": "4003767366972890778"
+        },
+        {
+          "file": "libs/theme/src/languages/en-us/index.ts",
+          "hash": "5040499671471451779"
+        },
+        {
+          "file": "libs/theme/src/languages/en-us/website.ts",
+          "hash": "18217851793529222191"
+        },
+        {
+          "file": "libs/theme/src/languages/fr/index.ts",
+          "hash": "11341630188010274359"
+        },
+        {
+          "file": "libs/theme/src/languages/fr/website.ts",
+          "hash": "17207364901409745138"
+        },
+        {
+          "file": "libs/theme/src/offerMasses/OfferMassProvider.tsx",
+          "hash": "8237124069000797790",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/offerMasses/offerMass.Context.ts",
+          "hash": "18122652652020389022",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/offerMasses/offerMass.interface.ts",
+          "hash": "10554074226286994809",
+          "deps": [
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "libs/theme/src/theme.ts",
+          "hash": "14279300607335880106",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/tsconfig.json",
+          "hash": "14088618039610991405"
+        },
+        {
+          "file": "libs/theme/tsconfig.lib.json",
+          "hash": "1536859351713546153"
+        }
+      ],
+      "easy-messe": [
+        {
+          "file": "apps/easy-messe/.eslintrc.json",
+          "hash": "467559735979933921"
+        },
+        {
+          "file": "apps/easy-messe/components/AboutUs/AboutUs.tsx",
+          "hash": "9317366188264689268",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/AboutUs/statisticMass.tsx",
+          "hash": "14170657632360937173",
+          "deps": [
+            "theme",
+            "utils",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/HeroSection/HeroImage.tsx",
+          "hash": "11739392986185816199",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "theme"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/HeroSection/HeroSection.tsx",
+          "hash": "9861496801723875846",
+          "deps": [
+            "npm:@mui/material",
+            "theme",
+            "npm:react-intl",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/Calendar.tsx",
+          "hash": "3147257714709653508",
+          "deps": [
+            "npm:@mui/x-date-pickers",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/DateTimeMass.tsx",
+          "hash": "15309183303828916974",
+          "deps": [
+            "utils",
+            "npm:@mui/material",
+            "npm:date-fns",
+            "npm:dayjs",
+            "npm:formik",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/TimeClock.tsx",
+          "hash": "17224032695019150419",
+          "deps": [
+            "theme",
+            "npm:@mui/x-date-pickers",
+            "npm:date-fns",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/HeroMass.tsx",
+          "hash": "10315397286476535628",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/LetOfferMass.tsx",
+          "hash": "6261159899033139547",
+          "deps": [
+            "theme",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify-icons/ph",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:dayjs",
+            "npm:formik",
+            "npm:react",
+            "npm:react-intl",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/ModalPayment.tsx",
+          "hash": "514704767509606166",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/OfferList.tsx",
+          "hash": "18430241257485937205",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/OfferMassCard.tsx",
+          "hash": "8142205855103151205",
+          "deps": [
+            "utils",
+            "npm:@mui/material",
+            "npm:dayjs",
+            "theme",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/Prefooter/Prefooter.tsx",
+          "hash": "4704421428171660435",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/Prefooter/QuoteMasses.tsx",
+          "hash": "13583895895391160293",
+          "deps": [
+            "theme",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/Footer.tsx",
+          "hash": "5520212632508066907",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/GetInvolved.tsx",
+          "hash": "3408429878490111808",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/Organisation.tsx",
+          "hash": "15259847651194622765",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/Header.tsx",
+          "hash": "15624668599215261322",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/fluent",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/SideBar/SideBar.tsx",
+          "hash": "11912331062415509009",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/navitem.tsx",
+          "hash": "3320742287951663531",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/LanguageSwapper.tsx",
+          "hash": "8936856557347937816",
+          "deps": [
+            "npm:@mui/material",
+            "theme"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/index.tsx",
+          "hash": "10469557732641288261",
+          "deps": [
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/index.d.ts",
+          "hash": "5498222895072842432"
+        },
+        {
+          "file": "apps/easy-messe/jest.config.ts",
+          "hash": "18281969078621185684"
+        },
+        {
+          "file": "apps/easy-messe/next-env.d.ts",
+          "hash": "5909181270615354023"
+        },
+        {
+          "file": "apps/easy-messe/next.config.js",
+          "hash": "9301335525920576465",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/_app.tsx",
+          "hash": "8923127807118782670",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:@mui/x-date-pickers",
+            "npm:next",
+            "shared-ui",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/_document.tsx",
+          "hash": "13944970053009140463",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/index.tsx",
+          "hash": "928561540240793353"
+        },
+        {
+          "file": "apps/easy-messe/pages/offer-mass/index.tsx",
+          "hash": "10738174663626416370",
+          "deps": [
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl",
+            "theme"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/project.json",
+          "hash": "746188988879950894"
+        },
+        {
+          "file": "apps/easy-messe/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoEasyMass.png",
+          "hash": "747595885533622310"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoOP.PNG",
+          "hash": "2211090384763731016"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoPoukamTech.png",
+          "hash": "1575886553188962472"
+        },
+        {
+          "file": "apps/easy-messe/public/actionAreaBeforeFooterImg.jpg",
+          "hash": "14153910872746637823"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/momo.png",
+          "hash": "17875946657079275099"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/om_logo.png",
+          "hash": "12941147589971480553"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/visa.png",
+          "hash": "9383417089752000076"
+        },
+        {
+          "file": "apps/easy-messe/public/favicon.ico",
+          "hash": "3252920121136182000"
+        },
+        {
+          "file": "apps/easy-messe/public/heroImage.png",
+          "hash": "3716529824031157636"
+        },
+        {
+          "file": "apps/easy-messe/public/heroMassImg.png",
+          "hash": "16206213071718484646"
+        },
+        {
+          "file": "apps/easy-messe/public/heroMassImgColor.jpg",
+          "hash": "10992883480768619192"
+        },
+        {
+          "file": "apps/easy-messe/public/imgFooter.png",
+          "hash": "7146442251104441954"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/global.scss",
+          "hash": "4815580831680848711"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/notifyGlobalStyles.css",
+          "hash": "2789888428721053495"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/reset.css",
+          "hash": "10004681829485327134"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/root.scss",
+          "hash": "5904375317765855433"
+        },
+        {
+          "file": "apps/easy-messe/specs/index.spec.tsx",
+          "hash": "1288872939091782814",
+          "deps": [
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/tsconfig.json",
+          "hash": "14509742142844746046"
+        },
+        {
+          "file": "apps/easy-messe/tsconfig.spec.json",
+          "hash": "6922413205408300107"
+        }
+      ],
+      "backend": [
+        {
+          "file": "apps/backend/.eslintrc.json",
+          "hash": "13800677001662881425"
+        },
+        {
+          "file": "apps/backend/.gitignore",
+          "hash": "12975187279384539528"
+        },
+        {
+          "file": "apps/backend/jest.config.ts",
+          "hash": "13565990685219350708"
+        },
+        {
+          "file": "apps/backend/prisma/migrations/migration_lock.toml",
+          "hash": "11493296588214560035"
+        },
+        {
+          "file": "apps/backend/prisma/schema.prisma",
+          "hash": "13592462089764455867"
+        },
+        {
+          "file": "apps/backend/project.json",
+          "hash": "5481918141925727184"
+        },
+        {
+          "file": "apps/backend/src/app/app.controller.spec.ts",
+          "hash": "9499997688052526633",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app/app.controller.ts",
+          "hash": "9005150069945785676",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app/app.module.ts",
+          "hash": "3163250445227373966",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app/app.service.spec.ts",
+          "hash": "8587461140686713758",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app/app.service.ts",
+          "hash": "9967902337593410053",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/assets/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/backend/src/main.ts",
+          "hash": "11205222914964382693",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core"
+          ]
+        },
+        {
+          "file": "apps/backend/tsconfig.app.json",
+          "hash": "3171572500325445971"
+        },
+        {
+          "file": "apps/backend/tsconfig.json",
+          "hash": "3490524966360018312"
+        },
+        {
+          "file": "apps/backend/tsconfig.spec.json",
+          "hash": "11550347367511341917"
+        },
+        {
+          "file": "apps/backend/webpack.config.js",
+          "hash": "6924630345323258675",
+          "deps": [
+            "npm:@nx/webpack"
+          ]
+        }
+      ],
+      "diocese-ui": [
+        {
+          "file": "apps/diocese-ui/.eslintrc.json",
+          "hash": "12867431114370744848"
+        },
+        {
+          "file": "apps/diocese-ui/components/Layout/index.tsx",
+          "hash": "16766137899049231745",
+          "deps": [
+            "shared-ui",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Masses/FinancialTableParishes.tsx",
+          "hash": "5271258444563411759",
+          "deps": [
+            "theme",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/ph",
+            "npm:react",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Menu/FinancialTableMenu.tsx",
+          "hash": "16561761674535275279",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Menu/ParishTableMenu.tsx",
+          "hash": "16190205075533482699",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/Dialog/CancelParish.tsx",
+          "hash": "9139407155828555483",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/Dialog/Parishes.tsx",
+          "hash": "5108923460552857446",
+          "deps": [
+            "npm:@mui/material",
+            "npm:formik",
+            "npm:react-intl",
+            "npm:yup",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/ParishesTables.tsx",
+          "hash": "2739512044591241097",
+          "deps": [
+            "theme",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify-icons/ph",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/index.d.ts",
+          "hash": "5498222895072842432"
+        },
+        {
+          "file": "apps/diocese-ui/jest.config.ts",
+          "hash": "13635291748368948537"
+        },
+        {
+          "file": "apps/diocese-ui/next-env.d.ts",
+          "hash": "5909181270615354023"
+        },
+        {
+          "file": "apps/diocese-ui/next.config.js",
+          "hash": "4640182932892698362",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/_app.tsx",
+          "hash": "6749041237313782824",
+          "deps": [
+            "shared-ui",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/_document.tsx",
+          "hash": "13944970053009140463",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/index.tsx",
+          "hash": "12892710929804122500",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/MassesStatTable.tsx",
+          "hash": "4029651169763527148",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/fluent",
+            "theme",
+            "npm:react",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/[parishId].tsx",
+          "hash": "13971714590421120186",
+          "deps": [
+            "shared-ui",
+            "npm:react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/fluent",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/index.tsx",
+          "hash": "291770062680183087",
+          "deps": [
+            "npm:@mui/material",
+            "shared-ui",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/parishes/index.tsx",
+          "hash": "16882736009567133392",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/recovery/new-password/index.tsx",
+          "hash": "17808760415202165660",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/recovery/verification/index.tsx",
+          "hash": "11145382502194975053",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/project.json",
+          "hash": "5453938516681583294"
+        },
+        {
+          "file": "apps/diocese-ui/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/diocese-ui/public/assets/LogoEasyMass.png",
+          "hash": "747595885533622310"
+        },
+        {
+          "file": "apps/diocese-ui/public/favicon.ico",
+          "hash": "3252920121136182000"
+        },
+        {
+          "file": "apps/diocese-ui/specs/index.spec.tsx",
+          "hash": "11675860502091292728",
+          "deps": [
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/tsconfig.json",
+          "hash": "3430623041928731112"
+        },
+        {
+          "file": "apps/diocese-ui/tsconfig.spec.json",
+          "hash": "6922413205408300107"
+        }
+      ],
+      "utils": [
+        {
+          "file": "libs/utils/.eslintrc.json",
+          "hash": "11012487992710232822"
+        },
+        {
+          "file": "libs/utils/README.md",
+          "hash": "14342862180974447819"
+        },
+        {
+          "file": "libs/utils/project.json",
+          "hash": "8138411405492156884"
+        },
+        {
+          "file": "libs/utils/src/index.ts",
+          "hash": "9410459294750962199"
+        },
+        {
+          "file": "libs/utils/src/lib/apiMiddleware.ts",
+          "hash": "10791007075871787889",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "libs/utils/src/lib/phone.ts",
+          "hash": "17257025659079960224"
+        },
+        {
+          "file": "libs/utils/src/lib/utils.ts",
+          "hash": "17909206954217026314",
+          "deps": [
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "libs/utils/tsconfig.json",
+          "hash": "14088618039610991405"
+        },
+        {
+          "file": "libs/utils/tsconfig.lib.json",
+          "hash": "1536859351713546153"
+        }
+      ],
+      "diocese-ui-e2e": [
+        {
+          "file": "apps/diocese-ui-e2e/.eslintrc.json",
+          "hash": "14060216369337943343"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/cypress.config.ts",
+          "hash": "17174515833644472706",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui-e2e/project.json",
+          "hash": "17220042051279305366"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/e2e/app.cy.ts",
+          "hash": "11040713370065402387"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/fixtures/example.json",
+          "hash": "11785586596216172004"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/app.po.ts",
+          "hash": "11157016311132186162"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/commands.ts",
+          "hash": "5397443931564808659"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/e2e.ts",
+          "hash": "1054106023200826784"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/tsconfig.json",
+          "hash": "10740392072068377465"
+        }
+      ],
+      "easy-messe-e2e": [
+        {
+          "file": "apps/easy-messe-e2e/.eslintrc.json",
+          "hash": "14060216369337943343"
+        },
+        {
+          "file": "apps/easy-messe-e2e/cypress.config.ts",
+          "hash": "2889913413705003951",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/easy-messe-e2e/project.json",
+          "hash": "15229761556177558407"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/e2e/app.cy.ts",
+          "hash": "9905372500508939792"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/fixtures/example.json",
+          "hash": "11785586596216172004"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/app.po.ts",
+          "hash": "11157016311132186162"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/commands.ts",
+          "hash": "5397443931564808659"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/e2e.ts",
+          "hash": "1054106023200826784"
+        },
+        {
+          "file": "apps/easy-messe-e2e/tsconfig.json",
+          "hash": "10740392072068377465"
+        }
+      ],
+      "admin-ui": [
+        {
+          "file": "apps/admin-ui/.eslintrc.json",
+          "hash": "975152111133660949"
+        },
+        {
+          "file": "apps/admin-ui/components/Finances/FinanceTable.tsx",
+          "hash": "4606621199336506049",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/HeroHeader.tsx",
+          "hash": "11701082584599362955",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Layout/index.tsx",
+          "hash": "3600830887182192120",
+          "deps": [
+            "shared-ui",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Masses/Dialogs/CanceMass.tsx",
+          "hash": "14216877540447022892",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Masses/Dialogs/Masses.tsx",
+          "hash": "17130570144045779185",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:@mui/x-date-pickers",
+            "npm:dayjs",
+            "npm:formik",
+            "npm:react-intl",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Masses/IntentionMassesTable.tsx",
+          "hash": "15377047724235784761",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify-icons/fluent"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Masses/MassOffer/MassofferTable.tsx",
+          "hash": "8758584682797560636",
+          "deps": [
+            "theme",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/fluent"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Masses/tableMassOwnerData.tsx",
+          "hash": "17468387775082685230",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/ph",
+            "npm:@iconify/react",
+            "npm:react",
+            "npm:@iconify-icons/fluent",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Menus/MassMenu.tsx",
+          "hash": "9549723772453466881",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/components/Menus/MassOwnerTableMenu.tsx",
+          "hash": "6183472039393863393",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/index.d.ts",
+          "hash": "5498222895072842432"
+        },
+        {
+          "file": "apps/admin-ui/jest.config.ts",
+          "hash": "14814153360708849237"
+        },
+        {
+          "file": "apps/admin-ui/next-env.d.ts",
+          "hash": "5909181270615354023"
+        },
+        {
+          "file": "apps/admin-ui/next.config.js",
+          "hash": "4640182932892698362",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/_app.tsx",
+          "hash": "6749041237313782824",
+          "deps": [
+            "shared-ui",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/_document.tsx",
+          "hash": "13944970053009140463",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/finances/index.tsx",
+          "hash": "964665076583227318",
+          "deps": [
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl",
+            "shared-ui"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/index.tsx",
+          "hash": "14374749635608058162"
+        },
+        {
+          "file": "apps/admin-ui/pages/login/index.tsx",
+          "hash": "16643260286713626222",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/massOffer/index.tsx",
+          "hash": "8513535897193727425",
+          "deps": [
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl",
+            "shared-ui"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/masses/[massesId].tsx",
+          "hash": "17801357344197670641",
+          "deps": [
+            "shared-ui",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:@mui/x-date-pickers",
+            "npm:dayjs",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/masses/index.tsx",
+          "hash": "9688856489269038803",
+          "deps": [
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl",
+            "shared-ui",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/recovery/new-password/index.tsx",
+          "hash": "17808760415202165660",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/pages/recovery/verification/index.tsx",
+          "hash": "11145382502194975053",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/project.json",
+          "hash": "16609037855812672876"
+        },
+        {
+          "file": "apps/admin-ui/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/admin-ui/public/assets/LogoEasyMass.png",
+          "hash": "747595885533622310"
+        },
+        {
+          "file": "apps/admin-ui/public/favicon.ico",
+          "hash": "3252920121136182000"
+        },
+        {
+          "file": "apps/admin-ui/specs/index.spec.tsx",
+          "hash": "11675860502091292728",
+          "deps": [
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/admin-ui/tsconfig.json",
+          "hash": "10856894897051292063"
+        },
+        {
+          "file": "apps/admin-ui/tsconfig.spec.json",
+          "hash": "6922413205408300107"
+        }
+      ],
+      "shared-ui": [
+        {
+          "file": "libs/shared-ui/.babelrc",
+          "hash": "2946678488919325452"
+        },
+        {
+          "file": "libs/shared-ui/.eslintrc.json",
+          "hash": "11012487992710232822"
+        },
+        {
+          "file": "libs/shared-ui/README.md",
+          "hash": "1173670062938964454"
+        },
+        {
+          "file": "libs/shared-ui/jest.config.ts",
+          "hash": "14105551914937192864"
+        },
+        {
+          "file": "libs/shared-ui/project.json",
+          "hash": "1974437768734572024"
+        },
+        {
+          "file": "libs/shared-ui/src/index.ts",
+          "hash": "9987574141868491283"
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/AdminLayout.tsx",
+          "hash": "2345375496247712871",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:@mui/x-date-pickers",
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/Footer.tsx",
+          "hash": "6838887638699234056",
+          "deps": [
+            "npm:@mui/material",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/fluent"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/Header/Breadcrumbs.tsx",
+          "hash": "12828051973172562106",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/Header/Header.tsx",
+          "hash": "10332004873413958853",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/LanguageSwapper.tsx",
+          "hash": "3290469167477894276",
+          "deps": [
+            "npm:@mui/material",
+            "theme",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/SideBar/NavBar.tsx",
+          "hash": "16243076635140223937",
+          "deps": [
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/SideBar/NavBarItem.tsx",
+          "hash": "1574614489362731657",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/SideBar/Profile.tsx",
+          "hash": "17396988368022771947",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/adminLayout/SideBar/SideBar.tsx",
+          "hash": "10532283152970140890",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/authentication/HeroHeader.tsx",
+          "hash": "11701082584599362955",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/authentication/Login.tsx",
+          "hash": "2441147236031249124",
+          "deps": [
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:formik",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/authentication/getMailVerification.tsx",
+          "hash": "657619843743904198",
+          "deps": [
+            "npm:@mui/material",
+            "npm:formik",
+            "npm:react-intl",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/authentication/getNewPassword.tsx",
+          "hash": "17317187580096197077",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:react",
+            "npm:formik",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "libs/shared-ui/src/lib/styles/global.scss",
+          "hash": "4815580831680848711"
+        },
+        {
+          "file": "libs/shared-ui/src/lib/styles/index.ts",
+          "hash": "9883329991310682323"
+        },
+        {
+          "file": "libs/shared-ui/src/lib/styles/notifyGlobalStyles.css",
+          "hash": "2789888428721053495"
+        },
+        {
+          "file": "libs/shared-ui/src/lib/styles/reset.css",
+          "hash": "10004681829485327134"
+        },
+        {
+          "file": "libs/shared-ui/src/lib/styles/root.scss",
+          "hash": "5904375317765855433"
+        },
+        {
+          "file": "libs/shared-ui/tsconfig.json",
+          "hash": "12937361759397702261"
+        },
+        {
+          "file": "libs/shared-ui/tsconfig.lib.json",
+          "hash": "15147195313780277677"
+        },
+        {
+          "file": "libs/shared-ui/tsconfig.spec.json",
+          "hash": "6514620907549802163"
+        }
+      ],
+      "backend-e2e": [
+        {
+          "file": "apps/backend-e2e/.eslintrc.json",
+          "hash": "13800677001662881425"
+        },
+        {
+          "file": "apps/backend-e2e/jest.config.ts",
+          "hash": "10342316975398403646"
+        },
+        {
+          "file": "apps/backend-e2e/project.json",
+          "hash": "18395645934347403237"
+        },
+        {
+          "file": "apps/backend-e2e/src/backend/backend.spec.ts",
+          "hash": "110394728024017389",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "apps/backend-e2e/src/support/global-setup.ts",
+          "hash": "2568409276037275290"
+        },
+        {
+          "file": "apps/backend-e2e/src/support/global-teardown.ts",
+          "hash": "5275447082211835490"
+        },
+        {
+          "file": "apps/backend-e2e/src/support/test-setup.ts",
+          "hash": "10984585515912236441",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "apps/backend-e2e/tsconfig.json",
+          "hash": "15443990093475294480"
+        },
+        {
+          "file": "apps/backend-e2e/tsconfig.spec.json",
+          "hash": "14954872453723519891"
+        }
+      ],
+      "admin-ui-e2e": [
+        {
+          "file": "apps/admin-ui-e2e/.eslintrc.json",
+          "hash": "14060216369337943343"
+        },
+        {
+          "file": "apps/admin-ui-e2e/cypress.config.ts",
+          "hash": "9758705333104404552",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/admin-ui-e2e/project.json",
+          "hash": "3584211616821091153"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/e2e/app.cy.ts",
+          "hash": "5772299150751468582"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/fixtures/example.json",
+          "hash": "11785586596216172004"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/app.po.ts",
+          "hash": "11157016311132186162"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/commands.ts",
+          "hash": "5397443931564808659"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/e2e.ts",
+          "hash": "1054106023200826784"
+        },
+        {
+          "file": "apps/admin-ui-e2e/tsconfig.json",
+          "hash": "10740392072068377465"
+        }
+      ]
+    }
+  }
+}
