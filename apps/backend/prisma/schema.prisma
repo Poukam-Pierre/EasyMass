@@ -78,6 +78,8 @@ model Priest {
   authCardImge String?
   availability Boolean              @default(false)
   email        String               @unique
+  password     String
+  token        String?
   souscribeAt  DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   transaction  Transaction[]
@@ -89,6 +91,8 @@ model Parish {
   id          Int                  @id @default(autoincrement())
   name        String
   email       String               @unique
+  password    String
+  token       String?
   phone       String
   city        String
   region      String
