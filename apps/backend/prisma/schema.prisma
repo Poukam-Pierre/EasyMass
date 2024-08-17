@@ -33,12 +33,12 @@ model Mass {
   updatedAt        DateTime    @updatedAt
   standardPrice    Int         @default(5000)
   massType         MassType    @default(UNIQUE)
-  createdByUser    User        @relation(fields: [userId], references: [id])
+  createdByUser    User?       @relation(fields: [userId], references: [id])
   createdByParish  Parish      @relation(fields: [parishId], references: [id])
-  assignedToPriest Priest      @relation(fields: [priestId], references: [id])
-  userId           Int
+  assignedToPriest Priest?     @relation(fields: [priestId], references: [id])
+  userId           Int?
   parishId         Int
-  priestId         Int
+  priestId         Int?
   massOrder        MassOrder[]
 }
 
@@ -88,21 +88,36 @@ model Priest {
 }
 
 model Parish {
-  id          Int                  @id @default(autoincrement())
-  name        String
-  email       String               @unique
-  password    String
-  token       String?
-  phone       String
-  city        String
-  region      String
-  diocese     String
-  leadManager String
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  transaction Transaction[]
-  mass        Mass[]
-  notif       NotificationParish[]
+  id             Int                  @id @default(autoincrement())
+  name           String
+  email          String               @unique
+  password       String
+  token          String?
+  phone          String
+  city           String
+  region         String
+  diocese        String
+  leadManager    String
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  transaction    Transaction[]
+  mass           Mass[]
+  notif          NotificationParish[]
+  createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
+  adminId        Int
+}
+
+model Administrator {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  token     String?
+  phone     String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  parish    Parish[]
 }
 
 model Notification {
@@ -143,4 +158,9 @@ enum Status {
   VALIDED
   PROCESS
   ECHEC
+}
+
+enum Role {
+  ENGENEER
+  ADMIN
 }
