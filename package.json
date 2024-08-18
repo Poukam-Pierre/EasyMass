@@ -20,6 +20,8 @@
     "@nestjs/core": "^10.0.2",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/platform-socket.io": "^10.4.1",
+    "@nestjs/websockets": "^10.4.1",
     "@prisma/client": "^5.18.0",
     "@tanstack/react-query": "^5.32.0",
     "axios": "^1.6.0",
