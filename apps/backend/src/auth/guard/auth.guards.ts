@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY, ROLE } from './decorator/public.decorator';
+import { IS_PUBLIC_KEY, ROLE } from '../decorator/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -21,17 +21,10 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    const requiredRole = this.reflector.get<ROLE[]>(
-      'role',
-      context.getHandler()
-    );
 
-    if (isPublic || !requiredRole) return true;
+    if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest();
-
-    const userRole: ROLE[] = request.user?.role; // Don't forget to set the user role during authentication.
-    if (!userRole || userRole.length === 0) return false;
 
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException();
@@ -42,7 +35,7 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload;
 
-      return userRole.some((role) => requiredRole.includes(role));
+      return true;
     } catch (error) {
       throw new UnauthorizedException();
     }
