@@ -1,22 +1,16 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BelieverService } from '../believer/believer.service';
 
 @Injectable()
-@WebSocketGateway()
 export class PaymentService {
-  @WebSocketServer()
-  server: Server;
+  constructor(private readonly believerService: BelieverService) {}
 
   async handlePayment(payload: {
     amount: number;
     currency: string;
     channel: string;
     customer: {
+      name: string;
       phone: string;
     };
     metadata?: Array<object>;
@@ -31,11 +25,9 @@ export class PaymentService {
         amount: payload.amount,
         currency: payload.currency,
         description: 'My first payment',
-        customer: {
-          email: 'easyMess@gmail.com',
-          phone: payload.customer.phone,
-        },
+        email: 'easyMess@gmail.com',
         reference: 'the unique reference',
+        callback: 'the callback url',
       }),
     };
 
@@ -46,38 +38,14 @@ export class PaymentService {
       ).then((response) => response.json());
 
       if (paymentInit.code === 201 && paymentInit.status === 'Accepted') {
-        this.server.emit('initPayment', {
-          msg: 'Payment initiated',
-        });
-      }
-
-      const optionPaymentCharge = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          channel: payload.channel,
-          phone: payload.customer.phone,
-        }),
-      };
-
-      const paymentCharge = await fetch(
-        `charge Notch pay link/${paymentInit.reference}`,
-        optionPaymentCharge
-      ).then((response) => response.json());
-
-      if (paymentCharge.code === 202 && paymentCharge.status === 'Accepted') {
-        this.server.emit('paymentCharge', {
-          msg: paymentCharge.message,
-        });
-      }
-
-      if (paymentInit.code !== 201 && paymentCharge.code !== 202) {
-        throw new UnauthorizedException(paymentInit.message);
+        return paymentInit.authorization_url;
       }
     } catch (error) {
       throw new UnprocessableEntityException(error);
     }
+  }
+
+  notifyPayment(paymentResult: object) {
+    return;
   }
 }
