@@ -15,8 +15,8 @@ datasource db {
 
 // Models
 
-model User {
-  id          Int           @id @unique @default(autoincrement())
+model Believer {
+  id          String        @id @unique @default(cuid())
   name        String?
   phone       String?
   transaction Transaction[]
@@ -25,31 +25,31 @@ model User {
 }
 
 model Mass {
-  id               Int         @id @default(autoincrement())
-  price            Int?
-  processAt        DateTime? // We can use this field wheither as the date and time the user would like the mass process or the one for a specific mass at church.
-  intension        String? //  We can use this field only when User created a mass directly from Priest. So that he can leave intension depending on itself.
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  standardPrice    Int         @default(5000)
-  massType         MassType    @default(UNIQUE)
-  createdByUser    User?       @relation(fields: [userId], references: [id])
-  createdByParish  Parish      @relation(fields: [parishId], references: [id])
-  assignedToPriest Priest?     @relation(fields: [priestId], references: [id])
-  userId           Int?
-  parishId         Int
-  priestId         Int?
-  massOrder        MassOrder[]
+  id                Int         @id @default(autoincrement())
+  price             Int?
+  processAt         DateTime? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
+  intension         String? //  We can use this field only when Believer created a mass directly from Priest. So that he can leave intension depending on itself.
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  standardPrice     Int         @default(5000)
+  massType          MassType    @default(UNIQUE)
+  createdByBeliever Believer?   @relation(fields: [believerId], references: [id])
+  createdByParish   Parish      @relation(fields: [parishId], references: [id])
+  assignedToPriest  Priest?     @relation(fields: [priestId], references: [id])
+  believerId        String?
+  parishId          Int
+  priestId          Int?
+  massOrder         MassOrder[]
 }
 
 model MassOrder {
-  id          Int      @id @default(autoincrement())
-  createAt    DateTime @default(now())
-  intension   String
-  orderByUser User     @relation(fields: [userId], references: [id])
-  mass        Mass     @relation(fields: [massId], references: [id])
-  userId      Int
-  massId      Int
+  id              Int      @id @default(autoincrement())
+  createAt        DateTime @default(now())
+  intension       String
+  orderByBeliever Believer @relation(fields: [believerId], references: [id])
+  mass            Mass     @relation(fields: [massId], references: [id])
+  believerId      String
+  massId          Int
 }
 
 model Transaction {
@@ -59,10 +59,12 @@ model Transaction {
   updatedAt     DateTime @updatedAt
   price         Int
   status        Status
-  user          User     @relation(fields: [userId], references: [id])
+  paymentMethod String
+  currency      String
+  believer      Believer @relation(fields: [believerId], references: [id])
   initByPriest  Priest   @relation(fields: [priestId], references: [id])
   initByParish  Parish   @relation(fields: [parishId], references: [id])
-  userId        Int
+  believerId    String
   priestId      Int
   parishId      Int
 }
