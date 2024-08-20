@@ -36,7 +36,27 @@ export class PaymentService {
     }
   }
 
-  notifyPayment(paymentResult: object) {
-    return;
+  async notifyPayment(paymentResult: any) {
+    const {
+      data: { reference },
+    } = paymentResult;
+
+    const checkPayment = {
+      port: 443,
+      method: 'GET',
+      headers: {
+        Authorization: process.env.NOTCH_PUBLIC_KEY,
+      },
+    };
+    try {
+      const paymentStatus = await fetch(
+        `https://api.notchpay.co/payments/${reference}`,
+        checkPayment
+      ).then((response) => response.json());
+
+      return paymentStatus;
+    } catch (error) {
+      throw new UnprocessableEntityException(error);
+    }
   }
 }
