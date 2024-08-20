@@ -124,11 +124,12 @@ model Administrator {
 }
 
 model Notification {
-  id        Int                  @id @default(autoincrement())
-  content   String
-  createdAt DateTime             @default(now())
-  parish    NotificationParish[]
-  priest    NotificationPriest[]
+  id             Int                  @id @default(autoincrement())
+  notificationId String               @unique
+  content        String
+  createdAt      DateTime             @default(now())
+  parish         NotificationParish[]
+  priest         NotificationPriest[]
 }
 
 model NotificationParish {
