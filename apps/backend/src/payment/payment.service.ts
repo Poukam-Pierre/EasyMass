@@ -1,5 +1,8 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { BelieverService } from '../believer/believer.service';
+import { createId } from '@paralleldrive/cuid2';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @Injectable()
 export class PaymentService {
@@ -13,8 +16,8 @@ export class PaymentService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: handlePaymentDto.orderInfo.amount,
-        currency: handlePaymentDto.orderInfo.currency,
+        amount: handlePaymentDto.paymentInfo.amount,
+        currency: handlePaymentDto.paymentInfo.currency,
         description: 'My first payment',
         email: 'easyMess@gmail.com',
         reference: createId(),
