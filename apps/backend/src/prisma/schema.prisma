@@ -34,10 +34,10 @@ model Mass {
   standardPrice     Int         @default(5000)
   massType          MassType    @default(UNIQUE)
   createdByBeliever Believer?   @relation(fields: [believerId], references: [id])
-  createdByParish   Parish      @relation(fields: [parishId], references: [id])
+  createdByParish   Parish?     @relation(fields: [parishId], references: [id])
   assignedToPriest  Priest?     @relation(fields: [priestId], references: [id])
   believerId        String?
-  parishId          Int
+  parishId          Int?
   priestId          Int?
   massOrder         MassOrder[]
 }
@@ -53,20 +53,20 @@ model MassOrder {
 }
 
 model Transaction {
-  id            Int      @id @default(autoincrement())
-  transactionId String   @unique @default(cuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            Int       @id @default(autoincrement())
+  transactionId String    @unique @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   price         Int
   status        Status
   paymentMethod String
   currency      String
-  believer      Believer @relation(fields: [believerId], references: [id])
-  initByPriest  Priest   @relation(fields: [priestId], references: [id])
-  initByParish  Parish   @relation(fields: [parishId], references: [id])
-  believerId    String
-  priestId      Int
-  parishId      Int
+  believer      Believer? @relation(fields: [believerId], references: [id])
+  initByPriest  Priest?   @relation(fields: [priestId], references: [id])
+  initByParish  Parish?   @relation(fields: [parishId], references: [id])
+  believerId    String?
+  priestId      Int?
+  parishId      Int?
 }
 
 model Priest {
