@@ -12,7 +12,7 @@ export class PaymentService {
     const optionPaymentInit = {
       method: 'POST',
       headers: {
-        Authorization: 'YOUR_PUBLIC_KEY',
+        Authorization: process.env.NOTCH_PUBLIC_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
