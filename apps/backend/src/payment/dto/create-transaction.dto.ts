@@ -3,7 +3,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class CreateTransactionDto {
   believerInfo: BelieverInfo;
   massInfo: MassInfo[];
-  orderInfo: OrderInfo;
+  paymentInfo: OrderInfo;
 }
 
 class BelieverInfo {
@@ -33,4 +33,7 @@ class OrderInfo {
   @IsString()
   @IsNotEmpty()
   currency: string;
+
+  @IsString()
+  phone?: string;
 }
