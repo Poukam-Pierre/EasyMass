@@ -16,7 +16,7 @@ datasource db {
 // Models
 
 model Believer {
-  id          String        @id @unique @default(cuid())
+  id          String        @id @unique
   name        String?
   phone       String?
   transaction Transaction[]
