@@ -17,8 +17,12 @@ export class PaymentService {
         currency: handlePaymentDto.orderInfo.currency,
         description: 'My first payment',
         email: 'easyMess@gmail.com',
-        reference: 'the unique reference',
-        callback: 'the callback url',
+        reference: createId(),
+        callback: 'https://onlinepreps.net',
+        metadata: JSON.stringify({
+          believerInfo: JSON.stringify(handlePaymentDto.believerInfo),
+          massInfo: JSON.stringify(handlePaymentDto.massInfo),
+        }),
       }),
     };
 
