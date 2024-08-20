@@ -6,9 +6,9 @@ import { Prisma } from '@prisma/client';
 export class NotificationParishService {
   constructor(private primaService: PrismaService) {}
 
-  async create(createNotifParisDto: Prisma.NotificationParishCreateInput) {
+  async create(createNotifParishDto: Prisma.NotificationParishCreateInput) {
     return this.primaService.notificationParish.create({
-      data: createNotifParisDto,
+      data: createNotifParishDto,
     });
   }
 }
