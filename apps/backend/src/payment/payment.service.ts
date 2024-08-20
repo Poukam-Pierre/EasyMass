@@ -28,7 +28,7 @@ export class PaymentService {
 
     try {
       const paymentInit = await fetch(
-        'noth pay url payment initialization',
+        'https://api.notchpay.co/payments',
         optionPaymentInit
       ).then((response) => response.json());
 
