@@ -46,6 +46,7 @@ model MassOrder {
   id              Int      @id @default(autoincrement())
   createAt        DateTime @default(now())
   intension       String
+  price           Int
   orderByBeliever Believer @relation(fields: [believerId], references: [id])
   mass            Mass     @relation(fields: [massId], references: [id])
   believerId      String
