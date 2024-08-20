@@ -5,16 +5,7 @@ import { BelieverService } from '../believer/believer.service';
 export class PaymentService {
   constructor(private readonly believerService: BelieverService) {}
 
-  async handlePayment(payload: {
-    amount: number;
-    currency: string;
-    channel: string;
-    customer: {
-      name: string;
-      phone: string;
-    };
-    metadata?: Array<object>;
-  }) {
+  async handlePayment(handlePaymentDto: CreateTransactionDto) {
     const optionPaymentInit = {
       method: 'POST',
       headers: {
@@ -22,8 +13,8 @@ export class PaymentService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: payload.amount,
-        currency: payload.currency,
+        amount: handlePaymentDto.orderInfo.amount,
+        currency: handlePaymentDto.orderInfo.currency,
         description: 'My first payment',
         email: 'easyMess@gmail.com',
         reference: 'the unique reference',
