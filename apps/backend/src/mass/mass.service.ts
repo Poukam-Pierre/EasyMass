@@ -27,6 +27,14 @@ export class MassService {
     });
   }
 
+  async findOne(id: number) {
+    return this.prismaService.mass.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
   async remove(id: number) {
     return this.prismaService.mass.delete({
       where: {
