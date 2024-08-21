@@ -16,8 +16,36 @@ export class AuthService {
     private readonly parishService: ParishService
   ) {}
 
-  async authenticate(input: LoginDataDto): Promise<ParishDataDto> {
-    const user = await this.validate(input);
+  /**
+   * This function authenticate the parish user when login
+   * @param input
+   * @returns
+   */
+  async authenticateParish(input: LoginDataDto): Promise<ParishDataDto> {
+    const user = await this.validate(input, 'parish');
+
+    if (!user) {
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'Wrong email or password.',
+      });
+    } else if (typeof user === 'string') {
+      throw new ConflictException(user, {
+        cause: new Error(),
+        description:
+          'Your account is already in use! Please logout before logging again.',
+      });
+    }
+
+    return this.signIn(user);
+  }
+  /**
+   * This function authenticate administrators user when login
+   * @param input
+   * @returns
+   */
+  async authenticateAdmin(input: LoginDataDto): Promise<ParishDataDto> {
+    const user = await this.validate(input, 'admin');
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
