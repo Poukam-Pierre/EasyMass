@@ -16,10 +16,10 @@ export class PriestService {
     return this.prismaService.priest.findMany();
   }
 
-  async findOne(id: number) {
+  async findOne(email: string) {
     return this.prismaService.priest.findUnique({
       where: {
-        id,
+        email,
       },
     });
   }
