@@ -15,17 +15,18 @@ import { ROLE, Role } from '../auth/decorator/public.decorator';
 import { AuthGuard } from '../auth/guard/auth.guards';
 
 @Controller('parishes')
-@UseGuards(AdminGuard)
 export class ParishController {
   constructor(private readonly parishService: ParishService) {}
 
   @Post()
+  @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   create(@Body() createParishDto: Prisma.ParishCreateInput) {
     return this.parishService.create(createParishDto);
   }
 
   @Get()
+  @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
   findAll() {
@@ -33,6 +34,7 @@ export class ParishController {
   }
 
   @Get(':id')
+  @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
   findOne(@Param('id') id: string) {
@@ -48,7 +50,6 @@ export class ParishController {
     return this.parishService.update(+id, updateParishDto);
   }
 
-  @Role(ROLE.ADMIN)
   @Delete(':id')
   @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
