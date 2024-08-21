@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { ParishService } from './parish.service';
 import { AdminGuard } from '../auth/guard/admin.guards';
 import { ROLE, Role } from '../auth/decorator/public.decorator';
+import { AuthGuard } from '../auth/guard/auth.guards';
 
 @Controller('parishes')
 @UseGuards(AdminGuard)
@@ -39,7 +40,7 @@ export class ParishController {
   }
 
   @Patch(':id')
-  @Role(ROLE.ADMIN)
+  @UseGuards(AuthGuard)
   update(
     @Param('id') id: string,
     @Body() updateParishDto: Prisma.ParishUpdateInput
@@ -49,6 +50,7 @@ export class ParishController {
 
   @Role(ROLE.ADMIN)
   @Delete(':id')
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.parishService.remove(+id);
   }
