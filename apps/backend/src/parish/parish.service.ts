@@ -24,6 +24,14 @@ export class ParishService {
     });
   }
 
+  async findOneByMail(email: string) {
+    return this.prismaService.parish.findUnique({
+      where: {
+        email,
+      },
+    });
+  }
+
   async update(id: number, updateParishDto: Prisma.ParishUpdateInput) {
     return this.prismaService.parish.update({
       where: {
