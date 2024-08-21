@@ -63,7 +63,16 @@ export class AuthService {
     return this.signIn(user);
   }
 
-  async validate(input: LoginDataDto): Promise<ParishDataDto | null | string> {
+  /**
+   * This function validate weither the user exists in db or not.
+   * Alo check weither all user's credentials are valid or not.
+   * @param input
+   * @returns
+   */
+  async validate(
+    input: LoginDataDto,
+    role: string
+  ): Promise<ParishDataDto | null | string> {
     const { email, password } = input;
     const user = await this.parishService.findOneByMail(email);
 
