@@ -18,4 +18,20 @@ export class MassService {
       data: updateMassDto,
     });
   }
+
+  async findAll(parishId?: number, believerId?: string) {
+    return this.prismaService.mass.findMany({
+      where: {
+        OR: [{ parishId: parishId }, { believerId: believerId }],
+      },
+    });
+  }
+
+  async remove(id: number) {
+    return this.prismaService.mass.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
