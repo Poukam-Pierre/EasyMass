@@ -22,7 +22,7 @@ export class MassService {
   async findAll(parishId?: number, believerId?: string) {
     return this.prismaService.mass.findMany({
       where: {
-        OR: [{ parishId: parishId }, { believerId: believerId }],
+        OR: [{ parishId }, { believerId }],
       },
     });
   }
