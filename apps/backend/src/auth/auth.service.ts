@@ -1,64 +1,124 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
-type AuthInput = { email: string; password: string };
-type SignInData = { userId: number; email: string }; // TODO Adjust signInData to get all needed data
-type AuthResult = { accessToken: string; userId: number; email: string };
+import { bcrypt } from 'bcryptjs';
+import { ParishService } from '../parish/parish.service';
+import { LoginDataDto, ParishDataDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  /* Injectable constructor goes here for priest users */
-  constructor(private JwtService: JwtService) {}
+  constructor(
+    private readonly JwtService: JwtService,
+    private readonly parishService: ParishService
+  ) {}
 
-  async authenticateParish(input: AuthInput): Promise<AuthResult> {
-    const user = await this.validateParish(input);
+  async authenticate(input: LoginDataDto): Promise<ParishDataDto> {
+    const user = await this.validate(input);
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'Wrong email or password.',
+      });
+    } else if (typeof user === 'string') {
+      throw new ConflictException(user, {
+        cause: new Error(),
+        description:
+          'Your account is already in use! Please logout before logging again.',
+      });
     }
 
     return this.signIn(user);
   }
 
-  async authenticateAdmin(input: AuthInput): Promise<AuthResult> {
-    const user = await this.validateAdmin(input);
+  async validate(input: LoginDataDto): Promise<ParishDataDto | null | string> {
+    const { email, password } = input;
+    const user = await this.parishService.findOneByMail(email);
 
     if (!user) {
-      throw new UnauthorizedException();
+      return null;
+    } else if (user.token) {
+      const verifyToken = await this.tokenCheckValidity(user.token, user.id);
+      if (typeof verifyToken === 'string') {
+        return verifyToken;
+      }
     }
 
-    return this.signIn(user);
+    try {
+      const validatePassword = bcrypt.compare(password, user.password);
+      if (validatePassword) {
+        return {
+          id: user.id,
+          email: user.email,
+          city: user.city,
+          diocese: user.diocese,
+          leadManager: user.leadManager,
+          name: user.name,
+          phone: user.phone,
+          region: user.region,
+          createdAt: user.createdAt,
+        };
+      } else return null;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
   }
 
-  async validateParish(input: AuthInput): Promise<SignInData | null> {
-    /* Fetch user here from database to find if it exists. 
-           If not found return null or if it exists return all data needed.
-           Test the password using hash function test.
-        */
-    return null;
-  }
-
-  async validateAdmin(input: AuthInput): Promise<SignInData | null> {
-    /* Fetch user here from database to find if it exists. 
-           If not found return null or if it exists return all data needed.
-           Test the password using hash function test.
-        */
-    return null;
-  }
-
-  async signIn(user: SignInData): Promise<AuthResult> {
+  /**
+   *
+   * @param user
+   * @returns user informations
+   */
+  async signIn(user: ParishDataDto): Promise<ParishDataDto> {
     const tokenPayload = {
-      // This spot needs to get out all needed information that we could use later maybe for validating.
-      sub: 2,
-      email: 'user@example.com',
+      id: user.id,
+      email: user.email,
+      name: user.name,
     };
 
-    const accessToken = await this.JwtService.signAsync(tokenPayload);
+    try {
+      const accessToken = await this.JwtService.signAsync(tokenPayload);
 
-    return {
-      accessToken,
-      userId: 1,
-      email: 'user@example.com',
-    };
+      await this.parishService.update(user.id, { token: accessToken });
+
+      user.token = accessToken;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
+  }
+
+  /**
+   *
+   * @param token
+   * @param id
+   * @returns a string if token is valide or @null if token is not.
+   */
+  async tokenCheckValidity(token: string, id: number): Promise<string | null> {
+    try {
+      const verifyToken = await this.JwtService.verifyAsync(token);
+
+      if (!verifyToken) {
+        await this.parishService.update(id, { token: null });
+        return null;
+      }
+
+      return 'already logged in';
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
   }
 }
