@@ -40,7 +40,6 @@ export class ParishController {
 
   @Patch(':id')
   @Role(ROLE.ADMIN)
-  @UseGuards(AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateParishDto: Prisma.ParishUpdateInput
@@ -49,7 +48,6 @@ export class ParishController {
   }
 
   @Role(ROLE.ADMIN)
-  @UseGuards(AdminGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.parishService.remove(+id);
