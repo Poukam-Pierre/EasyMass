@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { AuthGuard } from './guard/auth.guards';
 import { LoginDataDto } from './dto/login.dto';
+import { SignUpDataDto } from './dto/signup.dto';
 
 @Controller('auth')
 @UseGuards(AuthGuard)
@@ -25,5 +26,11 @@ export class AuthController {
   @Public()
   loginAdmin(@Body(ValidationPipe) input: LoginDataDto) {
     return this.authService.authenticate(input, 'admin');
+  }
+
+  @Post('/signup')
+  @Public()
+  signUp(@Body(ValidationPipe) input: SignUpDataDto) {
+    return this.authService.signup(input);
   }
 }
