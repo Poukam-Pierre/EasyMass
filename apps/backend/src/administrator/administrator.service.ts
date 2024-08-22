@@ -23,6 +23,13 @@ export class AdministratorService {
       },
     });
   }
+  async findOneByMail(email: string) {
+    return this.prismaService.administrator.findUnique({
+      where: {
+        email,
+      },
+    });
+  }
 
   async update(id: number, updateAdminDto: Prisma.AdministratorUpdateInput) {
     return this.prismaService.administrator.update({
