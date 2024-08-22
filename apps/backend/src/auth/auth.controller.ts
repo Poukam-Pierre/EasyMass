@@ -18,12 +18,12 @@ export class AuthController {
   @Post('/login-parish')
   @Public()
   loginParish(@Body(ValidationPipe) input: LoginDataDto) {
-    return this.authService.authenticateParish(input);
+    return this.authService.authenticate(input, 'parish');
   }
 
   @Post('/login-admin')
   @Public()
   loginAdmin(@Body(ValidationPipe) input: LoginDataDto) {
-    return this.authService.authenticateAdmin(input);
+    return this.authService.authenticate(input, 'admin');
   }
 }
