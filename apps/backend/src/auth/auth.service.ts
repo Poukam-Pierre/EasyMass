@@ -9,9 +9,16 @@ import { createId } from '@paralleldrive/cuid2';
 import { bcrypt } from 'bcryptjs';
 import { ParishService } from '../parish/parish.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { AdminDataDto, LoginDataDto, ParishDataDto } from './dto/login.dto';
+import {
+  AdminDataDto,
+  LoginDataDto,
+  ParishDataDto,
+  PriestDataDto,
+} from './dto/login.dto';
 import { AdministratorService } from '../administrator/administrator.service';
 import { Prisma } from '@prisma/client';
+import { SignUpDataDto } from './dto/signup.dto';
+import { PriestService } from '../priest/priest.service';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +26,8 @@ export class AuthService {
     private readonly JwtService: JwtService,
     private readonly parishService: ParishService,
     private readonly prismaService: PrismaService,
-    private readonly adminService: AdministratorService
+    private readonly adminService: AdministratorService,
+    private readonly priestService: PriestService
   ) {}
 
   /**
@@ -30,7 +38,7 @@ export class AuthService {
   async authenticate(
     input: LoginDataDto,
     role: string
-  ): Promise<ParishDataDto | AdminDataDto> {
+  ): Promise<ParishDataDto | AdminDataDto | PriestDataDto> {
     if (role === 'parish') {
       const user = await this.validateParish(input);
 
@@ -121,6 +129,7 @@ export class AuthService {
       });
     }
   }
+
   /**
    * This function validate weither the admin user exists in db or not.
    * Also check weither all user's credentials are valid or not.
@@ -180,13 +189,12 @@ export class AuthService {
    * @returns user object
    */
   async signIn(
-    user: ParishDataDto | AdminDataDto,
+    user: ParishDataDto | AdminDataDto | PriestDataDto,
     role: string
-  ): Promise<ParishDataDto | AdminDataDto> {
+  ): Promise<ParishDataDto | AdminDataDto | PriestDataDto> {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      name: user.name,
     };
 
     try {
@@ -215,10 +223,62 @@ export class AuthService {
             },
           },
         });
+      } else {
+        await this.create({
+          id: createId(),
+          refreshToken: refreshToken,
+          expiredDate: this.addOneDay(new Date()),
+          priestToken: {
+            connect: {
+              id: user.id,
+            },
+          },
+        });
       }
 
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
+  }
+
+  async signup(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
+    const user = await this.signUpValidation(input);
+
+    if (!user) {
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'This account is already in use.',
+      });
+    }
+
+    try {
+      const userData = await this.priestService.findOne(user.email);
+      return this.signIn(userData, 'priest');
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
+  }
+
+  async signUpValidation(input: SignUpDataDto): Promise<PriestDataDto | null> {
+    const { email } = input;
+
+    const user = await this.priestService.findOne(email); // TODO Adjust the function to find element user using two params like email and authNumber
+    if (user) return null;
+
+    try {
+      const hash = await bcrypt.hash(user.password, 10);
+      user.password = hash;
+
+      await this.priestService.create(user);
 
       return user;
     } catch (error) {
@@ -234,6 +294,7 @@ export class AuthService {
       data: createRefreshTokenDto,
     });
   }
+
   private addOneDay(date: Date): Date {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 1);
