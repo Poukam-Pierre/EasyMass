@@ -20,4 +20,6 @@ export class ParishDataDto {
   diocese: string;
   leadManager: string;
   createdAt: Date;
+  accessToken?: string;
+  refreshToken?: string;
 }
