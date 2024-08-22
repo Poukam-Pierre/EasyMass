@@ -23,3 +23,14 @@ export class ParishDataDto {
   accessToken?: string;
   refreshToken?: string;
 }
+
+export class AdminDataDto {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  createdAt: Date;
+  accessToken?: string;
+  refreshToken?: string;
+}
