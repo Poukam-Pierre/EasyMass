@@ -87,7 +87,7 @@ model Priest {
   transaction  Transaction[]
   mass         Mass[]
   notif        NotificationPriest[]
-  refleshToken RefleshToken[]
+  refleshToken RefreshToken[]
 }
 
 model Parish {
@@ -106,7 +106,7 @@ model Parish {
   transaction    Transaction[]
   mass           Mass[]
   notif          NotificationParish[]
-  refleshToken   RefleshToken[]
+  refleshToken   RefreshToken[]
   createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
   adminId        Int
 }
@@ -122,7 +122,7 @@ model Administrator {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   parish       Parish[]
-  refleshToken RefleshToken[]
+  refleshToken RefreshToken[]
 }
 
 model Notification {
@@ -152,18 +152,18 @@ model NotificationPriest {
   priestId Int
 }
 
-model RefleshToken {
-  id           String        @id
-  refreshToken String        @unique
+model RefreshToken {
+  id           String         @id
+  refreshToken String         @unique
   expiredDate  DateTime
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  priestToken  Priest        @relation(fields: [priestId], references: [id])
-  parishToken  Parish        @relation(fields: [parishId], references: [id])
-  adminToken   Administrator @relation(fields: [adminId], references: [id])
-  priestId     Int
-  parishId     Int
-  adminId      Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  priestToken  Priest?        @relation(fields: [priestId], references: [id])
+  parishToken  Parish?        @relation(fields: [parishId], references: [id])
+  adminToken   Administrator? @relation(fields: [adminId], references: [id])
+  priestId     Int?
+  parishId     Int?
+  adminId      Int?
 }
 
 enum MassType {
