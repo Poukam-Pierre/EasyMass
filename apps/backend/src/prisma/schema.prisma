@@ -95,7 +95,6 @@ model Parish {
   name           String
   email          String               @unique
   password       String
-  token          String?
   phone          String
   city           String
   region         String
@@ -116,7 +115,6 @@ model Administrator {
   name         String
   email        String         @unique
   password     String
-  token        String?
   phone        String
   role         Role
   createdAt    DateTime       @default(now())
