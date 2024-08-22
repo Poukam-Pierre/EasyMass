@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ParishModule } from '../parish/parish.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AdministratorModule } from '../administrator/administrator.module';
 
 @Module({
   providers: [AuthService],
@@ -16,6 +17,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
     ParishModule,
     PrismaModule,
+    AdministratorModule,
   ],
 })
 export class AuthModule {}
