@@ -7,13 +7,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { bcrypt } from 'bcryptjs';
 import { ParishService } from '../parish/parish.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { LoginDataDto, ParishDataDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly JwtService: JwtService,
-    private readonly parishService: ParishService
+    private readonly parishService: ParishService,
+    private readonly prismaService: PrismaService
   ) {}
 
   /**
@@ -78,11 +80,17 @@ export class AuthService {
 
     if (!user) {
       return null;
-    } else if (user.token) {
-      const verifyToken = await this.tokenCheckValidity(user.token, user.id);
-      if (typeof verifyToken === 'string') {
-        return verifyToken;
-      }
+    }
+
+    const existingRefreshToken = (
+      await this.prismaService.refreshToken.findMany()
+    ).find((token) => token.parishId === user.id);
+
+    if (
+      existingRefreshToken &&
+      new Date() <= existingRefreshToken.expiredDate
+    ) {
+      return 'Already logged in';
     }
 
     try {
@@ -123,7 +131,14 @@ export class AuthService {
     try {
       const accessToken = await this.JwtService.signAsync(tokenPayload);
 
-      await this.parishService.update(user.id, { token: accessToken });
+      await this.prismaService.refreshToken.create({
+        data: {
+          id: createId(),
+          refreshToken: refreshToken,
+          expiredDate: this.addOneDay(new Date()),
+          parishId: user.id,
+        },
+      });
 
       user.token = accessToken;
       return user;
