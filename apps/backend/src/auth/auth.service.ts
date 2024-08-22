@@ -34,31 +34,7 @@ export class AuthService {
     } else if (typeof user === 'string') {
       throw new ConflictException(user, {
         cause: new Error(),
-        description:
-          'Your account is already in use! Please logout before logging again.',
-      });
-    }
-
-    return this.signIn(user);
-  }
-  /**
-   * This function authenticate administrators user when login
-   * @param input
-   * @returns
-   */
-  async authenticateAdmin(input: LoginDataDto): Promise<ParishDataDto> {
-    const user = await this.validate(input, 'admin');
-
-    if (!user) {
-      throw new BadRequestException('Bad Request', {
-        cause: new Error(),
-        description: 'Wrong email or password.',
-      });
-    } else if (typeof user === 'string') {
-      throw new ConflictException(user, {
-        cause: new Error(),
-        description:
-          'Your account is already in use! Please logout before logging again.',
+        description: 'Account already logged in. Logout before login again.',
       });
     }
 
@@ -71,9 +47,8 @@ export class AuthService {
    * @param input
    * @returns
    */
-  async validate(
-    input: LoginDataDto,
-    role: string
+  async validateParish(
+    input: LoginDataDto
   ): Promise<ParishDataDto | null | string> {
     const { email, password } = input;
     const user = await this.parishService.findOneByMail(email);
@@ -150,27 +125,9 @@ export class AuthService {
     }
   }
 
-  /**
-   *
-   * @param token
-   * @param id
-   * @returns a string if token is valide or @null if token is not.
-   */
-  async tokenCheckValidity(token: string, id: number): Promise<string | null> {
-    try {
-      const verifyToken = await this.JwtService.verifyAsync(token);
-
-      if (!verifyToken) {
-        await this.parishService.update(id, { token: null });
-        return null;
-      }
-
-      return 'already logged in';
-    } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description: 'Error appears while processing your request.',
-      });
-    }
+  private addOneDay(date: Date): Date {
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + 1);
+    return newDate;
   }
 }
