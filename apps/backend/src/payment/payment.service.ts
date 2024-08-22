@@ -1,7 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { BelieverService } from '../believer/believer.service';
 import { createId } from '@paralleldrive/cuid2';
-import { PrismaService } from '../prisma/prisma.service';
+import { BelieverService } from '../believer/believer.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @Injectable()
