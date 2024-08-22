@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { createId } from '@paralleldrive/cuid2';
 import { bcrypt } from 'bcryptjs';
 import { ParishService } from '../parish/parish.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,7 +25,7 @@ export class AuthService {
    * @returns
    */
   async authenticateParish(input: LoginDataDto): Promise<ParishDataDto> {
-    const user = await this.validate(input, 'parish');
+    const user = await this.validateParish(input);
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
@@ -32,7 +33,7 @@ export class AuthService {
         description: 'Wrong email or password.',
       });
     } else if (typeof user === 'string') {
-      throw new ConflictException(user, {
+      throw new ConflictException('Conflict', {
         cause: new Error(),
         description: 'Account already logged in. Logout before login again.',
       });
@@ -51,6 +52,7 @@ export class AuthService {
     input: LoginDataDto
   ): Promise<ParishDataDto | null | string> {
     const { email, password } = input;
+
     const user = await this.parishService.findOneByMail(email);
 
     if (!user) {
@@ -69,7 +71,7 @@ export class AuthService {
     }
 
     try {
-      const validatePassword = bcrypt.compare(password, user.password);
+      const validatePassword = await bcrypt.compare(password, user.password);
       if (validatePassword) {
         return {
           id: user.id,
@@ -92,9 +94,9 @@ export class AuthService {
   }
 
   /**
-   *
+   *This function build a new token, update the db  when login and add them into data response object
    * @param user
-   * @returns user informations
+   * @returns user object
    */
   async signIn(user: ParishDataDto): Promise<ParishDataDto> {
     const tokenPayload = {
@@ -105,6 +107,7 @@ export class AuthService {
 
     try {
       const accessToken = await this.JwtService.signAsync(tokenPayload);
+      const refreshToken = createId();
 
       await this.prismaService.refreshToken.create({
         data: {
@@ -115,7 +118,9 @@ export class AuthService {
         },
       });
 
-      user.token = accessToken;
+      user.accessToken = accessToken;
+      user.refreshToken = refreshToken;
+
       return user;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
