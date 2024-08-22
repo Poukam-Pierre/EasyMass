@@ -34,3 +34,17 @@ export class AdminDataDto {
   accessToken?: string;
   refreshToken?: string;
 }
+
+export class PriestDataDto {
+  id?: number;
+  firstName: string;
+  secondName: string;
+  image?: string;
+  birthDate: Date;
+  phone: string;
+  authNumber: string;
+  availability: boolean;
+  email: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
