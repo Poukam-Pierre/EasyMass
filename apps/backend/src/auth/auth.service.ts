@@ -247,6 +247,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function passes the input to the other validation function
+   * and just wait for the result to perform error actions. If any errors retruned
+   * the function passes the result the to signIn function and return the result
+   * to client side.
+   * @param input
+   * @returns data need on client side
+   */
   async signup(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
     const user = await this.signUpValidation(input);
 
@@ -268,6 +276,13 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function verifies the input from the db server. If the input exists,
+   * the function returns null. If the input does not exist, the function hash password
+   * and creates a new user. Then returns the user object created.
+   * @param input
+   * @returns null or user object created
+   */
   async signUpValidation(input: SignUpDataDto): Promise<PriestDataDto | null> {
     const { email } = input;
 
@@ -289,12 +304,22 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function creates a new refreshToken in db.
+   * @param createRefreshTokenDto
+   * @returns the refreshToken object created in dd
+   */
   private async create(createRefreshTokenDto: Prisma.RefreshTokenCreateInput) {
     return this.prismaService.refreshToken.create({
       data: createRefreshTokenDto,
     });
   }
 
+  /**
+   * This function is responsible to add days in the actual one.
+   * @param date
+   * @returns  a future object date.
+   */
   private addOneDay(date: Date): Date {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 1);
