@@ -14,7 +14,7 @@ import { PriestModule } from '../priest/priest.module';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: '12h' },
+      signOptions: { expiresIn: 900 },
     }),
     ParishModule,
     PrismaModule,
