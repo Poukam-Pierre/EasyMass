@@ -242,7 +242,8 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
-        description: 'Error appears while processing your request.',
+        description:
+          'Error appears while processing the creation accessToken and refleshToken into db.',
       });
     }
   }
@@ -271,7 +272,8 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
-        description: 'Error appears while processing your request.',
+        description:
+          'Error appears while processing signIn function data before found one.',
       });
     }
   }
@@ -299,7 +301,8 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
-        description: 'Error appears while processing your request.',
+        description:
+          'Error appears while processing hashing and creating new user into db.',
       });
     }
   }
