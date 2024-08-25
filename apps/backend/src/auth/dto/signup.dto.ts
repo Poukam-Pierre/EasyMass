@@ -4,8 +4,8 @@ export class SignUpDataDto {
   image?: string;
   birthDate: Date;
   phone: string;
-  authNumber: number;
-  authCardImge: string;
+  authNumber: string;
+  authCardImge?: string;
   availability: boolean;
   email: string;
   password: string;
