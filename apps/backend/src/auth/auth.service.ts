@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createId } from '@paralleldrive/cuid2';
@@ -19,6 +20,7 @@ import { AdministratorService } from '../administrator/administrator.service';
 import { Prisma } from '@prisma/client';
 import { SignUpDataDto } from './dto/signup.dto';
 import { PriestService } from '../priest/priest.service';
+import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
 
 @Injectable()
 export class AuthService {
@@ -243,7 +245,7 @@ export class AuthService {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
         description:
-          'Error appears while processing the creation accessToken and refleshToken into db.',
+          'Error appears while processing the creation accessToken and refreshToken into db.',
       });
     }
   }
@@ -314,13 +316,103 @@ export class AuthService {
   }
 
   /**
+   * This function verifies if refreshToken exists from the refreshToken server.
+   * If not, responds with an error unauthorised else return a new access token
+   * and refresh token which will be stored in the database
+   * @param input all data received from client
+   * @returns  an object containing access token and refresh token
+   */
+  async refreshToken(input: RefreshToken): Promise<NewTokens> {
+    const refleshData = await this.findOneRefreshtokenData(input.refreshToken);
+    if (!refleshData) {
+      throw new UnauthorizedException('Unauthorized refresh token', {
+        cause: new Error(),
+        description: 'User not authorized to refresh token!',
+      });
+    }
+    if (refleshData.expiredDate <= new Date()) {
+      await this.removeRefreshToken(refleshData.id);
+
+      throw new UnauthorizedException('Unauthorized refresh token', {
+        cause: new Error(),
+        description: 'Refresh token expired. Please login!',
+      });
+    }
+
+    try {
+      const accessToken = await this.JwtService.signAsync({
+        id: input.id,
+        email: input.email,
+      });
+      const newRefreshToken = createId();
+
+      await this.updateRefreshToken(refleshData.id, {
+        refreshToken: newRefreshToken,
+      });
+
+      return {
+        accessToken: accessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing the creation accessToken and update refreshToken into db.',
+      });
+    }
+  }
+  /**
    * This function creates a new refreshToken in db.
    * @param createRefreshTokenDto
-   * @returns the refreshToken object created in dd
+   * @returns the refreshToken object created in db
    */
   private async create(createRefreshTokenDto: Prisma.RefreshTokenCreateInput) {
     return this.prismaService.refreshToken.create({
       data: createRefreshTokenDto,
+    });
+  }
+  /**
+   * This function unpdates the refresh token in db
+   * @param id unique identifier of the refresh token table.
+   * @param createRefreshTokenDto
+   * @returns the new refreshToken object from db
+   */
+  private async updateRefreshToken(
+    id: string,
+    createRefreshTokenDto: Prisma.RefreshTokenUpdateInput
+  ) {
+    return this.prismaService.refreshToken.update({
+      where: {
+        id,
+      },
+      data: createRefreshTokenDto,
+    });
+  }
+
+  /**
+   * This function delete the refresh token table
+   * @param id unique identifier of the refresh token table.
+   * @returns the refreshToken object from db
+   */
+  private async removeRefreshToken(id: string) {
+    return this.prismaService.refreshToken.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  /**
+   * This function find one element that match with the given criteria
+   * @param refreshToken unique identifier of the refresh token table.
+   * @returns the refreshToken object from db
+   */
+  private async findOneRefreshtokenData(refreshToken: string) {
+    return this.prismaService.refreshToken.findUnique({
+      where: {
+        refreshToken,
+      },
     });
   }
 
