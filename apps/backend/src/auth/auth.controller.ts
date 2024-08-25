@@ -10,6 +10,7 @@ import { Public } from './decorator/public.decorator';
 import { AuthGuard } from './guard/auth.guards';
 import { LoginDataDto } from './dto/login.dto';
 import { SignUpDataDto } from './dto/signup.dto';
+import { RefreshToken } from './dto/refreshToken.dto';
 
 @Controller('auth')
 @UseGuards(AuthGuard)
@@ -32,5 +33,11 @@ export class AuthController {
   @Public()
   signUp(@Body(ValidationPipe) input: SignUpDataDto) {
     return this.authService.signup(input);
+  }
+
+  @Post('/refreshToken')
+  @Public()
+  refreshToken(@Body(ValidationPipe) refreshToken: RefreshToken) {
+    return this.authService.refreshToken(refreshToken);
   }
 }
