@@ -24,6 +24,14 @@ export class PriestService {
     });
   }
 
+  async findOneByAuthNumber(email: string, authNumber: string) {
+    return this.prismaService.priest.findMany({
+      where: {
+        OR: [{ email: email }, { authNumber: authNumber }],
+      },
+    });
+  }
+
   async update(id: number, updatePriestDto: Prisma.PriestUpdateInput) {
     return this.prismaService.priest.update({
       where: {
