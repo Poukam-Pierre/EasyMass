@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createId } from '@paralleldrive/cuid2';
-import { bcrypt } from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { ParishService } from '../parish/parish.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -286,18 +286,24 @@ export class AuthService {
    * @returns null or user object created
    */
   async signUpValidation(input: SignUpDataDto): Promise<PriestDataDto | null> {
-    const { email } = input;
+    const { email, password, authNumber } = input;
 
-    const user = await this.priestService.findOne(email); // TODO Adjust the function to find element user using two params like email and authNumber
+    const user = await this.priestService.findOneByAuthNumber(
+      email,
+      authNumber
+    );
     if (user) return null;
 
     try {
-      const hash = await bcrypt.hash(user.password, 10);
-      user.password = hash;
+      const hash = await bcrypt.hash(password, 10);
+      input.password = hash;
+      input.birthDate = new Date(input.birthDate);
 
-      await this.priestService.create(user);
+      const newUser = await this.priestService.create(input);
+      delete newUser.password;
+      delete newUser.updatedAt;
 
-      return user;
+      return newUser;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
