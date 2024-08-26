@@ -13,12 +13,12 @@ export class ParishDataDto {
   id: number;
   name: string;
   email: string;
-  token?: string | null;
   phone: string;
   city: string;
   region: string;
   diocese: string;
   leadManager: string;
+  adminId: number;
   createdAt: Date;
   accessToken?: string;
   refreshToken?: string;

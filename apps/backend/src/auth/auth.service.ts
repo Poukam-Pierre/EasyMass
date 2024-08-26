@@ -117,6 +117,7 @@ export class AuthService {
           phone: user.phone,
           region: user.region,
           createdAt: user.createdAt,
+          adminId: user.adminId,
         };
       } else return null;
     } catch (error) {
@@ -243,8 +244,8 @@ export class AuthService {
 
   /**
    * This function passes the input to the other validation function
-   * and just wait for the result to perform error actions. If any errors retruned
-   * the function passes the result the to signIn function and return the result
+   * and just wait for the result to perform error actions. If any errors returned
+   * the function passes the result to signIn function and return the result
    * to client side.
    * @param input
    * @returns data need on client side
