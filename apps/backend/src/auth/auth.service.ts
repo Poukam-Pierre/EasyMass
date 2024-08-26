@@ -19,7 +19,11 @@ import {
   PriestDataDto,
 } from './dto/login.dto';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
-import { SignUpDataDto, SignUpParish } from './dto/signup.dto';
+import {
+  SignUpAdminDto,
+  SignUpDataDto,
+  SignUpParishDto,
+} from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -237,7 +241,7 @@ export class AuthService {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
         description:
-          'Error appears while processing the creation accessToken and refreshToken into db.',
+          'Error appears while processing the creation of accessToken and refreshToken into db.',
       });
     }
   }
@@ -281,7 +285,7 @@ export class AuthService {
    * @returns data need on client side
    */
   async signupParish(
-    input: SignUpParish,
+    input: SignUpParishDto,
     request: any
   ): Promise<ParishDataDto | unknown> {
     const user = await this.signUpParishValidation(input, request);
@@ -305,6 +309,35 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function passes the input to the other validation function
+   * and just wait for the result to perform error actions. If any error occurs
+   * the function passes the result to signIn function and returns the result.
+   * to client side.
+   * @param input
+   * @returns data need on client side
+   */
+  async signupAdmin(input: SignUpAdminDto): Promise<AdminDataDto | unknown> {
+    const user = await this.signupAdminValidation(input);
+
+    if (!user) {
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'This account is already in use.',
+      });
+    }
+
+    try {
+      const userData = await this.adminService.findOne(user.id);
+      return this.signIn(userData, 'admin');
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing signIn function data before found one.',
+      });
+    }
+  }
   /**
    * This function verifies the input from the db server. If the input exists,
    * the function returns null. If the input does not exist, the function hash password
@@ -349,7 +382,7 @@ export class AuthService {
    * @returns
    */
   async signUpParishValidation(
-    input: SignUpParish,
+    input: SignUpParishDto,
     request: any
   ): Promise<ParishDataDto> {
     const { email, password } = input;
@@ -375,11 +408,43 @@ export class AuthService {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
         description:
-          'Error appears while processing hash and create new user into db.',
+          'Error appears while processing hash and create new user parish into db.',
       });
     }
   }
 
+  /**
+   * This function verifies the input from the db server. If the input exists,
+   * the function returns null. If the input does not exist, the function hash password
+   * and creates a new admin user account. Then returns the user object created.
+   * @param input
+   * @returns
+   */
+  async signupAdminValidation(
+    input: SignUpAdminDto
+  ): Promise<AdminDataDto | null> {
+    const { email, password } = input;
+    const user = await this.adminService.findOneByMail(email);
+
+    if (user) return null;
+
+    try {
+      const hash = await bcrypt.hash(password, 10);
+      input.password = hash;
+
+      const newUser = await this.adminService.create(input);
+      delete newUser.password;
+      delete newUser.updatedAt;
+
+      return newUser;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing hash and create new user admin into db.',
+      });
+    }
+  }
   /**
    * This function verifies if refreshToken exists from the refreshToken server.
    * If not, responds with an error unauthorised else return a new access token
