@@ -75,7 +75,7 @@ export class AuthService {
         });
       }
 
-      return this.signIn(user, role);
+      return this.signInAdmin(user);
     }
   }
 
@@ -233,6 +233,45 @@ export class AuthService {
           },
         });
       }
+
+      user.accessToken = accessToken;
+      user.refreshToken = refreshToken;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing the creation of accessToken and refreshToken into db.',
+      });
+    }
+  }
+
+  /**
+   * This function build a new token, update the db  when login and add them into data response object
+   * @param user data object returned from validation function
+   * @returns user object returned
+   */
+  async signInAdmin(user: AdminDataDto): Promise<AdminDataDto> {
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    try {
+      const accessToken = await this.JwtService.signAsync(tokenPayload);
+      const refreshToken = createId();
+
+      await this.refreshTokenService.create({
+        id: createId(),
+        refreshToken: refreshToken,
+        expiredDate: this.addOneDay(new Date()),
+        adminToken: {
+          connect: {
+            id: user.id,
+          },
+        },
+      });
 
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
