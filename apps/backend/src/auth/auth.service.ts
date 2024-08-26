@@ -19,7 +19,7 @@ import {
   PriestDataDto,
 } from './dto/login.dto';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
-import { SignUpDataDto } from './dto/signup.dto';
+import { SignUpDataDto, SignUpParish } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -262,6 +262,31 @@ export class AuthService {
     try {
       const userData = await this.priestService.findOne(user.email);
       return this.signIn(userData, 'priest');
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing signIn function data before found one.',
+      });
+    }
+  }
+
+  async signupParish(
+    input: SignUpParish,
+    request: any
+  ): Promise<ParishDataDto | unknown> {
+    const user = await this.signUpParishValidation(input, request);
+
+    if (!user) {
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'This account is already in use.',
+      });
+    }
+
+    try {
+      const userData = await this.parishService.findOne(user.id);
+      return this.signIn(userData, 'parish');
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
