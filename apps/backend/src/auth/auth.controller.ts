@@ -10,7 +10,11 @@ import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
 import { LoginDataDto } from './dto/login.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
-import { SignUpDataDto, SignUpParish } from './dto/signup.dto';
+import {
+  SignUpAdminDto,
+  SignUpDataDto,
+  SignUpParishDto,
+} from './dto/signup.dto';
 import { AdminGuard } from './guard/admin.guards';
 
 @Controller('auth')
@@ -35,15 +39,18 @@ export class AuthController {
   @Post('/singup-admin')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
-  signupAdmin() {
-    return;
+  signupAdmin(@Body() input: SignUpAdminDto) {
+    return this.authService.signupAdmin(input);
   }
 
   @Post('/singup-parish')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
-  signupParish(@Body(ValidationPipe) input: SignUpParish, @Request() request) {
+  signupParish(
+    @Body(ValidationPipe) input: SignUpParishDto,
+    @Request() request
+  ) {
     return this.authService.signupParish(input, request);
   }
 
