@@ -323,7 +323,7 @@ export class AuthService {
    * the function passes the result to signIn function and returns the result.
    * @param input receiving value from client side
    * @param request request object processed in the guard function
-   * @returns data need on client side
+   * @returns successfull result object
    */
   async signupParish(
     input: SignUpParishDto,
@@ -338,16 +338,7 @@ export class AuthService {
       });
     }
 
-    try {
-      const userData = await this.parishService.findOne(user.id);
-      return this.signIn(userData, 'parish');
-    } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing signIn function data before found one.',
-      });
-    }
+    return { code: 200, message: 'New parish created successfully' };
   }
 
   /**
