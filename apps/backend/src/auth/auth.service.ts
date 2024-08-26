@@ -8,28 +8,27 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { createId } from '@paralleldrive/cuid2';
 import * as bcrypt from 'bcryptjs';
+import { AdministratorService } from '../administrator/administrator.service';
 import { ParishService } from '../parish/parish.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { PriestService } from '../priest/priest.service';
+import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import {
   AdminDataDto,
   LoginDataDto,
   ParishDataDto,
   PriestDataDto,
 } from './dto/login.dto';
-import { AdministratorService } from '../administrator/administrator.service';
-import { Prisma } from '@prisma/client';
-import { SignUpDataDto } from './dto/signup.dto';
-import { PriestService } from '../priest/priest.service';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
+import { SignUpDataDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly JwtService: JwtService,
     private readonly parishService: ParishService,
-    private readonly prismaService: PrismaService,
     private readonly adminService: AdministratorService,
-    private readonly priestService: PriestService
+    private readonly priestService: PriestService,
+    private readonly refreshTokenService: RefreshTokenService
   ) {}
 
   /**
@@ -94,18 +93,14 @@ export class AuthService {
     }
 
     const existingRefreshToken = (
-      await this.prismaService.refreshToken.findMany()
+      await this.refreshTokenService.findAll()
     ).find((token) => token.parishId === user.id);
 
     if (existingRefreshToken) {
       if (new Date() <= existingRefreshToken.expiredDate) {
         return 'Already logged in';
       } else {
-        await this.prismaService.refreshToken.delete({
-          where: {
-            refreshToken: existingRefreshToken.refreshToken,
-          },
-        });
+        await this.refreshTokenService.remove(existingRefreshToken.id);
       }
     }
 
@@ -150,18 +145,14 @@ export class AuthService {
     }
 
     const existingRefreshToken = (
-      await this.prismaService.refreshToken.findMany()
-    ).find((token) => token.parishId === user.id);
+      await this.refreshTokenService.findAll()
+    ).find((token) => token.adminId === user.id);
 
     if (existingRefreshToken) {
       if (new Date() <= existingRefreshToken.expiredDate) {
         return 'Already logged in';
       } else {
-        await this.prismaService.refreshToken.delete({
-          where: {
-            refreshToken: existingRefreshToken.refreshToken,
-          },
-        });
+        await this.refreshTokenService.remove(existingRefreshToken.id);
       }
     }
 
@@ -204,7 +195,7 @@ export class AuthService {
       const refreshToken = createId();
 
       if (role === 'parish') {
-        await this.create({
+        await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
           expiredDate: this.addOneDay(new Date()),
@@ -215,7 +206,7 @@ export class AuthService {
           },
         });
       } else if (role === 'admin') {
-        await this.create({
+        await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
           expiredDate: this.addOneDay(new Date()),
@@ -226,7 +217,7 @@ export class AuthService {
           },
         });
       } else {
-        await this.create({
+        await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
           expiredDate: this.addOneDay(new Date()),
@@ -323,15 +314,19 @@ export class AuthService {
    * @returns  an object containing access token and refresh token
    */
   async refreshToken(input: RefreshToken): Promise<NewTokens> {
-    const refleshData = await this.findOneRefreshtokenData(input.refreshToken);
-    if (!refleshData) {
+    const refreshData = await this.refreshTokenService.findOne(
+      input.refreshToken
+    );
+
+    if (!refreshData) {
       throw new UnauthorizedException('Unauthorized refresh token', {
         cause: new Error(),
         description: 'User not authorized to refresh token!',
       });
     }
-    if (refleshData.expiredDate <= new Date()) {
-      await this.removeRefreshToken(refleshData.id);
+
+    if (refreshData.expiredDate <= new Date()) {
+      await this.refreshTokenService.remove(refreshData.id);
 
       throw new UnauthorizedException('Unauthorized refresh token', {
         cause: new Error(),
@@ -346,7 +341,7 @@ export class AuthService {
       });
       const newRefreshToken = createId();
 
-      await this.updateRefreshToken(refleshData.id, {
+      await this.refreshTokenService.update(refreshData.id, {
         refreshToken: newRefreshToken,
       });
 
@@ -361,59 +356,6 @@ export class AuthService {
           'Error appears while processing the creation accessToken and update refreshToken into db.',
       });
     }
-  }
-  /**
-   * This function creates a new refreshToken in db.
-   * @param createRefreshTokenDto
-   * @returns the refreshToken object created in db
-   */
-  private async create(createRefreshTokenDto: Prisma.RefreshTokenCreateInput) {
-    return this.prismaService.refreshToken.create({
-      data: createRefreshTokenDto,
-    });
-  }
-  /**
-   * This function unpdates the refresh token in db
-   * @param id unique identifier of the refresh token table.
-   * @param createRefreshTokenDto
-   * @returns the new refreshToken object from db
-   */
-  private async updateRefreshToken(
-    id: string,
-    createRefreshTokenDto: Prisma.RefreshTokenUpdateInput
-  ) {
-    return this.prismaService.refreshToken.update({
-      where: {
-        id,
-      },
-      data: createRefreshTokenDto,
-    });
-  }
-
-  /**
-   * This function delete the refresh token table
-   * @param id unique identifier of the refresh token table.
-   * @returns the refreshToken object from db
-   */
-  private async removeRefreshToken(id: string) {
-    return this.prismaService.refreshToken.delete({
-      where: {
-        id,
-      },
-    });
-  }
-
-  /**
-   * This function find one element that match with the given criteria
-   * @param refreshToken unique identifier of the refresh token table.
-   * @returns the refreshToken object from db
-   */
-  private async findOneRefreshtokenData(refreshToken: string) {
-    return this.prismaService.refreshToken.findUnique({
-      where: {
-        refreshToken,
-      },
-    });
   }
 
   /**
