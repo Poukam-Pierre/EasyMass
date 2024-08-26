@@ -163,6 +163,7 @@ export class AuthService {
 
     try {
       const validatePassword = await bcrypt.compare(password, user.password);
+
       if (validatePassword) {
         return {
           id: user.id,
@@ -183,7 +184,8 @@ export class AuthService {
 
   /**
    *This function build a new token, update the db  when login and add them into data response object
-   * @param user
+   * @param user data object returned from validation function
+   * @param role used to identify where process will be performed
    * @returns user object
    */
   async signIn(
