@@ -347,7 +347,7 @@ export class AuthService {
    * the function passes the result to signIn function and returns the result.
    * to client side.
    * @param input
-   * @returns data need on client side
+   * @returns successfull result object
    */
   async signupAdmin(input: SignUpAdminDto): Promise<AdminDataDto | unknown> {
     const user = await this.signupAdminValidation(input);
@@ -358,18 +358,9 @@ export class AuthService {
         description: 'This account is already in use.',
       });
     }
-
-    try {
-      const userData = await this.adminService.findOne(user.id);
-      return this.signIn(userData, 'admin');
-    } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing signIn function data before found one.',
-      });
-    }
+    return { code: 200, message: 'New administrator created successfully' };
   }
+
   /**
    * This function verifies the input from the db server. If the input exists,
    * the function returns null. If the input does not exist, the function hash password
