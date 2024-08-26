@@ -39,4 +39,8 @@ export class RefreshTokenService {
       },
     });
   }
+
+  async findAll() {
+    return this.prismaService.refreshToken.findMany();
+  }
 }
