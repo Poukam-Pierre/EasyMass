@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class SignUpDataDto {
   firstName: string;
@@ -13,14 +13,13 @@ export class SignUpDataDto {
   password: string;
 }
 
-export class SignUpParish {
+export class SignUpParishDto {
   name: string;
 
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
-  @IsStrongPassword()
   @IsNotEmpty()
   password: string;
 
@@ -34,4 +33,21 @@ export class SignUpParish {
       id: number;
     };
   };
+}
+
+export class SignUpAdminDto {
+  name: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  password: string;
+  phone: string;
+  role: Role;
+}
+
+export enum Role {
+  ENGENEER = 'ENGENEER',
+  ADMIN = 'ADMIN',
 }
