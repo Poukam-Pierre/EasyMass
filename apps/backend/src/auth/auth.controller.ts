@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Post,
+  Request,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -9,7 +10,7 @@ import { AuthService } from './auth.service';
 import { Public, Role, ROLE } from './decorator/public.decorator';
 import { AuthGuard } from './guard/auth.guards';
 import { LoginDataDto } from './dto/login.dto';
-import { SignUpDataDto } from './dto/signup.dto';
+import { SignUpDataDto, SignUpParish } from './dto/signup.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
 import { AdminGuard } from './guard/admin.guards';
 
@@ -45,8 +46,12 @@ export class AuthController {
   }
 
   @Post('/singup-parish')
-  signupParish() {
-    return;
+  @Public()
+  @UseGuards(AdminGuard)
+  @Role(ROLE.ADMIN)
+  @Role(ROLE.ENGENEER)
+  signupParish(@Body(ValidationPipe) input: SignUpParish, @Request() request) {
+    return this.authService.signupParish(input, request);
   }
 
   @Post('/refreshToken')
