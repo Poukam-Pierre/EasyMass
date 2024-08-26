@@ -36,14 +36,17 @@ export class AuthController {
     return this.authService.signup(input);
   }
 
-  @Post('/singup-admin')
-  @UseGuards(AdminGuard)
+  @Post('/signup-admin')
   @Role(ROLE.ADMIN)
-  signupAdmin(@Body() input: SignUpAdminDto) {
+  @UseGuards(AdminGuard)
+  signupAdmin(
+    @Body(ValidationPipe)
+    input: SignUpAdminDto
+  ) {
     return this.authService.signupAdmin(input);
   }
 
-  @Post('/singup-parish')
+  @Post('/signup-parish')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
