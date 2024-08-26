@@ -331,6 +331,38 @@ export class AuthService {
     }
   }
 
+  async signUpParishValidation(
+    input: SignUpParish,
+    request: any
+  ): Promise<ParishDataDto> {
+    const { email, password } = input;
+    const user = await this.parishService.findOneByMail(email);
+
+    if (user) return null;
+
+    try {
+      const hash = await bcrypt.hash(password, 10);
+      input.password = hash;
+
+      input.createdByAdmin = {
+        connect: {
+          id: request.user.id,
+        },
+      };
+      const newUser = await this.parishService.create(input);
+      delete newUser.password;
+      delete newUser.updatedAt;
+
+      return newUser;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing hashing and creating new user into db.',
+      });
+    }
+  }
+
   /**
    * This function verifies if refreshToken exists from the refreshToken server.
    * If not, responds with an error unauthorised else return a new access token
