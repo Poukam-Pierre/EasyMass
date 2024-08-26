@@ -335,7 +335,7 @@ export class AuthService {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
         description:
-          'Error appears while processing hashing and creating new user into db.',
+          'Error appears while processing hash and create new user into db.',
       });
     }
   }
@@ -375,7 +375,7 @@ export class AuthService {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
         description:
-          'Error appears while processing hashing and creating new user into db.',
+          'Error appears while processing hash and create new user into db.',
       });
     }
   }
