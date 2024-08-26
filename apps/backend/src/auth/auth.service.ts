@@ -244,8 +244,8 @@ export class AuthService {
 
   /**
    * This function passes the input to the other validation function
-   * and just wait for the result to perform error actions. If any errors returned
-   * the function passes the result to signIn function and return the result
+   * and just wait for the result to perform error actions. If any error occurs
+   * the function passes the result to signIn function and returns the result.
    * to client side.
    * @param input
    * @returns data need on client side
@@ -272,6 +272,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function passes the input and request to other validation function
+   * and just waits for the result to perfom error action. If any error occurs
+   * the function passes the result to signIn function and returns the result.
+   * @param input receiving value from client side
+   * @param request request object processed in the guard function
+   * @returns data need on client side
+   */
   async signupParish(
     input: SignUpParish,
     request: any
@@ -300,7 +308,7 @@ export class AuthService {
   /**
    * This function verifies the input from the db server. If the input exists,
    * the function returns null. If the input does not exist, the function hash password
-   * and creates a new user. Then returns the user object created.
+   * and creates a new user account. Then returns the user object created.
    * @param input
    * @returns null or user object created
    */
@@ -332,6 +340,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * This function verifies that the input from the client exists in the database. If so,
+   * the function returns null. Otherwise, the function hash password and creates a new
+   * user account. Then returns the user object created.
+   * @param input
+   * @param request
+   * @returns
+   */
   async signUpParishValidation(
     input: SignUpParish,
     request: any
