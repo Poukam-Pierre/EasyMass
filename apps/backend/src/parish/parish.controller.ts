@@ -18,13 +18,6 @@ import { AuthGuard } from '../auth/guard/auth.guards';
 export class ParishController {
   constructor(private readonly parishService: ParishService) {}
 
-  @Post()
-  @UseGuards(AdminGuard)
-  @Role(ROLE.ADMIN)
-  create(@Body() createParishDto: Prisma.ParishCreateInput) {
-    return this.parishService.create(createParishDto);
-  }
-
   @Get()
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
