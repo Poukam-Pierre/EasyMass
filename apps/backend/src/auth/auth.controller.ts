@@ -32,8 +32,8 @@ export class AuthController {
   }
 
   @Post('/login-priest')
-  loginPriest(@Body(ValidationPipe) input) {
-    return;
+  loginPriest(@Body(ValidationPipe) input: LoginDataDto) {
+    return this.authService.authenticate(input, 'priest');
   }
 
   @Post('/signup')
