@@ -521,6 +521,33 @@ export class AuthService {
   }
 
   /**
+   * This function verifies if refreshToken exists from the refreshToken server.
+   * If not, responds with an error unauthorised else delete the refreshToken data
+   * corresponding to the refreshToken user and retrun successfully message.
+   * @param refreshToken
+   * @returns
+   */
+  async logout(refreshToken: string) {
+    try {
+      const refreshData = await this.refreshTokenService.findOne(refreshToken);
+      if (!refreshData) {
+        throw new UnauthorizedException('Unauthorized refresh token', {
+          cause: new Error(),
+          description: 'User not longer connect!',
+        });
+      }
+      await this.refreshTokenService.remove(refreshData.id);
+
+      return { code: 200, message: 'Disconnect token successfully!' };
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing deconnection.',
+      });
+    }
+  }
+
+  /**
    * This function is responsible to add days in the actual one.
    * @param date
    * @returns  a future object date.
