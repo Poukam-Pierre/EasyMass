@@ -61,4 +61,10 @@ export class AuthController {
   refreshToken(@Body(ValidationPipe) refreshToken: RefreshToken) {
     return this.authService.refreshToken(refreshToken);
   }
+
+  @Post('/logout')
+  @UseGuards(AuthGuard)
+  logout(@Body() refreshToken: string) {
+    return this.authService.logout(refreshToken);
+  }
 }
