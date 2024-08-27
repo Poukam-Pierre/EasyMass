@@ -55,7 +55,8 @@ export class AuthService {
       } else if (typeof user === 'string') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
-          description: 'Account already logged in. Logout before login again.',
+          description:
+            'Account already logged in. Logout before from the first one.',
         });
       }
 
@@ -71,11 +72,29 @@ export class AuthService {
       } else if (typeof user === 'string') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
-          description: 'Account already logged in. Logout before login again.',
+          description:
+            'Account already logged in. Logout before from the first one.',
         });
       }
 
       return this.signInAdmin(user);
+    } else {
+      const user = await this.validatePriest(input);
+
+      if (!user) {
+        throw new BadRequestException('Bad Request', {
+          cause: new Error(),
+          description: 'Wrong email or password.',
+        });
+      } else if (typeof user === 'string') {
+        throw new ConflictException('Conflict', {
+          cause: new Error(),
+          description:
+            'Account already logged in. Logout before from the first one.',
+        });
+      }
+
+      return this.signIn(user, role);
     }
   }
 
@@ -182,6 +201,53 @@ export class AuthService {
     }
   }
 
+  async validatePriest(
+    input: LoginDataDto
+  ): Promise<PriestDataDto | null | string> {
+    const { email, password } = input;
+
+    const user = await this.priestService.findOne(email);
+
+    if (!user) {
+      return null;
+    }
+
+    const existingRefreshToken = (
+      await this.refreshTokenService.findAll()
+    ).find((token) => token.priestId === user.id);
+
+    if (existingRefreshToken) {
+      if (new Date() <= existingRefreshToken.expiredDate) {
+        return 'Already logged in';
+      } else {
+        await this.refreshTokenService.remove(existingRefreshToken.id);
+      }
+    }
+
+    try {
+      const validatePassword = await bcrypt.compare(password, user.password);
+
+      if (validatePassword) {
+        return {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          secondName: user.secondName,
+          image: user.image,
+          birthDate: user.birthDate,
+          authNumber: user.authNumber,
+          availability: user.availability,
+          phone: user.phone,
+        };
+      } else return null;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description: 'Error appears while processing your request.',
+      });
+    }
+  }
+
   /**
    *This function build a new token, update the db  when login and add them into data response object
    * @param user data object returned from validation function
@@ -212,18 +278,7 @@ export class AuthService {
             },
           },
         });
-      } else if (role === 'admin') {
-        await this.refreshTokenService.create({
-          id: createId(),
-          refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()),
-          adminToken: {
-            connect: {
-              id: user.id,
-            },
-          },
-        });
-      } else {
+      } else if (role === 'priest') {
         await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
