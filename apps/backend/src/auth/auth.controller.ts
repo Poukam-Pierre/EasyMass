@@ -31,6 +31,11 @@ export class AuthController {
     return this.authService.authenticate(input, 'admin');
   }
 
+  @Post('/login-priest')
+  loginPriest(@Body(ValidationPipe) input) {
+    return;
+  }
+
   @Post('/signup')
   signUp(@Body(ValidationPipe) input: SignUpDataDto) {
     return this.authService.signup(input);
