@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { CreateMassDto } from './dto/create-mass.dto';
 
 @Injectable()
 export class MassService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  async createMasses(input: CreateMassDto, request) {
+    return;
+  }
 
   async create(createMassDto: Prisma.MassCreateInput) {
     return this.prismaService.mass.create({
