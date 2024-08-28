@@ -40,7 +40,7 @@ export class PriestDataDto {
   firstName: string;
   secondName: string;
   image?: string;
-  birthDate: Date;
+  birthDate: string;
   phone: string;
   authNumber: string;
   availability: boolean;

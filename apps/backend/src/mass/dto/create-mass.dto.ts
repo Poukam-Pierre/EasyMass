@@ -1,9 +1,9 @@
 export class CreateMassDto {
   price: number;
-  processAt: Date;
+  processAt: string;
   massType: MassType;
   replicate: boolean;
-  createByParish: { connect: { id: number } };
+  createdByParish: { connect: { id: number } };
 }
 
 enum MassType {

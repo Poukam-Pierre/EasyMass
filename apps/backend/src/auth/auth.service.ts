@@ -120,7 +120,7 @@ export class AuthService {
     ).find((token) => token.parishId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
         return 'Already logged in';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
@@ -173,7 +173,7 @@ export class AuthService {
     ).find((token) => token.adminId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
         return 'Already logged in';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
@@ -217,7 +217,7 @@ export class AuthService {
     ).find((token) => token.priestId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
         return 'Already logged in';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
@@ -271,7 +271,7 @@ export class AuthService {
         await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()),
+          expiredDate: this.addOneDay(new Date()).toISOString(),
           parishToken: {
             connect: {
               id: user.id,
@@ -282,7 +282,7 @@ export class AuthService {
         await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()),
+          expiredDate: this.addOneDay(new Date()).toISOString(),
           priestToken: {
             connect: {
               id: user.id,
@@ -322,7 +322,7 @@ export class AuthService {
       await this.refreshTokenService.create({
         id: createId(),
         refreshToken: refreshToken,
-        expiredDate: this.addOneDay(new Date()),
+        expiredDate: this.addOneDay(new Date()).toISOString(),
         adminToken: {
           connect: {
             id: user.id,
@@ -350,8 +350,8 @@ export class AuthService {
    * @param input
    * @returns data need on client side
    */
-  async signup(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
-    const user = await this.signUpValidation(input);
+  async signupPriest(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
+    const user = await this.signUpPriestValidation(input);
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
@@ -423,7 +423,9 @@ export class AuthService {
    * @param input
    * @returns null or user object created
    */
-  async signUpValidation(input: SignUpDataDto): Promise<PriestDataDto | null> {
+  async signUpPriestValidation(
+    input: SignUpDataDto
+  ): Promise<PriestDataDto | null> {
     const { email, password, authNumber } = input;
 
     const user = await this.priestService.findOneByAuthNumber(
@@ -435,7 +437,6 @@ export class AuthService {
     try {
       const hash = await bcrypt.hash(password, 10);
       input.password = hash;
-      input.birthDate = new Date(input.birthDate);
 
       const newUser = await this.priestService.create(input);
       delete newUser.password;
@@ -542,7 +543,7 @@ export class AuthService {
       });
     }
 
-    if (refreshData.expiredDate <= new Date()) {
+    if (new Date(refreshData.expiredDate) <= new Date()) {
       await this.refreshTokenService.remove(refreshData.id);
 
       throw new UnauthorizedException('Unauthorized refresh token', {
@@ -583,14 +584,14 @@ export class AuthService {
    * @returns
    */
   async logout(refreshToken: string) {
+    const refreshData = await this.refreshTokenService.findOne(refreshToken);
+    if (!refreshData) {
+      throw new UnauthorizedException('Unauthorized refresh token', {
+        cause: new Error(),
+        description: 'User not longer connect!',
+      });
+    }
     try {
-      const refreshData = await this.refreshTokenService.findOne(refreshToken);
-      if (!refreshData) {
-        throw new UnauthorizedException('Unauthorized refresh token', {
-          cause: new Error(),
-          description: 'User not longer connect!',
-        });
-      }
       await this.refreshTokenService.remove(refreshData.id);
 
       return { code: 200, message: 'Disconnect token successfully!' };

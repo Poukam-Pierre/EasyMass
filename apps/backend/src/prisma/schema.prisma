@@ -27,7 +27,7 @@ model Believer {
 model Mass {
   id                Int         @id @default(autoincrement())
   price             Int?
-  processAt         DateTime? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
+  processAt         String? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
   intension         String? //  We can use this field only when Believer created a mass directly from Priest. So that he can leave intension depending on itself.
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -73,10 +73,10 @@ model Transaction {
 model Priest {
   id           Int                  @id @default(autoincrement())
   firstName    String
-  secondName   String?
+  secondName   String
   image        String?
-  birthDate    DateTime
-  phone        String?
+  birthDate    String
+  phone        String
   authNumber   String               @unique
   authCardImge String?
   availability Boolean              @default(false)
@@ -153,7 +153,7 @@ model NotificationPriest {
 model RefreshToken {
   id           String         @id
   refreshToken String         @unique
-  expiredDate  DateTime
+  expiredDate  String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   priestToken  Priest?        @relation(fields: [priestId], references: [id])
