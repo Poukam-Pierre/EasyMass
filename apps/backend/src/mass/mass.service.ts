@@ -58,8 +58,10 @@ export class MassService {
     }
 
     const isMassAlreadyExists = existingMass.some(
-      (mass) => mass.processAt === processAt
+      (mass) =>
+        new Date(mass.processAt).getTime() === new Date(processAt).getTime()
     );
+
     if (isMassAlreadyExists) {
       throw new ConflictException('Mass already exists', {
         cause: new Error(),
@@ -67,7 +69,7 @@ export class MassService {
       });
     }
 
-    input.createByParish = {
+    input.createdByParish = {
       connect: {
         id: id,
       },
