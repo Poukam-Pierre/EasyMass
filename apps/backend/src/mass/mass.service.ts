@@ -47,4 +47,17 @@ export class MassService {
       },
     });
   }
+  private getDatesEvery7DaysUntilEndOfYear(startDate: Date): Date[] {
+    const dates = [];
+    const currentYear = new Date().getFullYear();
+    const endDate = new Date(currentYear, 11, 31);
+
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+    return dates;
+  }
 }
