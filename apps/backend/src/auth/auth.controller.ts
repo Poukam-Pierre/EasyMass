@@ -68,7 +68,7 @@ export class AuthController {
   }
 
   @Post('/logout')
-  logout(@Body() refreshToken: string) {
-    return this.authService.logout(refreshToken);
+  logout(@Body() input: { refreshToken: string }) {
+    return this.authService.logout(input.refreshToken);
   }
 }
