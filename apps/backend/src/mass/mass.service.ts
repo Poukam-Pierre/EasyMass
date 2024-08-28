@@ -3,8 +3,8 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateMassDto } from './dto/create-mass.dto';
 
 @Injectable()
@@ -47,14 +47,14 @@ export class MassService {
         id
       );
 
-          try {
+      try {
         await this.prismaService.mass.createMany({
           data: listOfMasses,
         });
         return { code: 201, message: 'Mass created successfully!' };
-          } catch (error) {
-            throw new InternalServerErrorException();
-          }
+      } catch (error) {
+        throw new InternalServerErrorException();
+      }
     }
 
     const isMassAlreadyExists = existingMass.some(
@@ -74,6 +74,7 @@ export class MassService {
         id: id,
       },
     };
+    delete input.replicate;
 
     try {
       await this.create(input);
@@ -127,17 +128,49 @@ export class MassService {
       },
     });
   }
-  private getDatesEvery7DaysUntilEndOfYear(startDate: Date): Date[] {
-    const dates = [];
+  private getDatesEvery7DaysUntilEndOfYear(startDate: string): string[] {
+    const dates: string[] = [];
     const currentYear = new Date().getFullYear();
     const endDate = new Date(currentYear, 11, 31);
 
     const currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
-      dates.push(new Date(currentDate));
+      dates.push(new Date(currentDate).toISOString());
       currentDate.setDate(currentDate.getDate() + 7);
     }
     return dates;
+  }
+
+  private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
+    const elementCount = new Map<string, number>();
+
+    const newArrayDate2 = arrayDate2.filter(
+      (date) => new Date(arrayDate1[0]) <= new Date(date)
+    );
+
+    arrayDate1.concat(newArrayDate2).forEach((date) => {
+      elementCount.set(date, (elementCount.get(date) || 0) + 1);
+    });
+
+    const uniqueElements = Array.from(elementCount.entries())
+      .filter(([date, count]) => count === 1)
+      .map(([date]) => date);
+
+    return uniqueElements;
+  }
+
+  private createListOfMasses(
+    arrayDate: string[],
+    input: CreateMassDto,
+    id: number
+  ) {
+    const arrayOfMasses = arrayDate.map((date) => ({
+      price: input.price,
+      processAt: date,
+      massType: input.massType,
+      parishId: id,
+    }));
+    return arrayOfMasses;
   }
 }
