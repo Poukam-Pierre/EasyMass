@@ -24,10 +24,18 @@ export class MassService {
     });
   }
 
-  async findAll(parishId?: number, believerId?: string) {
+  async findAllByBeliever(believerId: string) {
     return this.prismaService.mass.findMany({
       where: {
-        OR: [{ parishId }, { believerId }],
+        believerId,
+      },
+    });
+  }
+
+  async findAllByParish(parishId: number) {
+    return this.prismaService.mass.findMany({
+      where: {
+        parishId,
       },
     });
   }
