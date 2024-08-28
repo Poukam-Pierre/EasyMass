@@ -382,7 +382,7 @@ export class AuthService {
    */
   async signupParish(
     input: SignUpParishDto,
-    request: any
+    request
   ): Promise<ParishDataDto | unknown> {
     const user = await this.signUpParishValidation(input, request);
 
@@ -461,7 +461,7 @@ export class AuthService {
    */
   async signUpParishValidation(
     input: SignUpParishDto,
-    request: any
+    request
   ): Promise<ParishDataDto> {
     const { email, password } = input;
     const user = await this.parishService.findOneByMail(email);
