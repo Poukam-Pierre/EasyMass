@@ -33,31 +33,28 @@ export class MassService {
       const allDateProcessMasses =
         this.getDatesEvery7DaysUntilEndOfYear(processAt);
 
-      allDateProcessMasses.map(async (date) => {
-        const isMassAlreadyExists = existingMass.some(
-          (mass) => mass.processAt === date
-        );
-        if (isMassAlreadyExists) {
-          throw new ConflictException('Mass already exists', {
-            cause: new Error(),
-            description: `The mass ${date} is already created!`,
-          });
-        } else {
-          input.createByParish = {
-            connect: {
-              id: id,
-            },
-          };
+      const uniqueDateProcessMasses = this.getUniqueDate(
+        allDateProcessMasses,
+        existingMass.map((mass) => mass.processAt)
+      );
 
-          input.processAt = date;
+      if (!uniqueDateProcessMasses)
+        return { code: 200, message: 'No Mass created !' };
+
+      const listOfMasses = this.createListOfMasses(
+        uniqueDateProcessMasses,
+        input,
+        id
+      );
+
           try {
-            await this.create(input);
+        await this.prismaService.mass.createMany({
+          data: listOfMasses,
+        });
+        return { code: 201, message: 'Mass created successfully!' };
           } catch (error) {
             throw new InternalServerErrorException();
           }
-        }
-      });
-      return { code: 200, message: 'Masses created successfully!' };
     }
 
     const isMassAlreadyExists = existingMass.some(
