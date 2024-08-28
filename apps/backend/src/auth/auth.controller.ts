@@ -37,8 +37,8 @@ export class AuthController {
   }
 
   @Post('/signup')
-  signUp(@Body(ValidationPipe) input: SignUpDataDto) {
-    return this.authService.signup(input);
+  signUpPriest(@Body(ValidationPipe) input: SignUpDataDto) {
+    return this.authService.signupPriest(input);
   }
 
   @Post('/signup-admin')
