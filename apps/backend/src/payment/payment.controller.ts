@@ -30,7 +30,7 @@ export class PaymentController {
   @Post('/notifications')
   notifyPayment(
     @Body()
-    paymentResult: any
+    paymentResult
   ) {
     return this.paymentService.notifyPayment(paymentResult);
   }
