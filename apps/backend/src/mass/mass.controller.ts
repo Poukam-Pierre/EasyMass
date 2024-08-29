@@ -38,4 +38,9 @@ export class MassController {
   remove(@Param('id') id: string) {
     return this.massService.remove(+id);
   }
+
+  @Get()
+  findAll(@Query('parishId') parishId: string) {
+    return this.massService.findAllByParish(+parishId);
+  }
 }
