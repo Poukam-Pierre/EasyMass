@@ -7,6 +7,7 @@ import {
   UseGuards,
   ValidationPipe,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { MassService } from './mass.service';
 import { AuthGuard } from '../auth/guard/auth.guards';
@@ -30,5 +31,11 @@ export class MassController {
     @Body() updateMassDto: Prisma.MassUpdateInput
   ) {
     return this.massService.update(+id, updateMassDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard)
+  remove(@Param('id') id: string) {
+    return this.massService.remove(+id);
   }
 }
