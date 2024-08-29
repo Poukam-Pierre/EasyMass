@@ -39,7 +39,7 @@ export class MassService {
       );
 
       if (!uniqueDateProcessMasses)
-        return { code: 200, message: 'No Mass created !' };
+        return { code: 200, message: 'All masses already exist!' };
 
       const listOfMasses = this.createListOfMasses(
         uniqueDateProcessMasses,
