@@ -110,6 +110,13 @@ export class MassService {
       where: {
         parishId,
       },
+      select: {
+        id: true,
+        price: true,
+        processAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -128,6 +135,7 @@ export class MassService {
       },
     });
   }
+
   private getDatesEvery7DaysUntilEndOfYear(startDate: string): string[] {
     const dates: string[] = [];
     const currentYear = new Date().getFullYear();
