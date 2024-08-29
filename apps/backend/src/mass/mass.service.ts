@@ -115,7 +115,7 @@ export class MassService {
         price: true,
         processAt: true,
         createdAt: true,
-        updatedAt: true,
+        massType: true,
       },
     });
   }
