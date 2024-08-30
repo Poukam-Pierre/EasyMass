@@ -120,6 +120,17 @@ export class MassService {
     });
   }
 
+  async findAll(parishId: number) {
+    return this.prismaService.mass.findMany({
+      where: {
+        parishId,
+      },
+      include: {
+        massOrder: true,
+      },
+    });
+  }
+
   async findOne(id: number) {
     return this.prismaService.mass.findUnique({
       where: {
