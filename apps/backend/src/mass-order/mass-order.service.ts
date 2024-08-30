@@ -57,4 +57,15 @@ export class MassOrderService {
       throw new InternalServerErrorException();
     }
   }
+
+  async findMassOrderByMass(massId: number) {
+    return this.prismaService.massOrder.findMany({
+      where: {
+        massId,
+      },
+      include: {
+        orderByBeliever: true,
+      },
+    });
+  }
 }
