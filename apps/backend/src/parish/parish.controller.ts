@@ -5,14 +5,13 @@ import {
   Get,
   Param,
   Patch,
-  Post,
   UseGuards,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { ParishService } from './parish.service';
-import { AdminGuard } from '../auth/guard/admin.guards';
 import { ROLE, Role } from '../auth/decorator/public.decorator';
+import { AdminGuard } from '../auth/guard/admin.guards';
 import { AuthGuard } from '../auth/guard/auth.guards';
+import { ParishService } from './parish.service';
 
 @Controller('parishes')
 export class ParishController {
