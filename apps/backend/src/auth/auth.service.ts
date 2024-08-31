@@ -239,6 +239,7 @@ export class AuthService {
           authNumber: user.authNumber,
           availability: user.availability,
           phone: user.phone,
+          balance: user.balance,
         };
       } else return null;
     } catch (error) {
