@@ -76,6 +76,7 @@ model Priest {
   secondName   String
   image        String?
   birthDate    String
+  balance      Int                  @default(0)
   phone        String
   authNumber   String               @unique
   authCardImge String?
@@ -102,6 +103,7 @@ model Parish {
   leadManager    String
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  balance        Int                  @default(0)
   transaction    Transaction[]
   mass           Mass[]
   notif          NotificationParish[]
