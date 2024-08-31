@@ -20,6 +20,7 @@ export class ParishDataDto {
   leadManager: string;
   adminId: number;
   createdAt: Date;
+  balance: number;
   accessToken?: string;
   refreshToken?: string;
 }
@@ -45,6 +46,7 @@ export class PriestDataDto {
   authNumber: string;
   availability: boolean;
   email: string;
+  balance: number;
   accessToken?: string;
   refreshToken?: string;
 }
