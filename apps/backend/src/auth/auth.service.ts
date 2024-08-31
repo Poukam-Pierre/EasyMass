@@ -141,6 +141,7 @@ export class AuthService {
           region: user.region,
           createdAt: user.createdAt,
           adminId: user.adminId,
+          balance: user.balance,
         };
       } else return null;
     } catch (error) {
