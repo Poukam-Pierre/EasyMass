@@ -1,6 +1,6 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
-import { TransactionsService } from './transactions.service';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/guard/auth.guards';
+import { TransactionsService } from './transactions.service';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -8,7 +8,7 @@ export class TransactionsController {
 
   @Get()
   @UseGuards(AuthGuard)
-  findTransactionByParish(@Param('parishId') parishId: string) {
+  findTransactionByParish(@Query('parishId') parishId: string) {
     return this.transactionService.findAllTransactionByParish(+parishId);
   }
 }
