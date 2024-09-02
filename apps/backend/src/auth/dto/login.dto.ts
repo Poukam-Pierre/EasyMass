@@ -7,6 +7,10 @@ export class LoginDataDto {
 
   @IsNotEmpty()
   password: string;
+  
+  constructor(props: LoginDataDto) {
+     Object.assign(this, props);
+  }
 }
 
 export class ParishDataDto {
