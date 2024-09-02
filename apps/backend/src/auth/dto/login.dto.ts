@@ -23,6 +23,10 @@ export class ParishDataDto {
   balance: number;
   accessToken?: string;
   refreshToken?: string;
+
+  constructor(props: ParishDataDto) {
+    Object.assign(this, props);
+  }
 }
 
 export class AdminDataDto {
@@ -34,6 +38,10 @@ export class AdminDataDto {
   createdAt: Date;
   accessToken?: string;
   refreshToken?: string;
+
+  constructor(props: AdminDataDto) {
+    Object.assign(this, props);
+  }
 }
 
 export class PriestDataDto {
@@ -49,4 +57,8 @@ export class PriestDataDto {
   balance: number;
   accessToken?: string;
   refreshToken?: string;
+
+  constructor(props: PriestDataDto) {
+    Object.assign(this, props);
+  }
 }
