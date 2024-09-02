@@ -137,19 +137,7 @@ export class AuthService {
     try {
       const validatePassword = await bcrypt.compare(password, user.password);
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          city: user.city,
-          diocese: user.diocese,
-          leadManager: user.leadManager,
-          name: user.name,
-          phone: user.phone,
-          region: user.region,
-          createdAt: user.createdAt,
-          adminId: user.adminId,
-          balance: user.balance,
-        };
+        return new ParishDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
@@ -192,14 +180,7 @@ export class AuthService {
       const validatePassword = await bcrypt.compare(password, user.password);
 
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          phone: user.phone,
-          role: user.role,
-          createdAt: user.createdAt,
-        };
+        return new AdminDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
@@ -236,18 +217,7 @@ export class AuthService {
       const validatePassword = await bcrypt.compare(password, user.password);
 
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          secondName: user.secondName,
-          image: user.image,
-          birthDate: user.birthDate,
-          authNumber: user.authNumber,
-          availability: user.availability,
-          phone: user.phone,
-          balance: user.balance,
-        };
+        return new PriestDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
