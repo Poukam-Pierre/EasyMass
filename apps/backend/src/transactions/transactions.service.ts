@@ -39,4 +39,12 @@ export class TransactionsService {
       },
     });
   }
+
+  async findOne(id: string) {
+    return this.prismaService.transaction.findUnique({
+      where: {
+        transactionId: id,
+      },
+    });
+  }
 }
