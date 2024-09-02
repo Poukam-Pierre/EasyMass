@@ -48,7 +48,7 @@ export class AuthService {
       const user = await this.validateParish(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
@@ -65,7 +65,7 @@ export class AuthService {
       const user = await this.validateAdmin(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
@@ -82,7 +82,7 @@ export class AuthService {
       const user = await this.validatePriest(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
