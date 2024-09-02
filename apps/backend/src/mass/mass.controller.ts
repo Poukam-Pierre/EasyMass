@@ -5,7 +5,6 @@ import {
   Post,
   Request,
   UseGuards,
-  ValidationPipe,
   Param,
   Delete,
   Get,
@@ -22,7 +21,7 @@ export class MassController {
   constructor(private readonly massService: MassService) {}
 
   @Post('/create')
-  create(@Request() request, @Body(ValidationPipe) input: CreateMassDto) {
+  create(@Request() request, @Body() input: CreateMassDto) {
     return this.massService.createMasses(input, request);
   }
 

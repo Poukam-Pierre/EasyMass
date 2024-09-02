@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/guard/auth.guards';
 import { Public } from '../auth/decorator/public.decorator';
@@ -19,7 +13,7 @@ export class PaymentController {
   @Public()
   @Post('/collect')
   handlePayment(
-    @Body(ValidationPipe)
+    @Body()
     handlePaymentDto: CreateTransactionDto
   ) {
     return this.paymentService.handlePayment(handlePaymentDto);
