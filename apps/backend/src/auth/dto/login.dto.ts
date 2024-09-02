@@ -10,15 +10,20 @@ export class LoginDataDto {
 }
 
 export class ParishDataDto {
+  @IsNotEmpty()
   id: number;
   name: string;
+  adminId: number;
+
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
+
   phone: string;
   city: string;
   region: string;
   diocese: string;
   leadManager: string;
-  adminId: number;
   createdAt: Date;
   balance: number;
   accessToken?: string;
@@ -30,11 +35,16 @@ export class ParishDataDto {
 }
 
 export class AdminDataDto {
+  @IsNotEmpty()
   id: number;
   name: string;
-  email: string;
-  phone: string;
   role: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  phone: string;
   createdAt: Date;
   accessToken?: string;
   refreshToken?: string;
@@ -46,14 +56,20 @@ export class AdminDataDto {
 
 export class PriestDataDto {
   id?: number;
+
+  @IsNotEmpty()
   firstName: string;
   secondName: string;
+  authNumber: string;
+  availability: boolean;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
   image?: string;
   birthDate: string;
   phone: string;
-  authNumber: string;
-  availability: boolean;
-  email: string;
   balance: number;
   accessToken?: string;
   refreshToken?: string;
