@@ -38,6 +38,7 @@ export class AuthService {
   /**
    * This function authenticate the users when login
    * @param input
+   * @param role
    * @returns all data needed.
    */
   async authenticate(
@@ -52,7 +53,9 @@ export class AuthService {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -60,7 +63,7 @@ export class AuthService {
         });
       }
 
-      return this.signIn(user, role);
+      return this.signIn(user as ParishDataDto, role);
     } else if (role === 'admin') {
       const user = await this.validateAdmin(input);
 
@@ -69,7 +72,9 @@ export class AuthService {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -77,7 +82,7 @@ export class AuthService {
         });
       }
 
-      return this.signInAdmin(user);
+      return this.signInAdmin(user as AdminDataDto);
     } else {
       const user = await this.validatePriest(input);
 
@@ -86,7 +91,9 @@ export class AuthService {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -94,7 +101,7 @@ export class AuthService {
         });
       }
 
-      return this.signIn(user, role);
+      return this.signIn(user as PriestDataDto, role);
     }
   }
 
@@ -121,7 +128,7 @@ export class AuthService {
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Already logged in';
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
@@ -175,7 +182,7 @@ export class AuthService {
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Already logged in';
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
@@ -219,7 +226,7 @@ export class AuthService {
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Already logged in';
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
