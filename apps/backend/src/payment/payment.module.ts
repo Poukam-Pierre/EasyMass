@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PaymentService } from './payment.service';
+import { ParishModule } from '../parish/parish.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 import { PaymentController } from './payment.controller';
-import { BelieverModule } from '../believer/believer.module';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PaymentService } from './payment.service';
 
 @Module({
-  imports: [BelieverModule, PrismaModule],
+  imports: [ParishModule, TransactionsModule],
   providers: [PaymentService],
   exports: [PaymentService],
   controllers: [PaymentController],
