@@ -2,7 +2,7 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateTransactionDto {
   believerInfo: BelieverInfo;
-  massInfo: MassInfo[];
+  massInfo: MassInfos[];
   paymentInfo: OrderInfo;
 }
 
@@ -12,7 +12,7 @@ class BelieverInfo {
   phone?: string;
 }
 
-class MassInfo {
+class MassInfos {
   @IsNumber()
   @IsNotEmpty()
   id: number;
@@ -20,9 +20,10 @@ class MassInfo {
 
   @IsString()
   @IsNotEmpty()
-  parish: string;
-  dataTime: string;
+  processAt: string;
   intension: string;
+
+  massType: string;
 }
 
 class OrderInfo {
@@ -35,5 +36,5 @@ class OrderInfo {
   currency: string;
 
   @IsString()
-  phone?: string;
+  phone: string;
 }
