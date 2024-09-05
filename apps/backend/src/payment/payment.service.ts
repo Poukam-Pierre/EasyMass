@@ -56,11 +56,15 @@ export class PaymentService {
   async notifyPayment(paymentResult) {
     // Verify what data is received and extract metadata
     const {
-      data: { reference, paymentMethod },
+      data: { reference },
     } = paymentResult;
 
-    const { believerInfo, massInfo } = JSON.parse(paymentResult.data);
+    const { believerInfo, massInfos, paymentInfo } = JSON.parse(
+      paymentResult.data
+    );
+
     const believerId = createId();
+
     const checkPayment = {
       port: 443,
       method: 'GET',
@@ -68,6 +72,7 @@ export class PaymentService {
         Authorization: process.env.NOTCH_PUBLIC_KEY,
       },
     };
+
     try {
       const paymentStatus = await fetch(
         `https://api.notchpay.co/payments/${reference}`,
@@ -77,7 +82,7 @@ export class PaymentService {
       // If payment status is positif, then save the believer owner in db.
       // Then return the confirmation message for ordering masses.
       if (paymentStatus) {
-        const massOrders = massInfo.map((massInfo) => ({
+        const massOrders = massInfos.map((massInfo) => ({
           intension: massInfo.intension,
           price: massInfo.price,
           massId: massInfo.id,
@@ -98,9 +103,14 @@ export class PaymentService {
         await this.transactionsService.create({
           transactionId: reference,
           currency: 'xaf',
-          price: massInfo.price, // TODO match price corresponding to sum of masses ordered
+          price: paymentInfo.amount,
           status: 'VALIDED',
-          paymentMethod: paymentMethod,
+          paymentMethod: paymentInfo.paymentMethod,
+          believer: {
+            connect: {
+              id: believerId,
+            },
+          },
         });
       }
       return 'Bill of masses ordered';
