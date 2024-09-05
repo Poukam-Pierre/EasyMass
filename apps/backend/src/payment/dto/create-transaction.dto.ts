@@ -22,7 +22,7 @@ class MassInfo {
   @IsNotEmpty()
   parish: string;
   dataTime: string;
-  intention: string;
+  intension: string;
 }
 
 class OrderInfo {
