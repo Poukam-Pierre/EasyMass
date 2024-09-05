@@ -105,7 +105,21 @@ export class MassService {
     });
   }
 
-  async findAllByParish(parishId: number) {
+  async findAllByParish(parishId: number, role?) {
+    if (role) {
+      return this.prismaService.mass.findMany({
+        where: {
+          AND: [
+            { parishId },
+            {
+              processAt: {
+                lte: new Date().toISOString(), // TODO check this comparaison
+              },
+            },
+          ],
+        },
+      });
+    }
     return this.prismaService.mass.findMany({
       where: {
         parishId,
