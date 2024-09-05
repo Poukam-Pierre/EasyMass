@@ -11,4 +11,8 @@ export class BelieverService {
       data: createBelieverDto,
     });
   }
+
+  async findAll() {
+    return this.prismaService.believer.findMany();
+  }
 }
