@@ -77,19 +77,19 @@ export class PaymentService {
       // If payment status is positif, then save the believer owner in db.
       // Then return the confirmation message for ordering masses.
       if (paymentStatus) {
+        const massOrders = massInfo.map((massInfo) => ({
+          intension: massInfo.intension,
+          price: massInfo.price,
+          massId: massInfo.id,
+        }));
+
         await this.believerService.create({
           id: believerId,
           name: believerInfo.name,
           phone: believerInfo.phone,
           massOrder: {
-            create: {
-              intension: massInfo.intension,
-              price: massInfo.price,
-              mass: {
-                connect: {
-                  id: massInfo.id,
-                },
-              },
+            createMany: {
+              data: massOrders,
             },
           },
         });
@@ -98,7 +98,7 @@ export class PaymentService {
         await this.transactionsService.create({
           transactionId: reference,
           currency: 'xaf',
-          price: massInfo.price,
+          price: massInfo.price, // TODO match price corresponding to sum of masses ordered
           status: 'VALIDED',
           paymentMethod: paymentMethod,
         });
