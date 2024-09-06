@@ -19,11 +19,7 @@ import {
   PriestDataDto,
 } from './dto/login.dto';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
-import {
-  SignUpAdminDto,
-  SignUpDataDto,
-  SignUpParishDto,
-} from './dto/signup.dto';
+import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -352,30 +348,6 @@ export class AuthService {
   }
 
   /**
-   * This function passes the input and request to other validation function
-   * and just waits for the result to perfom error action. If any error occurs
-   * the function passes the result to signIn function and returns the result.
-   * @param input receiving value from client side
-   * @param request request object processed in the guard function
-   * @returns successfull result object
-   */
-  async signupParish(
-    input: SignUpParishDto,
-    request
-  ): Promise<ParishDataDto | unknown> {
-    const user = await this.signUpParishValidation(input, request);
-
-    if (!user) {
-      throw new BadRequestException('Bad Request', {
-        cause: new Error(),
-        description: 'This account is already in use.',
-      });
-    }
-
-    return { code: 200, message: 'New parish created successfully' };
-  }
-
-  /**
    * This function passes the input to the other validation function
    * and just wait for the result to perform error actions. If any error occurs
    * the function passes the result to signIn function and returns the result.
@@ -427,46 +399,6 @@ export class AuthService {
         cause: new Error(),
         description:
           'Error appears while processing hash and create new user into db.',
-      });
-    }
-  }
-
-  /**
-   * This function verifies that the input from the client exists in the database. If so,
-   * the function returns null. Otherwise, the function hash password and creates a new
-   * user account. Then returns the user object created.
-   * @param input
-   * @param request
-   * @returns
-   */
-  async signUpParishValidation(
-    input: SignUpParishDto,
-    request
-  ): Promise<ParishDataDto> {
-    const { email, password } = input;
-    const user = await this.parishService.findOneByMail(email);
-
-    if (user) return null;
-
-    try {
-      const hash = await bcrypt.hash(password, 10);
-      input.password = hash;
-
-      input.createdByAdmin = {
-        connect: {
-          id: request.user.id,
-        },
-      };
-      const newUser = await this.parishService.create(input);
-      delete newUser.password;
-      delete newUser.updatedAt;
-
-      return newUser;
-    } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user parish into db.',
       });
     }
   }

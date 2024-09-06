@@ -1,13 +1,9 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
 import { LoginDataDto } from './dto/login.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
-import {
-  SignUpAdminDto,
-  SignUpDataDto,
-  SignUpParishDto,
-} from './dto/signup.dto';
+import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
 import { AdminGuard } from './guard/admin.guards';
 
 @Controller('auth')
@@ -44,13 +40,13 @@ export class AuthController {
     return this.authService.signupAdmin(input);
   }
 
-  @Post('/signup-parish')
-  @UseGuards(AdminGuard)
-  @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGENEER)
-  signupParish(@Body() input: SignUpParishDto, @Request() request) {
-    return this.authService.signupParish(input, request);
-  }
+  // @Post('/signup-parish')
+  // @UseGuards(AdminGuard)
+  // @Role(ROLE.ADMIN)
+  // @Role(ROLE.ENGENEER)
+  // signupParish(@Body() input: SignUpParishDto, @Request() request) {
+  //   return this.authService.signupParish(input, request);
+  // }
 
   @Post('/refreshToken')
   refreshToken(@Body() refreshToken: RefreshToken) {
