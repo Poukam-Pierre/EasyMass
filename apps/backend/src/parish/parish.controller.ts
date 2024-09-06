@@ -5,6 +5,8 @@ import {
   Get,
   Param,
   Patch,
+  Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -12,6 +14,7 @@ import { ROLE, Role } from '../auth/decorator/public.decorator';
 import { AdminGuard } from '../auth/guard/admin.guards';
 import { AuthGuard } from '../auth/guard/auth.guards';
 import { ParishService } from './parish.service';
+import { SignUpParishDto } from './dto/signupParish.dto';
 
 @Controller('parishes')
 export class ParishController {
@@ -46,5 +49,13 @@ export class ParishController {
   @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.parishService.remove(+id);
+  }
+
+  @Post('/new')
+  @UseGuards(AdminGuard)
+  @Role(ROLE.ADMIN)
+  @Role(ROLE.ENGENEER)
+  create(@Body() input: SignUpParishDto, @Request() request) {
+    return this.parishService.signupParish(input, request);
   }
 }
