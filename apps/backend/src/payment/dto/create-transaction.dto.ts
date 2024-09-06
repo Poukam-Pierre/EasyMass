@@ -20,10 +20,7 @@ class MassInfos {
 
   @IsString()
   @IsNotEmpty()
-  processAt: string;
   intension: string;
-
-  massType: string;
 }
 
 class OrderInfo {
