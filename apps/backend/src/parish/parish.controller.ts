@@ -28,6 +28,14 @@ export class ParishController {
     return this.parishService.findAll();
   }
 
+  @Get('/masses')
+  @UseGuards(AdminGuard)
+  @Role(ROLE.ADMIN)
+  @Role(ROLE.ENGENEER)
+  findAllMasses() {
+    return this.parishService.findAllMasses();
+  }
+
   @Get(':id')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
