@@ -20,15 +20,29 @@ export class ParishService {
   }
 
   async findAll() {
-    return this.prismaService.parish.findMany();
+    return this.prismaService.parish.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        city: true,
+        region: true,
+        diocese: true,
+        leadManager: true,
+        createdAt: true,
+        updatedAt: true,
+        balance: true,
+      },
+    });
   }
 
   async findOne(id: number) {
     return new ParishDataDto(
       await this.prismaService.parish.findUnique({
-      where: {
-        id,
-      },
+        where: {
+          id,
+        },
       })
     );
   }
