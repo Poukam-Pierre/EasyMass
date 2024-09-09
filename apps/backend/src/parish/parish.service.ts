@@ -119,4 +119,19 @@ export class ParishService {
       });
     }
   }
+
+  async findAllMasses() {
+    return this.prismaService.parish.findMany({
+      select: {
+        name: true,
+        city: true,
+        mass: {
+          select: {
+            price: true,
+            processAt: true,
+          },
+        },
+      },
+    });
+  }
 }
