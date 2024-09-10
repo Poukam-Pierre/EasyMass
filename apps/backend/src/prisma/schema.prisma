@@ -82,12 +82,12 @@ model Priest {
   availability Boolean              @default(false)
   email        String               @unique
   password     String
-  token        String?
   souscribeAt  DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   transaction  Transaction[]
   mass         Mass[]
   notif        NotificationPriest[]
+  refleshToken RefreshToken[]
 }
 
 model Parish {
@@ -95,7 +95,6 @@ model Parish {
   name           String
   email          String               @unique
   password       String
-  token          String?
   phone          String
   city           String
   region         String
@@ -106,21 +105,22 @@ model Parish {
   transaction    Transaction[]
   mass           Mass[]
   notif          NotificationParish[]
+  refleshToken   RefreshToken[]
   createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
   adminId        Int
 }
 
 model Administrator {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  token     String?
-  phone     String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  parish    Parish[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String         @unique
+  password     String
+  phone        String
+  role         Role
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  parish       Parish[]
+  refleshToken RefreshToken[]
 }
 
 model Notification {
@@ -148,6 +148,20 @@ model NotificationPriest {
   priest   Priest       @relation(fields: [priestId], references: [id])
   notifId  Int
   priestId Int
+}
+
+model RefreshToken {
+  id           String         @id
+  refreshToken String         @unique
+  expiredDate  DateTime
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  priestToken  Priest?        @relation(fields: [priestId], references: [id])
+  parishToken  Parish?        @relation(fields: [parishId], references: [id])
+  adminToken   Administrator? @relation(fields: [adminId], references: [id])
+  priestId     Int?
+  parishId     Int?
+  adminId      Int?
 }
 
 enum MassType {

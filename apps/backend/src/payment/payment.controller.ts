@@ -25,7 +25,7 @@ export class PaymentController {
     return this.paymentService.handlePayment(handlePaymentDto);
   }
 
-  // TODO As this route is public, check if there is no scam good. Put it a new guard just for validate that.
+  // TODO As this route is public, check if there is no scam. Put it a new guard just for validate that.
   @Public()
   @Post('/notifications')
   notifyPayment(
