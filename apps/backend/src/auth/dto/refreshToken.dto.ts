@@ -5,6 +5,7 @@ export class RefreshToken {
   id: number;
   refreshToken: string;
 
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 }
