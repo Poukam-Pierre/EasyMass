@@ -137,7 +137,7 @@ export class ParishService {
   }
 
   async findAllMasses() {
-    return this.prismaService.parish.findMany({
+    const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
       select: {
         name: true,
         city: true,
@@ -150,5 +150,16 @@ export class ParishService {
         },
       },
     });
+
+    parishWithItsOwnMasses.forEach((parishData) => {
+      parishData.mass.map((massData) => {
+        massData['dateTime'] = new Date(massData.processAt);
+        delete massData['processAt'];
+      });
+      parishData['massData'] = parishData.mass;
+      delete parishData['mass'];
+    });
+
+    return parishWithItsOwnMasses;
   }
 }
