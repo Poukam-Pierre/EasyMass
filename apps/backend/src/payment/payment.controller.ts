@@ -1,16 +1,9 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '../auth/guard/auth.guards';
 import { Public } from '../auth/decorator/public.decorator';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 
-@UseGuards(AuthGuard)
 @Controller('payment')
 @UseGuards(AuthGuard)
 export class PaymentController {
@@ -19,7 +12,7 @@ export class PaymentController {
   @Public()
   @Post('/collect')
   handlePayment(
-    @Body(ValidationPipe)
+    @Body()
     handlePaymentDto: CreateTransactionDto
   ) {
     return this.paymentService.handlePayment(handlePaymentDto);
@@ -30,8 +23,17 @@ export class PaymentController {
   @Post('/notifications')
   notifyPayment(
     @Body()
-    paymentResult: any
+    paymentResult
   ) {
     return this.paymentService.notifyPayment(paymentResult);
+  }
+
+  @Post('/withdraw')
+  withdrawMoney(
+    @Request() request,
+    @Body() receiverNumber: string,
+    amount: number
+  ) {
+    return this.paymentService.withdrawMoney(request, receiverNumber, amount);
   }
 }

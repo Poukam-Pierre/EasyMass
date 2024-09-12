@@ -4,12 +4,17 @@ export class SignUpDataDto {
   firstName: string;
   secondName: string;
   image?: string;
-  birthDate: Date;
+  birthDate: string;
   phone: string;
-  authNumber: string;
   authCardImge?: string;
-  availability: boolean;
+
+  @IsNotEmpty()
+  @IsEmail()
   email: string;
+
+  @IsNotEmpty()
+  availability: boolean;
+  authNumber: string;
   password: string;
 }
 

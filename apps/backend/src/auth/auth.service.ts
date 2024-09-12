@@ -38,6 +38,7 @@ export class AuthService {
   /**
    * This function authenticate the users when login
    * @param input
+   * @param role
    * @returns all data needed.
    */
   async authenticate(
@@ -48,11 +49,13 @@ export class AuthService {
       const user = await this.validateParish(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -60,16 +63,18 @@ export class AuthService {
         });
       }
 
-      return this.signIn(user, role);
+      return this.signIn(user as ParishDataDto, role);
     } else if (role === 'admin') {
       const user = await this.validateAdmin(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -77,16 +82,18 @@ export class AuthService {
         });
       }
 
-      return this.signInAdmin(user);
+      return this.signInAdmin(user as AdminDataDto);
     } else {
       const user = await this.validatePriest(input);
 
       if (!user) {
-        throw new BadRequestException('Bad Request', {
+        throw new UnauthorizedException('Unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
-      } else if (typeof user === 'string') {
+      }
+
+      if (user === 'Logged') {
         throw new ConflictException('Conflict', {
           cause: new Error(),
           description:
@@ -94,7 +101,7 @@ export class AuthService {
         });
       }
 
-      return this.signIn(user, role);
+      return this.signIn(user as PriestDataDto, role);
     }
   }
 
@@ -120,8 +127,8 @@ export class AuthService {
     ).find((token) => token.parishId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
-        return 'Already logged in';
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
@@ -130,18 +137,7 @@ export class AuthService {
     try {
       const validatePassword = await bcrypt.compare(password, user.password);
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          city: user.city,
-          diocese: user.diocese,
-          leadManager: user.leadManager,
-          name: user.name,
-          phone: user.phone,
-          region: user.region,
-          createdAt: user.createdAt,
-          adminId: user.adminId,
-        };
+        return new ParishDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
@@ -173,8 +169,8 @@ export class AuthService {
     ).find((token) => token.adminId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
-        return 'Already logged in';
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
@@ -184,14 +180,7 @@ export class AuthService {
       const validatePassword = await bcrypt.compare(password, user.password);
 
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          phone: user.phone,
-          role: user.role,
-          createdAt: user.createdAt,
-        };
+        return new AdminDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
@@ -217,8 +206,8 @@ export class AuthService {
     ).find((token) => token.priestId === user.id);
 
     if (existingRefreshToken) {
-      if (new Date() <= existingRefreshToken.expiredDate) {
-        return 'Already logged in';
+      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
+        return 'Logged';
       } else {
         await this.refreshTokenService.remove(existingRefreshToken.id);
       }
@@ -228,17 +217,7 @@ export class AuthService {
       const validatePassword = await bcrypt.compare(password, user.password);
 
       if (validatePassword) {
-        return {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          secondName: user.secondName,
-          image: user.image,
-          birthDate: user.birthDate,
-          authNumber: user.authNumber,
-          availability: user.availability,
-          phone: user.phone,
-        };
+        return new PriestDataDto(user);
       } else return null;
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
@@ -271,7 +250,7 @@ export class AuthService {
         await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()),
+          expiredDate: this.addOneDay(new Date()).toISOString(),
           parishToken: {
             connect: {
               id: user.id,
@@ -282,7 +261,7 @@ export class AuthService {
         await this.refreshTokenService.create({
           id: createId(),
           refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()),
+          expiredDate: this.addOneDay(new Date()).toISOString(),
           priestToken: {
             connect: {
               id: user.id,
@@ -322,7 +301,7 @@ export class AuthService {
       await this.refreshTokenService.create({
         id: createId(),
         refreshToken: refreshToken,
-        expiredDate: this.addOneDay(new Date()),
+        expiredDate: this.addOneDay(new Date()).toISOString(),
         adminToken: {
           connect: {
             id: user.id,
@@ -350,8 +329,8 @@ export class AuthService {
    * @param input
    * @returns data need on client side
    */
-  async signup(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
-    const user = await this.signUpValidation(input);
+  async signupPriest(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
+    const user = await this.signUpPriestValidation(input);
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
@@ -382,7 +361,7 @@ export class AuthService {
    */
   async signupParish(
     input: SignUpParishDto,
-    request: any
+    request
   ): Promise<ParishDataDto | unknown> {
     const user = await this.signUpParishValidation(input, request);
 
@@ -423,7 +402,9 @@ export class AuthService {
    * @param input
    * @returns null or user object created
    */
-  async signUpValidation(input: SignUpDataDto): Promise<PriestDataDto | null> {
+  async signUpPriestValidation(
+    input: SignUpDataDto
+  ): Promise<PriestDataDto | null> {
     const { email, password, authNumber } = input;
 
     const user = await this.priestService.findOneByAuthNumber(
@@ -435,7 +416,6 @@ export class AuthService {
     try {
       const hash = await bcrypt.hash(password, 10);
       input.password = hash;
-      input.birthDate = new Date(input.birthDate);
 
       const newUser = await this.priestService.create(input);
       delete newUser.password;
@@ -461,7 +441,7 @@ export class AuthService {
    */
   async signUpParishValidation(
     input: SignUpParishDto,
-    request: any
+    request
   ): Promise<ParishDataDto> {
     const { email, password } = input;
     const user = await this.parishService.findOneByMail(email);
@@ -542,7 +522,7 @@ export class AuthService {
       });
     }
 
-    if (refreshData.expiredDate <= new Date()) {
+    if (new Date(refreshData.expiredDate) <= new Date()) {
       await this.refreshTokenService.remove(refreshData.id);
 
       throw new UnauthorizedException('Unauthorized refresh token', {
@@ -583,14 +563,14 @@ export class AuthService {
    * @returns
    */
   async logout(refreshToken: string) {
+    const refreshData = await this.refreshTokenService.findOne(refreshToken);
+    if (!refreshData) {
+      throw new UnauthorizedException('Unauthorized refresh token', {
+        cause: new Error(),
+        description: 'User not longer connect!',
+      });
+    }
     try {
-      const refreshData = await this.refreshTokenService.findOne(refreshToken);
-      if (!refreshData) {
-        throw new UnauthorizedException('Unauthorized refresh token', {
-          cause: new Error(),
-          description: 'User not longer connect!',
-        });
-      }
       await this.refreshTokenService.remove(refreshData.id);
 
       return { code: 200, message: 'Disconnect token successfully!' };

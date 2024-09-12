@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Request,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
 import { LoginDataDto } from './dto/login.dto';
@@ -22,30 +15,30 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login-parish')
-  loginParish(@Body(ValidationPipe) input: LoginDataDto) {
+  loginParish(@Body() input: LoginDataDto) {
     return this.authService.authenticate(input, 'parish');
   }
 
   @Post('/login-admin')
-  loginAdmin(@Body(ValidationPipe) input: LoginDataDto) {
+  loginAdmin(@Body() input: LoginDataDto) {
     return this.authService.authenticate(input, 'admin');
   }
 
   @Post('/login-priest')
-  loginPriest(@Body(ValidationPipe) input: LoginDataDto) {
+  loginPriest(@Body() input: LoginDataDto) {
     return this.authService.authenticate(input, 'priest');
   }
 
   @Post('/signup')
-  signUp(@Body(ValidationPipe) input: SignUpDataDto) {
-    return this.authService.signup(input);
+  signUpPriest(@Body() input: SignUpDataDto) {
+    return this.authService.signupPriest(input);
   }
 
   @Post('/signup-admin')
   @Role(ROLE.ADMIN)
   @UseGuards(AdminGuard)
   signupAdmin(
-    @Body(ValidationPipe)
+    @Body()
     input: SignUpAdminDto
   ) {
     return this.authService.signupAdmin(input);
@@ -55,15 +48,12 @@ export class AuthController {
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
-  signupParish(
-    @Body(ValidationPipe) input: SignUpParishDto,
-    @Request() request
-  ) {
+  signupParish(@Body() input: SignUpParishDto, @Request() request) {
     return this.authService.signupParish(input, request);
   }
 
   @Post('/refreshToken')
-  refreshToken(@Body(ValidationPipe) refreshToken: RefreshToken) {
+  refreshToken(@Body() refreshToken: RefreshToken) {
     return this.authService.refreshToken(refreshToken);
   }
 

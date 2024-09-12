@@ -21,4 +21,30 @@ export class TransactionsService {
       data: updateTransactionDto,
     });
   }
+
+  async findAllTransactionByParish(id: number) {
+    return this.prismaService.transaction.findMany({
+      where: {
+        parishId: id,
+      },
+      select: {
+        id: true,
+        transactionId: true,
+        createdAt: true,
+        price: true,
+        status: true,
+        paymentMethod: true,
+        currency: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prismaService.transaction.findUnique({
+      where: {
+        transactionId: id,
+      },
+    });
+  }
 }
