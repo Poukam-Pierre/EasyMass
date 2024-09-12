@@ -145,6 +145,7 @@ export class ParishService {
           select: {
             price: true,
             processAt: true,
+            massType: true,
           },
         },
       },
