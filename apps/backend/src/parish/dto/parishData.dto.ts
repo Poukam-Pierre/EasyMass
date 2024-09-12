@@ -17,6 +17,7 @@ export class ParishDataDto {
   leadManager: string;
   createdAt: Date;
   balance: number;
+  receiverId?: string;
   accessToken?: string;
   refreshToken?: string;
 
