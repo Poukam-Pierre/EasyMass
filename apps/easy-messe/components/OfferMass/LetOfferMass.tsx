@@ -13,6 +13,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
 import * as yup from 'yup'
+import { apiMiddleware } from '@easy-messe/libs/utils';
 
 
 
@@ -54,95 +55,11 @@ export interface UseformikProps {
 interface LetOfferMassProps {
     handleIndexTab?: (index: number) => void
 }
-const parishDataFetched: ParishData[] = [
-    {
-        name: 'Saint Pierre',
-        city: 'Douala',
-        massData: [
-            {
-                price: 2500,
-                dateTime: new Date('2024-06-20T06:30:00'),
-                massType: null
-            },
-            {
-                price: 2500,
-                dateTime: new Date('2024-06-13T09:00:00'),
-                massType: null
-            },
-            {
-                price: 2500,
-                dateTime: new Date('2024-07-19T10:30:00'),
-                massType: null
-            },
-            {
-                price: 2500,
-                dateTime: new Date('2024-06-18T12:00:00'),
-                massType: null
-            },
-            {
-                price: 2500,
-                dateTime: new Date('2024-06-17T17:00:00'),
-                massType: null
-            },
-        ]
-    },
-    {
-        name: 'Saint Michel Archange',
-        city: 'Bafoussam',
-        massData: [
-            {
-                price: 2000,
-                dateTime: new Date('2024-06-17T08:30:00'),
-                massType: null
-            },
-            {
-                price: 2000,
-                dateTime: new Date('2024-06-19T17:00:00'),
-                massType: null
-            },
-            {
-                price: 2000,
-                dateTime: new Date('2024-06-19T06:00:00'),
-                massType: null
-            },
-            {
-                price: 2000,
-                dateTime: new Date('2024-06-16T06:30:00'),
-                massType: null
-            },
-        ]
-    },
-    {
-        name: 'Saint Dominique Savio',
-        city: 'Yaoundé',
-        massData: [
-            {
-                price: 3000,
-                dateTime: new Date('2024-06-30T08:30:00'),
-                massType: null
-            },
-            {
-                price: 5000,
-                dateTime: new Date('2024-06-30T17:30:00'),
-                massType: null
-            },
-            {
-                price: 3000,
-                dateTime: new Date('2024-07-12T09:00:00'),
-                massType: null
-            },
-            {
-                price: 3000,
-                dateTime: new Date('2024-06-16T17:00:00'),
-                massType: null
-            },
-        ]
-    },
-]
+
 export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     const { formatMessage } = useIntl();
     const [isAnonym, setIsAnonym] = useState<boolean>(false)
-    const [parishData, setParishData] = useState<ParishData[]>()
+    const [parishData, setParishData] = useState<ParishData[]>([])
     const [selectedCity, setSelectedCity] = useState<string>('')
     const [selectedParish, setSelectedParish] = useState<string>('')
     const { massRequestDispatch, massRequested } = useOfferMass()
@@ -168,11 +85,18 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     ]
 
     useEffect(() => {
-        // TODO Fetch masses data from database
-        setParishData(parishDataFetched);
+        apiMiddleware({
+            url: `${process.env.NEXT_PUBLIC_API_URL}/parishes/masses`,
+            method: 'GET',
+            onSuccess: (data) => {
+                setParishData(data as ParishData[]);
+            },
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            onFailure: (data) => { }
+        })
     }, [])
 
-    const selectedCityParishes = parishDataFetched.filter((parish) => parish.city === selectedCity)
+    const selectedCityParishes = parishData.filter((parish) => parish.city === selectedCity)
 
 
     const { handleChange, handleSubmit, setFieldValue, errors, touched } = useFormik<UseformikProps>({
@@ -475,5 +399,6 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         </Box>
     );
 }
+
 
 
