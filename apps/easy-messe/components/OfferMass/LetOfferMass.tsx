@@ -323,7 +323,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         options={selectedCityParishes.map((parish) => parish.name)}
                         renderInput={(params) => <TextField
                             {...params}
-                            placeholder={formatMessage({ id: 'parish' })}
+                            placeholder={formatMessage({ id: 'parishes' })}
                             size='small'
                             required
                         />}
