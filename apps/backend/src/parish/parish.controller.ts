@@ -29,7 +29,6 @@ export class ParishController {
   }
 
   @Get('/masses')
-  @UseGuards(AuthGuard)
   findAllMasses() {
     return this.parishService.findAllMasses();
   }
