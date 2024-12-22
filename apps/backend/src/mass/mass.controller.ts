@@ -39,7 +39,10 @@ export class MassController {
   }
 
   @Get()
-  findAll(@Query('parishId') parishId: string) {
-    return this.massService.findAllByParish(+parishId);
+  findAll(
+    @Query('parishId') parishId: string,
+    @Query('role') role?: 'HISTORY'
+  ) {
+    return this.massService.findAllByParish(+parishId, role);
   }
 }

@@ -68,4 +68,13 @@ export class MassOrderService {
       },
     });
   }
+
+  async findAll() {
+    return this.prismaService.massOrder.findMany({
+      include: {
+        mass: true,
+        orderByBeliever: true,
+      },
+    });
+  }
 }

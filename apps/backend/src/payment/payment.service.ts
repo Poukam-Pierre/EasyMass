@@ -3,12 +3,14 @@ import { createId } from '@paralleldrive/cuid2';
 import { ParishService } from '../parish/parish.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from '../transactions/transactions.service';
+import { BelieverService } from '../believer/believer.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly parishService: ParishService,
-    private readonly transactionsService: TransactionsService
+    private readonly transactionsService: TransactionsService,
+    private readonly believerService: BelieverService
   ) {}
 
   async handlePayment(handlePaymentDto: CreateTransactionDto) {
@@ -46,10 +48,22 @@ export class PaymentService {
     }
   }
 
+  /**
+   * This function handles the payment confirmation and then creates the believer owner.
+   * @param paymentResult
+   * @returns
+   */
   async notifyPayment(paymentResult) {
+    // Verify what data is received and extract metadata
     const {
       data: { reference },
     } = paymentResult;
+
+    const { believerInfo, massInfos, paymentInfo } = JSON.parse(
+      paymentResult.data
+    );
+
+    const believerId = createId();
 
     const checkPayment = {
       port: 443,
@@ -58,13 +72,48 @@ export class PaymentService {
         Authorization: process.env.NOTCH_PUBLIC_KEY,
       },
     };
+
     try {
       const paymentStatus = await fetch(
         `https://api.notchpay.co/payments/${reference}`,
         checkPayment
       ).then((response) => response.json());
 
-      return paymentStatus;
+      // If payment status is positif, then save the believer owner in db.
+      // Then return the confirmation message for ordering masses.
+      if (paymentStatus) {
+        const massOrders = massInfos.map((massInfo) => ({
+          intension: massInfo.intension,
+          price: massInfo.price,
+          massId: massInfo.id,
+        }));
+
+        await this.believerService.create({
+          id: believerId,
+          name: believerInfo.name,
+          phone: believerInfo.phone,
+          massOrder: {
+            createMany: {
+              data: massOrders,
+            },
+          },
+        });
+
+        // Extract all data from webhook parameters
+        await this.transactionsService.create({
+          transactionId: reference,
+          currency: 'xaf',
+          price: paymentInfo.amount,
+          status: 'VALIDED',
+          paymentMethod: paymentInfo.paymentMethod,
+          believer: {
+            connect: {
+              id: believerId,
+            },
+          },
+        });
+      }
+      return 'Bill of masses ordered';
     } catch (error) {
       throw new UnprocessableEntityException(error);
     }
