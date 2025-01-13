@@ -27,7 +27,7 @@ model Believer {
 model Mass {
   id                Int         @id @default(autoincrement())
   price             Int?
-  processAt         String? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
+  processAt         DateTime? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
   intension         String? //  We can use this field only when Believer created a mass directly from Priest. So that he can leave intension depending on itself.
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
