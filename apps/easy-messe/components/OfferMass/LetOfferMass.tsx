@@ -98,7 +98,6 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const selectedCityParishes = parishData.filter((parish) => parish.city === selectedCity)
 
-
     const { handleChange, handleSubmit, setFieldValue, errors, touched } = useFormik<UseformikProps>({
         initialValues: {
             name: '',
@@ -350,7 +349,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         id='dateTime'
                         name='dateTime'
                         parishData={
-                            parishData?.find((parish) =>
+                            parishData.find((parish) =>
                                 parish.name === selectedParish && parish.city === selectedCity
                             )
                         }
@@ -399,6 +398,3 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         </Box>
     );
 }
-
-
-
