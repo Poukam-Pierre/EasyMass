@@ -57,7 +57,7 @@ export default function DateTimeMassPicker({
         handleChange('price', price?.price as number)
     }
 
-    const allMassDates = parishData?.massData.map((data) => data.dateTime)
+    const allMassDates = parishData?.massData.map((data) => new Date(data.dateTime))
 
     const isDateAllowed = useCallback((date: Date) => {
         return allMassDates?.some((allowedDate) => isSameDay(date, allowedDate));
@@ -67,7 +67,7 @@ export default function DateTimeMassPicker({
         if (selectedDateTime.date) {
             const dateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDateTime.date.toDate()))
             return dateSelected?.some((allowedTime) =>
-                allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
+                allowedTime.getUTCHours() === time.getHours() && allowedTime.getUTCMinutes() === time.getMinutes())
         }
     }, [allMassDates, selectedDateTime.date])
 
