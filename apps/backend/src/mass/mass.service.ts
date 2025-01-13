@@ -35,7 +35,7 @@ export class MassService {
 
       const uniqueDateProcessMasses = this.getUniqueDate(
         allDateProcessMasses,
-        existingMass.map((mass) => mass.processAt)
+        existingMass.map((mass) => mass.processAt.toISOString())
       );
 
       if (!uniqueDateProcessMasses)
