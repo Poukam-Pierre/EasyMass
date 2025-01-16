@@ -9,7 +9,7 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: 'http://localhost:4200', // remote url server should be added here to avoid CORS issue
     methods: 'GET, POST, PATCH, DELETE',
     credentials: true,
   });
