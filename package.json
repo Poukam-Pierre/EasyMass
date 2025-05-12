@@ -2,6 +2,10 @@
   "name": "@easy-messe/source",
   "version": "0.0.0",
   "license": "MIT",
+  "prisma": {
+    "seed": "npx tsx apps/backend/src/prisma/seed.js",
+    "schema": "apps/backend/src/prisma/schema.prisma"
+  },
   "scripts": {
     "start:backend": "nodemon --watch apps/backend/src --exec npx nx serve backend"
   },
@@ -16,6 +20,7 @@
     "@mui/lab": "^5.0.0-alpha.170",
     "@mui/material": "^5.15.15",
     "@mui/x-date-pickers": "^7.6.2",
+    "@nest/websockets": "^4.5.4",
     "@nestjs/common": "^10.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/jwt": "^10.2.0",
@@ -32,6 +37,7 @@
     "class-validator": "^0.14.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",
+    "dayjs-plugin-utc": "^0.1.2",
     "formik": "^2.4.6",
     "next": "14.2.3",
     "react": "18.3.1",
