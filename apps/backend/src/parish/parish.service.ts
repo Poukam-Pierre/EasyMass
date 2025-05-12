@@ -1,6 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { SignUpParishDto } from './dto/signupParish.dto';
+import { ParishDataDto } from './dto/parishData.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class ParishService {
@@ -13,15 +20,31 @@ export class ParishService {
   }
 
   async findAll() {
-    return this.prismaService.parish.findMany();
+    return this.prismaService.parish.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        city: true,
+        region: true,
+        diocese: true,
+        leadManager: true,
+        createdAt: true,
+        updatedAt: true,
+        balance: true,
+      },
+    });
   }
 
   async findOne(id: number) {
-    return this.prismaService.parish.findUnique({
-      where: {
-        id,
-      },
-    });
+    return new ParishDataDto(
+      await this.prismaService.parish.findUnique({
+        where: {
+          id,
+        },
+      })
+    );
   }
 
   async findOneByMail(email: string) {
@@ -47,5 +70,96 @@ export class ParishService {
         id,
       },
     });
+  }
+
+  /**
+   * This function passes the input and request to other validation function
+   * and just waits for the result to perfom error action. If any error occurs
+   * the function passes the result to signIn function and returns the result.
+   * @param input receiving value from client side
+   * @param request request object processed in the guard function
+   * @returns successfull result object
+   */
+  async signupParish(
+    input: SignUpParishDto,
+    request
+  ): Promise<ParishDataDto | unknown> {
+    const user = await this.signUpParishValidation(input, request);
+
+    if (!user) {
+      throw new BadRequestException('Bad Request', {
+        cause: new Error(),
+        description: 'This account is already in use.',
+      });
+    }
+
+    return { code: 200, message: 'New parish created successfully' };
+  }
+
+  /**
+   * This function verifies that the input from the client exists in the database. If so,
+   * the function returns null. Otherwise, the function hash password and creates a new
+   * user account. Then returns the user object created.
+   * @param input
+   * @param request
+   * @returns
+   */
+  async signUpParishValidation(
+    input: SignUpParishDto,
+    request
+  ): Promise<ParishDataDto> {
+    const { email, password } = input;
+    const user = await this.findOneByMail(email);
+
+    if (user) return null;
+
+    try {
+      const hash = await bcrypt.hash(password, 10);
+      input.password = hash;
+
+      input.createdByAdmin = {
+        connect: {
+          id: request.user.id,
+        },
+      };
+      const newUser = await this.create(input);
+      delete newUser.password;
+      delete newUser.updatedAt;
+
+      return newUser;
+    } catch (error) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: new Error(),
+        description:
+          'Error appears while processing hash and create new user parish into db.',
+      });
+    }
+  }
+
+  async findAllMasses() {
+    const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
+      select: {
+        name: true,
+        city: true,
+        mass: {
+          select: {
+            price: true,
+            processAt: true,
+            massType: true,
+          },
+        },
+      },
+    });
+
+    parishWithItsOwnMasses.forEach((parishData) => {
+      parishData.mass.map((massData) => {
+        massData['dateTime'] = new Date(massData.processAt);
+        delete massData['processAt'];
+      });
+      parishData['massData'] = parishData.mass;
+      delete parishData['mass'];
+    });
+
+    return parishWithItsOwnMasses;
   }
 }

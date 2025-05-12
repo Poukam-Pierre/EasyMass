@@ -17,6 +17,7 @@ node_modules
 .settings/
 *.sublime-workspace
 
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
@@ -39,7 +40,11 @@ testem.log
 Thumbs.db
 migration.sql
 .nx/cache
+.nx/workspace-data
+.github/workflows
+
 
 # Next.js
 .next
 out
+.env

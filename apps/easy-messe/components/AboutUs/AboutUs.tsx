@@ -19,7 +19,7 @@ export default function AboutUs() {
             value: 30
         },
         {
-            label: formatMessage({ id: 'parish' }),
+            label: formatMessage({ id: 'parishes' }),
             value: 60
         }
     ]

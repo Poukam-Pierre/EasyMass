@@ -11,7 +11,7 @@ interface apiMiddlewareProps {
   accessDenied?: (data: string) => void;
 }
 
-const apiMiddleware = ({
+export const apiMiddleware = ({
   url,
   method,
   onSuccess,
@@ -48,5 +48,3 @@ const apiMiddleware = ({
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     .finally(() => {});
 };
-
-export default apiMiddleware;
