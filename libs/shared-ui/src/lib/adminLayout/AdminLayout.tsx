@@ -8,7 +8,7 @@ import { PropsWithChildren } from "react";
 export function EasyMassAdminLayout({ children }: PropsWithChildren) {
     const { activeLanguage } = useLanguage()
     return (
-        <EasyMassThemeProvider defaultLang="fr">
+        <EasyMassThemeProvider defaultLang="en">
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
                 <Head>
                     <title>{"EasyMesse"}</title>
