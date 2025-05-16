@@ -26,10 +26,7 @@ export class ParishService {
         name: true,
         email: true,
         phone: true,
-        city: true,
-        region: true,
-        diocese: true,
-        leadManager: true,
+        manager_name: true,
         createdAt: true,
         updatedAt: true,
         balance: true,
@@ -140,7 +137,6 @@ export class ParishService {
     const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
       select: {
         name: true,
-        city: true,
         mass: {
           select: {
             price: true,
