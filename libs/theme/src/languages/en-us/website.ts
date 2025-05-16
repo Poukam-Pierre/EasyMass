@@ -168,4 +168,7 @@ export const website = {
   dayOfMassWarningMsg: 'Should choose a day',
   massTimeWarningMsg: 'Should choose a time',
   priceWarningMsg: 'Should choose a price',
+  unauthorized: 'Wrong email or password !',
+  serverError: 'Server error. Try later !',
+  conflictLogin: 'Account already logged in. Logout before from the first one.',
 };

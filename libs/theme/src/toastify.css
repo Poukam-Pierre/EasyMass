@@ -1,0 +1,9 @@
+.my-toast-container .Toastify__toast-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.Toastify__toast-body {
+  margin: 10px !important;
+  align-items: center !important;
+}

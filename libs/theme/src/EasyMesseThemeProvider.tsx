@@ -16,6 +16,8 @@ import enMessages from './languages/en-us';
 import frMessages from './languages/fr';
 import { theme } from './theme';
 import OfferMassContextProvider from './offerMasses/OfferMassProvider';
+import './toastify.css';
+
 
 const App = ({
     children,
@@ -37,21 +39,24 @@ const App = ({
         <IntlProvider
             messages={activeMessages}
             locale={activeLanguage}
-            defaultLocale="fr"
+            defaultLocale="en"
         >
             <ThemeProvider theme={newTheme ?? theme}>
-                <ToastContainer
-                    position="top-right"
-                    autoClose={1000}
-                    newestOnTop
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    transition={Flip}
-                />
-                <CssBaseline />
-                {children}
+                <>
+                    <ToastContainer
+                        className="my-toast-container"
+                        position="top-right"
+                        autoClose={3000}
+                        newestOnTop
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        transition={Flip}
+                    />
+                    <CssBaseline />
+                    {children}
+                </>
             </ThemeProvider>
         </IntlProvider>
     );
