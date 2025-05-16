@@ -16,7 +16,7 @@ datasource db {
 // Models
 
 model Believer {
-  id          String        @id @unique
+  id          String        @id @unique @default(cuid())
   name        String?
   phone       String?
   transaction Transaction[]
@@ -98,8 +98,7 @@ model Parish {
   email          String               @unique
   password       String
   phone          String
-  city           String
-  leadManager    String
+  manager_name   String
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   balance        Int                  @default(0)
@@ -110,7 +109,7 @@ model Parish {
   refleshToken   RefreshToken[]
   createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
   adminId        Int
-  City           City?                @relation(fields: [city_id], references: [city_id])
+  city           City?                @relation(fields: [city_id], references: [city_id])
   city_id        String
 }
 
