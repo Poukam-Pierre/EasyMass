@@ -37,10 +37,7 @@ export class AuthService {
    * @param role
    * @returns all data needed.
    */
-  async authenticate(
-    input: LoginDataDto,
-    role: string
-  ): Promise<ParishDataDto | AdminDataDto | PriestDataDto> {
+  async authenticate(input: LoginDataDto, role: string) {
     if (role === 'parish') {
       const user = await this.validateParish(input);
 
@@ -52,7 +49,7 @@ export class AuthService {
       }
 
       if (user === 'Logged') {
-        throw new ConflictException('Conflict', {
+        throw new ConflictException('conflictLogin', {
           cause: new Error(),
           description:
             'Account already logged in. Logout before from the first one.',
@@ -64,14 +61,14 @@ export class AuthService {
       const user = await this.validateAdmin(input);
 
       if (!user) {
-        throw new UnauthorizedException('Unauthorized', {
+        throw new UnauthorizedException('unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
       }
 
       if (user === 'Logged') {
-        throw new ConflictException('Conflict', {
+        throw new ConflictException('conflictLogin', {
           cause: new Error(),
           description:
             'Account already logged in. Logout before from the first one.',
@@ -83,14 +80,14 @@ export class AuthService {
       const user = await this.validatePriest(input);
 
       if (!user) {
-        throw new UnauthorizedException('Unauthorized', {
+        throw new UnauthorizedException('unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
       }
 
       if (user === 'Logged') {
-        throw new ConflictException('Conflict', {
+        throw new ConflictException('conflictLogin', {
           cause: new Error(),
           description:
             'Account already logged in. Logout before from the first one.',
@@ -136,7 +133,7 @@ export class AuthService {
         return new ParishDataDto(user);
       } else return null;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description: 'Error appears while processing your request.',
       });
@@ -167,9 +164,8 @@ export class AuthService {
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
         return 'Logged';
-      } else {
-        await this.refreshTokenService.remove(existingRefreshToken.id);
       }
+      await this.refreshTokenService.remove(existingRefreshToken.id);
     }
 
     try {
@@ -179,7 +175,7 @@ export class AuthService {
         return new AdminDataDto(user);
       } else return null;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description: 'Error appears while processing your request.',
       });
@@ -216,7 +212,7 @@ export class AuthService {
         return new PriestDataDto(user);
       } else return null;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description: 'Error appears while processing your request.',
       });
@@ -270,7 +266,7 @@ export class AuthService {
       user.refreshToken = refreshToken;
       return user;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing the creation of accessToken and refreshToken into db.',
@@ -283,7 +279,7 @@ export class AuthService {
    * @param user data object returned from validation function
    * @returns user object returned
    */
-  async signInAdmin(user: AdminDataDto): Promise<AdminDataDto> {
+  async signInAdmin(user: AdminDataDto) {
     const tokenPayload = {
       id: user.id,
       email: user.email,
@@ -307,9 +303,15 @@ export class AuthService {
 
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
-      return user;
+      return {
+        statusCode: 200,
+        data: {
+          accessToken,
+          refreshToken,
+        },
+      };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing the creation of accessToken and refreshToken into db.',
@@ -339,7 +341,7 @@ export class AuthService {
       const userData = await this.priestService.findOne(user.email);
       return this.signIn(userData, 'priest');
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing signIn function data before found one.',
@@ -395,7 +397,7 @@ export class AuthService {
 
       return newUser;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing hash and create new user into db.',
@@ -428,7 +430,7 @@ export class AuthService {
 
       return newUser;
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing hash and create new user admin into db.',
@@ -479,7 +481,7 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description:
           'Error appears while processing the creation accessToken and update refreshToken into db.',
@@ -507,7 +509,7 @@ export class AuthService {
 
       return { code: 200, message: 'Disconnect token successfully!' };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
+      throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description: 'Error appears while processing deconnection.',
       });
