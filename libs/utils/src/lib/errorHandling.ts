@@ -16,23 +16,21 @@ export function errorHandling({
 
     if (status === 401) {
       toast.error(formatMessage({ id: message ?? 'unauthorized' }));
-      redirect('/');
+      redirect('/login');
     }
     if (status === 409) {
       toast.error(formatMessage({ id: message ?? 'conflict' }));
     }
     if (status === 500) {
       toast.error(formatMessage({ id: message ?? 'serverError' }));
-      redirect('/');
     }
     // TODO: Check the rest of the status codes
     if (status === 403) {
       toast.error(formatMessage({ id: message ?? 'forbidden' }));
-      redirect('/');
+      redirect('/login');
     }
     if (status === 404) {
       toast.error(formatMessage({ id: message ?? 'notFound' }));
-      redirect('/');
     }
     if (status === 400) {
       toast.error(formatMessage({ id: message ?? 'badRequest' }));
