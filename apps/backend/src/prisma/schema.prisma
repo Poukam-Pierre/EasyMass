@@ -99,8 +99,6 @@ model Parish {
   password       String
   phone          String
   city           String
-  region         String
-  diocese        String
   leadManager    String
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
@@ -112,6 +110,8 @@ model Parish {
   refleshToken   RefreshToken[]
   createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
   adminId        Int
+  City           City?                @relation(fields: [city_id], references: [city_id])
+  city_id        String
 }
 
 model Administrator {
@@ -166,6 +166,15 @@ model RefreshToken {
   priestId     Int?
   parishId     Int?
   adminId      Int?
+}
+
+model City {
+  city_id   String   @id @default(cuid())
+  city_name String
+  country   String   @unique @default("Cameroon")
+  parish    Parish[]
+
+  @@unique([city_name, country])
 }
 
 enum MassType {
