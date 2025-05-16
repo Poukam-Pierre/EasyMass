@@ -1,3 +1,4 @@
+import { apiMiddleware, errorHandling } from '@easy-messe/libs/utils';
 import invisibleIcon from '@iconify-icons/material-symbols/visibility-off-outline';
 import visibleIcon from '@iconify-icons/material-symbols/visibility-outline';
 import { Icon } from "@iconify/react";
@@ -15,8 +16,10 @@ import { useFormik } from 'formik';
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useIntl } from "react-intl";
+import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import HeroHeader from "./HeroHeader";
+
 
 
 
@@ -37,8 +40,21 @@ export function LoginCretentials() {
             password: '',
         },
         onSubmit: (values, { resetForm }) => {
-            // TODO fetch data to API for authentication
-            console.log(values)
+            apiMiddleware({
+                url: `${process.env.NEXT_PUBLIC_API_URL}/auth/login-admin`,
+                method: 'POST',
+                data: values,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onSuccess: (response: any) => {
+                    const { data } = response;
+                    localStorage.setItem('token', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    toast.success(formatMessage({ id: 'loginSuccess' }))
+                },
+                onFailure: (error) => {
+                    errorHandling({ error, formatMessage, redirect: push })
+                }
+            })
             resetForm()
         },
         validationSchema: yup.object().shape({
@@ -74,6 +90,7 @@ export function LoginCretentials() {
                 onSubmit={handleSubmit}
             >
                 <TextField
+                    autoComplete='off'
                     name="email"
                     size="small"
                     placeholder="Email"
