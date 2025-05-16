@@ -6,9 +6,8 @@ interface apiMiddlewareProps {
   data?: unknown;
   accessToken?: string;
   onSuccess: (data: unknown) => void;
-  onFailure: (data: string) => void;
+  onFailure: (data: unknown) => void;
   headers?: AxiosHeaders;
-  accessDenied?: (data: string) => void;
 }
 
 export const apiMiddleware = ({
@@ -19,7 +18,6 @@ export const apiMiddleware = ({
   accessToken,
   data,
   headers,
-  accessDenied,
 }: apiMiddlewareProps) => {
   const dataOrParams = ['GET', 'DELETE'].includes(method) ? 'params' : 'data';
 
@@ -39,11 +37,7 @@ export const apiMiddleware = ({
       onSuccess(data);
     })
     .catch((error) => {
-      onFailure(error.message);
-
-      if (error.response && error.response.status === 403 && accessDenied) {
-        accessDenied(window.location.pathname);
-      }
+      onFailure(error);
     })
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     .finally(() => {});
