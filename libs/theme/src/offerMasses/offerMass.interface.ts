@@ -6,7 +6,7 @@ export interface OfferMassContextProviderProps {
 
 interface Person {
   name: string;
-  phone: string;
+  email: string;
 }
 
 interface MassInformation {

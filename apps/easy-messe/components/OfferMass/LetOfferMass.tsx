@@ -1,4 +1,5 @@
 import { useOfferMass } from '@easy-messe/libs/theme';
+import { apiMiddleware } from '@easy-messe/libs/utils';
 import contactIcon from '@iconify-icons/fluent/contact-card-24-regular';
 import editIcon from '@iconify-icons/fluent/edit-24-regular';
 import locationIcon from '@iconify-icons/fluent/location-24-regular';
@@ -9,11 +10,10 @@ import { Icon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
 import { Dayjs } from 'dayjs';
 import { useFormik } from 'formik';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
+import * as yup from 'yup';
 import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
-import * as yup from 'yup'
-import { apiMiddleware } from '@easy-messe/libs/utils';
 
 
 
@@ -42,7 +42,7 @@ export interface ParishData {
 
 export interface UseformikProps {
     name: string,
-    phone: string,
+    email: string,
     anonymous: boolean,
     city: string,
     parish: string,
@@ -58,7 +58,6 @@ interface LetOfferMassProps {
 
 export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     const { formatMessage } = useIntl();
-    const [isAnonym, setIsAnonym] = useState<boolean>(false)
     const [parishData, setParishData] = useState<ParishData[]>([])
     const [selectedCity, setSelectedCity] = useState<string>('')
     const [selectedParish, setSelectedParish] = useState<string>('')
@@ -88,20 +87,21 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         apiMiddleware({
             url: `${process.env.NEXT_PUBLIC_API_URL}/parishes/masses`,
             method: 'GET',
-            onSuccess: (data) => {
-                setParishData(data as ParishData[]);
+            onSuccess: (response: unknown) => {
+                const { data } = response as { data: ParishData[] };
+                setParishData(data);
             },
             // eslint-disable-next-line @typescript-eslint/no-empty-function
-            onFailure: (data) => { }
+            onFailure: () => { }
         })
     }, [])
 
     const selectedCityParishes = parishData.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, handleSubmit, setFieldValue, errors, touched } = useFormik<UseformikProps>({
+    const { handleChange, handleSubmit, setFieldValue, errors, touched, values } = useFormik<UseformikProps>({
         initialValues: {
             name: '',
-            phone: '',
+            email: '',
             anonymous: false,
             city: '',
             parish: '',
@@ -110,7 +110,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             price: null
         },
         onSubmit: ({
-            name, phone, anonymous,
+            name, email, anonymous,
             city, parish, dateTime,
             intention, price
         }) => {
@@ -121,7 +121,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         faithInfos: anonymous ?
                             undefined : {
                                 name: name,
-                                phone: phone,
+                                email: email,
                             },
                         massInfos: {
                             city: city,
@@ -134,7 +134,9 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             if (handleIndexTab) handleIndexTab(0)
         },
         validationSchema: yup.object().shape({
-            phone: yup.number(),
+            email: yup.string()
+                .email(formatMessage({ id: 'invalidEmail' }))
+                .required(formatMessage({ id: 'emailWarningMsg' })),
             dateTime: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
             intention: yup
                 .string()
@@ -143,10 +145,6 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         })
     })
 
-    const handleAnonymous = (event: ChangeEvent<HTMLInputElement>) => {
-        setFieldValue('anonymous', event.target.checked)
-        setIsAnonym(event.target.checked)
-    }
     const handleCity = (city: string) => {
         setFieldValue('city', city);
         setSelectedCity(city)
@@ -174,6 +172,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                     <Button
                         key={index}
                         variant="outlined"
+                        disabled
                     >
                         {formatMessage({ id: label })}
                     </Button>
@@ -186,13 +185,14 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                 rowGap: '10px',
                 paddingBottom: '20px'
             }}>
-                {massOrderCategory.map(({ label, valueOrder }, index) => (
+                {massOrderCategory.map(({ label }, index) => (
                     <Button
                         key={index}
                         variant="outlined"
                         sx={{
                             minWidth: { laptop: 'initial', mobile: '145px' }
                         }}
+                        disabled
                     >
                         {formatMessage({ id: label })}
                     </Button>
@@ -213,7 +213,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         <Switch
                             name='anonymous'
                             id='anonymous'
-                            onChange={handleAnonymous}
+                            onChange={(e) => setFieldValue('anonymous', e.target.checked)}
                         />
                     }
                     label={formatMessage({ id: 'anonymous' })}
@@ -240,12 +240,14 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         <TextField
                             name='name'
                             id='name'
-                            type='text'
                             placeholder={formatMessage({ id: 'fullName' })}
                             size="small"
-                            disabled={isAnonym}
+                            type='text'
+                            disabled={values.anonymous}
                             onChange={handleChange}
-                            required={!isAnonym}
+                            required={!values.anonymous}
+                            helperText={(errors.name && touched.name) && errors.name}
+                            error={errors.name && touched.name ? true : false}
                         />
                     </Box>
                     <Box
@@ -258,15 +260,16 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                     >
                         <Icon icon={contactIcon} fontSize={32} color="var(--offWhite)" />
                         <TextField
-                            name='phone'
-                            id='phone'
-                            type='tel'
-                            placeholder={formatMessage({ id: 'phoneNumber' })}
+                            required={!values.anonymous}
+                            name='email'
+                            id='email'
+                            type='email'
+                            placeholder={formatMessage({ id: 'email' })}
                             size="small"
-                            disabled={isAnonym}
+                            disabled={values.anonymous}
                             onChange={handleChange}
-                            error={errors.phone && touched.phone ? true : false}
-                            helperText={(errors.phone && touched.phone) && errors.phone}
+                            helperText={(errors.email && touched.email) && errors.email}
+                            error={errors.email && touched.email ? true : false}
                         />
                     </Box>
                 </Box>

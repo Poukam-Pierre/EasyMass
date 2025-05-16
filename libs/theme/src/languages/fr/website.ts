@@ -169,4 +169,7 @@ export const website = {
   dayOfMassWarningMsg: 'Choix obligatoire de date',
   massTimeWarningMsg: "Choix obligatoire de l'heure",
   priceWarningMsg: 'Honoraire obligatoire',
+  email: 'Email',
+  emailWarningMsg: 'Email obligatoire',
+  invalidEmail: 'Email invalide',
 };
