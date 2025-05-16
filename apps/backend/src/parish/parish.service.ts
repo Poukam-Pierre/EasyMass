@@ -13,9 +13,23 @@ import * as bcrypt from 'bcryptjs';
 export class ParishService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createParishDto: Prisma.ParishCreateInput) {
+  async create(parishData: SignUpParishDto, request: any) {
+    const { city, ...rest } = parishData;
     return this.prismaService.parish.create({
-      data: createParishDto,
+      data: {
+        ...rest,
+        city: {
+          connect: {
+            city_id: city.city_id,
+          },
+        },
+        createdByAdmin: {
+          connect: {
+            // TODO: get the id from the request
+            id: 1,
+          },
+        },
+      },
     });
   }
 
@@ -77,11 +91,11 @@ export class ParishService {
    * @param request request object processed in the guard function
    * @returns successfull result object
    */
-  async signupParish(
+  async createParish(
     input: SignUpParishDto,
     request
   ): Promise<ParishDataDto | unknown> {
-    const user = await this.signUpParishValidation(input, request);
+    const user = await this.credentialsParishValidation(input, request);
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
@@ -101,29 +115,22 @@ export class ParishService {
    * @param request
    * @returns
    */
-  async signUpParishValidation(
-    input: SignUpParishDto,
-    request
-  ): Promise<ParishDataDto> {
+  async credentialsParishValidation(input: SignUpParishDto, request) {
     const { email, password } = input;
-    const user = await this.findOneByMail(email);
-
-    if (user) return null;
-
     try {
+      const user = await this.findOneByMail(email);
+
+      if (user) return null;
+
       const hash = await bcrypt.hash(password, 10);
       input.password = hash;
 
-      input.createdByAdmin = {
-        connect: {
-          id: request.user.id,
-        },
-      };
-      const newUser = await this.create(input);
-      delete newUser.password;
-      delete newUser.updatedAt;
+      await this.create(input, request);
 
-      return newUser;
+      return {
+        statusCode: 200,
+        message: 'Parish created successfully',
+      };
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
