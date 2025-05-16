@@ -173,7 +173,7 @@ export class PaymentService {
   ): Promise<string> {
     const referenceId = createId();
 
-    const parish = await this.parishService.findOne(id);
+    const parish = await this.parishService.findParish(id);
 
     if (parish.receiverId) {
       return parish.receiverId;
