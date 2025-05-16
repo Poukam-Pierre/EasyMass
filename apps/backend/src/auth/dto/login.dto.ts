@@ -7,9 +7,9 @@ export class LoginDataDto {
 
   @IsNotEmpty()
   password: string;
-  
+
   constructor(props: LoginDataDto) {
-     Object.assign(this, props);
+    Object.assign(this, props);
   }
 }
 
@@ -24,10 +24,7 @@ export class ParishDataDto {
   email: string;
 
   phone: string;
-  city: string;
-  region: string;
-  diocese: string;
-  leadManager: string;
+  manager_name: string;
   createdAt: Date;
   balance: number;
   accessToken?: string;
