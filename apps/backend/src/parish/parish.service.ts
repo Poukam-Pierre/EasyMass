@@ -48,14 +48,12 @@ export class ParishService {
     });
   }
 
-  async findOne(id: number) {
-    return new ParishDataDto(
-      await this.prismaService.parish.findUnique({
-        where: {
-          id,
-        },
-      })
-    );
+  async findParish(id: number) {
+    return await this.prismaService.parish.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
   async findOneByMail(email: string) {
