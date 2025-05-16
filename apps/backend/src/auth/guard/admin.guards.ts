@@ -27,7 +27,9 @@ export class AdminGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Unauthorized: Token is missing or invalid.'
+      );
     }
 
     try {
@@ -37,18 +39,18 @@ export class AdminGuard implements CanActivate {
         email: payload.email,
         role: payload.role,
       };
+
+      const userRole: ROLE[] = [request.user.role];
+
+      if (!userRole || userRole.length === 0) return false;
+
+      return userRole.some((role) => requiredRole.includes(role));
     } catch (error) {
-      throw new UnauthorizedException('Unauthorized action', {
-        cause: new Error(),
-        description: 'Invalid or expired token',
-      });
+      console.error('Token verification error:', error);
+      throw new UnauthorizedException(
+        'Unauthorized: Token is missing or invalid.'
+      );
     }
-
-    const userRole: ROLE[] = [request.user.role];
-
-    if (!userRole || userRole.length === 0) return false;
-
-    return userRole.some((role) => requiredRole.includes(role));
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
