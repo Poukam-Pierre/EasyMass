@@ -161,9 +161,11 @@ model RefreshToken {
 
 model City {
   city_id   String   @id @default(cuid())
-  city_name String   @unique
+  city_name String
   country   String   @default("Cameroon")
   parish    Parish[]
+
+  @@unique([city_name, country])
 }
 
 enum MassType {
