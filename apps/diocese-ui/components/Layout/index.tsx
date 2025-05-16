@@ -23,7 +23,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 {
                     label: formatMessage({ id: 'parishes' }),
                     icon: <Icon icon={taskIcon} fontSize={24} />,
-                    link: '/parishes'
+                    link: '/'
                 },
                 {
                     label: formatMessage({ id: 'masses' }),
@@ -39,7 +39,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         {
             title: formatMessage({ id: 'parishes' }),
             links: {
-                '/parishes': formatMessage({ id: 'parishes' }),
+                '/': formatMessage({ id: 'parishes' }),
             }
         },
         {

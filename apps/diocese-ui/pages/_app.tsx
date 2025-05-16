@@ -2,6 +2,7 @@ import '@easy-messe/shared-ui';
 import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import { AppProps } from 'next/app';
 
+
 type NextPageWithoutLayout = AppProps & {
     Component: AppProps['Component'] & {
         getLayout?: (page: React.ReactNode) => React.ReactNode;
