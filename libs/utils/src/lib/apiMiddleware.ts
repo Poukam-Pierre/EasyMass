@@ -7,6 +7,7 @@ interface apiMiddlewareProps {
   accessToken?: string;
   onSuccess: (data: unknown) => void;
   onFailure: (data: unknown) => void;
+  onFinally?: () => void;
   headers?: AxiosHeaders;
 }
 
@@ -15,6 +16,7 @@ export const apiMiddleware = ({
   method,
   onSuccess,
   onFailure,
+  onFinally,
   accessToken,
   data,
   headers,
@@ -40,5 +42,7 @@ export const apiMiddleware = ({
       onFailure(error);
     })
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    .finally(() => {});
+    .finally(() => {
+      onFinally && onFinally();
+    });
 };
