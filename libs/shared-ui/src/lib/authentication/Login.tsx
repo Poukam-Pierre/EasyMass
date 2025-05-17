@@ -13,7 +13,7 @@ import {
     TextField
 } from "@mui/material";
 import { useFormik } from 'formik';
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from 'react-toastify';
@@ -41,7 +41,7 @@ export function LoginCretentials() {
         },
         onSubmit: (values, { resetForm }) => {
             apiMiddleware({
-                url: `${process.env.NEXT_PUBLIC_API_URL}/auth/login-admin`,
+                url: `/auth/login-admin`,
                 method: 'POST',
                 data: values,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
