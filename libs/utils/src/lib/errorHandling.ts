@@ -8,7 +8,7 @@ export function errorHandling({
 }: {
   error: unknown;
   formatMessage: (message: { id: string }) => string;
-  redirect: (link: string) => void;
+  redirect?: (link: string) => void;
 }) {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
@@ -16,7 +16,7 @@ export function errorHandling({
 
     if (status === 401) {
       toast.error(formatMessage({ id: message ?? 'unauthorized' }));
-      redirect('/login');
+      if (redirect) redirect('/login');
     }
     if (status === 409) {
       toast.error(formatMessage({ id: message ?? 'conflict' }));
@@ -24,13 +24,13 @@ export function errorHandling({
     if (status === 500) {
       toast.error(formatMessage({ id: message ?? 'serverError' }));
     }
+    if (status === 404) {
+      toast.error(formatMessage({ id: message ?? 'notFound' }));
+    }
     // TODO: Check the rest of the status codes
     if (status === 403) {
       toast.error(formatMessage({ id: message ?? 'forbidden' }));
-      redirect('/login');
-    }
-    if (status === 404) {
-      toast.error(formatMessage({ id: message ?? 'notFound' }));
+      if (redirect) redirect('/login');
     }
     if (status === 400) {
       toast.error(formatMessage({ id: message ?? 'badRequest' }));
