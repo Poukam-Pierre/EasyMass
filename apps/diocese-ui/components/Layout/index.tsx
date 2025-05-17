@@ -1,3 +1,4 @@
+import { apiMiddleware, errorHandling } from '@easy-messe/libs/utils';
 import { BreadcrumbsNameMaps, Header, ProfileProps, SideBar, SideBarSection } from '@easy-messe/shared-ui';
 import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded';
 import taskIcon from '@iconify-icons/material-symbols/task-outline';
@@ -6,6 +7,7 @@ import { Box } from "@mui/material";
 import { useRouter } from 'next/router';
 import { PropsWithChildren, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
+import { useRouter as Router } from 'next/navigation';
 
 
 export default function AppLayout({ children }: PropsWithChildren) {
@@ -14,7 +16,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         name: '',
         email: ''
     })
-
+    const { push } = Router()
     const { query: { name } } = useRouter()
     const sideBarSectionParish: SideBarSection[] = [
         {
@@ -51,14 +53,28 @@ export default function AppLayout({ children }: PropsWithChildren) {
         },
     ]
 
-    useEffect(() => (
-        // TODO fetch data profile from API
-        setProfileData({
-            name: 'Diocèse de Bafoussam',
-            email: 'diocèsedebaf@gmail.com'
-        })
-
-    ), [])
+    useEffect(() => {
+        const fetchAdminData = async () => {
+            const token = localStorage.getItem('token')
+            if (!token) {
+                push('/login')
+                return
+            }
+            await apiMiddleware({
+                url: '/administrator',
+                method: 'GET',
+                accessToken: token,
+                onSuccess: (response: any) => {
+                    const { user } = response
+                    setProfileData(user)
+                },
+                onFailure: (error) => {
+                    errorHandling({ error, formatMessage, redirect: push })
+                }
+            })
+        }
+        fetchAdminData();
+    }, [])
 
     return (
         <Box sx={{
