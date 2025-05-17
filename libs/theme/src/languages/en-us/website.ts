@@ -175,4 +175,5 @@ export const website = {
   otpSend: 'Password reset email sent successfully',
   passwordChanged: 'Password changed successfully',
   notFoundToken: 'Link expired or invalid !',
+  unauthorizerRefreshToken: 'User not longer connect!',
 };
