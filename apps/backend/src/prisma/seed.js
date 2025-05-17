@@ -1,3 +1,4 @@
+const { createId } = require('@paralleldrive/cuid2');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
@@ -20,7 +21,7 @@ async function seedEasyMass() {
             password: await bcrypt.hash('Admin2025*', 10),
         },
         create: {
-            name: 'Admin',
+            name: 'Administrator',
             email: 'admin@easymesse.com',
             password: await bcrypt.hash('Admin2024*', 10),
             phone: '+237696841451',
@@ -31,7 +32,7 @@ async function seedEasyMass() {
     // Create cities
     for (const city of cities) {
         await prisma.city.upsert({
-            where: { city_name: city.city_name },
+            where: { city_id: createId() },
             update: {},
             create: {
                 city_name: city.city_name,
@@ -41,7 +42,7 @@ async function seedEasyMass() {
     console.log('✅ Database seeded successfully!');
     console.log('Admin user credentials:');
     console.log('Email: admin@easymesse.com');
-    console.log('Password: Admin2025*');
+    console.log('Password: Admin2024*');
 
 }
 
