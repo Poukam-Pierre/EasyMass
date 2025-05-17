@@ -50,6 +50,7 @@ export function LoginCretentials() {
                     localStorage.setItem('token', data.accessToken);
                     localStorage.setItem('refreshToken', data.refreshToken);
                     toast.success(formatMessage({ id: 'loginSuccess' }))
+                    push('/')
                 },
                 onFailure: (error) => {
                     errorHandling({ error, formatMessage, redirect: push })
