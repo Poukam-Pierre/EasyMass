@@ -16,6 +16,7 @@ import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import {
   AdminDataDto,
   LoginDataDto,
+  LogoutDataDto,
   ParishDataDto,
   PriestDataDto,
 } from './dto/login.dto';
@@ -174,7 +175,6 @@ export class AuthService {
 
     try {
       const validatePassword = await bcrypt.compare(password, user.password);
-
       if (validatePassword) {
         return new AdminDataDto(user);
       } else return null;
@@ -500,19 +500,24 @@ export class AuthService {
    * @param refreshToken
    * @returns
    */
-  async logout(refreshToken: string) {
-    const refreshData = await this.refreshTokenService.findOne(refreshToken);
-    if (!refreshData) {
-      throw new UnauthorizedException('Unauthorized refresh token', {
-        cause: new Error(),
-        description: 'User not longer connect!',
-      });
-    }
+  async logout(input: LogoutDataDto) {
+    const { refreshToken } = input;
     try {
+      const refreshData = await this.refreshTokenService.findOne(refreshToken);
+
+      if (!refreshData) {
+        throw new UnauthorizedException('unauthorizerRefreshToken', {
+          cause: new Error(),
+          description: 'User not longer connect!',
+        });
+      }
       await this.refreshTokenService.remove(refreshData.id);
 
       return { code: 200, message: 'Disconnect token successfully!' };
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw new UnauthorizedException('unauthorizerRefreshToken');
+      }
       throw new InternalServerErrorException('serverError', {
         cause: new Error(),
         description: 'Error appears while processing deconnection.',

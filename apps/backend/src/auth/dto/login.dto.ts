@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class LoginDataDto {
   @IsEmail()
@@ -78,4 +79,14 @@ export class PriestDataDto {
   constructor(props: PriestDataDto) {
     Object.assign(this, props);
   }
+}
+
+export class LogoutDataDto {
+  @ApiProperty({
+    description: 'Refresh token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
 }

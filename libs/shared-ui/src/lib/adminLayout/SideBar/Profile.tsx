@@ -1,4 +1,7 @@
-import { Avatar, Box, Typography, Button } from "@mui/material";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { Avatar, Box, Button, CircularProgress, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 
 export interface ProfileProps {
@@ -14,6 +17,8 @@ export default function Profile({
     profile: ProfileProps
 }) {
     const { formatMessage } = useIntl()
+    const { push } = useRouter()
+    const [isDisconnectionLoading, setIsDisconnectionLoading] = useState(false)
     return (
         <Box sx={{
             display: 'grid',
@@ -51,8 +56,33 @@ export default function Profile({
             </Box>
             <Button
                 variant='outlined'
+                onClick={() => {
+                    setIsDisconnectionLoading(true);
+                    apiMiddleware({
+                        url: '/auth/logout',
+                        method: 'POST',
+                        data: {
+                            refreshToken: localStorage.getItem('refreshToken')
+                        },
+                        onSuccess: (response: any) => {
+                            const { code } = response;
+                            if (code === 200) {
+                                localStorage.removeItem('token')
+                                localStorage.removeItem('refreshToken')
+                                push('/login')
+                            }
+                        },
+                        onFailure: (error) => {
+                            errorHandling({ error, formatMessage, redirect: push })
+                        },
+                        onFinally: () => setIsDisconnectionLoading(false)
+                    })
+                }}
+                disabled={isDisconnectionLoading}
             >
-                {formatMessage({ id: 'logout' })}
+                {isDisconnectionLoading
+                    ? <CircularProgress size={20} />
+                    : formatMessage({ id: 'logout' })}
             </Button>
         </Box>
     );

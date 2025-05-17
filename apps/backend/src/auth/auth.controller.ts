@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
-import { LoginDataDto } from './dto/login.dto';
+import { LoginDataDto, LogoutDataDto } from './dto/login.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
 import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
 import { AdminGuard } from './guard/admin.guards';
@@ -56,9 +56,26 @@ export class AuthController {
     return this.authService.refreshToken(refreshToken);
   }
 
+  @ApiOperation({
+    summary: 'Logout the user',
+    description:
+      'This endpoint logs out the user by invalidating the provided refresh token.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout successful.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid refresh token.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error appears while logging out.',
+  })
   @Post('/logout')
-  logout(@Body() input: { refreshToken: string }) {
-    return this.authService.logout(input.refreshToken);
+  logout(@Body() input: LogoutDataDto) {
+    return this.authService.logout(input);
   }
 
   @ApiOperation({

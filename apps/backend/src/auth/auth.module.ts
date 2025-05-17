@@ -15,7 +15,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: 900 },
+      signOptions: { expiresIn: '24h' },
     }),
     ParishModule,
     AdministratorModule,
