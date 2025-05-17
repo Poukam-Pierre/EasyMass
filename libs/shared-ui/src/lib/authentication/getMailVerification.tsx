@@ -3,6 +3,8 @@ import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import HeroHeader from "./HeroHeader";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { toast } from "react-toastify";
 
 export function GetMailVerification() {
     const { formatMessage } = useIntl()
@@ -13,8 +15,22 @@ export function GetMailVerification() {
             email: ''
         },
         onSubmit: (values) => {
-            // TODO send mail data to API to handle verification
-            console.log(values)
+            apiMiddleware({
+                url: '/auth/forgot-password',
+                method: 'POST',
+                data: {
+                    email: values.email
+                },
+                onSuccess: (response: any) => {
+                    toast.success(formatMessage({ id: response.message }))
+                },
+                onFailure: (error) => {
+                    errorHandling({
+                        error,
+                        formatMessage,
+                    })
+                }
+            })
         },
         validationSchema: yup.object().shape({
             email: yup.string()

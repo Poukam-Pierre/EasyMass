@@ -6,6 +6,7 @@ import { PriestModule } from '../priest/priest.module';
 import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   providers: [AuthService],
@@ -20,6 +21,7 @@ import { AuthService } from './auth.service';
     AdministratorModule,
     PriestModule,
     RefreshTokenModule,
+    PrismaModule,
   ],
 })
 export class AuthModule {}

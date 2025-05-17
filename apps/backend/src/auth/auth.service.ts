@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -20,6 +21,8 @@ import {
 } from './dto/login.dto';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
 import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +31,8 @@ export class AuthService {
     private readonly parishService: ParishService,
     private readonly adminService: AdministratorService,
     private readonly priestService: PriestService,
-    private readonly refreshTokenService: RefreshTokenService
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly prismaService: PrismaService
   ) {}
 
   /**
@@ -525,5 +529,127 @@ export class AuthService {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 1);
     return newDate;
+  }
+
+  /**
+   * This function is responsible to send a password reset email to the user
+   * @param input
+   * @returns
+   */
+  async forgotPassword(input: ForgotPasswordDto) {
+    const { email } = input;
+
+    try {
+      const user = await this.adminService.findOneByMail(email);
+
+      if (!user) {
+        throw new NotFoundException('notFound', {
+          cause: new Error(),
+          description: 'User not found.',
+        });
+      }
+
+      // update all previous OTPs to isUsed = true
+      await this.prismaService.otp.updateMany({
+        where: {
+          adminId: user.id,
+        },
+        data: {
+          isUsed: true,
+        },
+      });
+
+      const { code } = await this.prismaService.otp.create({
+        data: {
+          otp_id: createId(),
+          code: createId(),
+          isUsed: false,
+          expiredAt: new Date(new Date().getTime() + 10 * 60000), // 10 minutes from now
+          admin: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+      const OTP_MESSAGE = `Dear ${user.name},\n\n
+      We have received a request to reset your password. Please use the following link to reset your password:\n\n
+      
+      "<a href="${
+        process.env.NEXT_PUBLIC_ADMIN_LINK ?? 'http://localhost:3001'
+      }/recovery/${code}/new-password/">Reset Password</a>"\n\n
+      
+      If you did not request this, please ignore this email.\n\n
+      This link will expire in 10 minutes.
+      
+      Thank you,\n
+      Your Team`;
+      // TODO: send email to the user with OTP_MESSAGE
+      console.log(OTP_MESSAGE);
+
+      return {
+        statusCode: 200,
+        message: 'otpSend',
+      };
+    } catch (error) {
+      console.log('Error while resetting password', error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('notFoundUser');
+      }
+      throw new InternalServerErrorException('serverError', {
+        cause: new Error(),
+        description: 'Error appears while sending password reset email.',
+      });
+    }
+  }
+
+  /**
+   * This function is responsible to reset the password of the user
+   * @param input
+   * @returns
+   */
+  async resetPassword(input: ResetPasswordDto) {
+    const { newPassword, token } = input;
+
+    try {
+      const user = await this.prismaService.otp.findFirst({
+        where: {
+          code: token,
+          isUsed: false,
+          expiredAt: {
+            gte: new Date(),
+          },
+        },
+        select: {
+          admin: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      if (!user) {
+        throw new NotFoundException('notFound', {
+          cause: new Error(),
+          description: 'User not found.',
+        });
+      }
+      const hash = await bcrypt.hash(newPassword, 10);
+
+      await this.adminService.update(user.admin.id, {
+        password: hash,
+      });
+
+      return {
+        statusCode: 200,
+        message: 'passwordChanged',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('notFoundToken');
+      }
+      console.log('Error while resetting password', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 }

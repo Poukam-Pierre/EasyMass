@@ -4,11 +4,18 @@ import { useIntl } from "react-intl";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as yup from 'yup';
+import { useRouter } from "next/router";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { toast } from "react-toastify";
+import { useRouter as Router } from 'next/navigation';
 
 
 export function GetNewPassword() {
     const { formatMessage } = useIntl()
     const [isVisible, setIsVisible] = useState<boolean>(false)
+    const router = useRouter()
+    const { token } = router.query
+    const { push } = Router()
 
 
     const {
@@ -23,8 +30,21 @@ export function GetNewPassword() {
             confirmPassword: ''
         },
         onSubmit: (values, { resetForm }) => {
-            // TODO send password data to API to change password
-            console.log(values)
+            apiMiddleware({
+                url: '/auth/reset-password',
+                method: 'POST',
+                data: {
+                    newPassword: values.newPassword,
+                    token: token
+                },
+                onSuccess: (response: any) => {
+                    toast.success(formatMessage({ id: response.message }))
+                    push('/login')
+                },
+                onFailure: (error) => {
+                    errorHandling({ error, formatMessage })
+                }
+            })
             resetForm()
         },
         validationSchema: yup.object().shape({

@@ -5,8 +5,11 @@ import { LoginDataDto } from './dto/login.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
 import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
 import { AdminGuard } from './guard/admin.guards';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -56,5 +59,53 @@ export class AuthController {
   @Post('/logout')
   logout(@Body() input: { refreshToken: string }) {
     return this.authService.logout(input.refreshToken);
+  }
+
+  @ApiOperation({
+    summary: 'Send a password reset email to the user',
+    description:
+      'This endpoint sends a password reset email to the user with the provided email address.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email address.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error appears while sending password reset email.',
+  })
+  @Post('/forgot-password')
+  forgotPassword(@Body() input: ForgotPasswordDto) {
+    return this.authService.forgotPassword(input);
+  }
+
+  @ApiOperation({
+    summary: 'Reset the user password',
+    description:
+      'This endpoint resets the user password using the provided token and new password.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid token or password.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Error appears while resetting password.',
+  })
+  @Post('/reset-password')
+  resetPassword(@Body() input: ResetPasswordDto) {
+    return this.authService.resetPassword(input);
   }
 }

@@ -171,4 +171,8 @@ export const website = {
   unauthorized: 'Wrong email or password !',
   serverError: 'Server error. Try later !',
   conflictLogin: 'Account already logged in. Logout before from the first one.',
+  notFoundUser: 'User not found !',
+  otpSend: 'Password reset email sent successfully',
+  passwordChanged: 'Password changed successfully',
+  notFoundToken: 'Link expired or invalid !',
 };
