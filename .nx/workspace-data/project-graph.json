@@ -14264,9 +14264,9 @@
       "type": "npm",
       "name": "npm:react-toastify",
       "data": {
-        "version": "10.0.5",
+        "version": "10.0.6",
         "packageName": "react-toastify",
-        "hash": "sha512-mNKt2jBXJg4O7pSdbNUfDdTsK9FIdikfsIE/yUCxbAEXl4HMyJaivrVFcn3Elvt5xvCQYhUZm+hqTIu1UXM3Pw=="
+        "hash": "sha512-yYjp+omCDf9lhZcrZHKbSq7YMuK0zcYkDFTzfRFgTXkTFHZ1ToxwAonzA4JI5CxA91JpjFLmwEsZEgfYfOqI1A=="
       }
     },
     "npm:react-transition-group": {
@@ -16387,7 +16387,17 @@
       },
       {
         "source": "shared-ui",
+        "target": "utils",
+        "type": "static"
+      },
+      {
+        "source": "shared-ui",
         "target": "npm:formik",
+        "type": "static"
+      },
+      {
+        "source": "shared-ui",
+        "target": "npm:react-toastify",
         "type": "static"
       },
       {
@@ -16496,6 +16506,11 @@
       },
       {
         "source": "backend",
+        "target": "npm:@nestjs/swagger",
+        "type": "static"
+      },
+      {
+        "source": "backend",
         "target": "npm:@nestjs/jwt",
         "type": "static"
       },
@@ -16522,11 +16537,6 @@
       {
         "source": "backend",
         "target": "npm:express",
-        "type": "static"
-      },
-      {
-        "source": "backend",
-        "target": "npm:@nestjs/swagger",
         "type": "static"
       },
       {
@@ -16571,6 +16581,11 @@
       {
         "source": "utils",
         "target": "npm:axios",
+        "type": "static"
+      },
+      {
+        "source": "utils",
+        "target": "npm:react-toastify",
         "type": "static"
       },
       {

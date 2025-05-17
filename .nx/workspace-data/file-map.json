@@ -36,7 +36,7 @@
     "react-dom": "18.3.1",
     "react-intl": "^6.6.5",
     "react-is": "18.3.1",
-    "react-toastify": "^10.0.5",
+    "react-toastify": "^10.0.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "styled-components": "5.3.6",
@@ -166,133 +166,501 @@
     }
   ],
   "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "'~/.npm-global'/better-commits-init.ps1",
+        "hash": "4078383204798953721"
+      },
+      {
+        "file": "jest.config.ts",
+        "hash": "3494843969422251966"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "17866138117546000433"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3932248283349115886"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch",
+        "hash": "199653772355522664"
+      },
+      {
+        "file": "jest.preset.js",
+        "hash": "9430166341120122740"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "16088360435477277747"
+      },
+      {
+        "file": ".vscode/extensions.json",
+        "hash": "4934098906304722861"
+      },
+      {
+        "file": ".editorconfig",
+        "hash": "5443105041930014821"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init",
+        "hash": "17503740099951035908"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "17446287651628692543"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "7656269653852839065"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "package.json",
+        "hash": "13754851503093519933"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "migrations.json",
+        "hash": "7445881635137701183"
+      },
+      {
+        "file": "README.md",
+        "hash": "1844809074738531768"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "13787748745224937162"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init.cmd",
+        "hash": "15497449486842377589"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch.cmd",
+        "hash": "10772025752390581339"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch.ps1",
+        "hash": "7524653750135427649"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
+      }
+    ],
     "projectFileMap": {
-      "admin-ui-e2e": [
+      "easy-messe": [
         {
-          "file": "apps/admin-ui-e2e/.eslintrc.json",
-          "hash": "10799368048025705622"
+          "file": "apps/easy-messe/.eslintrc.json",
+          "hash": "467559735979933921"
         },
         {
-          "file": "apps/admin-ui-e2e/cypress.config.ts",
-          "hash": "14674619830198287579",
+          "file": "apps/easy-messe/components/AboutUs/AboutUs.tsx",
+          "hash": "14582107090896413988",
           "deps": [
-            "npm:@nx/cypress",
-            "npm:cypress"
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl"
           ]
         },
         {
-          "file": "apps/admin-ui-e2e/project.json",
-          "hash": "13679815823647797734"
-        },
-        {
-          "file": "apps/admin-ui-e2e/src/e2e/app.cy.ts",
-          "hash": "1510792611007607198"
-        },
-        {
-          "file": "apps/admin-ui-e2e/src/fixtures/example.json",
-          "hash": "13882982864087580737"
-        },
-        {
-          "file": "apps/admin-ui-e2e/src/support/app.po.ts",
-          "hash": "5364106453863571025"
-        },
-        {
-          "file": "apps/admin-ui-e2e/src/support/commands.ts",
-          "hash": "7570864621153670540"
-        },
-        {
-          "file": "apps/admin-ui-e2e/src/support/e2e.ts",
-          "hash": "14369563060992369541"
-        },
-        {
-          "file": "apps/admin-ui-e2e/tsconfig.json",
-          "hash": "10574899838287769993"
-        }
-      ],
-      "easy-messe-e2e": [
-        {
-          "file": "apps/easy-messe-e2e/.eslintrc.json",
-          "hash": "14060216369337943343"
-        },
-        {
-          "file": "apps/easy-messe-e2e/cypress.config.ts",
-          "hash": "2889913413705003951",
+          "file": "apps/easy-messe/components/AboutUs/statisticMass.tsx",
+          "hash": "14170657632360937173",
           "deps": [
-            "npm:@nx/cypress",
-            "npm:cypress"
+            "theme",
+            "utils",
+            "npm:@mui/material"
           ]
         },
         {
-          "file": "apps/easy-messe-e2e/project.json",
-          "hash": "15229761556177558407"
-        },
-        {
-          "file": "apps/easy-messe-e2e/src/e2e/app.cy.ts",
-          "hash": "9905372500508939792"
-        },
-        {
-          "file": "apps/easy-messe-e2e/src/fixtures/example.json",
-          "hash": "11785586596216172004"
-        },
-        {
-          "file": "apps/easy-messe-e2e/src/support/app.po.ts",
-          "hash": "11157016311132186162"
-        },
-        {
-          "file": "apps/easy-messe-e2e/src/support/commands.ts",
-          "hash": "5397443931564808659"
-        },
-        {
-          "file": "apps/easy-messe-e2e/src/support/e2e.ts",
-          "hash": "1054106023200826784"
-        },
-        {
-          "file": "apps/easy-messe-e2e/tsconfig.json",
-          "hash": "10740392072068377465"
-        }
-      ],
-      "backend-e2e": [
-        {
-          "file": "apps/backend-e2e/.eslintrc.json",
-          "hash": "14921153827776288937"
-        },
-        {
-          "file": "apps/backend-e2e/jest.config.ts",
-          "hash": "14431208338104345705"
-        },
-        {
-          "file": "apps/backend-e2e/project.json",
-          "hash": "7046310521601730827"
-        },
-        {
-          "file": "apps/backend-e2e/src/backend/backend.spec.ts",
-          "hash": "6988925255182087386",
+          "file": "apps/easy-messe/components/HeroSection/HeroImage.tsx",
+          "hash": "11739392986185816199",
           "deps": [
-            "npm:axios"
+            "npm:@mui/material",
+            "npm:next",
+            "theme"
           ]
         },
         {
-          "file": "apps/backend-e2e/src/support/global-setup.ts",
-          "hash": "18221119270488052961"
-        },
-        {
-          "file": "apps/backend-e2e/src/support/global-teardown.ts",
-          "hash": "17927034305001160425"
-        },
-        {
-          "file": "apps/backend-e2e/src/support/test-setup.ts",
-          "hash": "4165311015569872896",
+          "file": "apps/easy-messe/components/HeroSection/HeroSection.tsx",
+          "hash": "9861496801723875846",
           "deps": [
-            "npm:axios"
+            "npm:@mui/material",
+            "theme",
+            "npm:react-intl",
+            "npm:next"
           ]
         },
         {
-          "file": "apps/backend-e2e/tsconfig.json",
-          "hash": "1422418700492434985"
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/Calendar.tsx",
+          "hash": "3147257714709653508",
+          "deps": [
+            "npm:@mui/x-date-pickers",
+            "npm:dayjs"
+          ]
         },
         {
-          "file": "apps/backend-e2e/tsconfig.spec.json",
-          "hash": "5623794208198348967"
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/DateTimeMass.tsx",
+          "hash": "1220307375746878935",
+          "deps": [
+            "utils",
+            "npm:@mui/material",
+            "npm:date-fns",
+            "npm:dayjs",
+            "npm:formik",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/TimeClock.tsx",
+          "hash": "17224032695019150419",
+          "deps": [
+            "theme",
+            "npm:@mui/x-date-pickers",
+            "npm:date-fns",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/HeroMass.tsx",
+          "hash": "10315397286476535628",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/LetOfferMass.tsx",
+          "hash": "7014585761423756",
+          "deps": [
+            "theme",
+            "utils",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify-icons/ph",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:dayjs",
+            "npm:formik",
+            "npm:react",
+            "npm:react-intl",
+            "npm:yup"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/ModalPayment.tsx",
+          "hash": "514704767509606166",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/OfferList.tsx",
+          "hash": "18430241257485937205",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/OfferMass/OfferMassCard.tsx",
+          "hash": "8142205855103151205",
+          "deps": [
+            "utils",
+            "npm:@mui/material",
+            "npm:dayjs",
+            "theme",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/Prefooter/Prefooter.tsx",
+          "hash": "4704421428171660435",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/Prefooter/QuoteMasses.tsx",
+          "hash": "13583895895391160293",
+          "deps": [
+            "theme",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/Footer.tsx",
+          "hash": "5520212632508066907",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/GetInvolved.tsx",
+          "hash": "3408429878490111808",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Footer/Organisation.tsx",
+          "hash": "15259847651194622765",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/Header.tsx",
+          "hash": "15624668599215261322",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/fluent",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/SideBar/SideBar.tsx",
+          "hash": "11912331062415509009",
+          "deps": [
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/Header/navitem.tsx",
+          "hash": "3320742287951663531",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/LanguageSwapper.tsx",
+          "hash": "8936856557347937816",
+          "deps": [
+            "npm:@mui/material",
+            "theme"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/components/layout/index.tsx",
+          "hash": "10469557732641288261",
+          "deps": [
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/index.d.ts",
+          "hash": "5498222895072842432"
+        },
+        {
+          "file": "apps/easy-messe/jest.config.ts",
+          "hash": "18281969078621185684"
+        },
+        {
+          "file": "apps/easy-messe/next-env.d.ts",
+          "hash": "5909181270615354023"
+        },
+        {
+          "file": "apps/easy-messe/next.config.js",
+          "hash": "9301335525920576465",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/_app.tsx",
+          "hash": "8923127807118782670",
+          "deps": [
+            "theme",
+            "npm:@mui/material",
+            "npm:@mui/x-date-pickers",
+            "npm:next",
+            "shared-ui",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/_document.tsx",
+          "hash": "13944970053009140463",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/pages/index.tsx",
+          "hash": "928561540240793353"
+        },
+        {
+          "file": "apps/easy-messe/pages/offer-mass/index.tsx",
+          "hash": "10738174663626416370",
+          "deps": [
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl",
+            "theme"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/project.json",
+          "hash": "746188988879950894"
+        },
+        {
+          "file": "apps/easy-messe/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoEasyMass.png",
+          "hash": "16756790280062041341"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoOP.PNG",
+          "hash": "2211090384763731016"
+        },
+        {
+          "file": "apps/easy-messe/public/LogoPoukamTech.png",
+          "hash": "1575886553188962472"
+        },
+        {
+          "file": "apps/easy-messe/public/actionAreaBeforeFooterImg.jpg",
+          "hash": "14153910872746637823"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/momo.png",
+          "hash": "17875946657079275099"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/om_logo.png",
+          "hash": "12941147589971480553"
+        },
+        {
+          "file": "apps/easy-messe/public/assets/visa.png",
+          "hash": "9383417089752000076"
+        },
+        {
+          "file": "apps/easy-messe/public/favicon.ico",
+          "hash": "3252920121136182000"
+        },
+        {
+          "file": "apps/easy-messe/public/heroImage.png",
+          "hash": "3716529824031157636"
+        },
+        {
+          "file": "apps/easy-messe/public/heroMassImg.png",
+          "hash": "16206213071718484646"
+        },
+        {
+          "file": "apps/easy-messe/public/heroMassImgColor.jpg",
+          "hash": "10992883480768619192"
+        },
+        {
+          "file": "apps/easy-messe/public/imgFooter.png",
+          "hash": "7146442251104441954"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/global.scss",
+          "hash": "4815580831680848711"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/notifyGlobalStyles.css",
+          "hash": "2789888428721053495"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/reset.css",
+          "hash": "10004681829485327134"
+        },
+        {
+          "file": "apps/easy-messe/public/styles/root.scss",
+          "hash": "5904375317765855433"
+        },
+        {
+          "file": "apps/easy-messe/specs/index.spec.tsx",
+          "hash": "1288872939091782814",
+          "deps": [
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/easy-messe/tsconfig.json",
+          "hash": "14509742142844746046"
+        },
+        {
+          "file": "apps/easy-messe/tsconfig.spec.json",
+          "hash": "6922413205408300107"
         }
       ],
       "shared-ui": [
@@ -322,7 +690,7 @@
         },
         {
           "file": "libs/shared-ui/src/lib/adminLayout/AdminLayout.tsx",
-          "hash": "2345375496247712871",
+          "hash": "2760693342480264005",
           "deps": [
             "theme",
             "npm:@mui/material",
@@ -408,8 +776,9 @@
         },
         {
           "file": "libs/shared-ui/src/lib/authentication/Login.tsx",
-          "hash": "2441147236031249124",
+          "hash": "15983837909246563674",
           "deps": [
+            "utils",
             "npm:@iconify-icons/material-symbols",
             "npm:@iconify/react",
             "npm:@mui/material",
@@ -417,28 +786,34 @@
             "npm:next",
             "npm:react",
             "npm:react-intl",
+            "npm:react-toastify",
             "npm:yup"
           ]
         },
         {
           "file": "libs/shared-ui/src/lib/authentication/getMailVerification.tsx",
-          "hash": "657619843743904198",
+          "hash": "6147138635183953510",
           "deps": [
             "npm:@mui/material",
             "npm:formik",
             "npm:react-intl",
-            "npm:yup"
+            "npm:yup",
+            "utils",
+            "npm:react-toastify"
           ]
         },
         {
           "file": "libs/shared-ui/src/lib/authentication/getNewPassword.tsx",
-          "hash": "17317187580096197077",
+          "hash": "6436713158984818488",
           "deps": [
             "npm:@mui/material",
             "npm:react-intl",
             "npm:react",
             "npm:formik",
-            "npm:yup"
+            "npm:yup",
+            "npm:next",
+            "utils",
+            "npm:react-toastify"
           ]
         },
         {
@@ -472,6 +847,1144 @@
         {
           "file": "libs/shared-ui/tsconfig.spec.json",
           "hash": "14275568886759166330"
+        }
+      ],
+      "diocese-ui-e2e": [
+        {
+          "file": "apps/diocese-ui-e2e/.eslintrc.json",
+          "hash": "10799368048025705622"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/cypress.config.ts",
+          "hash": "10555257113386225265",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui-e2e/project.json",
+          "hash": "13328088478926750192"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/e2e/app.cy.ts",
+          "hash": "11326912187054831584"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/fixtures/example.json",
+          "hash": "13882982864087580737"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/app.po.ts",
+          "hash": "5364106453863571025"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/commands.ts",
+          "hash": "7570864621153670540"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/src/support/e2e.ts",
+          "hash": "14369563060992369541"
+        },
+        {
+          "file": "apps/diocese-ui-e2e/tsconfig.json",
+          "hash": "10574899838287769993"
+        }
+      ],
+      "theme": [
+        {
+          "file": "libs/theme/.eslintrc.json",
+          "hash": "11012487992710232822"
+        },
+        {
+          "file": "libs/theme/README.md",
+          "hash": "3359207826875452305"
+        },
+        {
+          "file": "libs/theme/project.json",
+          "hash": "3459324222374896896"
+        },
+        {
+          "file": "libs/theme/src/EasyMesseThemeProvider.tsx",
+          "hash": "8231965987971164191",
+          "deps": [
+            "npm:@mui/material",
+            "npm:@tanstack/react-query",
+            "npm:react",
+            "npm:react-intl",
+            "npm:react-toastify"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/language/language.interface.ts",
+          "hash": "9603599055881829481"
+        },
+        {
+          "file": "libs/theme/src/contexts/language/languageContext.ts",
+          "hash": "17824644253539521453",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/language/languageContextProvider.tsx",
+          "hash": "9172730863408717709",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/themeContext/AppThemeContext.ts",
+          "hash": "3831644524918233729",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/contexts/themeContext/AppThemeContextProvider.tsx",
+          "hash": "5338375295148733154",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/index.ts",
+          "hash": "2968425283020802234"
+        },
+        {
+          "file": "libs/theme/src/languages/en-us/index.ts",
+          "hash": "5040499671471451779"
+        },
+        {
+          "file": "libs/theme/src/languages/en-us/website.ts",
+          "hash": "10333135626448441986"
+        },
+        {
+          "file": "libs/theme/src/languages/fr/index.ts",
+          "hash": "11341630188010274359"
+        },
+        {
+          "file": "libs/theme/src/languages/fr/website.ts",
+          "hash": "13837659810354812405"
+        },
+        {
+          "file": "libs/theme/src/offerMasses/OfferMassProvider.tsx",
+          "hash": "8237124069000797790",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/offerMasses/offerMass.Context.ts",
+          "hash": "18122652652020389022",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/offerMasses/offerMass.interface.ts",
+          "hash": "8945149938872061399",
+          "deps": [
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "libs/theme/src/theme.ts",
+          "hash": "14279300607335880106",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "libs/theme/src/toastify.css",
+          "hash": "12582318608500037809"
+        },
+        {
+          "file": "libs/theme/tsconfig.json",
+          "hash": "14088618039610991405"
+        },
+        {
+          "file": "libs/theme/tsconfig.lib.json",
+          "hash": "1536859351713546153"
+        }
+      ],
+      "diocese-ui": [
+        {
+          "file": "apps/diocese-ui/.eslintrc.json",
+          "hash": "18160681141115727353"
+        },
+        {
+          "file": "apps/diocese-ui/components/Layout/index.tsx",
+          "hash": "17029575301314525227",
+          "deps": [
+            "shared-ui",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:next",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Masses/FinancialTableParishes.tsx",
+          "hash": "5271258444563411759",
+          "deps": [
+            "theme",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/ph",
+            "npm:react",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Menu/FinancialTableMenu.tsx",
+          "hash": "16561761674535275279",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Menu/ParishTableMenu.tsx",
+          "hash": "16190205075533482699",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/Dialog/CancelParish.tsx",
+          "hash": "9139407155828555483",
+          "deps": [
+            "npm:@mui/material",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/Dialog/Parishes.tsx",
+          "hash": "5108923460552857446",
+          "deps": [
+            "npm:@mui/material",
+            "npm:formik",
+            "npm:react-intl",
+            "npm:yup",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/components/Parishes/ParishesTables.tsx",
+          "hash": "2739512044591241097",
+          "deps": [
+            "theme",
+            "npm:@iconify-icons/fluent",
+            "npm:@iconify-icons/material-symbols",
+            "npm:@iconify-icons/ph",
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/index.d.ts",
+          "hash": "17021007320214501298"
+        },
+        {
+          "file": "apps/diocese-ui/jest.config.ts",
+          "hash": "1984731775527217246"
+        },
+        {
+          "file": "apps/diocese-ui/next-env.d.ts",
+          "hash": "650381615855576712"
+        },
+        {
+          "file": "apps/diocese-ui/next.config.js",
+          "hash": "16731246376206153475",
+          "deps": [
+            "npm:@nx/next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/_app.tsx",
+          "hash": "16151262610980061026",
+          "deps": [
+            "shared-ui",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/_document.tsx",
+          "hash": "13944970053009140463",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/index.tsx",
+          "hash": "15778977352205272519",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/login/index.tsx",
+          "hash": "15526598809743369437",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/MassesStatTable.tsx",
+          "hash": "4029651169763527148",
+          "deps": [
+            "npm:@iconify/react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify-icons/fluent",
+            "theme",
+            "npm:react",
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/[parishId].tsx",
+          "hash": "13971714590421120186",
+          "deps": [
+            "shared-ui",
+            "npm:react",
+            "npm:@mui/material",
+            "npm:react-intl",
+            "npm:@iconify/react",
+            "npm:@iconify-icons/fluent",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/masses/index.tsx",
+          "hash": "291770062680183087",
+          "deps": [
+            "npm:@mui/material",
+            "shared-ui",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/parishes/index.tsx",
+          "hash": "16882736009567133392",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material",
+            "npm:react",
+            "npm:react-intl"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/recovery/[token]/new-password/index.tsx",
+          "hash": "17808760415202165660",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/pages/recovery/verification/index.tsx",
+          "hash": "11145382502194975053",
+          "deps": [
+            "shared-ui",
+            "npm:@mui/material"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/project.json",
+          "hash": "15005538460727884949"
+        },
+        {
+          "file": "apps/diocese-ui/public/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/diocese-ui/public/assets/LogoEasyMass.png",
+          "hash": "747595885533622310"
+        },
+        {
+          "file": "apps/diocese-ui/public/favicon.ico",
+          "hash": "3252920121136182000"
+        },
+        {
+          "file": "apps/diocese-ui/specs/index.spec.tsx",
+          "hash": "8492075169236428179",
+          "deps": [
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/diocese-ui/tsconfig.json",
+          "hash": "5812368170505732223"
+        },
+        {
+          "file": "apps/diocese-ui/tsconfig.spec.json",
+          "hash": "4919308245432237962"
+        }
+      ],
+      "backend": [
+        {
+          "file": "apps/backend/.eslintrc.json",
+          "hash": "14921153827776288937"
+        },
+        {
+          "file": "apps/backend/.gitignore",
+          "hash": "10308826327547328170"
+        },
+        {
+          "file": "apps/backend/jest.config.ts",
+          "hash": "12456466818011235466"
+        },
+        {
+          "file": "apps/backend/project.json",
+          "hash": "5481918141925727184"
+        },
+        {
+          "file": "apps/backend/src/administrator/administrator.module.ts",
+          "hash": "15978428106253905554",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/administrator/administrator.service.spec.ts",
+          "hash": "4250462095109556310",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/administrator/administrator.service.ts",
+          "hash": "1115629791366718645",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.controller.spec.ts",
+          "hash": "13081227780612210744",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.controller.ts",
+          "hash": "8194742152470293406",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.module.ts",
+          "hash": "13358879960551862014",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.service.spec.ts",
+          "hash": "18278639153968026239",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.service.ts",
+          "hash": "7653932249302388706",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/assets/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/backend/src/auth/auth.controller.spec.ts",
+          "hash": "11625570402663679261",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/auth.controller.ts",
+          "hash": "13642685397587463361",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/auth.module.ts",
+          "hash": "10367633846294478286",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/jwt"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/auth.service.spec.ts",
+          "hash": "3531801313276079682",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/auth.service.ts",
+          "hash": "11499809683468010766",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/jwt",
+            "npm:@paralleldrive/cuid2",
+            "npm:bcryptjs"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/decorator/public.decorator.ts",
+          "hash": "8996942101729499042",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/dto/login.dto.ts",
+          "hash": "17154211121043175843",
+          "deps": [
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/dto/refreshToken.dto.ts",
+          "hash": "9692944912553030227",
+          "deps": [
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/dto/signup.dto.ts",
+          "hash": "3340554666714745602",
+          "deps": [
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/guard/admin.guards.ts",
+          "hash": "5236910208389707719",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/jwt",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/guard/auth.guards.ts",
+          "hash": "2879544800770923157",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/jwt",
+            "npm:express"
+          ]
+        },
+        {
+          "file": "apps/backend/src/believer/believer.module.ts",
+          "hash": "11235710131957443190",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/believer/believer.service.spec.ts",
+          "hash": "15066590485688759739",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/believer/believer.service.ts",
+          "hash": "6856987804703094313",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/main.ts",
+          "hash": "10559682736690600063",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/swagger"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass-order/mass-order.controller.ts",
+          "hash": "17033168589500705716",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass-order/mass-order.module.ts",
+          "hash": "16888848625145113659",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass-order/mass-order.service.spec.ts",
+          "hash": "12882465368249305824",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass-order/mass-order.service.ts",
+          "hash": "15329526457684633169",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass/dto/create-mass.dto.ts",
+          "hash": "14271275564441182900"
+        },
+        {
+          "file": "apps/backend/src/mass/mass.controller.ts",
+          "hash": "2512879501906919250",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass/mass.module.ts",
+          "hash": "9186265466449753313",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass/mass.service.spec.ts",
+          "hash": "12162378408326754999",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/mass/mass.service.ts",
+          "hash": "8791075077496711261",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-parish/notification-parish.module.ts",
+          "hash": "9384574368899885128",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-parish/notification-parish.service.spec.ts",
+          "hash": "16505930788753520181",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-parish/notification-parish.service.ts",
+          "hash": "15821458260060562603",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-priest/notification-priest.module.ts",
+          "hash": "16998969215888710049",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-priest/notification-priest.service.spec.ts",
+          "hash": "9830059755374056646",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification-priest/notification-priest.service.ts",
+          "hash": "5116723759669325904",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification/notification.module.ts",
+          "hash": "13082378576474417682",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification/notification.service.spec.ts",
+          "hash": "105999784569160512",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/notification/notification.service.ts",
+          "hash": "14039140940805029132",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/dto/parishData.dto.ts",
+          "hash": "2901426750180225896",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger",
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/dto/signupParish.dto.ts",
+          "hash": "10959285282096525653",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger",
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/parish.controller.ts",
+          "hash": "12462356783661306666",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/parish.module.ts",
+          "hash": "1376808569845740575",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/parish.service.spec.ts",
+          "hash": "15652750805456703235",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/parish/parish.service.ts",
+          "hash": "1589460237666387292",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client",
+            "npm:bcryptjs"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/dto/create-transaction.dto.ts",
+          "hash": "105429138085671653",
+          "deps": [
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/payment.controller.spec.ts",
+          "hash": "13801991275496178004",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/payment.controller.ts",
+          "hash": "17046377732588482875",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/payment.module.ts",
+          "hash": "6709030996203303318",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/payment.service.spec.ts",
+          "hash": "7144710185888576117",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payment/payment.service.ts",
+          "hash": "17736512174856252150",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@paralleldrive/cuid2"
+          ]
+        },
+        {
+          "file": "apps/backend/src/priest/priest.controller.ts",
+          "hash": "13960121155168738483",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/priest/priest.module.ts",
+          "hash": "8633587667401477359",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/priest/priest.service.spec.ts",
+          "hash": "13017085521148775751",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/priest/priest.service.ts",
+          "hash": "17192913387204234954",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/prisma/migrations/migration_lock.toml",
+          "hash": "11493296588214560035"
+        },
+        {
+          "file": "apps/backend/src/prisma/prisma.module.ts",
+          "hash": "10188824724168759469",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/prisma/prisma.service.spec.ts",
+          "hash": "18363546303979903707",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/prisma/prisma.service.ts",
+          "hash": "14895230517307509605",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/prisma/schema.prisma",
+          "hash": "8952849328724804572"
+        },
+        {
+          "file": "apps/backend/src/prisma/seed.js",
+          "hash": "12038948749788456788",
+          "deps": [
+            "npm:@prisma/client",
+            "npm:bcryptjs"
+          ]
+        },
+        {
+          "file": "apps/backend/src/refresh-token/refresh-token.module.ts",
+          "hash": "1981733709087173879",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/refresh-token/refresh-token.service.spec.ts",
+          "hash": "10998729071610643770",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/refresh-token/refresh-token.service.ts",
+          "hash": "6321290831600476001",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/src/transactions/transactions.controller.ts",
+          "hash": "8747424916984455814",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/transactions/transactions.module.ts",
+          "hash": "4741800770645037316",
+          "deps": [
+            "npm:@nestjs/common"
+          ]
+        },
+        {
+          "file": "apps/backend/src/transactions/transactions.service.spec.ts",
+          "hash": "1174128984488333653",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/transactions/transactions.service.ts",
+          "hash": "1521699776192963301",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@prisma/client"
+          ]
+        },
+        {
+          "file": "apps/backend/tsconfig.app.json",
+          "hash": "8327219737532488200"
+        },
+        {
+          "file": "apps/backend/tsconfig.json",
+          "hash": "7462419380158041776"
+        },
+        {
+          "file": "apps/backend/tsconfig.spec.json",
+          "hash": "11194536110028348959"
+        },
+        {
+          "file": "apps/backend/webpack.config.js",
+          "hash": "12451567406504317685",
+          "deps": [
+            "npm:@nx/webpack"
+          ]
+        },
+        {
+          "file": "apps/backend/src/auth/dto/forgotPassword.ts",
+          "hash": "9482623714946817964",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger",
+            "npm:class-validator"
+          ]
+        }
+      ],
+      "easy-messe-e2e": [
+        {
+          "file": "apps/easy-messe-e2e/.eslintrc.json",
+          "hash": "14060216369337943343"
+        },
+        {
+          "file": "apps/easy-messe-e2e/cypress.config.ts",
+          "hash": "2889913413705003951",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/easy-messe-e2e/project.json",
+          "hash": "15229761556177558407"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/e2e/app.cy.ts",
+          "hash": "9905372500508939792"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/fixtures/example.json",
+          "hash": "11785586596216172004"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/app.po.ts",
+          "hash": "11157016311132186162"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/commands.ts",
+          "hash": "5397443931564808659"
+        },
+        {
+          "file": "apps/easy-messe-e2e/src/support/e2e.ts",
+          "hash": "1054106023200826784"
+        },
+        {
+          "file": "apps/easy-messe-e2e/tsconfig.json",
+          "hash": "10740392072068377465"
+        }
+      ],
+      "utils": [
+        {
+          "file": "libs/utils/.eslintrc.json",
+          "hash": "11012487992710232822"
+        },
+        {
+          "file": "libs/utils/README.md",
+          "hash": "14342862180974447819"
+        },
+        {
+          "file": "libs/utils/project.json",
+          "hash": "8138411405492156884"
+        },
+        {
+          "file": "libs/utils/src/index.ts",
+          "hash": "14594063877384681542"
+        },
+        {
+          "file": "libs/utils/src/lib/apiMiddleware.ts",
+          "hash": "18256605824254881115",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "libs/utils/src/lib/errorHandling.ts",
+          "hash": "17930735046376878781",
+          "deps": [
+            "npm:axios",
+            "npm:react-toastify"
+          ]
+        },
+        {
+          "file": "libs/utils/src/lib/phone.ts",
+          "hash": "17257025659079960224"
+        },
+        {
+          "file": "libs/utils/src/lib/utils.ts",
+          "hash": "17909206954217026314",
+          "deps": [
+            "npm:dayjs"
+          ]
+        },
+        {
+          "file": "libs/utils/tsconfig.json",
+          "hash": "14088618039610991405"
+        },
+        {
+          "file": "libs/utils/tsconfig.lib.json",
+          "hash": "1536859351713546153"
+        }
+      ],
+      "admin-ui-e2e": [
+        {
+          "file": "apps/admin-ui-e2e/.eslintrc.json",
+          "hash": "10799368048025705622"
+        },
+        {
+          "file": "apps/admin-ui-e2e/cypress.config.ts",
+          "hash": "14674619830198287579",
+          "deps": [
+            "npm:@nx/cypress",
+            "npm:cypress"
+          ]
+        },
+        {
+          "file": "apps/admin-ui-e2e/project.json",
+          "hash": "13679815823647797734"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/e2e/app.cy.ts",
+          "hash": "1510792611007607198"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/fixtures/example.json",
+          "hash": "13882982864087580737"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/app.po.ts",
+          "hash": "5364106453863571025"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/commands.ts",
+          "hash": "7570864621153670540"
+        },
+        {
+          "file": "apps/admin-ui-e2e/src/support/e2e.ts",
+          "hash": "14369563060992369541"
+        },
+        {
+          "file": "apps/admin-ui-e2e/tsconfig.json",
+          "hash": "10574899838287769993"
+        }
+      ],
+      "backend-e2e": [
+        {
+          "file": "apps/backend-e2e/.eslintrc.json",
+          "hash": "14921153827776288937"
+        },
+        {
+          "file": "apps/backend-e2e/jest.config.ts",
+          "hash": "14431208338104345705"
+        },
+        {
+          "file": "apps/backend-e2e/project.json",
+          "hash": "7046310521601730827"
+        },
+        {
+          "file": "apps/backend-e2e/src/backend/backend.spec.ts",
+          "hash": "6988925255182087386",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "apps/backend-e2e/src/support/global-setup.ts",
+          "hash": "18221119270488052961"
+        },
+        {
+          "file": "apps/backend-e2e/src/support/global-teardown.ts",
+          "hash": "17927034305001160425"
+        },
+        {
+          "file": "apps/backend-e2e/src/support/test-setup.ts",
+          "hash": "4165311015569872896",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "apps/backend-e2e/tsconfig.json",
+          "hash": "1422418700492434985"
+        },
+        {
+          "file": "apps/backend-e2e/tsconfig.spec.json",
+          "hash": "5623794208198348967"
         }
       ],
       "admin-ui": [
@@ -734,1481 +2247,7 @@
           "file": "apps/admin-ui/tsconfig.spec.json",
           "hash": "4919308245432237962"
         }
-      ],
-      "diocese-ui-e2e": [
-        {
-          "file": "apps/diocese-ui-e2e/.eslintrc.json",
-          "hash": "10799368048025705622"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/cypress.config.ts",
-          "hash": "10555257113386225265",
-          "deps": [
-            "npm:@nx/cypress",
-            "npm:cypress"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui-e2e/project.json",
-          "hash": "13328088478926750192"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/src/e2e/app.cy.ts",
-          "hash": "11326912187054831584"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/src/fixtures/example.json",
-          "hash": "13882982864087580737"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/src/support/app.po.ts",
-          "hash": "5364106453863571025"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/src/support/commands.ts",
-          "hash": "7570864621153670540"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/src/support/e2e.ts",
-          "hash": "14369563060992369541"
-        },
-        {
-          "file": "apps/diocese-ui-e2e/tsconfig.json",
-          "hash": "10574899838287769993"
-        }
-      ],
-      "utils": [
-        {
-          "file": "libs/utils/.eslintrc.json",
-          "hash": "11012487992710232822"
-        },
-        {
-          "file": "libs/utils/README.md",
-          "hash": "14342862180974447819"
-        },
-        {
-          "file": "libs/utils/project.json",
-          "hash": "8138411405492156884"
-        },
-        {
-          "file": "libs/utils/src/index.ts",
-          "hash": "16183537979465648559"
-        },
-        {
-          "file": "libs/utils/src/lib/apiMiddleware.ts",
-          "hash": "14600836737270872353",
-          "deps": [
-            "npm:axios"
-          ]
-        },
-        {
-          "file": "libs/utils/src/lib/phone.ts",
-          "hash": "17257025659079960224"
-        },
-        {
-          "file": "libs/utils/src/lib/utils.ts",
-          "hash": "17909206954217026314",
-          "deps": [
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "libs/utils/tsconfig.json",
-          "hash": "14088618039610991405"
-        },
-        {
-          "file": "libs/utils/tsconfig.lib.json",
-          "hash": "1536859351713546153"
-        }
-      ],
-      "diocese-ui": [
-        {
-          "file": "apps/diocese-ui/.eslintrc.json",
-          "hash": "18160681141115727353"
-        },
-        {
-          "file": "apps/diocese-ui/components/Layout/index.tsx",
-          "hash": "16766137899049231745",
-          "deps": [
-            "shared-ui",
-            "npm:@iconify-icons/material-symbols",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:next",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Masses/FinancialTableParishes.tsx",
-          "hash": "5271258444563411759",
-          "deps": [
-            "theme",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react-intl",
-            "npm:@iconify-icons/ph",
-            "npm:react",
-            "npm:@iconify-icons/fluent",
-            "npm:@iconify-icons/material-symbols"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Menu/FinancialTableMenu.tsx",
-          "hash": "16561761674535275279",
-          "deps": [
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Menu/ParishTableMenu.tsx",
-          "hash": "16190205075533482699",
-          "deps": [
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Parishes/Dialog/CancelParish.tsx",
-          "hash": "9139407155828555483",
-          "deps": [
-            "npm:@mui/material",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Parishes/Dialog/Parishes.tsx",
-          "hash": "5108923460552857446",
-          "deps": [
-            "npm:@mui/material",
-            "npm:formik",
-            "npm:react-intl",
-            "npm:yup",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/components/Parishes/ParishesTables.tsx",
-          "hash": "2739512044591241097",
-          "deps": [
-            "theme",
-            "npm:@iconify-icons/fluent",
-            "npm:@iconify-icons/material-symbols",
-            "npm:@iconify-icons/ph",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/index.d.ts",
-          "hash": "17021007320214501298"
-        },
-        {
-          "file": "apps/diocese-ui/jest.config.ts",
-          "hash": "1984731775527217246"
-        },
-        {
-          "file": "apps/diocese-ui/next-env.d.ts",
-          "hash": "650381615855576712"
-        },
-        {
-          "file": "apps/diocese-ui/next.config.js",
-          "hash": "16731246376206153475",
-          "deps": [
-            "npm:@nx/next"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/_app.tsx",
-          "hash": "6749041237313782824",
-          "deps": [
-            "shared-ui",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/_document.tsx",
-          "hash": "13944970053009140463",
-          "deps": [
-            "npm:next",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/index.tsx",
-          "hash": "12892710929804122500",
-          "deps": [
-            "shared-ui",
-            "npm:@mui/material"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/masses/MassesStatTable.tsx",
-          "hash": "4029651169763527148",
-          "deps": [
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react-intl",
-            "npm:@iconify-icons/fluent",
-            "theme",
-            "npm:react",
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/masses/[parishId].tsx",
-          "hash": "13971714590421120186",
-          "deps": [
-            "shared-ui",
-            "npm:react",
-            "npm:@mui/material",
-            "npm:react-intl",
-            "npm:@iconify/react",
-            "npm:@iconify-icons/fluent",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/masses/index.tsx",
-          "hash": "291770062680183087",
-          "deps": [
-            "npm:@mui/material",
-            "shared-ui",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/parishes/index.tsx",
-          "hash": "16882736009567133392",
-          "deps": [
-            "shared-ui",
-            "npm:@mui/material",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/recovery/[token]/new-password/index.tsx",
-          "hash": "17808760415202165660",
-          "deps": [
-            "shared-ui",
-            "npm:@mui/material"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/pages/recovery/verification/index.tsx",
-          "hash": "11145382502194975053",
-          "deps": [
-            "shared-ui",
-            "npm:@mui/material"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/project.json",
-          "hash": "15005538460727884949"
-        },
-        {
-          "file": "apps/diocese-ui/public/.gitkeep",
-          "hash": "3244421341483603138"
-        },
-        {
-          "file": "apps/diocese-ui/public/assets/LogoEasyMass.png",
-          "hash": "747595885533622310"
-        },
-        {
-          "file": "apps/diocese-ui/public/favicon.ico",
-          "hash": "3252920121136182000"
-        },
-        {
-          "file": "apps/diocese-ui/specs/index.spec.tsx",
-          "hash": "8492075169236428179",
-          "deps": [
-            "npm:react",
-            "npm:@testing-library/react"
-          ]
-        },
-        {
-          "file": "apps/diocese-ui/tsconfig.json",
-          "hash": "5812368170505732223"
-        },
-        {
-          "file": "apps/diocese-ui/tsconfig.spec.json",
-          "hash": "4919308245432237962"
-        }
-      ],
-      "easy-messe": [
-        {
-          "file": "apps/easy-messe/.eslintrc.json",
-          "hash": "467559735979933921"
-        },
-        {
-          "file": "apps/easy-messe/components/AboutUs/AboutUs.tsx",
-          "hash": "14582107090896413988",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/AboutUs/statisticMass.tsx",
-          "hash": "14170657632360937173",
-          "deps": [
-            "theme",
-            "utils",
-            "npm:@mui/material"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/HeroSection/HeroImage.tsx",
-          "hash": "11739392986185816199",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "theme"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/HeroSection/HeroSection.tsx",
-          "hash": "9861496801723875846",
-          "deps": [
-            "npm:@mui/material",
-            "theme",
-            "npm:react-intl",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/Calendar.tsx",
-          "hash": "3147257714709653508",
-          "deps": [
-            "npm:@mui/x-date-pickers",
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/DateTimeMass.tsx",
-          "hash": "1220307375746878935",
-          "deps": [
-            "utils",
-            "npm:@mui/material",
-            "npm:date-fns",
-            "npm:dayjs",
-            "npm:formik",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/DateTimeMass/TimeClock.tsx",
-          "hash": "17224032695019150419",
-          "deps": [
-            "theme",
-            "npm:@mui/x-date-pickers",
-            "npm:date-fns",
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/HeroMass.tsx",
-          "hash": "10315397286476535628",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/LetOfferMass.tsx",
-          "hash": "10921665305640262199",
-          "deps": [
-            "theme",
-            "utils",
-            "npm:@iconify-icons/fluent",
-            "npm:@iconify-icons/material-symbols",
-            "npm:@iconify-icons/ph",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:dayjs",
-            "npm:formik",
-            "npm:react",
-            "npm:react-intl",
-            "npm:yup"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/ModalPayment.tsx",
-          "hash": "514704767509606166",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/OfferList.tsx",
-          "hash": "13780013176190119615",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:react-intl",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/OfferMass/OfferMassCard.tsx",
-          "hash": "8142205855103151205",
-          "deps": [
-            "utils",
-            "npm:@mui/material",
-            "npm:dayjs",
-            "theme",
-            "npm:@iconify-icons/material-symbols",
-            "npm:@iconify/react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/Prefooter/Prefooter.tsx",
-          "hash": "4704421428171660435",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:react-intl",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/Prefooter/QuoteMasses.tsx",
-          "hash": "13583895895391160293",
-          "deps": [
-            "theme",
-            "npm:@iconify-icons/fluent",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Footer/Footer.tsx",
-          "hash": "5520212632508066907",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Footer/GetInvolved.tsx",
-          "hash": "3408429878490111808",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Footer/Organisation.tsx",
-          "hash": "15259847651194622765",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Header/Header.tsx",
-          "hash": "15624668599215261322",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "npm:@iconify/react",
-            "npm:@iconify-icons/fluent",
-            "npm:react",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Header/SideBar/SideBar.tsx",
-          "hash": "11912331062415509009",
-          "deps": [
-            "npm:@mui/material",
-            "npm:next",
-            "npm:react-intl"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/Header/navitem.tsx",
-          "hash": "3320742287951663531",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:next"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/LanguageSwapper.tsx",
-          "hash": "8936856557347937816",
-          "deps": [
-            "npm:@mui/material",
-            "theme"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/components/layout/index.tsx",
-          "hash": "10469557732641288261",
-          "deps": [
-            "npm:@mui/material"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/index.d.ts",
-          "hash": "5498222895072842432"
-        },
-        {
-          "file": "apps/easy-messe/jest.config.ts",
-          "hash": "18281969078621185684"
-        },
-        {
-          "file": "apps/easy-messe/next-env.d.ts",
-          "hash": "5909181270615354023"
-        },
-        {
-          "file": "apps/easy-messe/next.config.js",
-          "hash": "9301335525920576465",
-          "deps": [
-            "npm:@nx/next"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/pages/_app.tsx",
-          "hash": "8923127807118782670",
-          "deps": [
-            "theme",
-            "npm:@mui/material",
-            "npm:@mui/x-date-pickers",
-            "npm:next",
-            "shared-ui",
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/pages/_document.tsx",
-          "hash": "13944970053009140463",
-          "deps": [
-            "npm:next",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/pages/index.tsx",
-          "hash": "928561540240793353"
-        },
-        {
-          "file": "apps/easy-messe/pages/offer-mass/index.tsx",
-          "hash": "10738174663626416370",
-          "deps": [
-            "npm:@iconify-icons/fluent",
-            "npm:@iconify/react",
-            "npm:@mui/material",
-            "npm:react",
-            "npm:react-intl",
-            "theme"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/project.json",
-          "hash": "746188988879950894"
-        },
-        {
-          "file": "apps/easy-messe/public/.gitkeep",
-          "hash": "3244421341483603138"
-        },
-        {
-          "file": "apps/easy-messe/public/LogoEasyMass.png",
-          "hash": "16756790280062041341"
-        },
-        {
-          "file": "apps/easy-messe/public/LogoOP.PNG",
-          "hash": "2211090384763731016"
-        },
-        {
-          "file": "apps/easy-messe/public/LogoPoukamTech.png",
-          "hash": "1575886553188962472"
-        },
-        {
-          "file": "apps/easy-messe/public/actionAreaBeforeFooterImg.jpg",
-          "hash": "14153910872746637823"
-        },
-        {
-          "file": "apps/easy-messe/public/assets/momo.png",
-          "hash": "17875946657079275099"
-        },
-        {
-          "file": "apps/easy-messe/public/assets/om_logo.png",
-          "hash": "12941147589971480553"
-        },
-        {
-          "file": "apps/easy-messe/public/assets/visa.png",
-          "hash": "9383417089752000076"
-        },
-        {
-          "file": "apps/easy-messe/public/favicon.ico",
-          "hash": "3252920121136182000"
-        },
-        {
-          "file": "apps/easy-messe/public/heroImage.png",
-          "hash": "3716529824031157636"
-        },
-        {
-          "file": "apps/easy-messe/public/heroMassImg.png",
-          "hash": "16206213071718484646"
-        },
-        {
-          "file": "apps/easy-messe/public/heroMassImgColor.jpg",
-          "hash": "10992883480768619192"
-        },
-        {
-          "file": "apps/easy-messe/public/imgFooter.png",
-          "hash": "7146442251104441954"
-        },
-        {
-          "file": "apps/easy-messe/public/styles/global.scss",
-          "hash": "4815580831680848711"
-        },
-        {
-          "file": "apps/easy-messe/public/styles/notifyGlobalStyles.css",
-          "hash": "2789888428721053495"
-        },
-        {
-          "file": "apps/easy-messe/public/styles/reset.css",
-          "hash": "10004681829485327134"
-        },
-        {
-          "file": "apps/easy-messe/public/styles/root.scss",
-          "hash": "5904375317765855433"
-        },
-        {
-          "file": "apps/easy-messe/specs/index.spec.tsx",
-          "hash": "1288872939091782814",
-          "deps": [
-            "npm:react",
-            "npm:@testing-library/react"
-          ]
-        },
-        {
-          "file": "apps/easy-messe/tsconfig.json",
-          "hash": "14509742142844746046"
-        },
-        {
-          "file": "apps/easy-messe/tsconfig.spec.json",
-          "hash": "6922413205408300107"
-        }
-      ],
-      "backend": [
-        {
-          "file": "apps/backend/.eslintrc.json",
-          "hash": "14921153827776288937"
-        },
-        {
-          "file": "apps/backend/.gitignore",
-          "hash": "10308826327547328170"
-        },
-        {
-          "file": "apps/backend/jest.config.ts",
-          "hash": "12456466818011235466"
-        },
-        {
-          "file": "apps/backend/project.json",
-          "hash": "5481918141925727184"
-        },
-        {
-          "file": "apps/backend/src/administrator/administrator.module.ts",
-          "hash": "15978428106253905554",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/administrator/administrator.service.spec.ts",
-          "hash": "4250462095109556310",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/administrator/administrator.service.ts",
-          "hash": "1115629791366718645",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/app.controller.spec.ts",
-          "hash": "13081227780612210744",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/app.controller.ts",
-          "hash": "8194742152470293406",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/app.module.ts",
-          "hash": "13358879960551862014",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/app.service.spec.ts",
-          "hash": "18278639153968026239",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/app.service.ts",
-          "hash": "7653932249302388706",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/assets/.gitkeep",
-          "hash": "3244421341483603138"
-        },
-        {
-          "file": "apps/backend/src/auth/auth.controller.spec.ts",
-          "hash": "11625570402663679261",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/auth.controller.ts",
-          "hash": "9965027834658833467",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/auth.module.ts",
-          "hash": "17820334554831733171",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/jwt"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/auth.service.spec.ts",
-          "hash": "3531801313276079682",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/auth.service.ts",
-          "hash": "13639444073376951917",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/jwt",
-            "npm:@paralleldrive/cuid2",
-            "npm:bcryptjs"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/decorator/public.decorator.ts",
-          "hash": "8996942101729499042",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/dto/login.dto.ts",
-          "hash": "5003212529672356476",
-          "deps": [
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/dto/refreshToken.dto.ts",
-          "hash": "9692944912553030227",
-          "deps": [
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/dto/signup.dto.ts",
-          "hash": "3340554666714745602",
-          "deps": [
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/guard/admin.guards.ts",
-          "hash": "7474644716588428432",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/core",
-            "npm:@nestjs/jwt",
-            "npm:express"
-          ]
-        },
-        {
-          "file": "apps/backend/src/auth/guard/auth.guards.ts",
-          "hash": "2879544800770923157",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/core",
-            "npm:@nestjs/jwt",
-            "npm:express"
-          ]
-        },
-        {
-          "file": "apps/backend/src/believer/believer.module.ts",
-          "hash": "11235710131957443190",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/believer/believer.service.spec.ts",
-          "hash": "15066590485688759739",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/believer/believer.service.ts",
-          "hash": "6856987804703094313",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/main.ts",
-          "hash": "13096994796762095520",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/core",
-            "npm:@nestjs/swagger"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass-order/mass-order.controller.ts",
-          "hash": "17033168589500705716",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass-order/mass-order.module.ts",
-          "hash": "16888848625145113659",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass-order/mass-order.service.spec.ts",
-          "hash": "12882465368249305824",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass-order/mass-order.service.ts",
-          "hash": "15329526457684633169",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass/dto/create-mass.dto.ts",
-          "hash": "14271275564441182900"
-        },
-        {
-          "file": "apps/backend/src/mass/mass.controller.ts",
-          "hash": "2512879501906919250",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass/mass.module.ts",
-          "hash": "9186265466449753313",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass/mass.service.spec.ts",
-          "hash": "12162378408326754999",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/mass/mass.service.ts",
-          "hash": "8791075077496711261",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-parish/notification-parish.module.ts",
-          "hash": "9384574368899885128",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-parish/notification-parish.service.spec.ts",
-          "hash": "16505930788753520181",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-parish/notification-parish.service.ts",
-          "hash": "15821458260060562603",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-priest/notification-priest.module.ts",
-          "hash": "16998969215888710049",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-priest/notification-priest.service.spec.ts",
-          "hash": "9830059755374056646",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification-priest/notification-priest.service.ts",
-          "hash": "5116723759669325904",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification/notification.module.ts",
-          "hash": "13082378576474417682",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification/notification.service.spec.ts",
-          "hash": "105999784569160512",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/notification/notification.service.ts",
-          "hash": "14039140940805029132",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/dto/parishData.dto.ts",
-          "hash": "14645593053224431982",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/swagger",
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/dto/signupParish.dto.ts",
-          "hash": "16336993235942359035",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/swagger",
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/parish.controller.ts",
-          "hash": "17005228979717324289",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@nestjs/swagger",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/parish.module.ts",
-          "hash": "1376808569845740575",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/parish.service.spec.ts",
-          "hash": "15652750805456703235",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/parish/parish.service.ts",
-          "hash": "13128699382217064173",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client",
-            "npm:bcryptjs"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/dto/create-transaction.dto.ts",
-          "hash": "105429138085671653",
-          "deps": [
-            "npm:class-validator"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/payment.controller.spec.ts",
-          "hash": "13801991275496178004",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/payment.controller.ts",
-          "hash": "17046377732588482875",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/payment.module.ts",
-          "hash": "6709030996203303318",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/payment.service.spec.ts",
-          "hash": "7144710185888576117",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/payment/payment.service.ts",
-          "hash": "16038842189288806365",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@paralleldrive/cuid2"
-          ]
-        },
-        {
-          "file": "apps/backend/src/priest/priest.controller.ts",
-          "hash": "13960121155168738483",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/priest/priest.module.ts",
-          "hash": "8633587667401477359",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/priest/priest.service.spec.ts",
-          "hash": "13017085521148775751",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/priest/priest.service.ts",
-          "hash": "17192913387204234954",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/prisma/migrations/migration_lock.toml",
-          "hash": "5278839983338653787"
-        },
-        {
-          "file": "apps/backend/src/prisma/prisma.module.ts",
-          "hash": "10188824724168759469",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/prisma/prisma.service.spec.ts",
-          "hash": "18363546303979903707",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/prisma/prisma.service.ts",
-          "hash": "14895230517307509605",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/prisma/schema.prisma",
-          "hash": "14539096298682529849"
-        },
-        {
-          "file": "apps/backend/src/prisma/seed.js",
-          "hash": "9538060330739426211",
-          "deps": [
-            "npm:@prisma/client",
-            "npm:bcryptjs"
-          ]
-        },
-        {
-          "file": "apps/backend/src/refresh-token/refresh-token.module.ts",
-          "hash": "1981733709087173879",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/refresh-token/refresh-token.service.spec.ts",
-          "hash": "10998729071610643770",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/refresh-token/refresh-token.service.ts",
-          "hash": "6321290831600476001",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/src/transactions/transactions.controller.ts",
-          "hash": "8747424916984455814",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/transactions/transactions.module.ts",
-          "hash": "4741800770645037316",
-          "deps": [
-            "npm:@nestjs/common"
-          ]
-        },
-        {
-          "file": "apps/backend/src/transactions/transactions.service.spec.ts",
-          "hash": "1174128984488333653",
-          "deps": [
-            "npm:@nestjs/testing"
-          ]
-        },
-        {
-          "file": "apps/backend/src/transactions/transactions.service.ts",
-          "hash": "1521699776192963301",
-          "deps": [
-            "npm:@nestjs/common",
-            "npm:@prisma/client"
-          ]
-        },
-        {
-          "file": "apps/backend/tsconfig.app.json",
-          "hash": "8327219737532488200"
-        },
-        {
-          "file": "apps/backend/tsconfig.json",
-          "hash": "7462419380158041776"
-        },
-        {
-          "file": "apps/backend/tsconfig.spec.json",
-          "hash": "11194536110028348959"
-        },
-        {
-          "file": "apps/backend/webpack.config.js",
-          "hash": "12451567406504317685",
-          "deps": [
-            "npm:@nx/webpack"
-          ]
-        }
-      ],
-      "theme": [
-        {
-          "file": "libs/theme/.eslintrc.json",
-          "hash": "11012487992710232822"
-        },
-        {
-          "file": "libs/theme/README.md",
-          "hash": "3359207826875452305"
-        },
-        {
-          "file": "libs/theme/project.json",
-          "hash": "3459324222374896896"
-        },
-        {
-          "file": "libs/theme/src/EasyMesseThemeProvider.tsx",
-          "hash": "4211305563169299755",
-          "deps": [
-            "npm:@mui/material",
-            "npm:@tanstack/react-query",
-            "npm:react",
-            "npm:react-intl",
-            "npm:react-toastify"
-          ]
-        },
-        {
-          "file": "libs/theme/src/contexts/language/language.interface.ts",
-          "hash": "9603599055881829481"
-        },
-        {
-          "file": "libs/theme/src/contexts/language/languageContext.ts",
-          "hash": "17824644253539521453",
-          "deps": [
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/contexts/language/languageContextProvider.tsx",
-          "hash": "9172730863408717709",
-          "deps": [
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/contexts/themeContext/AppThemeContext.ts",
-          "hash": "3831644524918233729",
-          "deps": [
-            "npm:@mui/material",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/contexts/themeContext/AppThemeContextProvider.tsx",
-          "hash": "5338375295148733154",
-          "deps": [
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/index.ts",
-          "hash": "2968425283020802234"
-        },
-        {
-          "file": "libs/theme/src/languages/en-us/index.ts",
-          "hash": "5040499671471451779"
-        },
-        {
-          "file": "libs/theme/src/languages/en-us/website.ts",
-          "hash": "18217851793529222191"
-        },
-        {
-          "file": "libs/theme/src/languages/fr/index.ts",
-          "hash": "11341630188010274359"
-        },
-        {
-          "file": "libs/theme/src/languages/fr/website.ts",
-          "hash": "17207364901409745138"
-        },
-        {
-          "file": "libs/theme/src/offerMasses/OfferMassProvider.tsx",
-          "hash": "8237124069000797790",
-          "deps": [
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/offerMasses/offerMass.Context.ts",
-          "hash": "18122652652020389022",
-          "deps": [
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/src/offerMasses/offerMass.interface.ts",
-          "hash": "10554074226286994809",
-          "deps": [
-            "npm:dayjs"
-          ]
-        },
-        {
-          "file": "libs/theme/src/theme.ts",
-          "hash": "14279300607335880106",
-          "deps": [
-            "npm:@mui/material",
-            "npm:react"
-          ]
-        },
-        {
-          "file": "libs/theme/tsconfig.json",
-          "hash": "14088618039610991405"
-        },
-        {
-          "file": "libs/theme/tsconfig.lib.json",
-          "hash": "1536859351713546153"
-        }
       ]
-    },
-    "nonProjectFiles": [
-      {
-        "file": "'~/.npm-global'/bcommits",
-        "hash": "1458245369334501786"
-      },
-      {
-        "file": "'~/.npm-global'/bcommits.cmd",
-        "hash": "6706896060117187556"
-      },
-      {
-        "file": "'~/.npm-global'/bcommits.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": "'~/.npm-global'/better-branch",
-        "hash": "199653772355522664"
-      },
-      {
-        "file": "'~/.npm-global'/better-branch.cmd",
-        "hash": "10772025752390581339"
-      },
-      {
-        "file": "'~/.npm-global'/better-branch.ps1",
-        "hash": "7524653750135427649"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits",
-        "hash": "1458245369334501786"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits-init",
-        "hash": "17503740099951035908"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits-init.cmd",
-        "hash": "15497449486842377589"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits-init.ps1",
-        "hash": "4078383204798953721"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits.cmd",
-        "hash": "6706896060117187556"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": "'~/.npm-global'/git-bc",
-        "hash": "1458245369334501786"
-      },
-      {
-        "file": "'~/.npm-global'/git-bc.cmd",
-        "hash": "6706896060117187556"
-      },
-      {
-        "file": "'~/.npm-global'/git-bc.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": ".editorconfig",
-        "hash": "5443105041930014821"
-      },
-      {
-        "file": ".eslintignore",
-        "hash": "7663861978715868291"
-      },
-      {
-        "file": ".eslintrc.json",
-        "hash": "17866138117546000433"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "7656269653852839065"
-      },
-      {
-        "file": ".prettierignore",
-        "hash": "16448050467312557263"
-      },
-      {
-        "file": ".prettierrc",
-        "hash": "16267754514737964994"
-      },
-      {
-        "file": ".vscode/extensions.json",
-        "hash": "4934098906304722861"
-      },
-      {
-        "file": "README.md",
-        "hash": "1844809074738531768"
-      },
-      {
-        "file": "docker-compose.yml",
-        "hash": "17446287651628692543"
-      },
-      {
-        "file": "jest.config.ts",
-        "hash": "3494843969422251966"
-      },
-      {
-        "file": "jest.preset.js",
-        "hash": "9430166341120122740"
-      },
-      {
-        "file": "migrations.json",
-        "hash": "7445881635137701183"
-      },
-      {
-        "file": "nx.json",
-        "hash": "3932248283349115886"
-      },
-      {
-        "file": "package-lock.json",
-        "hash": "11416108068655252306"
-      },
-      {
-        "file": "package.json",
-        "hash": "13853817706438421034"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "16088360435477277747"
-      }
-    ]
+    }
   }
 }

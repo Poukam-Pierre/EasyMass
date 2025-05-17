@@ -12838,9 +12838,9 @@
       "type": "npm",
       "name": "npm:react-toastify",
       "data": {
-        "version": "10.0.5",
+        "version": "10.0.6",
         "packageName": "react-toastify",
-        "hash": "sha512-mNKt2jBXJg4O7pSdbNUfDdTsK9FIdikfsIE/yUCxbAEXl4HMyJaivrVFcn3Elvt5xvCQYhUZm+hqTIu1UXM3Pw=="
+        "hash": "sha512-yYjp+omCDf9lhZcrZHKbSq7YMuK0zcYkDFTzfRFgTXkTFHZ1ToxwAonzA4JI5CxA91JpjFLmwEsZEgfYfOqI1A=="
       }
     },
     "npm:react-transition-group": {
