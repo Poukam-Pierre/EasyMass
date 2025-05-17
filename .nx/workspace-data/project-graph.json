@@ -16173,6 +16173,11 @@
     "diocese-ui": [
       {
         "source": "diocese-ui",
+        "target": "utils",
+        "type": "static"
+      },
+      {
+        "source": "diocese-ui",
         "target": "shared-ui",
         "type": "static"
       },
@@ -16382,12 +16387,12 @@
       },
       {
         "source": "shared-ui",
-        "target": "npm:react-intl",
+        "target": "utils",
         "type": "static"
       },
       {
         "source": "shared-ui",
-        "target": "utils",
+        "target": "npm:react-intl",
         "type": "static"
       },
       {

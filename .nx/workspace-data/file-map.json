@@ -168,128 +168,128 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "'~/.npm-global'/better-commits-init.ps1",
-        "hash": "4078383204798953721"
+        "file": "'~/.npm-global'/better-commits",
+        "hash": "1458245369334501786"
       },
       {
         "file": "jest.config.ts",
         "hash": "3494843969422251966"
       },
       {
-        "file": ".eslintrc.json",
-        "hash": "17866138117546000433"
-      },
-      {
-        "file": "nx.json",
-        "hash": "3932248283349115886"
-      },
-      {
-        "file": "'~/.npm-global'/better-branch",
-        "hash": "199653772355522664"
-      },
-      {
-        "file": "jest.preset.js",
-        "hash": "9430166341120122740"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "16088360435477277747"
+        "file": "package.json",
+        "hash": "13754851503093519933"
       },
       {
         "file": ".vscode/extensions.json",
         "hash": "4934098906304722861"
       },
       {
-        "file": ".editorconfig",
-        "hash": "5443105041930014821"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits-init",
-        "hash": "17503740099951035908"
-      },
-      {
-        "file": ".eslintignore",
-        "hash": "7663861978715868291"
-      },
-      {
-        "file": ".prettierrc",
-        "hash": "16267754514737964994"
-      },
-      {
-        "file": "'~/.npm-global'/git-bc.cmd",
+        "file": "'~/.npm-global'/better-commits.cmd",
         "hash": "6706896060117187556"
-      },
-      {
-        "file": "'~/.npm-global'/git-bc.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": "docker-compose.yml",
-        "hash": "17446287651628692543"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "7656269653852839065"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits",
-        "hash": "1458245369334501786"
-      },
-      {
-        "file": "'~/.npm-global'/better-commits.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": "'~/.npm-global'/bcommits.cmd",
-        "hash": "6706896060117187556"
-      },
-      {
-        "file": "package.json",
-        "hash": "13754851503093519933"
-      },
-      {
-        "file": "'~/.npm-global'/bcommits.ps1",
-        "hash": "16070486948092760662"
-      },
-      {
-        "file": "migrations.json",
-        "hash": "7445881635137701183"
       },
       {
         "file": "README.md",
         "hash": "1844809074738531768"
       },
       {
-        "file": "'~/.npm-global'/better-commits.cmd",
-        "hash": "6706896060117187556"
+        "file": ".prettierrc",
+        "hash": "16267754514737964994"
       },
       {
-        "file": "package-lock.json",
-        "hash": "13787748745224937162"
+        "file": "jest.preset.js",
+        "hash": "9430166341120122740"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init",
+        "hash": "17503740099951035908"
+      },
+      {
+        "file": "migrations.json",
+        "hash": "7445881635137701183"
       },
       {
         "file": "'~/.npm-global'/better-commits-init.cmd",
         "hash": "15497449486842377589"
       },
       {
-        "file": "'~/.npm-global'/git-bc",
-        "hash": "1458245369334501786"
-      },
-      {
         "file": "'~/.npm-global'/better-branch.cmd",
         "hash": "10772025752390581339"
       },
       {
-        "file": "'~/.npm-global'/bcommits",
+        "file": "'~/.npm-global'/bcommits.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc",
         "hash": "1458245369334501786"
+      },
+      {
+        "file": ".prettierignore",
+        "hash": "16448050467312557263"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "13787748745224937162"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3932248283349115886"
+      },
+      {
+        "file": ".eslintignore",
+        "hash": "7663861978715868291"
+      },
+      {
+        "file": ".eslintrc.json",
+        "hash": "17866138117546000433"
       },
       {
         "file": "'~/.npm-global'/better-branch.ps1",
         "hash": "7524653750135427649"
       },
       {
-        "file": ".prettierignore",
-        "hash": "16448050467312557263"
+        "file": "tsconfig.base.json",
+        "hash": "16088360435477277747"
+      },
+      {
+        "file": ".editorconfig",
+        "hash": "5443105041930014821"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "'~/.npm-global'/better-commits-init.ps1",
+        "hash": "4078383204798953721"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "7656269653852839065"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.ps1",
+        "hash": "16070486948092760662"
+      },
+      {
+        "file": "'~/.npm-global'/bcommits",
+        "hash": "1458245369334501786"
+      },
+      {
+        "file": "'~/.npm-global'/git-bc.cmd",
+        "hash": "6706896060117187556"
+      },
+      {
+        "file": "'~/.npm-global'/better-branch",
+        "hash": "199653772355522664"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "17446287651628692543"
       }
     ],
     "projectFileMap": {
@@ -743,7 +743,7 @@
         },
         {
           "file": "libs/shared-ui/src/lib/adminLayout/SideBar/NavBarItem.tsx",
-          "hash": "1574614489362731657",
+          "hash": "4376137558031406127",
           "deps": [
             "npm:@mui/material",
             "npm:next"
@@ -751,9 +751,12 @@
         },
         {
           "file": "libs/shared-ui/src/lib/adminLayout/SideBar/Profile.tsx",
-          "hash": "17396988368022771947",
+          "hash": "16840014625445386056",
           "deps": [
+            "utils",
             "npm:@mui/material",
+            "npm:next",
+            "npm:react",
             "npm:react-intl"
           ]
         },
@@ -776,7 +779,7 @@
         },
         {
           "file": "libs/shared-ui/src/lib/authentication/Login.tsx",
-          "hash": "15983837909246563674",
+          "hash": "5238941456320421955",
           "deps": [
             "utils",
             "npm:@iconify-icons/material-symbols",
@@ -958,7 +961,7 @@
         },
         {
           "file": "libs/theme/src/languages/en-us/website.ts",
-          "hash": "10333135626448441986"
+          "hash": "8677554200666046482"
         },
         {
           "file": "libs/theme/src/languages/fr/index.ts",
@@ -1017,8 +1020,9 @@
         },
         {
           "file": "apps/diocese-ui/components/Layout/index.tsx",
-          "hash": "17029575301314525227",
+          "hash": "15192415766894069079",
           "deps": [
+            "utils",
             "shared-ui",
             "npm:@iconify-icons/material-symbols",
             "npm:@iconify/react",
@@ -1259,7 +1263,7 @@
         },
         {
           "file": "apps/backend/src/administrator/administrator.module.ts",
-          "hash": "15978428106253905554",
+          "hash": "10009324169569208951",
           "deps": [
             "npm:@nestjs/common"
           ]
@@ -1273,7 +1277,7 @@
         },
         {
           "file": "apps/backend/src/administrator/administrator.service.ts",
-          "hash": "1115629791366718645",
+          "hash": "10664526189530141249",
           "deps": [
             "npm:@nestjs/common",
             "npm:@prisma/client"
@@ -1327,7 +1331,7 @@
         },
         {
           "file": "apps/backend/src/auth/auth.controller.ts",
-          "hash": "13642685397587463361",
+          "hash": "5390537307546410465",
           "deps": [
             "npm:@nestjs/common",
             "npm:@nestjs/swagger"
@@ -1335,7 +1339,7 @@
         },
         {
           "file": "apps/backend/src/auth/auth.module.ts",
-          "hash": "10367633846294478286",
+          "hash": "2737000193666487755",
           "deps": [
             "npm:@nestjs/common",
             "npm:@nestjs/jwt"
@@ -1350,7 +1354,7 @@
         },
         {
           "file": "apps/backend/src/auth/auth.service.ts",
-          "hash": "11499809683468010766",
+          "hash": "4044814620147292340",
           "deps": [
             "npm:@nestjs/common",
             "npm:@nestjs/jwt",
@@ -1367,8 +1371,9 @@
         },
         {
           "file": "apps/backend/src/auth/dto/login.dto.ts",
-          "hash": "17154211121043175843",
+          "hash": "8877976324006070864",
           "deps": [
+            "npm:@nestjs/swagger",
             "npm:class-validator"
           ]
         },
@@ -1721,8 +1726,9 @@
         },
         {
           "file": "apps/backend/src/prisma/seed.js",
-          "hash": "12038948749788456788",
+          "hash": "4308166816490672831",
           "deps": [
+            "npm:@paralleldrive/cuid2",
             "npm:@prisma/client",
             "npm:bcryptjs"
           ]
@@ -1805,6 +1811,14 @@
             "npm:@nestjs/swagger",
             "npm:class-validator"
           ]
+        },
+        {
+          "file": "apps/backend/src/administrator/administrator.controller.ts",
+          "hash": "10172320666042470388",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger"
+          ]
         }
       ],
       "easy-messe-e2e": [
@@ -1868,7 +1882,7 @@
         },
         {
           "file": "libs/utils/src/lib/apiMiddleware.ts",
-          "hash": "18256605824254881115",
+          "hash": "12857073122377243269",
           "deps": [
             "npm:axios"
           ]
