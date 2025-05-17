@@ -13,7 +13,7 @@ export default function NavBarItem({
     },
 }: navBarItemProps) {
     const { push, asPath } = useRouter()
-    const isActive = asPath.startsWith(link)
+    const isActive = asPath === link
 
     return (
         <Box
