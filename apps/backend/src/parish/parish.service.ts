@@ -34,18 +34,58 @@ export class ParishService {
   }
 
   async findAll() {
-    return this.prismaService.parish.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        manager_name: true,
-        createdAt: true,
-        updatedAt: true,
-        balance: true,
-      },
-    });
+    try {
+      const parishes = await this.prismaService.parish.findMany({
+        where: {
+          is_deleted: false,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          manager_name: true,
+          createdAt: true,
+          balance: true,
+          city: {
+            select: {
+              city_id: true,
+              city_name: true,
+            },
+          },
+        },
+      });
+      const strurctureParishData = parishes.map(
+        ({
+          id,
+          name,
+          city,
+          email,
+          phone: contact,
+          manager_name: leadName,
+          createdAt,
+          balance,
+        }) => {
+          return {
+            id,
+            name,
+            city,
+            email,
+            contact,
+            leadName,
+            createdAt,
+            balance,
+          };
+        }
+      );
+      return {
+        statusCode: 200,
+        parishes: strurctureParishData,
+      };
+    } catch (error) {
+      console.log('Error while fetching parishes:', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
   async findParish(id: number) {

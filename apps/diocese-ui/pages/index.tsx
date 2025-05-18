@@ -1,53 +1,51 @@
 
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import ParishesDialog from "../components/Parishes/Dialog/Parishes";
 import ParishesTable, { ParishData } from "../components/Parishes/ParishesTables";
 import AppLayout from "../components/Layout";
+import { useRouter } from "next/navigation";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
 
 
 
 export default function Index() {
     const { formatMessage } = useIntl()
-    const [parishData, setParishData] = useState<ParishData[]>([])
+    const [parishData, setParishData] = useState<ParishData[]>()
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
-
-
-    const parishesData: ParishData[] = [
-        {
-            id: 1,
-            name: 'Saint Paul Apôtre',
-            city: 'Bangangté',
-            email: 'saintp@gmail.com',
-            contact: '+237 680 090 489',
-            leadName: 'Père tata',
-        },
-        {
-            id: 2,
-            name: 'Marie Reine des apôtres de Kamtop',
-            city: 'Bafoussam',
-            email: 'marier@gmail.com',
-            contact: '+237 680 090 489',
-            leadName: 'Père toto',
-        },
-        {
-            id: 3,
-            name: 'Immaculée Conception de la Vierge Marie de Briqueterie',
-            city: 'Bangangté',
-            email: 'notred@gmail.com',
-            contact: '+237 680 090 489',
-            leadName: 'Père titi',
-        },
-    ]
+    const [isParishDataLoading, setIsParishDataLoading] = useState<boolean>(false)
+    const { push } = useRouter()
 
     const handleParishCreationDialog = () => {
         setIsOpenCreate((prev) => !prev)
     }
 
+    const fetchParishes = async () => {
+        setIsParishDataLoading(true);
+        const token = localStorage.getItem('token')
+        if (!token) {
+            push('/login')
+            return
+        }
+        await apiMiddleware({
+            url: '/parishes',
+            method: 'GET',
+            accessToken: token,
+            onSuccess: (response: any) => {
+                setParishData(response.parishes)
+            },
+            onFailure: (error) => {
+                errorHandling({ error, formatMessage, redirect: push })
+            },
+            onFinally: () => {
+                setIsParishDataLoading(false)
+            }
+        })
+    }
     useEffect(() => {
-        setParishData(parishesData)
+        fetchParishes()
     }, [])
 
     return (
@@ -57,6 +55,8 @@ export default function Index() {
                 labelBtn={formatMessage({ id: 'create' })}
                 isOpen={isOpenCreate}
                 handleClose={handleParishCreationDialog}
+                usage="CREATION"
+                reload={fetchParishes}
             />
             <Box sx={{
                 padding: '0 16px 40px 0'
@@ -83,7 +83,32 @@ export default function Index() {
                     </Button>
                 </Box>
             </Box>
-            <ParishesTable parishDataTable={parishData} />
+            {isParishDataLoading ? (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '70%'
+                }}>
+                    <CircularProgress size={40} />
+                </Box>
+            ) : parishData && parishData.length !== 0 ? (
+                <ParishesTable
+                    parishDataTable={parishData}
+                    reload={fetchParishes}
+                />
+            ) : (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '70%'
+                }}>
+                    <Typography variant="h4">
+                        {formatMessage({ id: 'noParish' })}
+                    </Typography>
+                </Box>
+            )}
         </>
 
     );

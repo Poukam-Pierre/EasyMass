@@ -22,6 +22,22 @@ import { ParishService } from './parish.service';
 export class ParishController {
   constructor(private readonly parishService: ParishService) {}
 
+  @ApiOperation({
+    summary: 'Get all parishes',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Parishes retrieved successfully.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error. An error occurred while processing the request.',
+  })
   @Get()
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
