@@ -10,15 +10,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
 import { ROLE, Role } from '../auth/decorator/public.decorator';
 import { AdminGuard } from '../auth/guard/admin.guards';
 import { AuthGuard } from '../auth/guard/auth.guards';
+import { UpdateParishData } from './dto/parishData.dto';
 import { SignUpParishDto } from './dto/signupParish.dto';
 import { ParishService } from './parish.service';
 
 @Controller('parishes')
-@ApiTags('Parish')
+@ApiTags('Parishes')
 export class ParishController {
   constructor(private readonly parishService: ParishService) {}
 
@@ -77,19 +77,51 @@ export class ParishController {
     return this.parishService.findParish(+id);
   }
 
+  @ApiOperation({
+    summary: 'Update parish data',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Parish updated successfully.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error. An error occurred while processing the request.',
+  })
   @Patch(':id')
   @UseGuards(AuthGuard)
-  update(
+  updateParish(
     @Param('id') id: string,
-    @Body() updateParishDto: Prisma.ParishUpdateInput
+    @Body() updateParishDto: UpdateParishData
   ) {
-    return this.parishService.update(+id, updateParishDto);
+    return this.parishService.updateParish(+id, updateParishDto);
   }
 
+  @ApiOperation({
+    summary: 'Delete a parish',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Parish deleted successfully.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error. An error occurred while processing the request.',
+  })
   @Delete(':id')
   @UseGuards(AuthGuard)
-  remove(@Param('id') id: string) {
-    return this.parishService.remove(+id);
+  remove(@Param('id') id: string, @Request() request) {
+    return this.parishService.remove(+id, request);
   }
 
   @ApiOperation({
@@ -118,10 +150,9 @@ export class ParishController {
       'Internal Server Error. An error occurred while processing the request.',
   })
   @Post('/new')
-  // TODO: uncomment this when the admin data credentials is ready
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
+  @UseGuards(AdminGuard)
+  @Role(ROLE.ADMIN)
+  @Role(ROLE.ENGENEER)
   create(@Body() input: SignUpParishDto, @Request() request) {
     return this.parishService.createParish(input, request);
   }

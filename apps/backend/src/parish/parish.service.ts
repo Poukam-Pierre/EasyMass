@@ -104,21 +104,77 @@ export class ParishService {
     });
   }
 
-  async update(id: number, updateParishDto: Prisma.ParishUpdateInput) {
-    return this.prismaService.parish.update({
-      where: {
-        id,
-      },
-      data: updateParishDto,
-    });
+  /**
+   * This function updates a parish by its ID.
+   * @param id - The ID of the parish to update.
+   * @param updateParishDto - The data to update the parish with.
+   * @returns The updated parish object.
+   */
+  async updateParish(id: number, updateParishDto: UpdateParishData) {
+    const { city, ...rest } = updateParishDto;
+
+    try {
+      await this.prismaService.parish.update({
+        where: {
+          id,
+        },
+        data: {
+          ...rest,
+          ...(city &&
+            Object.values(city).length !== 0 && {
+              city: {
+                connect: {
+                  city_id: city.city_id,
+                },
+              },
+            }),
+        },
+      });
+
+      return {
+        statusCode: 200,
+        message: 'parishUpdated',
+      };
+    } catch (error) {
+      console.log('Error while updating parish data :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
-  async remove(id: number) {
-    return this.prismaService.parish.delete({
-      where: {
-        id,
-      },
-    });
+  /**
+   * This function deletes a parish by setting the is_deleted field to true
+   * and updating the deletedByAdmin and deletedAt fields.
+   * @param id - The ID of the parish to delete.
+   * @param request - The request object containing user information.
+   * @returns A success message if the deletion was successful.
+   */
+  async remove(id: number, request) {
+    const { id: admin_id } = request.user;
+
+    try {
+      await this.prismaService.parish.update({
+        where: {
+          id,
+        },
+        data: {
+          is_deleted: true,
+          deletedByAdmin: {
+            connect: {
+              id: admin_id,
+            },
+          },
+          deletedAt: new Date(),
+        },
+      });
+
+      return {
+        statusCode: 200,
+        message: 'parishDeleted',
+      };
+    } catch (error) {
+      console.log('Error while deleting parish:', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
   /**

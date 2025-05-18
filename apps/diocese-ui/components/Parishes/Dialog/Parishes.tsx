@@ -2,6 +2,7 @@ import {
     Autocomplete,
     Box,
     Button,
+    CircularProgress,
     Dialog,
     TextField,
     Typography
@@ -11,8 +12,15 @@ import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import { ParishData } from "../ParishesTables";
 import { useEffect, useState } from "react";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-
+type Usage = 'CREATION' | 'MODIFICATION'
+export interface CitiesDto {
+    city_id?: string
+    city_name: string
+}
 interface CreateMassesDialogProps {
     parishData?: ParishData
     title: string;
@@ -21,21 +29,25 @@ interface CreateMassesDialogProps {
     id?: number;
     isOpen: boolean;
     handleClose: () => void;
+    reload?: () => void;
+    usage: Usage;
 }
 
 interface FormikProps {
-    name: string | undefined;
-    city: string | undefined;
-    leadName: string | undefined;
-    email: string | undefined;
-    tel: string | undefined;
+    name: string;
+    city: CitiesDto;
+    leadName: string;
+    email: string;
+    tel: string;
 }
 export default function ParishesDialog({
     isOpen,
     handleClose,
     title,
     labelBtn,
-    parishData
+    parishData,
+    usage,
+    reload
 }: CreateMassesDialogProps) {
     const { formatMessage } = useIntl()
     const { push } = useRouter();
@@ -44,17 +56,67 @@ export default function ParishesDialog({
 
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
-        values
+        values, getFieldProps
     } = useFormik<FormikProps>({
         initialValues: {
-            name: parishData?.name,
-            city: parishData?.city,
-            leadName: parishData?.leadName,
-            email: parishData?.email,
-            tel: parishData?.contact
+            name: parishData?.name ?? '',
+            city: parishData?.city ?? { city_name: '' },
+            leadName: parishData?.leadName ?? '',
+            email: parishData?.email ?? '',
+            tel: parishData?.contact ?? ''
         },
         onSubmit: (values) => {
+            const saveParishModification = async () => {
+                const token = localStorage.getItem('token')
+                if (!token)
+                    return
+
+                setIsPendingMofication(true);
+
+                const params: { url: string; method: string } = { url: '', method: '' };
+                if (usage === 'MODIFICATION') {
+                    if (!parishData)
+                        return
+                    params.url = `/parishes/${parishData.id}`;
+                    params.method = 'PATCH';
+                }
+                if (usage === 'CREATION') {
+                    params.url = `/parishes/new`;
+                    params.method = 'POST';
+                }
+
+                await apiMiddleware({
+                    ...params,
+                    accessToken: token,
+                    data: {
+                        name: values.name,
+                        city: values.city,
+                        manager_name: values.leadName,
+                        email: values.email,
+                        phone: values.tel
+                    },
+                    onSuccess: () => {
+                        toast.success(formatMessage({
+                            id: usage === 'MODIFICATION'
+                                ? 'parishUpdated'
+                                : 'parishCreated'
+                        }))
+                        if (reload)
+                            reload()
+                    },
+                    onFailure: (error) => {
+                        errorHandling({ error, formatMessage, redirect: push })
+                    },
+                    onFinally: () => {
+                        setIsPendingMofication(false);
+                        handleClose()
+                    }
+
+                })
+            }
+            saveParishModification()
             console.log(values)
+
         },
         validationSchema: yup.object().shape({
             name: yup.string().required('Should filled parish name'),
@@ -109,7 +171,6 @@ export default function ParishesDialog({
                 },
 
             }}
-
         >
             <Box sx={{
                 padding: '60px 100px',
@@ -145,6 +206,7 @@ export default function ParishesDialog({
                                 bgcolor: 'transparent'
                             }
                         }}
+                        disabled={isFetchingCities || isPendingModification}
                     />
 
                     <Autocomplete
@@ -193,6 +255,7 @@ export default function ParishesDialog({
                                 bgcolor: 'transparent'
                             }
                         }}
+                        disabled={isFetchingCities || isPendingModification}
                     />
                     <TextField
                         name="email"
@@ -209,6 +272,7 @@ export default function ParishesDialog({
                                 bgcolor: 'transparent'
                             }
                         }}
+                        disabled={isFetchingCities || isPendingModification}
                     />
                     <TextField
                         name="tel"
@@ -225,6 +289,7 @@ export default function ParishesDialog({
                                 bgcolor: 'transparent'
                             }
                         }}
+                        disabled={isFetchingCities || isPendingModification}
                     />
                     <Box sx={{
                         display: "grid",
@@ -235,14 +300,20 @@ export default function ParishesDialog({
                         <Button
                             variant='outlined'
                             onClick={handleClose}
+                            disabled={isFetchingCities}
                         >
                             {formatMessage({ id: 'cancel' })}
                         </Button>
                         <Button
                             variant='contained'
                             type='submit'
+                            disabled={isFetchingCities || isPendingModification}
                         >
-                            {labelBtn}
+                            {isPendingModification ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                labelBtn
+                            )}
                         </Button>
                     </Box>
                 </Box>

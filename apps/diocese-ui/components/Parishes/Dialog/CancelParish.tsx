@@ -1,5 +1,9 @@
-import { Box, Button, Dialog, Typography } from "@mui/material";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { Box, Button, CircularProgress, Dialog, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useIntl } from "react-intl";
+import { toast } from "react-toastify";
 
 interface CancelMassDialogProps {
     isOpen: boolean;
@@ -13,9 +17,33 @@ export default function CancelParishDialog({
     idSelected
 }: CancelMassDialogProps) {
     const { formatMessage } = useIntl()
-    const handleDeleteMass = () => {
-        // TODO update data by deleting parish selected
-        console.log(idSelected)
+    const { push } = useRouter()
+    const [isDeletePending, setIsDeletePending] = useState<boolean>(false)
+
+    const handleDeleteMass = async () => {
+        const token = localStorage.getItem('token')
+        if (!token) {
+            push('/login')
+            return
+        }
+
+        setIsDeletePending(true)
+        await apiMiddleware({
+            url: `/parishes/${idSelected}`,
+            method: 'DELETE',
+            accessToken: token,
+            onSuccess: (response: any) => {
+                toast.success(formatMessage({ id: response.message }))
+                console.log(response)
+            },
+            onFailure: (error) => {
+                errorHandling({ error, formatMessage, redirect: push })
+            },
+            onFinally: () => {
+                setIsDeletePending(false)
+                handleClose()
+            }
+        })
     }
 
     return (
@@ -61,6 +89,7 @@ export default function CancelParishDialog({
                     <Button
                         variant='outlined'
                         onClick={handleClose}
+                        disabled={isDeletePending}
                     >
                         {formatMessage({ id: 'cancel' })}
                     </Button>
@@ -68,8 +97,13 @@ export default function CancelParishDialog({
                         variant='contained'
                         color="error"
                         onClick={handleDeleteMass}
+                        disabled={isDeletePending}
                     >
-                        {formatMessage({ id: 'delete' })}
+                        {isDeletePending ? (
+                            <CircularProgress size={20} />
+                        ) :
+                            formatMessage({ id: 'delete' })
+                        }
                     </Button>
                 </Box>
             </Box>
