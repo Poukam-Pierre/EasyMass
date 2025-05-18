@@ -220,10 +220,7 @@ export class ParishService {
     const user = await this.credentialsParishValidation(input, request);
 
     if (!user) {
-      throw new BadRequestException('Bad Request', {
-        cause: new Error(),
-        description: 'This account is already in use.',
-      });
+      throw new BadRequestException('userExistAlready');
     }
 
     return { code: 200, message: 'New parish created successfully' };

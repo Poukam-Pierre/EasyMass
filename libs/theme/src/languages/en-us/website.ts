@@ -181,4 +181,5 @@ export const website = {
   parishDeleted: 'Parish deleted successfully !',
   parishUpdated: 'Parish updated successfully !',
   parishCreated: 'Parish created successfully !',
+  userExistAlready: 'This account is already in use',
 };
