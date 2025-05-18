@@ -19,17 +19,19 @@ import {
 import { MouseEvent, useState } from "react";
 import { useIntl } from "react-intl";
 import ParishTableMenu from "../Menu/ParishTableMenu";
-import ParishesDialog from "./Dialog/Parishes";
+import ParishesDialog, { CitiesDto } from "./Dialog/Parishes";
 import CancelParishDialog from "./Dialog/CancelParish";
 
 
 export interface ParishData {
     id: number;
     name: string;
-    city: string;
+    city: CitiesDto;
     email: string;
     contact: string;
     leadName: string;
+    balance?: number;
+    createdAt?: string;
 
 }
 
@@ -39,20 +41,23 @@ export interface MenuItems {
     color?: string;
 }
 
+interface ParishTableProps {
+    parishDataTable: ParishData[],
+    reload: () => void
+}
 export default function ParishesTable({
-    parishDataTable
-}: {
-    parishDataTable: ParishData[]
-}) {
+    parishDataTable,
+    reload
+}: ParishTableProps) {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [idSelected, setIdSelected] = useState<number | undefined>();
     const [isOpenDialogModif, setIsOpenDialogModif] = useState<boolean>(false);
     const [isOpenDialogDelete, setIsOpenDialogDelete] = useState<boolean>(false);
-    const [parishSelected, setParishSelected] = useState<ParishData>()
+    const [parishSelected, setParishSelected] = useState<ParishData>(parishDataTable[0]);
 
 
-    const titles: string[] = ['name', 'city', 'email', 'contact', 'action']
+    const titles: string[] = ['name', 'cities', 'email', 'contact', 'balance(xaf)', 'action']
 
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget);
@@ -61,7 +66,8 @@ export default function ParishesTable({
 
     const handleParishshModif = () => {
         setIsOpenDialogModif(true);
-        setParishSelected(parishDataTable.find((data) => data.id === idSelected))
+        setParishSelected(parishDataTable.find(
+            (data) => data.id === idSelected) as ParishData)
     }
     const handleCancelClose = () => {
         setIsOpenDialogDelete((prev) => !prev)
@@ -95,6 +101,7 @@ export default function ParishesTable({
                 isOpen={isOpenDialogModif}
                 handleClose={() => setIsOpenDialogModif(false)}
                 parishData={parishSelected}
+                usage="MODIFICATION"
             />
             <CancelParishDialog
                 isOpen={isOpenDialogDelete}
@@ -114,6 +121,7 @@ export default function ParishesTable({
                     columnGap: 0.5,
                     cursor: 'pointer',
                 }}
+                    onClick={reload}
                 >
                     <Icon icon={refreshIcon} fontSize={20} />
                     <Typography
@@ -130,6 +138,7 @@ export default function ParishesTable({
                     columnGap: 0.5
                 }}>
                     <Icon icon={searchIcon} fontSize={20} />
+                    {/* TODO: Set up search buttom over parish name. */}
                     <InputBase
                         placeholder={formatMessage({ id: 'search' })}
                     />
@@ -154,7 +163,7 @@ export default function ParishesTable({
                 <TableBody>
                     {parishDataTable.map(({
                         name, city, id,
-                        email, contact
+                        email, contact, balance
                     }, index) => (
                         <TableRow
                             key={`${index} + ${contact}`}
@@ -164,7 +173,7 @@ export default function ParishesTable({
                         >
                             <TableCell>
                                 <Typography sx={{
-                                    width: '400px',
+                                    width: '300px',
                                     textOverflow: "ellipsis",
                                     overflow: "hidden",
                                     whiteSpace: "nowrap",
@@ -178,7 +187,7 @@ export default function ParishesTable({
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>
-                                {city}
+                                {city.city_name}
                             </TableCell>
                             <TableCell sx={{
                                 fontWeight: 600,
@@ -188,6 +197,11 @@ export default function ParishesTable({
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>{contact}</TableCell>
+                            <TableCell align="center"
+                                sx={{
+                                    fontWeight: 600,
+                                    color: 'var(--label)'
+                                }}>{balance}</TableCell>
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"
