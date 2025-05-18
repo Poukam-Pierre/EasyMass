@@ -3,8 +3,8 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import dayjs from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { ParishDataDto, UpdateParishData } from './dto/parishData.dto';
 import { SignUpParishDto } from './dto/signupParish.dto';
@@ -116,12 +116,91 @@ export class ParishService {
     }
   }
 
-  async findParish(id: number) {
-    return await this.prismaService.parish.findUnique({
-      where: {
+  // TODO: Set up JSDocs
+  async findParish(parish_id: number) {
+    try {
+      const statistics = await this.prismaService.parish.findUnique({
+        where: {
+          id: parish_id,
+        },
+        select: {
+          id: true,
+          name: true,
+          balance: true,
+          email: true,
+          manager_name: true,
+          phone: true,
+          city: {
+            select: {
+              city_id: true,
+              city_name: true,
+            },
+          },
+          mass: {
+            select: {
+              massOrder: {
+                select: {
+                  createAt: true,
+                  price: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const {
         id,
-      },
-    });
+        name,
+        balance,
+        email,
+        city,
+        manager_name: leadName,
+        phone: contact,
+        mass,
+      } = statistics;
+      const restructuredStatistics = mass.map((tt) => tt.massOrder).flat();
+
+      const result: Record<string, object> = {};
+      const startOfYear = dayjs(`${dayjs().year()}-01-01`);
+      for (
+        let month = 0;
+        month <= dayjs().month() - startOfYear.month();
+        month++
+      ) {
+        const startOfMonth = startOfYear.add(month, 'month').startOf('month');
+        const monthKey = startOfMonth.format('DD/MM/YYYY');
+
+        const itemsInMonth = restructuredStatistics.filter(({ createAt }) => {
+          const itemDate = dayjs(createAt);
+          return (
+            itemDate.month() === startOfMonth.month() &&
+            itemDate.year() === startOfMonth.year()
+          );
+        });
+
+        result[monthKey] = {
+          massNumber: itemsInMonth.length,
+          amount: itemsInMonth.reduce((acc, { price }) => acc + price, 0),
+        };
+      }
+
+      return {
+        parishInfo: {
+          id,
+          name,
+          city,
+          email,
+          leadName,
+          contact,
+          balance,
+        },
+        statistics: result,
+      };
+    } catch (error) {
+      console.log('Error arise while retreiving data statistics :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
   async findOneByMail(email: string) {
@@ -253,6 +332,7 @@ export class ParishService {
     }
   }
 
+  // TODO: Set up JSDocs
   async findAllMasses() {
     try {
       const parishWithItsOwnMasses = await this.prismaService.parish.findMany({

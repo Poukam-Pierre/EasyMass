@@ -77,6 +77,10 @@ export class ParishController {
     description: 'Cities retrieves successfully',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
+  @ApiResponse({
     status: 500,
     description:
       'Internal Server Error. An error occurred while processing the request.',
@@ -87,12 +91,28 @@ export class ParishController {
     return this.parishService.findAllCities();
   }
 
-  @Get(':id')
+  @ApiOperation({
+    summary: 'get such parish informations and its statistics',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Parish statistics retrieves successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error. An error occurred while processing the request.',
+  })
+  @Get(':parish_id')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
-  findOne(@Param('id') id: string) {
-    return this.parishService.findParish(+id);
+  findOne(@Param('parish_id') parish_id: string) {
+    return this.parishService.findParish(+parish_id);
   }
 
   @ApiOperation({

@@ -10,25 +10,65 @@ import MassesStatTable from "./MassesStatTable";
 import ParishesDialog from "../../components/Parishes/Dialog/Parishes";
 import { ParishData } from "../../components/Parishes/ParishesTables";
 
+interface ParishStatistics {
+    parishInfo: ParishData,
+    statistics: Record<string, object>
+}
 export default function ParishOverview() {
-    const staticData: string[] = ['name', 'city', 'Email', 'Responsable', 'phoneNumber']
-    const { formatMessage } = useIntl()
-    const [parishData, setParishData] = useState<ParishData>()
+    const staticData: string[] = ['name', 'city', 'Email', 'Responsable', 'phoneNumber', 'balance']
+    const { formatMessage, formatNumber } = useIntl()
+    const [parishData, setParishData] = useState<ParishStatistics>()
     const { query: { parishId } } = useRouter()
     const [isOpenDialogModif, setIsOpenDialogModif] = useState<boolean>(false);
+    const [isPending, setIsPending] = useState<boolean>(false);
+    const { push } = Router()
 
-    const parishinfo: ParishData = {
-        id: 1,
-        name: 'Saint Paul Apôtre',
-        city: 'Bangangté',
-        email: 'saintp@gmail.com',
-        contact: '+237 680 090 489',
-        leadName: 'Père tata',
+    const fetchMassDetails = async () => {
+        setIsPending(true);
+        const token = localStorage.getItem('token')
+        if (!token) {
+            push('/login')
+            return
+        }
+        if (!parishId)
+            return
+
+        await apiMiddleware({
+            url: `/parishes/${parishId}`,
+            method: 'GET',
+            accessToken: token,
+            onSuccess: (response: any) => {
+                setParishData(response);
+                console.log(response);
+            },
+            onFailure: (error) => {
+                errorHandling({ error, formatMessage, redirect: push })
+            },
+            onFinally: () => {
+                setIsPending(false)
+            }
+        })
     }
-    useEffect(() => (
-        // TODA Fetch data from API according to a specific parish
-        setParishData(parishinfo)
-    ), [parishId])
+    useEffect(() => {
+        fetchMassDetails();
+    }, [parishId])
+
+
+    if (isPending) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '80%',
+                    p: 4,
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
 
     return (
         <>
@@ -37,7 +77,9 @@ export default function ParishOverview() {
                 labelBtn={formatMessage({ id: 'save' })}
                 isOpen={isOpenDialogModif}
                 handleClose={() => setIsOpenDialogModif(false)}
-                parishData={parishData}
+                parishData={parishData?.parishInfo}
+                usage="MODIFICATION"
+                reload={fetchMassDetails}
             />
 
             <Box sx={{
@@ -101,7 +143,7 @@ export default function ParishOverview() {
                     </Grid>
                     <Grid item>
                         {parishData && Object
-                            .values(parishData)
+                            .values(parishData.parishInfo)
                             .slice(1)
                             .map((value, index) => (
                                 <Typography
@@ -110,7 +152,12 @@ export default function ParishOverview() {
                                     paddingBottom='20px'
                                     key={index}
                                 >
-                                    {value}
+                                    {typeof value === 'number'
+                                        ? formatNumber(value ?? 0, {
+                                            style: 'currency',
+                                            currency: 'xaf'
+                                        }) : typeof value !== 'string'
+                                            ? value.city_name : value}
                                 </Typography>
                             ))}
                     </Grid>
