@@ -4,13 +4,15 @@ import { ParishService } from '../parish/parish.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from '../transactions/transactions.service';
 import { BelieverService } from '../believer/believer.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly parishService: ParishService,
     private readonly transactionsService: TransactionsService,
-    private readonly believerService: BelieverService
+    private readonly believerService: BelieverService,
+    private readonly prismaService: PrismaService
   ) {}
 
   async handlePayment(handlePaymentDto: CreateTransactionDto) {
@@ -173,7 +175,16 @@ export class PaymentService {
   ): Promise<string> {
     const referenceId = createId();
 
-    const parish = await this.parishService.findParish(id);
+    const parish = await this.prismaService.parish.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        receiverId: true,
+        phone: true,
+        name: true,
+      },
+    });
 
     if (parish.receiverId) {
       return parish.receiverId;
