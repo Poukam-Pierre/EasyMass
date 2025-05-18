@@ -4,14 +4,15 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
 const cities = [
-    { city_name: 'BAMBOUTOS' },
+    { city_name: 'Bamboutos' },
     { city_name: 'HAUT-NKAM' },
-    { city_name: 'HAUT-PLATEAUX' },
-    { city_name: 'KOUNG-KHI' },
-    { city_name: 'MENOUA' },
-    { city_name: 'MIFI' },
-    { city_name: 'NDE' },
-    { city_name: 'NOUN' },
+    { city_name: 'Haut-Nkam' },
+    { city_name: 'Haut-Plateaux' },
+    { city_name: 'Koung-Khi' },
+    { city_name: 'Menoua' },
+    { city_name: 'Mifi' },
+    { city_name: 'Nde' },
+    { city_name: 'Noun' },
 ]
 async function seedEasyMass() {
     // create admin first admin user
@@ -23,7 +24,7 @@ async function seedEasyMass() {
         create: {
             name: 'Administrator',
             email: 'admin@easymesse.com',
-            password: await bcrypt.hash('Admin2024*', 10),
+            password: await bcrypt.hash('Admin2025*', 10),
             phone: '+237696841451',
             role: 'ADMIN',
         },
@@ -42,7 +43,7 @@ async function seedEasyMass() {
     console.log('✅ Database seeded successfully!');
     console.log('Admin user credentials:');
     console.log('Email: admin@easymesse.com');
-    console.log('Password: Admin2024*');
+    console.log('Password: Admin2025*');
 
 }
 
