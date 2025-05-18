@@ -21,22 +21,27 @@ import FinancialTableMenu from "../Menu/FinancialTableMenu";
 
 
 export interface FinanceParish {
-    id: number;
+    parish_id: number;
     name: string;
     city: string;
     massType: string;
     price: number;
+    createdAt?: Date
+}
+
+interface FinanceParishProps {
+    financeParishData: FinanceParish[],
+    reload: () => void
 }
 
 export default function FinancialTableParishes({
-    financeParishData
-}: {
-    financeParishData: FinanceParish[]
-}) {
-    const { formatMessage, formatNumber } = useIntl();
+    financeParishData,
+    reload
+}: FinanceParishProps) {
+    const { formatMessage, formatNumber, formatDate } = useIntl();
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [idSelected, setIdSelected] = useState<number | undefined>();
-    const titles: string[] = ['parishes', 'city', 'massType', 'price', 'action'];
+    const titles: string[] = ['parishes', 'city', 'massType', 'price', 'createdAt', 'action'];
 
 
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
@@ -56,7 +61,7 @@ export default function FinancialTableParishes({
                     }
                 ]}
                 idSelected={idSelected as number}
-                parishData={financeParishData.find((data) => data.id === idSelected)}
+                parishData={financeParishData.find((data) => data.parish_id === idSelected)}
             />
             <Box sx={{
                 display: 'grid',
@@ -71,6 +76,7 @@ export default function FinancialTableParishes({
                     columnGap: 0.5,
                     cursor: 'pointer',
                 }}
+                    onClick={reload}
                 >
                     <Icon icon={refreshIcon} fontSize={20} />
                     <Typography
@@ -87,6 +93,7 @@ export default function FinancialTableParishes({
                     columnGap: 0.5
                 }}>
                     <Icon icon={searchIcon} fontSize={20} />
+                    {/* TODO: Set up search buttom over parish name. */}
                     <InputBase
                         placeholder={formatMessage({ id: 'search' })}
                     />
@@ -111,8 +118,8 @@ export default function FinancialTableParishes({
                 </TableHead>
                 <TableBody>
                     {financeParishData.map(({
-                        id, name, city,
-                        massType, price
+                        parish_id, name, city,
+                        massType, price, createdAt
                     }, index) => (
                         <TableRow
                             key={`${index} + ${name}`}
@@ -122,7 +129,7 @@ export default function FinancialTableParishes({
                         >
                             <TableCell>
                                 <Typography sx={{
-                                    width: '400px',
+                                    width: '250px',
                                     textOverflow: "ellipsis",
                                     overflow: "hidden",
                                     whiteSpace: "nowrap",
@@ -151,10 +158,23 @@ export default function FinancialTableParishes({
                                     currency: 'xaf'
                                 })}
                             </TableCell>
+                            <TableCell sx={{
+                                fontWeight: 600,
+                                color: 'var(--label)'
+                            }}>{
+                                    formatDate(createdAt, {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        hour12: false,
+                                        minute: '2-digit',
+                                    })
+                                }</TableCell>
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"
-                                    onClick={(event) => handleActionOnRow(event, id)}
+                                    onClick={(event) => handleActionOnRow(event, parish_id)}
                                 >
                                     <Icon icon={verticalDotsIcon} fontSize={18} />
                                 </IconButton>

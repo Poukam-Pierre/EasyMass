@@ -49,7 +49,7 @@ export default function ParishesTable({
     parishDataTable,
     reload
 }: ParishTableProps) {
-    const { formatMessage } = useIntl()
+    const { formatMessage, formatNumber } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [idSelected, setIdSelected] = useState<number | undefined>();
     const [isOpenDialogModif, setIsOpenDialogModif] = useState<boolean>(false);
@@ -57,7 +57,7 @@ export default function ParishesTable({
     const [parishSelected, setParishSelected] = useState<ParishData>(parishDataTable[0]);
 
 
-    const titles: string[] = ['name', 'cities', 'email', 'contact', 'balance(xaf)', 'action']
+    const titles: string[] = ['name', 'city', 'email', 'contact', 'balance', 'action']
 
     const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
         setAnchorEl(event.currentTarget);
@@ -197,11 +197,16 @@ export default function ParishesTable({
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>{contact}</TableCell>
-                            <TableCell align="center"
+                            <TableCell
                                 sx={{
                                     fontWeight: 600,
                                     color: 'var(--label)'
-                                }}>{balance}</TableCell>
+                                }}>
+                                {formatNumber(balance ?? 0, {
+                                    style: 'currency',
+                                    currency: 'xaf'
+                                })}
+                            </TableCell>
                             <TableCell align='right'>
                                 <IconButton
                                     size="small"

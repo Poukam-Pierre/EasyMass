@@ -182,4 +182,7 @@ export const website = {
   parishUpdated: 'Parish updated successfully !',
   parishCreated: 'Parish created successfully !',
   userExistAlready: 'This account is already in use',
+  parishAndmassInfo: 'Prices for different masses and their parishes',
+  noMass: 'No mass available !',
+  createdAt: 'Date of creation',
 };
