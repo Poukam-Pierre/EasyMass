@@ -51,6 +51,24 @@ export class ParishController {
     return this.parishService.findAllMasses();
   }
 
+  @ApiOperation({
+    summary: 'Get all cities',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cities retrieves successfully',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      'Internal Server Error. An error occurred while processing the request.',
+  })
+  @Get('/cities')
+  @UseGuards(AuthGuard)
+  getAllCities() {
+    return this.parishService.findAllCities();
+  }
+
   @Get(':id')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)

@@ -37,8 +37,10 @@ export default function ParishesDialog({
     labelBtn,
     parishData
 }: CreateMassesDialogProps) {
-
     const { formatMessage } = useIntl()
+    const { push } = useRouter();
+    const [isFetchingCities, setIsFetchingCities] = useState<boolean>(false);
+    const [isPendingModification, setIsPendingMofication] = useState<boolean>(false);
 
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
@@ -56,7 +58,9 @@ export default function ParishesDialog({
         },
         validationSchema: yup.object().shape({
             name: yup.string().required('Should filled parish name'),
-            city: yup.string().required('Should choose city'),
+            city: yup.object({
+                city_name: yup.string().required('Should choose city')
+            }),
             leadName: yup.string().required('Should filled a lead name'),
             email: yup.string().required('Should filled email'),
             tel: yup.string().required('Should filled phone number'),
@@ -64,12 +68,32 @@ export default function ParishesDialog({
         enableReinitialize: true
     })
 
-    const [cities, setCities] = useState<string[]>([])
+    const [cities, setCities] = useState<CitiesDto[]>([])
 
-    useEffect(() => (
-        // TODO Fetch cities from API
-        setCities(['Bangangté', 'Bafoussam', 'Bouda'])
-    ), [])
+    useEffect(() => {
+        const fetchCities = async () => {
+            const token = localStorage.getItem('token');
+            if (!token)
+                return
+
+            setIsFetchingCities(true);
+            await apiMiddleware({
+                url: '/parishes/cities',
+                method: 'GET',
+                accessToken: token,
+                onSuccess: (response: any) => {
+                    setCities(response.cities)
+                },
+                onFailure: (error) => {
+                    errorHandling({ error, formatMessage, redirect: push })
+                },
+                onFinally: () => {
+                    setIsFetchingCities(false);
+                }
+            })
+        }
+        fetchCities()
+    }, [])
 
 
     return (
@@ -126,22 +150,33 @@ export default function ParishesDialog({
                     <Autocomplete
                         id="city"
                         options={cities}
-                        value={values.city}
                         size="small"
                         renderInput={(params) =>
                             <TextField
                                 {...params}
                                 placeholder={formatMessage({ id: 'parishCity' })}
-                                error={errors.city && touched.city ? true : false}
-                                helperText={(errors.city && touched.city) && errors.city}
+                                error={!!(errors.city?.city_name && touched.city)}
+                                helperText={(errors.city?.city_name && touched.city) && errors.city.city_name}
                             />
                         }
-                        onChange={(_, type) => setFieldValue('massType', type)}
+                        renderOption={(props, { city_name }) => (
+                            <li {...props}>
+                                {city_name}
+                            </li>
+                        )}
+                        getOptionLabel={(option) => {
+                            return option.city_name
+                        }}
+                        {...getFieldProps('city')}
+                        onChange={(_, newValue: CitiesDto) => {
+                            setFieldValue('city', newValue);
+                        }}
                         sx={{
                             '& .MuiFormControl-root': {
                                 bgcolor: 'transparent'
                             }
                         }}
+                        disabled={isFetchingCities || isPendingModification}
                     />
                     <TextField
                         name="leadName"

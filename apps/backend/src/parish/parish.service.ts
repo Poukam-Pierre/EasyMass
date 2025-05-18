@@ -203,4 +203,24 @@ export class ParishService {
 
     return parishWithItsOwnMasses;
   }
+
+  // TODO: Set up JSDocs
+  async findAllCities() {
+    try {
+      const cities = await this.prismaService.city.findMany({
+        select: {
+          city_id: true,
+          city_name: true,
+        },
+      });
+
+      return {
+        statusCode: 200,
+        cities,
+      };
+    } catch (error) {
+      console.log('Error while retrieving cities :', error);
+      throw new InternalServerErrorException('serverError');
+    }
+  }
 }
