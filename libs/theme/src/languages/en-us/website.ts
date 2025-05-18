@@ -56,7 +56,8 @@ export const website = {
   novena: 'Novena',
   thirty: 'Thirty',
   fullName: 'Full Name',
-  city: 'Cities',
+  city: 'City',
+  cities: 'Cities',
   dateTime: 'Date & Time',
   massIntention: 'Mass Intention',
   noProcessMass: 'No request for a mass.',
@@ -176,4 +177,8 @@ export const website = {
   passwordChanged: 'Password changed successfully',
   notFoundToken: 'Link expired or invalid !',
   unauthorizerRefreshToken: 'User not longer connect!',
+  noParish: 'No parish found !',
+  parishDeleted: 'Parish deleted successfully !',
+  parishUpdated: 'Parish updated successfully !',
+  parishCreated: 'Parish created successfully !',
 };
