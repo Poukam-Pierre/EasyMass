@@ -1,7 +1,7 @@
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
 import AppLayout from "../../components/Layout";
 import { ReactNode, useEffect, useState } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import { useIntl } from "react-intl";
 import { Icon } from "@iconify/react";
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
@@ -9,6 +9,8 @@ import { useRouter } from "next/router";
 import MassesStatTable from "./MassesStatTable";
 import ParishesDialog from "../../components/Parishes/Dialog/Parishes";
 import { ParishData } from "../../components/Parishes/ParishesTables";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { useRouter as Router } from 'next/navigation'
 
 interface ParishStatistics {
     parishInfo: ParishData,
@@ -163,7 +165,9 @@ export default function ParishOverview() {
                     </Grid>
                 </Grid>
             </Box >
-            <MassesStatTable />
+            {parishData && Object.values(parishData.statistics).length !== 0 && (
+                <MassesStatTable statistics={parishData.statistics} />
+            )}
         </>
     );
 }

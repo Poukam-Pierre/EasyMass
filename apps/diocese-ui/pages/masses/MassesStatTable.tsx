@@ -1,44 +1,12 @@
-import { Icon } from "@iconify/react";
-import { Box, InputBase, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
-import { useIntl } from "react-intl";
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { theme } from "@easy-messe/libs/theme";
-import warningIcon from '@iconify-icons/fluent/warning-24-regular';
-import { useEffect, useState } from "react";
-import { Dayjs } from "dayjs";
+import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import { useIntl } from "react-intl";
 
-interface StatisticsData {
-    label: string;
-    number: number;
-    amount: number;
-}
-export default function MassesStatTable() {
+export default function MassesStatTable({ statistics }: Record<string, object>) {
     const { formatMessage, formatNumber } = useIntl()
     const titles = ['period', 'massNumber', 'amount']
-    const [statData, setStatData] = useState<StatisticsData[]>([])
 
-    const statisticsData: StatisticsData[] = [
-        {
-            label: 'January',
-            number: 30,
-            amount: 60000
-        },
-        {
-            label: 'February',
-            number: 150,
-            amount: 300000
-        },
-        {
-            label: 'Mars',
-            number: 100,
-            amount: 200000
-        },
-    ]
-    useEffect(() => (
-        // TODO Fetch data table from api corresponding to masses orders, total amount and the occurences
-        setStatData(statisticsData)
-    ), [])
     return (
         <>
             <Box sx={{
@@ -57,32 +25,6 @@ export default function MassesStatTable() {
                 >
                     {formatMessage({ id: 'massStatistics' })}
                 </Typography>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    alignItems: 'center',
-                    columnGap: 1
-                }}>
-                    <Icon icon={searchIcon} fontSize={20} />
-                    <InputBase
-                        placeholder={formatMessage({ id: 'search' })}
-                    />
-                </Box>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    alignItems: 'center',
-                    columnGap: 1,
-                    cursor: 'pointer',
-                }}
-                >
-                    <Icon icon={filterIcon} fontSize={20} />
-                    <Typography
-                        variant='body2'
-                    >
-                        {formatMessage({ id: 'filter' })}
-                    </Typography>
-                </Box>
             </Box>
             <Table>
                 <TableHead>
@@ -101,21 +43,19 @@ export default function MassesStatTable() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {statData.map(({
-                        label, number, amount
-                    }, index) => (
+                    {Object.entries(statistics).map(([date, { massNumber, amount }], index) => (
                         <TableRow
-                            key={`${index} + ${label}`}
+                            key={`${index} + ${date}`}
                             sx={{
                                 color: 'var(--label)'
                             }}
                         >
-                            <TableCell>{label}</TableCell>
+                            <TableCell>{dayjs(date, "DD/MM/YYYY").format("MMMM")}</TableCell>
                             <TableCell sx={{
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>
-                                {number}
+                                {massNumber}
                             </TableCell>
                             <TableCell>{
                                 formatNumber(amount,
@@ -125,27 +65,10 @@ export default function MassesStatTable() {
                                     })}
                             </TableCell>
                         </TableRow>
+
                     ))}
                 </TableBody>
             </Table>
-            {
-                !statData.length && (
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '50%'
-                    }}>
-                        <Icon icon={warningIcon} fontSize={24} />
-                        <Typography variant='body2'>
-                            Aucune statistique disponible.
-                            {/* {formatMessage({ id: 'noProcessMass' })} */}
-                        </Typography>
-                    </Box>
-                )
-            }
-
         </>
 
     );
