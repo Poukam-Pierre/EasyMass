@@ -18,7 +18,7 @@ export class ParishService {
     const { id } = request.user;
 
     try {
-      await this.prismaService.parish.create({
+      const newParish = await this.prismaService.parish.create({
         data: {
           password: await bcrypt.hash('Parish2025*', 10),
           ...rest,
@@ -39,7 +39,8 @@ export class ParishService {
 
       We are delighted to welcome you to **Easy Messe**, your trusted platform for accessing Mass schedules,\n
       parish updates, and spiritual resources. Thank you for registering—we’re honored to be part of your faith journey.\n\n
-      **Your temporary password is:** Parish2025*
+      **Your email is:** ${newParish.email}\n
+      **Your temporary password is:** Parish2025*\n
 
       For security reasons, we **strongly recommend** changing this password upon your first login.\n\n
       If you have any questions or need assistance, feel free to reach out. May this platform enrich your connection with your parish community.\n\n
