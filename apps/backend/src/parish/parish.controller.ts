@@ -46,7 +46,25 @@ export class ParishController {
     return this.parishService.findAll();
   }
 
+  @ApiOperation({
+    summary: 'Retrieve all masses with their parish',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Masses retreive successfully',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token is missing or invalid.',
+  })
   @Get('/masses')
+  @UseGuards(AdminGuard)
+  @Role(ROLE.ADMIN)
+  @Role(ROLE.ENGENEER)
   findAllMasses() {
     return this.parishService.findAllMasses();
   }

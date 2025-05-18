@@ -254,29 +254,51 @@ export class ParishService {
   }
 
   async findAllMasses() {
-    const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
-      select: {
-        name: true,
-        mass: {
-          select: {
-            price: true,
-            processAt: true,
-            massType: true,
+    try {
+      const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
+        select: {
+          id: true,
+          name: true,
+          mass: {
+            select: {
+              id: true,
+              price: true,
+              createdAt: true,
+              massType: true,
+            },
+          },
+          city: {
+            select: {
+              city_id: true,
+              city_name: true,
+            },
           },
         },
-      },
-    });
-
-    parishWithItsOwnMasses.forEach((parishData) => {
-      parishData.mass.map((massData) => {
-        massData['dateTime'] = new Date(massData.processAt);
-        delete massData['processAt'];
       });
-      parishData['massData'] = parishData.mass;
-      delete parishData['mass'];
-    });
 
-    return parishWithItsOwnMasses;
+      const structuredParishWithOwnMasses = parishWithItsOwnMasses.map(
+        ({ id: parish_id, name, city, mass }) => {
+          return mass.map(({ createdAt, massType, price }) => {
+            return {
+              parish_id,
+              name,
+              city: city.city_name,
+              createdAt,
+              massType,
+              price,
+            };
+          });
+        }
+      );
+
+      return {
+        statusCode: 200,
+        data: structuredParishWithOwnMasses.filter((tt) => tt.length !== 0),
+      };
+    } catch (error) {
+      console.log('Error arise while retreiving all masses :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
   // TODO: Set up JSDocs

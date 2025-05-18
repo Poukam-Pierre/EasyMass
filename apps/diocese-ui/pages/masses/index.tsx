@@ -1,41 +1,45 @@
-import { Box, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { EasyMassAdminLayout } from "@easy-messe/shared-ui";
 import AppLayout from "../../components/Layout";
 import { ReactNode, useEffect, useState } from "react";
 import FinancialTableParishes, { FinanceParish } from "../../components/Masses/FinancialTableParishes";
+import { useIntl } from "react-intl";
+import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
+import { useRouter } from "next/navigation";
 
 
 export default function Masses() {
-    const [parishData, setParishData] = useState<FinanceParish[]>([])
-    const financeParishData: FinanceParish[] = [
-        {
-            id: 1,
-            name: 'Saint Paul Apôtre',
-            city: 'Bangangté',
-            massType: 'unique',
-            price: 1000,
-        },
-        {
-            id: 2,
-            name: 'Marie Reine des apôtres de Kamtop',
-            city: 'Bouda',
-            massType: 'triduum',
-            price: 7000,
-        },
-        {
-            id: 3,
-            name: 'Immaculée Conception de la Vierge Marie de Briqueterie',
-            city: 'Bamena',
-            massType: 'septaine',
-            price: 4000,
-        },
+    const [parishData, setParishData] = useState<FinanceParish[]>([]);
+    const { formatMessage } = useIntl();
+    const { push } = useRouter()
+    const [isPending, setIsPending] = useState<boolean>(false);
 
-    ]
 
-    useEffect(() => (
-        // TODO fetch data parish related to mass financy.
-        setParishData(financeParishData)
-    ), [])
+    const fetchParishWithMass = async () => {
+        setIsPending(true);
+        const token = localStorage.getItem('token')
+        if (!token) {
+            push('/login')
+            return
+        }
+        await apiMiddleware({
+            url: '/parishes/masses',
+            method: 'GET',
+            accessToken: token,
+            onSuccess: (response: any) => {
+                setParishData(response.data);
+            },
+            onFailure: (error) => {
+                errorHandling({ error, formatMessage, redirect: push })
+            },
+            onFinally: () => {
+                setIsPending(false)
+            }
+        })
+    }
+    useEffect(() => {
+        fetchParishWithMass()
+    }, [])
 
     return (
         <>
@@ -54,11 +58,36 @@ export default function Masses() {
                             paddingBottom: 0
                         }}
                     >
-                        Prix des différentes messes et leur paroisse
+                        {formatMessage({ id: 'parishAndmassInfo' })}
                     </Typography>
                 </Box>
             </Box>
-            <FinancialTableParishes financeParishData={parishData} />
+            {isPending ? (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '70%'
+                }}>
+                    <CircularProgress size={40} />
+                </Box>
+            ) : parishData && parishData.length !== 0 ? (
+                <FinancialTableParishes
+                    financeParishData={parishData}
+                    reload={fetchParishWithMass}
+                />
+            ) : (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '70%'
+                }}>
+                    <Typography variant="h4">
+                        {formatMessage({ id: 'noMass' })}
+                    </Typography>
+                </Box>
+            )}
         </>
     );
 }
