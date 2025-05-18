@@ -98,9 +98,12 @@ model Parish {
   receiverId     String?              @unique
   city_id        String
   manager_name   String
+  is_deleted     Boolean              @default(false)
+  deletedAt      DateTime?
+  deletedByAdmin Administrator?       @relation(name: "deleteParish", fields: [adminId], references: [id], map: "Parish_adminId_delete_fkey")
   mass           Mass[]
   notif          NotificationParish[]
-  createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
+  createdByAdmin Administrator?       @relation(name: "createParish", fields: [adminId], references: [id], map: "Parish_adminId_create_fkey")
   city           City                 @relation(fields: [city_id], references: [city_id])
   refleshToken   RefreshToken[]
   transaction    Transaction[]
@@ -108,17 +111,18 @@ model Parish {
 }
 
 model Administrator {
-  id           Int            @id @default(autoincrement())
-  name         String
-  email        String         @unique
-  password     String
-  phone        String
-  role         Role
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  parish       Parish[]
-  refleshToken RefreshToken[]
-  otp          otp[]
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  password       String
+  phone          String
+  role           Role
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  parishCreation Parish[]       @relation("createParish")
+  refleshToken   RefreshToken[]
+  otp            otp[]
+  ParishDeletion Parish[]       @relation("deleteParish")
 }
 
 model Notification {
