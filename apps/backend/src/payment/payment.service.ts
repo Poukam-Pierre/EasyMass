@@ -203,7 +203,7 @@ export class PaymentService {
         ).then((response) => response.json());
 
         if (createRecipient.code === 200) {
-          await this.parishService.update(id, { receiverId: referenceId });
+          await this.parishService.updateParish(id, { referenceId });
           return referenceId;
         }
       } catch (error) {

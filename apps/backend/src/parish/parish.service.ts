@@ -3,36 +3,63 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { SignUpParishDto } from './dto/signupParish.dto';
-import { ParishDataDto } from './dto/parishData.dto';
 import * as bcrypt from 'bcryptjs';
+import { PrismaService } from '../prisma/prisma.service';
+import { ParishDataDto, UpdateParishData } from './dto/parishData.dto';
+import { SignUpParishDto } from './dto/signupParish.dto';
 
 @Injectable()
 export class ParishService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(parishData: SignUpParishDto, request: any) {
+  async create(parishData: SignUpParishDto, request) {
     const { city, ...rest } = parishData;
-    return this.prismaService.parish.create({
-      data: {
-        ...rest,
-        city: {
-          connect: {
-            city_id: city.city_id,
+    const { id } = request.user;
+
+    try {
+      await this.prismaService.parish.create({
+        data: {
+          password: await bcrypt.hash('Parish2025*', 10),
+          ...rest,
+          city: {
+            connect: {
+              city_id: city.city_id,
+            },
+          },
+          createdByAdmin: {
+            connect: {
+              id,
+            },
           },
         },
-        createdByAdmin: {
-          connect: {
-            // TODO: get the id from the request
-            id: 1,
-          },
-        },
-      },
-    });
+      });
+
+      const WELCOME_MESSAGE = `Dear Parish,
+
+      We are delighted to welcome you to **Easy Messe**, your trusted platform for accessing Mass schedules,\n
+      parish updates, and spiritual resources. Thank you for registering—we’re honored to be part of your faith journey.\n\n
+      **Your temporary password is:** Parish2025*
+
+      For security reasons, we **strongly recommend** changing this password upon your first login.\n\n
+      If you have any questions or need assistance, feel free to reach out. May this platform enrich your connection with your parish community.\n\n
+      Blessings\n,
+      Easymesse team\n
+      easymesse+support@gmail.com`;
+
+      // TODO: Send by mail to the such parsh email
+      console.log(WELCOME_MESSAGE);
+      return {
+        statusCode: 201,
+        message: ' Parish created successfully',
+      };
+    } catch (error) {
+      console.log('Error while trying to create parish :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
+  // TODO: Set up the JSDocs
   async findAll() {
     try {
       const parishes = await this.prismaService.parish.findMany({
@@ -210,27 +237,21 @@ export class ParishService {
    * @returns
    */
   async credentialsParishValidation(input: SignUpParishDto, request) {
-    const { email, password } = input;
+    const { email } = input;
     try {
       const user = await this.findOneByMail(email);
 
       if (user) return null;
 
-      const hash = await bcrypt.hash(password, 10);
-      input.password = hash;
-
       await this.create(input, request);
 
       return {
         statusCode: 200,
-        message: 'Parish created successfully',
+        message: 'parishCreated',
       };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user parish into db.',
-      });
+      console.log('Error appear while processing creation of parish');
+      throw new InternalServerErrorException('serverError');
     }
   }
 

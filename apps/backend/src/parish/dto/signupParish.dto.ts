@@ -3,17 +3,20 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
-class CityDto {
+export class CityDto {
   @ApiProperty({
     description: 'The ID of the city',
     example: 'a1e',
   })
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   city_id: string;
 
   @ApiProperty({
@@ -58,35 +61,9 @@ export class SignUpParishDto {
   email: string;
 
   @ApiProperty({
-    description: 'The password of the account',
-    example: 'password123',
-  })
-  @IsStrongPassword(
-    {
-      minLength: 4,
-      minLowercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-      minUppercase: 1,
-    },
-    {
-      message: () => {
-        throw new BadRequestException(
-          'Password does not meet security requirements.',
-          {
-            cause: new Error(),
-            description:
-              'Provided password not strong enough. Add at least 4 characters, 1 lowercase, 1 number, 1 symbols, 1 uppercase',
-          }
-        );
-      },
-    }
-  )
-  password: string;
-
-  @ApiProperty({
     description: 'The city of the parish',
     example: { city_id: 'a1e', city_name: 'New York' },
   })
+  @Type(() => CityDto)
   city: CityDto;
 }
