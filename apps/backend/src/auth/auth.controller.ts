@@ -13,11 +13,41 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({
+    summary: 'Login parishes',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Wrong email or password.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Account already logged in. Logout before from the first one.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
   @Post('/login-parish')
   loginParish(@Body() input: LoginDataDto) {
     return this.authService.authenticate(input, 'parish');
   }
 
+  @ApiOperation({
+    summary: 'Login administrators',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Wrong email or password.',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Account already logged in. Logout before from the first one.',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
   @Post('/login-admin')
   loginAdmin(@Body() input: LoginDataDto) {
     return this.authService.authenticate(input, 'admin');

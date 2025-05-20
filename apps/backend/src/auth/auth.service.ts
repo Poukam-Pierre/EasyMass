@@ -47,7 +47,7 @@ export class AuthService {
       const user = await this.validateParish(input);
 
       if (!user) {
-        throw new UnauthorizedException('Unauthorized', {
+        throw new UnauthorizedException('unauthorized', {
           cause: new Error(),
           description: 'Wrong email or password.',
         });
@@ -181,7 +181,8 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException('serverError', {
         cause: new Error(),
-        description: 'Error appears while processing your request.',
+        description:
+          'Error appears while validating admin credentials your request.',
       });
     }
   }

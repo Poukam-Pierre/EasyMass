@@ -20,10 +20,14 @@ import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import HeroHeader from "./HeroHeader";
 
+export enum LoginUsageEnum {
+    PARISH = "PARISH",
+    ADMINISTRATOR = "ADMINISTRATOR"
+}
 
 
 
-export function LoginCretentials() {
+export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
     const [isVisible, setIsVisible] = useState<boolean>(false)
     const { formatMessage } = useIntl()
     const { push } = useRouter()
@@ -40,8 +44,15 @@ export function LoginCretentials() {
             password: '',
         },
         onSubmit: (values, { resetForm }) => {
+            let URL_ROUTES = ''
+            if (usage === LoginUsageEnum.ADMINISTRATOR)
+                URL_ROUTES = '/auth/login-admin'
+
+            if (usage === LoginUsageEnum.PARISH)
+                URL_ROUTES = '/auth/login-parish'
+
             apiMiddleware({
-                url: `/auth/login-admin`,
+                url: URL_ROUTES,
                 method: 'POST',
                 data: values,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
