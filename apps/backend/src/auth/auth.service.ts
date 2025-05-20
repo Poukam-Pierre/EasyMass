@@ -12,18 +12,17 @@ import * as bcrypt from 'bcryptjs';
 import { AdministratorService } from '../administrator/administrator.service';
 import { ParishService } from '../parish/parish.service';
 import { PriestService } from '../priest/priest.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { RefreshTokenService } from '../refresh-token/refresh-token.service';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
 import {
   AdminDataDto,
   LoginDataDto,
   LogoutDataDto,
-  ParishDataDto,
   PriestDataDto,
 } from './dto/login.dto';
 import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
 import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -155,136 +154,6 @@ export class AuthService {
   }
 
   /**
-   *This function build a new token, update the db  when login and add them into data response object
-   * @param user data object returned from validation function
-   * @param role used to identify where process will be performed
-   * @returns user object
-   */
-  async signIn(
-    user: ParishDataDto | AdminDataDto | PriestDataDto,
-    role: string
-  ): Promise<ParishDataDto | AdminDataDto | PriestDataDto> {
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-    };
-
-    try {
-      const accessToken = await this.JwtService.signAsync(tokenPayload);
-      const refreshToken = createId();
-
-      if (role === 'parish') {
-        await this.refreshTokenService.create({
-          id: createId(),
-          refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()).toISOString(),
-          parishToken: {
-            connect: {
-              id: user.id,
-            },
-          },
-        });
-      } else if (role === 'priest') {
-        await this.refreshTokenService.create({
-          id: createId(),
-          refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()).toISOString(),
-          priestToken: {
-            connect: {
-              id: user.id,
-            },
-          },
-        });
-      }
-
-      user.accessToken = accessToken;
-      user.refreshToken = refreshToken;
-      return user;
-    } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation of accessToken and refreshToken into db.',
-      });
-    }
-  }
-
-  /**
-   * This function build a new token, update the db  when login and add them into data response object
-   * @param user data object returned from validation function
-   * @returns user object returned
-   */
-  async signInAdmin(user: AdminDataDto) {
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
-    try {
-      const accessToken = await this.JwtService.signAsync(tokenPayload);
-      const refreshToken = createId();
-
-      await this.refreshTokenService.create({
-        id: createId(),
-        refreshToken: refreshToken,
-        expiredDate: this.addOneDay(new Date()).toISOString(),
-        adminToken: {
-          connect: {
-            id: user.id,
-          },
-        },
-      });
-
-      user.accessToken = accessToken;
-      user.refreshToken = refreshToken;
-      return {
-        statusCode: 200,
-        data: {
-          accessToken,
-          refreshToken,
-        },
-      };
-    } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation of accessToken and refreshToken into db.',
-      });
-    }
-  }
-
-  /**
-   * This function passes the input to the other validation function
-   * and just wait for the result to perform error actions. If any error occurs
-   * the function passes the result to signIn function and returns the result.
-   * to client side.
-   * @param input
-   * @returns data need on client side
-   */
-  async signupPriest(input: SignUpDataDto): Promise<PriestDataDto | unknown> {
-    const user = await this.signUpPriestValidation(input);
-
-    if (!user) {
-      throw new BadRequestException('Bad Request', {
-        cause: new Error(),
-        description: 'This account is already in use.',
-      });
-    }
-
-    try {
-      const userData = await this.priestService.findOne(user.email);
-      return this.signIn(userData, 'priest');
-    } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while processing signIn function data before found one.',
-      });
-    }
-  }
-
-  /**
    * This function passes the input to the other validation function
    * and just wait for the result to perform error actions. If any error occurs
    * the function passes the result to signIn function and returns the result.
@@ -365,13 +234,10 @@ export class AuthService {
 
       return newUser;
     } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user admin into db.',
-      });
+      throw new InternalServerErrorException('serverError');
     }
   }
+
   /**
    * This function verifies if refreshToken exists from the refreshToken server.
    * If not, responds with an error unauthorised else return a new access token
@@ -416,11 +282,11 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation accessToken and update refreshToken into db.',
-      });
+      console.log('Error appear while refreshing token :', error);
+      if (error instanceof BadRequestException) {
+        throw new UnauthorizedException(error.message);
+      }
+      throw new InternalServerErrorException('serverError');
     }
   }
 
@@ -437,22 +303,17 @@ export class AuthService {
       const refreshData = await this.refreshTokenService.findOne(refreshToken);
 
       if (!refreshData) {
-        throw new UnauthorizedException('unauthorizerRefreshToken', {
-          cause: new Error(),
-          description: 'User not longer connect!',
-        });
+        throw new UnauthorizedException('unauthorizerRefreshToken');
       }
       await this.refreshTokenService.remove(refreshData.id);
 
       return { code: 200, message: 'Disconnect token successfully!' };
     } catch (error) {
+      console.log('Error arise while disconnection');
       if (error instanceof UnauthorizedException) {
-        throw new UnauthorizedException('unauthorizerRefreshToken');
+        throw new UnauthorizedException(error.message);
       }
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description: 'Error appears while processing deconnection.',
-      });
+      throw new InternalServerErrorException('serverError');
     }
   }
 
@@ -472,24 +333,31 @@ export class AuthService {
    * @param input
    * @returns
    */
-  async forgotPassword(input: ForgotPasswordDto) {
+  async forgotPassword(input: ForgotPasswordDto, request) {
+    const origin = request.headers['origin'];
+    const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
+
     const { email } = input;
-
+    let user;
+    const userId = {};
     try {
-      const user = await this.adminService.findOneByMail(email);
+      if (subdomain === 'admin') {
+        user = await this.adminService.findOneByMail(email);
+        if (!user) throw new NotFoundException('notFound');
 
-      if (!user) {
-        throw new NotFoundException('notFound', {
-          cause: new Error(),
-          description: 'User not found.',
-        });
+        userId['adminId'] = user.id;
+      }
+
+      if (subdomain === 'parish') {
+        user = await this.parishService.findOneByMail(email);
+        if (!user) throw new NotFoundException('notFound');
+
+        userId['adminId'] = user.id;
       }
 
       // update all previous OTPs to isUsed = true
       await this.prismaService.otp.updateMany({
-        where: {
-          adminId: user.id,
-        },
+        where: userId,
         data: {
           isUsed: true,
         },
@@ -501,24 +369,35 @@ export class AuthService {
           code: createId(),
           isUsed: false,
           expiredAt: new Date(new Date().getTime() + 10 * 60000), // 10 minutes from now
-          admin: {
-            connect: {
-              id: user.id,
+          ...(subdomain === 'admin' && {
+            admin: {
+              connect: {
+                id: user.id,
+              },
             },
-          },
+          }),
+          ...(subdomain === 'parish' && {
+            parish: {
+              connect: {
+                id: user.id,
+              },
+            },
+          }),
         },
       });
-      const OTP_MESSAGE = `Dear ${user.name},\n\n
-      We have received a request to reset your password. Please use the following link to reset your password:\n\n
+      const OTP_MESSAGE = `Dear ${user.name},
+      We have received a request to reset your password. Please use the following link to reset your password:
+  
+      ${
+        subdomain === 'admin'
+          ? process.env.NEXT_PUBLIC_ADMIN_URL
+          : process.env.NEXT_PUBLIC_PARISH_URL
+      }/recovery/${code}/new-password
       
-      "<a href="${
-        process.env.NEXT_PUBLIC_ADMIN_LINK ?? 'http://localhost:3001'
-      }/recovery/${code}/new-password/">Reset Password</a>"\n\n
-      
-      If you did not request this, please ignore this email.\n\n
+      If you did not request this, please ignore this email.
       This link will expire in 10 minutes.
       
-      Thank you,\n
+      Thank you,
       Your Team`;
       // TODO: send email to the user with OTP_MESSAGE
       console.log(OTP_MESSAGE);
@@ -530,12 +409,9 @@ export class AuthService {
     } catch (error) {
       console.log('Error while resetting password', error);
       if (error instanceof NotFoundException) {
-        throw new NotFoundException('notFoundUser');
+        throw new NotFoundException(error.message);
       }
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description: 'Error appears while sending password reset email.',
-      });
+      throw new InternalServerErrorException('serverError');
     }
   }
 
@@ -544,11 +420,13 @@ export class AuthService {
    * @param input
    * @returns
    */
-  async resetPassword(input: ResetPasswordDto) {
+  async resetPassword(input: ResetPasswordDto, request) {
     const { newPassword, token } = input;
+    const origin = request.headers['origin'];
+    const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
 
     try {
-      const user = await this.prismaService.otp.findFirst({
+      const otp = await this.prismaService.otp.findFirst({
         where: {
           code: token,
           isUsed: false,
@@ -557,34 +435,49 @@ export class AuthService {
           },
         },
         select: {
-          admin: {
-            select: {
-              id: true,
+          ...(subdomain === 'admin' && {
+            admin: {
+              select: {
+                id: true,
+              },
             },
-          },
+          }),
+          ...(subdomain === 'parish' && {
+            parish: {
+              select: {
+                id: true,
+              },
+            },
+          }),
         },
       });
-      if (!user) {
-        throw new NotFoundException('notFound', {
-          cause: new Error(),
-          description: 'User not found.',
-        });
+
+      if (!otp) {
+        throw new NotFoundException('oTPExpiredOrInvalid');
       }
       const hash = await bcrypt.hash(newPassword, 10);
 
-      await this.adminService.update(user.admin.id, {
-        password: hash,
-      });
+      if (subdomain === 'admin') {
+        await this.adminService.update(otp.admin.id, {
+          password: hash,
+        });
+      }
+
+      if (subdomain === 'parish') {
+        await this.parishService.updateParish(otp.admin.id, {
+          password: hash,
+        });
+      }
 
       return {
         statusCode: 200,
         message: 'passwordChanged',
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException('notFoundToken');
-      }
       console.log('Error while resetting password', error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
       throw new InternalServerErrorException('serverError');
     }
   }

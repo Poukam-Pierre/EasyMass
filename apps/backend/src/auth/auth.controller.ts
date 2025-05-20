@@ -1,12 +1,12 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
 import { LoginDataDto, LogoutDataDto } from './dto/login.dto';
 import { RefreshToken } from './dto/refreshToken.dto';
-import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
+import { SignUpAdminDto } from './dto/signup.dto';
 import { AdminGuard } from './guard/admin.guards';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -31,11 +31,6 @@ export class AuthController {
   @Post('/login')
   loginParish(@Body() input: LoginDataDto, @Req() request) {
     return this.authService.authenticate(input, request);
-  }
-
-  @Post('/signup')
-  signUpPriest(@Body() input: SignUpDataDto) {
-    return this.authService.signupPriest(input);
   }
 
   @Post('/signup-admin')
@@ -97,9 +92,12 @@ export class AuthController {
     description: 'Error appears while sending password reset email.',
   })
   @Post('/forgot-password')
-  forgotPassword(@Body() input: ForgotPasswordDto) {
-    return this.authService.forgotPassword(input);
+  forgotPassword(@Body() input: ForgotPasswordDto, @Req() request) {
+    return this.authService.forgotPassword(input, request);
   }
+
+  // TODO: Upon deployement remove this logic and
+  // use request host to know what link is currently requesting
 
   @ApiOperation({
     summary: 'Reset the user password',
@@ -119,7 +117,7 @@ export class AuthController {
     description: 'Error appears while resetting password.',
   })
   @Post('/reset-password')
-  resetPassword(@Body() input: ResetPasswordDto) {
-    return this.authService.resetPassword(input);
+  resetPassword(@Body() input: ResetPasswordDto, @Req() request) {
+    return this.authService.resetPassword(input, request);
   }
 }
