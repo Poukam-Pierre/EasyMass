@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -24,12 +24,23 @@ export class RefreshTokenService {
     });
   }
 
+  // TODO: set up JSDocs
   async remove(id: string) {
-    return this.prismaService.refreshToken.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prismaService.refreshToken.delete({
+        where: {
+          id,
+        },
+      });
+
+      return {
+        statusCode: 201,
+        message: 'refresh-token deleted successfully',
+      };
+    } catch (error) {
+      console.log('Error while deleting refresh-token :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 
   async findOne(refreshToken: string) {
@@ -42,5 +53,35 @@ export class RefreshTokenService {
 
   async findAll() {
     return this.prismaService.refreshToken.findMany();
+  }
+
+  // TODO: Add JSDocs here
+  async findFirstToken({
+    parishId,
+    adminId,
+  }: {
+    parishId?: number;
+    adminId?: number;
+  }) {
+    try {
+      const refreshToken = await this.prismaService.refreshToken.findFirst({
+        where: {
+          ...(parishId && {
+            parishId,
+          }),
+          ...(adminId && {
+            adminId,
+          }),
+        },
+      });
+
+      return {
+        statusCode: 200,
+        refreshToken,
+      };
+    } catch (error) {
+      console.log('Error while retreiving refresh-token :', error);
+      throw new InternalServerErrorException('serverError');
+    }
   }
 }

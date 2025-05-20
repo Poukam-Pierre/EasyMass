@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Role, ROLE } from './decorator/public.decorator';
 import { LoginDataDto, LogoutDataDto } from './dto/login.dto';
@@ -28,9 +28,9 @@ export class AuthController {
     status: 500,
     description: 'Internal server error',
   })
-  @Post('/login-parish')
-  loginParish(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'parish');
+  @Post('/login')
+  loginParish(@Body() input: LoginDataDto, @Req() request) {
+    return this.authService.authenticate(input, request);
   }
 
   @ApiOperation({

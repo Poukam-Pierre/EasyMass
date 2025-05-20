@@ -155,7 +155,7 @@ model NotificationPriest {
 model RefreshToken {
   id           String         @id
   refreshToken String         @unique
-  expiredDate  String
+  expiredDate  DateTime
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   priestId     Int?

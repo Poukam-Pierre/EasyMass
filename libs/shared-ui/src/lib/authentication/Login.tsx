@@ -40,22 +40,15 @@ export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
             password: '',
         },
         onSubmit: (values, { resetForm }) => {
-            let URL_ROUTES = ''
-            if (usage === LoginUsageEnum.ADMINISTRATOR)
-                URL_ROUTES = '/auth/login-admin'
-
-            if (usage === LoginUsageEnum.PARISH)
-                URL_ROUTES = '/auth/login-parish'
-
             apiMiddleware({
-                url: URL_ROUTES,
+                url: '/auth/login',
                 method: 'POST',
                 data: values,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onSuccess: (response: any) => {
-                    const { data } = response;
-                    localStorage.setItem('token', data.accessToken);
-                    localStorage.setItem('refreshToken', data.refreshToken);
+                    const { accessToken, refreshToken } = response;
+                    localStorage.setItem('token', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
                     toast.success(formatMessage({ id: 'loginSuccess' }))
                     push('/')
                 },

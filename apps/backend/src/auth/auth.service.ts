@@ -42,64 +42,68 @@ export class AuthService {
    * @param role
    * @returns all data needed.
    */
-  async authenticate(input: LoginDataDto, role: string) {
-    if (role === 'parish') {
-      const user = await this.validateParish(input);
+  async authenticate(input: LoginDataDto, request) {
+    const origin = request.headers['origin'];
+    const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
+
+    try {
+      const user = await this.validateUser(input, subdomain);
 
       if (!user) {
-        throw new UnauthorizedException('unauthorized', {
-          cause: new Error(),
-          description: 'Wrong email or password.',
-        });
+        throw new UnauthorizedException('unauthorized');
       }
 
       if (user === 'Logged') {
-        throw new ConflictException('conflictLogin', {
-          cause: new Error(),
-          description:
-            'Account already logged in. Logout before from the first one.',
-        });
+        throw new ConflictException('conflictLogin');
       }
 
-      return this.signIn(user as ParishDataDto, role);
-    } else if (role === 'admin') {
-      const user = await this.validateAdmin(input);
+      // Set up payload according to the subdomaine name
+      const tokenPayload = {
+        id: user.id,
+        email: user.email,
+        ...(subdomain === 'admin' && {
+          role: user.role,
+        }),
+      };
 
-      if (!user) {
-        throw new UnauthorizedException('unauthorized', {
-          cause: new Error(),
-          description: 'Wrong email or password.',
-        });
+      const accessToken = await this.JwtService.signAsync(tokenPayload);
+      const refreshToken = createId();
+
+      // create refresh-token record
+      await this.refreshTokenService.create({
+        id: createId(),
+        refreshToken: refreshToken,
+        expiredDate: this.addOneDay(new Date()),
+        ...(subdomain === 'parish' && {
+          parishToken: {
+            connect: {
+              id: user.id,
+            },
+          },
+        }),
+        ...(subdomain === 'admin' && {
+          adminToken: {
+            connect: {
+              id: user.id,
+            },
+          },
+        }),
+      });
+
+      return {
+        statusCode: 200,
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      console.log('Error while authenticating user :', error);
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
       }
-
-      if (user === 'Logged') {
-        throw new ConflictException('conflictLogin', {
-          cause: new Error(),
-          description:
-            'Account already logged in. Logout before from the first one.',
-        });
+      if (error instanceof UnauthorizedException) {
+        throw new UnauthorizedException(error.message);
       }
-
-      return this.signInAdmin(user as AdminDataDto);
-    } else {
-      const user = await this.validatePriest(input);
-
-      if (!user) {
-        throw new UnauthorizedException('unauthorized', {
-          cause: new Error(),
-          description: 'Wrong email or password.',
-        });
-      }
-
-      if (user === 'Logged') {
-        throw new ConflictException('conflictLogin', {
-          cause: new Error(),
-          description:
-            'Account already logged in. Logout before from the first one.',
-        });
-      }
-
-      return this.signIn(user as PriestDataDto, role);
+      throw new InternalServerErrorException('serverError');
     }
   }
 
@@ -109,118 +113,44 @@ export class AuthService {
    * @param input
    * @returns
    */
-  async validateParish(
-    input: LoginDataDto
-  ): Promise<ParishDataDto | null | string> {
+  async validateUser(input: LoginDataDto, subdomain: string) {
     const { email, password } = input;
-
-    const user = await this.parishService.findOneByMail(email);
-
-    if (!user) {
-      return null;
-    }
-
-    const existingRefreshToken = (
-      await this.refreshTokenService.findAll()
-    ).find((token) => token.parishId === user.id);
-
-    if (existingRefreshToken) {
-      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Logged';
-      } else {
-        await this.refreshTokenService.remove(existingRefreshToken.id);
-      }
-    }
+    let user = null;
+    const userId = {};
 
     try {
-      const validatePassword = await bcrypt.compare(password, user.password);
-      if (validatePassword) {
-        return new ParishDataDto(user);
-      } else return null;
-    } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description: 'Error appears while processing your request.',
-      });
-    }
-  }
-
-  /**
-   * This function validate weither the admin user exists in db or not.
-   * Also check weither all user's credentials are valid or not.
-   * @param input
-   * @returns
-   */
-  async validateAdmin(
-    input: LoginDataDto
-  ): Promise<AdminDataDto | null | string> {
-    const { email, password } = input;
-
-    const user = await this.adminService.findOneByMail(email);
-
-    if (!user) {
-      return null;
-    }
-
-    const existingRefreshToken = (
-      await this.refreshTokenService.findAll()
-    ).find((token) => token.adminId === user.id);
-
-    if (existingRefreshToken) {
-      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Logged';
+      if (subdomain === 'admin') {
+        user = await this.adminService.findOneByMail(email);
+        if (!user) return null;
+        userId['adminId'] = user.id;
       }
-      await this.refreshTokenService.remove(existingRefreshToken.id);
-    }
 
-    try {
-      const validatePassword = await bcrypt.compare(password, user.password);
-      if (validatePassword) {
-        return new AdminDataDto(user);
-      } else return null;
-    } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description:
-          'Error appears while validating admin credentials your request.',
-      });
-    }
-  }
-
-  async validatePriest(
-    input: LoginDataDto
-  ): Promise<PriestDataDto | null | string> {
-    const { email, password } = input;
-
-    const user = await this.priestService.findOne(email);
-
-    if (!user) {
-      return null;
-    }
-
-    const existingRefreshToken = (
-      await this.refreshTokenService.findAll()
-    ).find((token) => token.priestId === user.id);
-
-    if (existingRefreshToken) {
-      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        return 'Logged';
-      } else {
-        await this.refreshTokenService.remove(existingRefreshToken.id);
+      if (subdomain === 'parish') {
+        user = await this.parishService.findOneByMail(email);
+        if (!user) return null;
+        userId['parishId'] = user.id;
       }
-    }
 
-    try {
+      const { refreshToken } = await this.refreshTokenService.findFirstToken(
+        userId
+      );
+
+      if (refreshToken && Object.values(refreshToken).length !== 0) {
+        if (refreshToken.createdAt >= new Date()) {
+          return 'Logged';
+        } else {
+          await this.refreshTokenService.remove(refreshToken.id);
+        }
+      }
+
       const validatePassword = await bcrypt.compare(password, user.password);
-
-      if (validatePassword) {
-        return new PriestDataDto(user);
-      } else return null;
+      if (!validatePassword) {
+        return null;
+      }
+      return user;
     } catch (error) {
-      throw new InternalServerErrorException('serverError', {
-        cause: new Error(),
-        description: 'Error appears while processing your request.',
-      });
+      console.log('Error appear while validating user credential :', error);
+      throw new InternalServerErrorException('serverError');
     }
   }
 
