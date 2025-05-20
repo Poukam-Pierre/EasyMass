@@ -33,31 +33,6 @@ export class AuthController {
     return this.authService.authenticate(input, request);
   }
 
-  @ApiOperation({
-    summary: 'Login administrators',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Wrong email or password.',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Account already logged in. Logout before from the first one.',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error',
-  })
-  @Post('/login-admin')
-  loginAdmin(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'admin');
-  }
-
-  @Post('/login-priest')
-  loginPriest(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'priest');
-  }
-
   @Post('/signup')
   signUpPriest(@Body() input: SignUpDataDto) {
     return this.authService.signupPriest(input);
@@ -72,14 +47,6 @@ export class AuthController {
   ) {
     return this.authService.signupAdmin(input);
   }
-
-  // @Post('/signup-parish')
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // signupParish(@Body() input: SignUpParishDto, @Request() request) {
-  //   return this.authService.signupParish(input, request);
-  // }
 
   @Post('/refreshToken')
   refreshToken(@Body() refreshToken: RefreshToken) {

@@ -6,7 +6,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import dayjs from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service';
-import { ParishDataDto, UpdateParishData } from './dto/parishData.dto';
+import { UpdateParishData } from './dto/parishData.dto';
 import { SignUpParishDto } from './dto/signupParish.dto';
 
 @Injectable()
@@ -37,15 +37,17 @@ export class ParishService {
 
       const WELCOME_MESSAGE = `Dear Parish,
 
-      We are delighted to welcome you to **Easy Messe**, your trusted platform for accessing Mass schedules,\n
-      parish updates, and spiritual resources. Thank you for registering—we’re honored to be part of your faith journey.\n\n
-      **Your email is:** ${newParish.email}\n
-      **Your temporary password is:** Parish2025*\n
+      We are delighted to welcome you to Easy Messe, your trusted platform for accessing Mass schedules,
+      parish updates, and spiritual resources. Thank you for registering—we’re honored to be part of your faith journey.
 
-      For security reasons, we **strongly recommend** changing this password upon your first login.\n\n
-      If you have any questions or need assistance, feel free to reach out. May this platform enrich your connection with your parish community.\n\n
-      Blessings\n,
-      Easymesse team\n
+      Your email is: ${newParish.email}
+      Your temporary password is: Parish2025*
+
+      For security reasons, we **strongly recommend** changing this password upon your first login.
+      If you have any questions or need assistance, feel free to reach out. May this platform enrich your connection with your parish community.
+
+      Blessings,
+      Easymesse team,
       easymesse+support@gmail.com`;
 
       // TODO: Send by mail to the such parsh email
@@ -292,33 +294,14 @@ export class ParishService {
    * @param request request object processed in the guard function
    * @returns successfull result object
    */
-  async createParish(
-    input: SignUpParishDto,
-    request
-  ): Promise<ParishDataDto | unknown> {
-    const user = await this.credentialsParishValidation(input, request);
-
-    if (!user) {
-      throw new BadRequestException('userExistAlready');
-    }
-
-    return { code: 200, message: 'New parish created successfully' };
-  }
-
-  /**
-   * This function verifies that the input from the client exists in the database. If so,
-   * the function returns null. Otherwise, the function hash password and creates a new
-   * user account. Then returns the user object created.
-   * @param input
-   * @param request
-   * @returns
-   */
-  async credentialsParishValidation(input: SignUpParishDto, request) {
+  async createParish(input: SignUpParishDto, request) {
     const { email } = input;
     try {
       const user = await this.findOneByMail(email);
 
-      if (user) return null;
+      if (user) {
+        throw new BadRequestException('userExistAlready');
+      }
 
       await this.create(input, request);
 
