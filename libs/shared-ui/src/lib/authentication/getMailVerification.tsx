@@ -1,13 +1,16 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
 import HeroHeader from "./HeroHeader";
 import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 export function GetMailVerification() {
     const { formatMessage } = useIntl()
+    const [isMailSend, setIsMailSend] = useState<boolean>(false);
+    const [isPendingCheck, setIsPendingCheck] = useState<boolean>(false);
 
 
     const { handleChange, handleSubmit, errors, touched } = useFormik({
@@ -15,6 +18,7 @@ export function GetMailVerification() {
             email: ''
         },
         onSubmit: (values) => {
+            setIsPendingCheck(true)
             apiMiddleware({
                 url: '/auth/forgot-password',
                 method: 'POST',
@@ -23,12 +27,16 @@ export function GetMailVerification() {
                 },
                 onSuccess: (response: any) => {
                     toast.success(formatMessage({ id: response.message }))
+                    setIsMailSend(true)
                 },
                 onFailure: (error) => {
                     errorHandling({
                         error,
                         formatMessage,
                     })
+                },
+                onFinally: () => {
+                    setIsPendingCheck(false)
                 }
             })
         },
@@ -51,6 +59,14 @@ export function GetMailVerification() {
                 greeting={formatMessage({ id: 'passwordRecovery' })}
                 getActionMsg={formatMessage({ id: 'fillEmail' })}
             />
+            <Typography variant="h5"
+                sx={{
+                    color: 'success.main',
+                    textAlign: 'center',
+                    display: isMailSend ? 'inherit' : 'none'
+                }}>
+                {formatMessage({ id: 'sendOTPlinkDone' })}
+            </Typography>
             <Box
                 sx={{
                     display: 'grid',
@@ -67,12 +83,17 @@ export function GetMailVerification() {
                     onChange={handleChange}
                     error={errors.email && touched.email ? true : false}
                     helperText={(errors.email && touched.email) && errors.email}
+                    disabled={isPendingCheck}
                 />
                 <Button
                     variant="contained"
                     type="submit"
+                    disabled={isPendingCheck}
                 >
-                    {formatMessage({ id: 'send' })}
+                    {isPendingCheck ?
+                        <CircularProgress size={20} /> :
+                        formatMessage({ id: 'send' })
+                    }
                 </Button>
             </Box>
         </Box>

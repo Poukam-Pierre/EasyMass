@@ -185,4 +185,7 @@ export const website = {
   parishAndmassInfo: 'Prices for different masses and their parishes',
   noMass: 'No mass available !',
   createdAt: 'Date of creation',
+  sendOTPlinkDone:
+    'An email has been send to your email account. Check it out and follow the link.',
+  oTPExpiredOrInvalid: 'Code invalid or expired.',
 };

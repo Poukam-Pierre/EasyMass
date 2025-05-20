@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import {
     Box,
     Button,
+    CircularProgress,
     FormControl,
     FormHelperText,
     IconButton,
@@ -24,7 +25,8 @@ import { LoginUsageEnum } from "@easyMesseLibs/types"
 
 
 export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
-    const [isVisible, setIsVisible] = useState<boolean>(false)
+    const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [isLoginPending, setIsLoginPending] = useState<boolean>(false);
     const { formatMessage } = useIntl()
     const { push } = useRouter()
 
@@ -40,6 +42,7 @@ export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
             password: '',
         },
         onSubmit: (values, { resetForm }) => {
+            setIsLoginPending(true);
             apiMiddleware({
                 url: '/auth/login',
                 method: 'POST',
@@ -50,10 +53,18 @@ export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
                     localStorage.setItem('token', accessToken);
                     localStorage.setItem('refreshToken', refreshToken);
                     toast.success(formatMessage({ id: 'loginSuccess' }))
-                    push('/')
+
+                    if (usage === LoginUsageEnum.ADMINISTRATOR)
+                        push('/')
+
+                    if (usage === LoginUsageEnum.PARISH)
+                        push('/massOffer')
                 },
                 onFailure: (error) => {
                     errorHandling({ error, formatMessage, redirect: push })
+                },
+                onFinally: () => {
+                    setIsLoginPending(false)
                 }
             })
             resetForm()
@@ -100,10 +111,12 @@ export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
                     error={errors.email && touched.email ? true : false}
                     helperText={(errors.email && touched.email) && errors.email}
                     onChange={handleChange}
+                    disabled={isLoginPending}
                 />
                 <FormControl
                     variant="outlined"
                     size='small'
+                    disabled={isLoginPending}
                 >
                     <OutlinedInput
                         id="outlined-adornment-password"
@@ -141,13 +154,18 @@ export function LoginCretentials({ usage }: { usage: LoginUsageEnum }) {
                 <Button
                     variant="contained"
                     type="submit"
+                    disabled={isLoginPending}
                 >
-                    {formatMessage({ id: 'connexion' })}
+                    {isLoginPending ?
+                        <CircularProgress size={20} /> :
+                        formatMessage({ id: 'connexion' })
+                    }
                 </Button>
                 <Button
                     variant='text'
                     disableRipple
                     onClick={() => push('/recovery/verification')}
+                    disabled={isLoginPending}
                 >
                     {formatMessage({ id: 'forgotPassword' })}
                 </Button>
