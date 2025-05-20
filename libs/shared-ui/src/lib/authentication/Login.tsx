@@ -19,11 +19,7 @@ import { useIntl } from "react-intl";
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import HeroHeader from "./HeroHeader";
-
-export enum LoginUsageEnum {
-    PARISH = "PARISH",
-    ADMINISTRATOR = "ADMINISTRATOR"
-}
+import { LoginUsageEnum } from "@easyMesseLibs/types"
 
 
 
