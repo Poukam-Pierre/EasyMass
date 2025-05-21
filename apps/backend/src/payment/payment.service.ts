@@ -93,7 +93,7 @@ export class PaymentService {
         await this.believerService.create({
           id: believerId,
           name: believerInfo.name,
-          phone: believerInfo.phone,
+          email: believerInfo.email,
           massOrder: {
             createMany: {
               data: massOrders,
