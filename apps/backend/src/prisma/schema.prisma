@@ -9,40 +9,47 @@ datasource db {
 
 model Believer {
   id          String        @id @unique @default(cuid())
+  email       String
   name        String?
-  phone       String?
   mass        Mass[]
   massOrder   MassOrder[]
   transaction Transaction[]
 }
 
 model Mass {
-  id                Int         @id @default(autoincrement())
-  price             Int?
-  intension         String?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  standardPrice     Int         @default(5000)
-  massType          MassType    @default(UNIQUE)
-  parishId          Int?
-  priestId          Int?
-  believerId        String?
-  processAt         DateTime?
-  createdByBeliever Believer?   @relation(fields: [believerId], references: [id])
-  createdByParish   Parish?     @relation(fields: [parishId], references: [id])
-  assignedToPriest  Priest?     @relation(fields: [priestId], references: [id])
-  massOrder         MassOrder[]
+  id                 Int                  @id @default(autoincrement())
+  price              Int?
+  intension          String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  standardPrice      Int                  @default(5000)
+  parishId           Int?
+  priestId           Int?
+  believerId         String?
+  processAt          DateTime?
+  createdByBeliever  Believer?            @relation(fields: [believerId], references: [id])
+  createdByParish    Parish?              @relation(fields: [parishId], references: [id])
+  assignedToPriest   Priest?              @relation(fields: [priestId], references: [id])
+  MassOrderHasMasses MassOrderHasMasses[]
+}
+
+model MassOrderHasMasses {
+  massOrder_has_mass_id String    @id @default(cuid())
+  mass_id               Int
+  massOrder_id          Int
+  mass                  Mass      @relation(fields: [mass_id], references: [id])
+  massOrder             MassOrder @relation(fields: [massOrder_id], references: [id])
 }
 
 model MassOrder {
-  id              Int      @id @default(autoincrement())
-  createAt        DateTime @default(now())
-  intension       String
-  massId          Int
-  believerId      String
-  price           Int
-  orderByBeliever Believer @relation(fields: [believerId], references: [id])
-  mass            Mass     @relation(fields: [massId], references: [id])
+  id                 Int                  @id @default(autoincrement())
+  createdAt          DateTime             @default(now())
+  massType           MassType             @default(UNIQUE)
+  intension          String
+  believerId         String
+  price              Int
+  orderByBeliever    Believer             @relation(fields: [believerId], references: [id])
+  MassOrderHasMasses MassOrderHasMasses[]
 }
 
 model Transaction {

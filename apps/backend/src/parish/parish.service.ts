@@ -140,10 +140,14 @@ export class ParishService {
           },
           mass: {
             select: {
-              massOrder: {
+              MassOrderHasMasses: {
                 select: {
-                  createAt: true,
-                  price: true,
+                  massOrder: {
+                    select: {
+                      createdAt: true,
+                      price: true,
+                    },
+                  },
                 },
               },
             },
@@ -161,7 +165,9 @@ export class ParishService {
         phone: contact,
         mass,
       } = statistics;
-      const restructuredStatistics = mass.map((tt) => tt.massOrder).flat();
+      const restructuredStatistics = mass.flatMap(({ MassOrderHasMasses }) =>
+        MassOrderHasMasses.map((tt) => tt.massOrder)
+      );
 
       const result: Record<string, object> = {};
       const startOfYear = dayjs(`${dayjs().year()}-01-01`);
@@ -173,8 +179,8 @@ export class ParishService {
         const startOfMonth = startOfYear.add(month, 'month').startOf('month');
         const monthKey = startOfMonth.format('DD/MM/YYYY');
 
-        const itemsInMonth = restructuredStatistics.filter(({ createAt }) => {
-          const itemDate = dayjs(createAt);
+        const itemsInMonth = restructuredStatistics.filter(({ createdAt }) => {
+          const itemDate = dayjs(createdAt);
           return (
             itemDate.month() === startOfMonth.month() &&
             itemDate.year() === startOfMonth.year()
@@ -327,7 +333,6 @@ export class ParishService {
               id: true,
               price: true,
               createdAt: true,
-              massType: true,
             },
           },
           city: {
@@ -341,13 +346,12 @@ export class ParishService {
 
       const structuredParishWithOwnMasses = parishWithItsOwnMasses.map(
         ({ id: parish_id, name, city, mass }) => {
-          return mass.map(({ createdAt, massType, price }) => {
+          return mass.map(({ createdAt, price }) => {
             return {
               parish_id,
               name,
               city: city.city_name,
               createdAt,
-              massType,
               price,
             };
           });
