@@ -21,76 +21,71 @@ export default function MassOfferTable({
 }) {
     const titles = ['name', 'registrationDate', 'massType', 'startDate', 'endDate', 'status']
     const { formatMessage } = useIntl()
-    return (
-        <>
+    return !massDataTable.length ? (
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '70%'
+        }}>
+            <Icon icon={warningIcon} fontSize={24} />
+            <Typography variant='body2'>
+                {formatMessage({ id: 'noProcessMass' })}
+            </Typography>
+        </Box>
+    ) : (
 
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell sx={{
-                            bgcolor: theme.palette.secondary.main,
-                            fontWeight: 600
-                        }}
-                        >
-                            No
-                        </TableCell>
-                        {titles.map((title, index) => (
-                            <TableCell
-                                key={index}
-                                sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    fontWeight: 600
-                                }}
-                            >
-                                {formatMessage({ id: title }).toUpperCase()}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {massDataTable?.map(({
-                        id, name, registrationDate,
-                        massType, startDate, endDate,
-                        status
-                    }, index) => (
-                        <TableRow
-                            key={`${index} + ${id} + ${name}`}
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell sx={{
+                        bgcolor: theme.palette.secondary.main,
+                        fontWeight: 600
+                    }}
+                    >
+                        No
+                    </TableCell>
+                    {titles.map((title, index) => (
+                        <TableCell
+                            key={index}
                             sx={{
-                                color: 'var(--label)'
+                                bgcolor: theme.palette.secondary.main,
+                                fontWeight: 600
                             }}
                         >
-                            <TableCell>{id}</TableCell>
-                            <TableCell sx={{
-                                fontWeight: 600,
-                                color: 'var(--label)'
-                            }}>
-                                {name}
-                            </TableCell>
-                            <TableCell>{registrationDate}</TableCell>
-                            <TableCell>{massType}</TableCell>
-                            <TableCell>{startDate}</TableCell>
-                            <TableCell>{endDate}</TableCell>
-                            <TableCell>{status}</TableCell>
-                        </TableRow>
+                            {formatMessage({ id: title }).toUpperCase()}
+                        </TableCell>
                     ))}
-                </TableBody>
-            </Table>
-            {
-                !massDataTable.length && (
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '50%'
-                    }}>
-                        <Icon icon={warningIcon} fontSize={24} />
-                        <Typography variant='body2'>
-                            {formatMessage({ id: 'noProcessMass' })}
-                        </Typography>
-                    </Box>
-                )
-            }
-        </>
-    );
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {massDataTable?.map(({
+                    id, name, registrationDate,
+                    massType, startDate, endDate,
+                    status
+                }, index) => (
+                    <TableRow
+                        key={`${index} + ${id} + ${name}`}
+                        sx={{
+                            color: 'var(--label)'
+                        }}
+                    >
+                        <TableCell>{id}</TableCell>
+                        <TableCell sx={{
+                            fontWeight: 600,
+                            color: 'var(--label)'
+                        }}>
+                            {name}
+                        </TableCell>
+                        <TableCell>{registrationDate}</TableCell>
+                        <TableCell>{massType}</TableCell>
+                        <TableCell>{startDate}</TableCell>
+                        <TableCell>{endDate}</TableCell>
+                        <TableCell>{status}</TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    )
 }
