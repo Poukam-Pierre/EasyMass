@@ -1,14 +1,13 @@
+import { apiMiddleware, errorHandling } from '@easy-messe/libs/utils';
+import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
-import { Box, InputBase, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
+import AppLayout from '../../components/Layout';
 import MassOfferTable, { TableData } from "../../components/Masses/MassOffer/MassofferTable";
 import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
-import AppLayout from '../../components/Layout';
-import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 
 
 
@@ -16,6 +15,9 @@ export default function MassOffer() {
     const { formatMessage } = useIntl()
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     const [massDate, setMassData] = useState<TableData[]>([])
+    const [isMassRequestPending, setIsMassRequestPending] = useState<boolean>(false);
+
+    const { push } = useRouter()
     const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'year' }),
@@ -30,40 +32,32 @@ export default function MassOffer() {
             icon: checkmarkIcon
         }
     ]
-    const tableDate: TableData[] = [
-        {
-            id: 1,
-            name: 'Meulak Kouam',
-            registrationDate: '2015-01-01',
-            massType: 'single',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/1'
-        },
-        {
-            id: 2,
-            name: 'Ngamaleu Pierre',
-            registrationDate: '2015-01-01',
-            massType: 'Tridum',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/2'
-        },
-        {
-            id: 3,
-            name: 'Poukam irénée',
-            registrationDate: '2015-01-01',
-            massType: 'Neuvaine',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/9'
-        }
-    ]
 
-    useEffect(() => (
-        // TODO fetch data for all masses ordered into the church.
-        setMassData(tableDate)
-    ), [])
+    useEffect(() => {
+        const fetchMassRequested = async () => {
+            setIsMassRequestPending(true);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                push('/login')
+                return
+            };
+            apiMiddleware({
+                url: '/mass-order',
+                method: 'GET',
+                accessToken: token,
+                onSuccess: (response: any) => {
+                    setMassData(response.data);
+                },
+                onFailure: (error) => {
+                    errorHandling({ error, formatMessage, redirect: push })
+                },
+                onFinally: () => {
+                    setIsMassRequestPending(false)
+                }
+            })
+        };
+        fetchMassRequested();
+    }, [])
     return (
         <>
             <MassMenu
@@ -87,20 +81,18 @@ export default function MassOffer() {
                 >
                     {formatMessage({ id: 'listOfMassSupply' })}
                 </Typography>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    alignItems: 'center',
-                    columnGap: 1
-                }}>
-                    <Icon icon={searchIcon} fontSize={20} />
-                    <InputBase
-                        placeholder={formatMessage({ id: 'search' })}
-                        size='small'
-                    />
-                </Box>
             </Box>
-            <MassOfferTable massDataTable={massDate} />
+            {isMassRequestPending ?
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '70%'
+                }}>
+                    <CircularProgress size={40} />
+                </Box> :
+                <MassOfferTable massDataTable={massDate} />
+            }
         </>
     );
 }
