@@ -39,42 +39,86 @@ export class MassOrderService {
 
       const allUnprocessMasses = await this.prismaService.massOrder.findMany({
         where: {
-          massId: {
-            in: massIds,
+          createdByParish: {
+            id,
           },
         },
-        include: {
-          mass: true,
-          orderByBeliever: true,
+        select: {
+          MassOrderHasMasses: {
+            select: {
+              massOrder: {
+                select: {
+                  id: true,
+                  massType: true,
+                  createdAt: true,
+                  orderByBeliever: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                  MassOrderHasMasses: {
+                    select: {
+                      mass: {
+                        select: {
+                          processAt: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
+
+      const restructuredMassOrder = massOrder
+        .map((tt) => tt.MassOrderHasMasses)
+        .flat()
+        .map(
+          ({
+            massOrder: {
+              id,
+              MassOrderHasMasses,
+              createdAt,
+              massType,
+              orderByBeliever,
+            },
+          }) => {
+            const proceedDates = MassOrderHasMasses.map(
+              (tt) => tt.mass.processAt
+            );
+            const status = `${
+              proceedDates.filter((date) => date > new Date()).length
+            }/${proceedDates.length}`;
+
+            return {
+              id,
+              registrationDate: createdAt,
+              massType,
+              name: orderByBeliever.name,
+              startDate: new Date(
+                Math.min(
+                  ...MassOrderHasMasses.map((tt) => tt.mass.processAt.getTime())
+                )
+              ),
+              endDate: new Date(
+                Math.max(
+                  ...MassOrderHasMasses.map((tt) => tt.mass.processAt.getTime())
+                )
+              ),
+              status,
+            };
+          }
+        );
+
       return {
-        code: 200,
-        data: allUnprocessMasses,
-        message: 'Successfull request',
+        statusCode: 200,
+        data: restructuredMassOrder,
       };
     } catch (error) {
-      throw new InternalServerErrorException();
+      console.log('Error arise while fetching all requested masses :', error);
+      throw new InternalServerErrorException('serveError');
     }
-  }
-
-  async findMassOrderByMass(massId: number) {
-    return this.prismaService.massOrder.findMany({
-      where: {
-        massId,
-      },
-      include: {
-        orderByBeliever: true,
-      },
-    });
-  }
-
-  async findAll() {
-    return this.prismaService.massOrder.findMany({
-      include: {
-        mass: true,
-        orderByBeliever: true,
-      },
-    });
   }
 }
