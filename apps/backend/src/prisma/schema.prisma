@@ -18,15 +18,15 @@ model Believer {
 
 model Mass {
   id                 Int                  @id @default(autoincrement())
-  price              Int?
+  price              Int
   intension          String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   standardPrice      Int                  @default(5000)
-  parishId           Int?
+  parishId           Int
   priestId           Int?
   believerId         String?
-  processAt          DateTime?
+  processAt          DateTime
   createdByBeliever  Believer?            @relation(fields: [believerId], references: [id])
   createdByParish    Parish?              @relation(fields: [parishId], references: [id])
   assignedToPriest   Priest?              @relation(fields: [priestId], references: [id])
