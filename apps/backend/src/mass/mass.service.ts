@@ -1,9 +1,11 @@
+import { ReplicationPeriodEnum } from '@easyMesseLibs/types';
 import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import dayjs, { Dayjs } from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMassDto } from './dto/create-mass.dto';
 
@@ -14,73 +16,55 @@ export class MassService {
   /**
    * This function is responsible to create masses from parish owner. It's take the data of mass and
    * create them depending on the replicate boolean value. If it's true, then the function will create
-   * masses at the same time on the week until the end of the actual year. Otherwise it will create
+   * masses at the same time on the week until the end of the givrn period. Otherwise it will create
    * one mass at the specific time.
    * @param input data of a mass to create
    * @param request express request object that hold cretenrial parish data
    * @returns
    */
-  async createMasses(
-    input: CreateMassDto,
-    request
-  ): Promise<{ code: number; message: string }> {
+  async createMasses(input: CreateMassDto, request) {
     const { id } = request.user;
-    const { replicate, processAt } = input;
+    const { canReplicate, processAt, period, price } = input;
 
-    const existingMass = await this.findAllByParish(id);
-
-    if (replicate) {
-      const allDateProcessMasses =
-        this.getDatesEvery7DaysUntilEndOfYear(processAt);
-
-      const uniqueDateProcessMasses = this.getUniqueDate(
-        allDateProcessMasses,
-        existingMass.map((mass) => mass.processAt.toISOString())
-      );
-
-      if (!uniqueDateProcessMasses)
-        return { code: 200, message: 'All masses already exist!' };
-
-      const listOfMasses = this.createListOfMasses(
-        uniqueDateProcessMasses,
-        input,
-        id
-      );
-
-      try {
-        await this.prismaService.mass.createMany({
-          data: listOfMasses,
-        });
-        return { code: 201, message: 'Mass created successfully!' };
-      } catch (error) {
-        throw new InternalServerErrorException();
-      }
-    }
-
-    const isMassAlreadyExists = existingMass.some(
-      (mass) =>
-        new Date(mass.processAt).getTime() === new Date(processAt).getTime()
-    );
-
-    if (isMassAlreadyExists) {
-      throw new ConflictException('Mass already exists', {
-        cause: new Error(),
-        description: 'Mass already created by the same parish',
-      });
-    }
-
-    input.createdByParish = {
-      connect: {
-        id: id,
-      },
-    };
-    delete input.replicate;
-
+    let dataMassesByPeriod;
     try {
-      await this.create(input);
-      return { code: 200, message: 'Mass created successfully!' };
+      const existingMass = await this.findAllMasses(id);
+
+      // verify if mass exist already
+      const isMassAlreadyExists = existingMass.some(
+        (mass) =>
+          new Date(mass.processAt).getTime() === new Date(processAt).getTime()
+      );
+
+      if (isMassAlreadyExists) throw new ConflictException('massExistAlready');
+
+      if (canReplicate) {
+        // create array of masses data according to the period
+        dataMassesByPeriod = this.getDataMassesByPeriod(
+          period,
+          processAt,
+          price,
+          id
+        );
+      }
+      // create mass in the db
+      await this.prismaService.mass.createMany({
+        data: !canReplicate
+          ? {
+              processAt,
+              price,
+              parishId: id,
+            }
+          : dataMassesByPeriod,
+      });
+
+      return { code: 201, message: 'Mass created successfully!' };
     } catch (error) {
-      throw new InternalServerErrorException();
+      console.log('Error while creating new mass :', error);
+      if (error instanceof ConflictException) {
+        throw new ConflictException('massExistAlready');
+      }
+      throw new InternalServerErrorException('serverError');
     }
   }
 
@@ -161,18 +145,37 @@ export class MassService {
     });
   }
 
-  private getDatesEvery7DaysUntilEndOfYear(startDate: string): string[] {
-    const dates: string[] = [];
-    const currentYear = new Date().getFullYear();
-    const endDate = new Date(currentYear, 11, 31);
+  private getDataMassesByPeriod(
+    period: ReplicationPeriodEnum,
+    startDate: Date,
+    price: number,
+    id: number
+  ) {
+    const data = [];
+    let currentDate = dayjs(startDate);
+    let endDate: Dayjs;
 
-    const currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate).toISOString());
-      currentDate.setDate(currentDate.getDate() + 7);
+    switch (period) {
+      case ReplicationPeriodEnum.MONTHLY:
+        endDate = currentDate.add(30, 'days');
+        break;
+      case ReplicationPeriodEnum.YEARLY:
+        endDate = currentDate.endOf('year');
+        break;
     }
-    return dates;
+
+    // process repetition every week in the whole period
+    while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+      data.push({
+        processAt: dayjs(currentDate).toDate(),
+        price,
+        parishId: id,
+      });
+
+      // add 7 days to the last mass process date
+      currentDate = currentDate.add(7, 'days');
+    }
+    return data;
   }
 
   private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
