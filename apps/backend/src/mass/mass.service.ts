@@ -89,7 +89,7 @@ export class MassService {
     });
   }
 
-  async findAllByParish(parishId: number, role?) {
+  async findAllMasses(parishId: number, role?) {
     if (role) {
       return this.prismaService.mass.findMany({
         where: {
@@ -97,7 +97,7 @@ export class MassService {
             { parishId },
             {
               processAt: {
-                lte: new Date().toISOString(), // TODO check this comparaison
+                lte: new Date(),
               },
             },
           ],
@@ -194,19 +194,5 @@ export class MassService {
       .map(([date]) => date);
 
     return uniqueElements;
-  }
-
-  private createListOfMasses(
-    arrayDate: string[],
-    input: CreateMassDto,
-    id: number
-  ) {
-    const arrayOfMasses = arrayDate.map((date) => ({
-      price: input.price,
-      processAt: date,
-      massType: input.massType,
-      parishId: id,
-    }));
-    return arrayOfMasses;
   }
 }
