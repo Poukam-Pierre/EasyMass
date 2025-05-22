@@ -130,7 +130,7 @@ export const website = {
   massDayHolder: 'Entrez le jour',
   massTimeHolder: "Entrez l'heure",
   massPriceHolder: 'Entrez le montant de la messe',
-  duplicateAll: 'Reproduire dur toutes les semaines',
+  duplicateAll: 'Reproduire',
   cashRegister: 'Font de caisse',
   transactionHistory: 'Historique de transactions',
   transactionId: 'Transaction ID#',

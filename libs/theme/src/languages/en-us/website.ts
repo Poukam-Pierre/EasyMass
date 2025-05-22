@@ -130,7 +130,7 @@ export const website = {
   massDayHolder: 'Enter day',
   massTimeHolder: 'Enter time',
   massPriceHolder: 'Enter the mass fee',
-  duplicateAll: 'Reproduce hard weekly',
+  duplicateAll: 'Reproduce',
   cashRegister: 'Cash register',
   transactionHistory: 'Transactions history',
   transactionId: 'Transaction ID#',
@@ -188,4 +188,9 @@ export const website = {
   sendOTPlinkDone:
     'An email has been send to your email account. Check it out and follow the link.',
   oTPExpiredOrInvalid: 'Code invalid or expired.',
+  weekly: 'weekly',
+  monthly: 'monthly',
+  yearly: 'yearly',
+  massCreatedSuccess: 'Mass created successfully',
+  massExistAlready: 'Mass exists already',
 };
