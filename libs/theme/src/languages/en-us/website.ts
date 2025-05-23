@@ -134,7 +134,7 @@ export const website = {
   cashRegister: 'Cash register',
   transactionHistory: 'Transactions history',
   transactionId: 'Transaction ID#',
-  warningMassCreation: 'Aucune messe créée pour le moment.',
+  warningMassCreation: 'No mass created at the moment!',
   deleteMass: 'Delete a mass !',
   deleteMassMsg: 'Are you sure you want to abolish this mass ?',
   minPassword: ' At least 5 caracters !',
@@ -193,4 +193,6 @@ export const website = {
   yearly: 'yearly',
   massCreatedSuccess: 'Mass created successfully',
   massExistAlready: 'Mass exists already',
+  massNotFound: 'Data with the correspondant ID does not exist',
+  networkError: 'Network connection error. Check your connection',
 };
