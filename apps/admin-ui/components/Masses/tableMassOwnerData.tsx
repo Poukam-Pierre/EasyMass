@@ -1,4 +1,12 @@
 import { theme } from "@easy-messe/libs/theme";
+import { showTransactionStatus } from "@easy-messe/shared-ui";
+import { TableMassOwnerData } from "@easyMesseLibs/types";
+import editIcon from '@iconify-icons/fluent/edit-28-regular';
+import historyIcon from '@iconify-icons/fluent/history-28-regular';
+import warningIcon from '@iconify-icons/fluent/warning-24-regular';
+import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill';
+import trashIcon from '@iconify-icons/ph/trash-light';
+import { Icon } from "@iconify/react";
 import {
     Box,
     IconButton,
@@ -9,31 +17,16 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import { useIntl } from "react-intl";
-import verticalDotsIcon from '@iconify-icons/ph/dots-three-outline-vertical-fill'
-import { Icon } from "@iconify/react";
+import dayjs from "dayjs";
 import { MouseEvent, useState } from "react";
-import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
-import MassesDialog, { MassTypeEnum } from "./Dialogs/Masses";
-import CancelMassDialog from "./Dialogs/CanceMass";
+import { useIntl } from "react-intl";
 import { MenuItem } from "../Menus/MassMenu";
-import trashIcon from '@iconify-icons/ph/trash-light';
-import editIcon from '@iconify-icons/fluent/edit-28-regular';
-import historyIcon from '@iconify-icons/fluent/history-28-regular';
-import warningIcon from '@iconify-icons/fluent/warning-24-regular';
-import { Dayjs } from "dayjs";
-import { showTransactionStatus } from "../Finances/FinanceTable";
+import MassOwnerTableMenu from "../Menus/MassOwnerTableMenu";
+import CancelMassDialog from "./Dialogs/CanceMass";
+import MassesDialog from "./Dialogs/Masses";
+import utc from 'dayjs/plugin/utc';
 
-
-export interface TableMassOwnerData {
-    id: number;
-    dayOfMass: Dayjs | null;
-    massTime: Dayjs | null;
-    massType: MassTypeEnum | string;
-    price: number;
-    status?: string
-}
-
+dayjs.extend(utc);
 export interface MenuItemForMassOwner extends MenuItem {
     color?: string
 }
@@ -44,21 +37,21 @@ export default function MassOwnerTable({
     massDataTable: TableMassOwnerData[]
 }) {
     const { formatMessage, formatNumber } = useIntl()
-    const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'status', 'action']
+    const titles = ['dayOfMass', 'massHour', 'price', 'created_at', 'status', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
     const [idSelected, setIdSelected] = useState<number | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
     const [massSelected, setMassSelected] = useState<TableMassOwnerData>()
-    const dayOfWeek: Record<number, string> = {
-        1: 'monday',
-        2: 'tuesday',
-        3: 'wednesday',
-        4: 'thursday',
-        5: 'friday',
-        6: 'saturday',
-        7: 'sunday',
-    }
+    // const dayOfWeek: Record<number, string> = {
+    //     1: 'monday',
+    //     2: 'tuesday',
+    //     3: 'wednesday',
+    //     4: 'thursday',
+    //     5: 'friday',
+    //     6: 'saturday',
+    //     7: 'sunday',
+    // }
 
     const menuItem: MenuItemForMassOwner[] = [
         {
@@ -112,91 +105,92 @@ export default function MassOwnerTable({
                 idSelected={idSelected}
             />
 
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell sx={{
-                            bgcolor: theme.palette.secondary.main,
-                            fontWeight: 600
-                        }}
-                        >
-                            No
-                        </TableCell>
-                        {titles.map((title, index) => (
-                            <TableCell
-                                key={index}
-                                sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    fontWeight: 600
-                                }}
-                            >
-                                {formatMessage({ id: title }).toUpperCase()}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {massDataTable.map(({
-                        id, dayOfMass, massTime,
-                        massType, price, status
-
-                    }, index) => (
-                        <TableRow
-                            key={`${index} + ${id} + ${dayOfMass}`}
-                            sx={{
-                                color: 'var(--label)'
-                            }}
-                        >
-                            <TableCell>{id}</TableCell>
-                            <TableCell sx={{
-                                fontWeight: 600,
-                                color: 'var(--label)'
-                            }}>
-                                {dayOfMass ? formatMessage({ id: dayOfWeek[dayOfMass.day()] })
-                                    .toUpperCase() : '-'
-                                }
-                            </TableCell>
-                            <TableCell>{massTime ? massTime.format('HH:mm') : '-'}</TableCell>
-                            <TableCell>{massType}</TableCell>
-                            <TableCell sx={{
-                                fontWeight: 600,
-                                color: 'var(--label)'
-                            }}>{formatNumber(price, {
-                                style: 'currency',
-                                currency: 'xaf'
-                            })}</TableCell>
-                            <TableCell>
-                                {showTransactionStatus(status as string)}
-                            </TableCell>
-
-                            <TableCell align='right'>
-                                <IconButton
-                                    size="small"
-                                    onClick={(event) => handleActionOnRow(event, id)}
-                                >
-                                    <Icon icon={verticalDotsIcon} fontSize={18} />
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
             {
-                !massDataTable.length && (
+                !massDataTable.length ? (
                     <Box sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        height: '50%'
+                        height: '70%'
                     }}>
                         <Icon icon={warningIcon} fontSize={24} />
                         <Typography variant='body2'>
                             {formatMessage({ id: 'warningMassCreation' })}
                         </Typography>
                     </Box>
+                ) : (
+
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{
+                                    bgcolor: theme.palette.secondary.main,
+                                    fontWeight: 600
+                                }}
+                                >
+                                    No
+                                </TableCell>
+                                {titles.map((title, index) => (
+                                    <TableCell
+                                        key={index}
+                                        sx={{
+                                            bgcolor: theme.palette.secondary.main,
+                                            fontWeight: 600
+                                        }}
+                                    >
+                                        {formatMessage({ id: title }).toUpperCase()}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {massDataTable.map(({
+                                id, dayOfMass,
+                                price, status, createdAt
+
+                            }, index) => (
+                                <TableRow
+                                    key={`${index} + ${id} + ${dayOfMass}`}
+                                    sx={{
+                                        color: 'var(--label)'
+                                    }}
+                                >
+                                    <TableCell>{id}</TableCell>
+                                    <TableCell sx={{
+                                        fontWeight: 600,
+                                        color: 'var(--label)'
+                                    }}>
+                                        {dayjs.utc(dayOfMass).format('dddd, MMMM D')}
+                                    </TableCell>
+                                    <TableCell>{dayjs(dayOfMass).format('HH:mm')}</TableCell>
+                                    <TableCell sx={{
+                                        fontWeight: 600,
+                                        color: 'var(--label)'
+                                    }}>{formatNumber(price, {
+                                        style: 'currency',
+                                        currency: 'xaf'
+                                    })}</TableCell>
+                                    <TableCell>{dayjs(createdAt).format('MMMM D, YYYY')}</TableCell>
+                                    <TableCell>
+                                        {showTransactionStatus(status as string)}
+                                    </TableCell>
+
+                                    <TableCell align='right'>
+                                        <IconButton
+                                            size="small"
+                                            onClick={(event) => handleActionOnRow(event, id)}
+                                        >
+                                            <Icon icon={verticalDotsIcon} fontSize={18} />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 )
             }
+
         </>
 
     );
