@@ -1,3 +1,5 @@
+import { Dayjs } from 'dayjs';
+
 export enum MassTypeEnum {
   One = 'unique',
   Triduum = 'triduum',
@@ -19,4 +21,13 @@ export interface ReplicateMassDto {
 export enum ReplicationPeriodEnum {
   MONTHLY = 'MONTHLY',
   YEARLY = 'YEARLY',
+}
+
+export interface TableMassOwnerData {
+  id: number;
+  dayOfMass: Dayjs | null;
+  massTime: Dayjs | null;
+  createdAt: Dayjs;
+  price: number;
+  status?: string;
 }
