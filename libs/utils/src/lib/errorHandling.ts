@@ -47,6 +47,5 @@ export function errorHandling({
     if (status === 504) {
       toast.error(formatMessage({ id: message ?? 'gatewayTimeout' }));
     }
-  }
-  toast.error(formatMessage({ id: 'networkError' }));
+  } else toast.error(formatMessage({ id: 'networkError' }));
 }
