@@ -116,26 +116,20 @@ export default function Masses() {
                         + {formatMessage({ id: 'addMass' })}
                     </Button>
                 </Box>
-                <Box sx={{
-                    display: 'grid',
-                    gridAutoFlow: 'column',
-                    width: 'fit-content',
-                    columnGap: 3
-                }}>
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'auto 1fr',
-                        alignItems: 'center',
-                        columnGap: 1
-                    }}>
-                        <Icon icon={searchIcon} fontSize={20} />
-                        <InputBase
-                            placeholder={formatMessage({ id: 'search' })}
-                        />
-                    </Box>
-                </Box>
             </Box>
-            <MassOwnerTable massDataTable={massData} />
+            {
+                isMassPending ?
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '70%'
+                    }}>
+                        <CircularProgress size={40} />
+                    </Box> :
+                    <MassOwnerTable massDataTable={massData} />
+            }
+
         </>
     );
 }
