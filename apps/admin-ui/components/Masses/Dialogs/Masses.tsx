@@ -1,5 +1,5 @@
 import { useLanguage } from "@easy-messe/libs/theme";
-import { ReplicationPeriodEnum } from "@easyMesseLibs/types";
+import { ReplicationPeriodEnum, TableMassOwnerData } from "@easyMesseLibs/types";
 import upDownIcon from '@iconify-icons/fluent/chevron-up-down-20-regular';
 import { Icon } from "@iconify/react";
 import { Box, Button, Checkbox, CircularProgress, Dialog, FormControlLabel, IconButton, Menu, MenuItem, TextField, Typography } from "@mui/material";
@@ -9,7 +9,6 @@ import { useFormik } from "formik";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import * as yup from 'yup';
-import { TableMassOwnerData } from "../tableMassOwnerData";
 import { apiMiddleware, errorHandling } from "@easy-messe/libs/utils";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -82,11 +81,11 @@ export default function MassesDialog({
                     processAt: dayOfMass?.toDate(),
                 },
                 onSuccess: (response) => {
-                    console.log(response);
                     toast.success(formatMessage({ id: 'massCreatedSuccess' }))
+                    handleClose();
                 },
                 onFailure: (error) => {
-                    errorHandling({ error, formatMessage, redirect: push })
+                    errorHandling({ error, formatMessage, redirect: push });
                 },
                 onFinally: () => {
                     setIsCreationPending(false);
