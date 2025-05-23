@@ -14,6 +14,7 @@ import {
     TableBody,
     TableCell,
     TableHead,
+    TablePagination,
     TableRow,
     Typography
 } from "@mui/material";
@@ -43,15 +44,15 @@ export default function MassOwnerTable({
     const [idSelected, setIdSelected] = useState<number | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
     const [massSelected, setMassSelected] = useState<TableMassOwnerData>()
-    // const dayOfWeek: Record<number, string> = {
-    //     1: 'monday',
-    //     2: 'tuesday',
-    //     3: 'wednesday',
-    //     4: 'thursday',
-    //     5: 'friday',
-    //     6: 'saturday',
-    //     7: 'sunday',
-    // }
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+
+    // Calculate the current page's data
+    const currentPageData = massDataTable.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+    );
 
     const menuItem: MenuItemForMassOwner[] = [
         {
@@ -120,74 +121,89 @@ export default function MassOwnerTable({
                         </Typography>
                     </Box>
                 ) : (
+                    <>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{
+                                        bgcolor: theme.palette.secondary.main,
+                                        fontWeight: 600
+                                    }}
+                                    >
+                                        No
+                                    </TableCell>
+                                    {titles.map((title, index) => (
+                                        <TableCell
+                                            key={index}
+                                            sx={{
+                                                bgcolor: theme.palette.secondary.main,
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            {formatMessage({ id: title }).toUpperCase()}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {currentPageData.map(({
+                                    id, dayOfMass,
+                                    price, status, createdAt
 
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={{
-                                    bgcolor: theme.palette.secondary.main,
-                                    fontWeight: 600
-                                }}
-                                >
-                                    No
-                                </TableCell>
-                                {titles.map((title, index) => (
-                                    <TableCell
-                                        key={index}
+                                }, index) => (
+                                    <TableRow
+                                        key={`${index} + ${id} + ${dayOfMass}`}
                                         sx={{
-                                            bgcolor: theme.palette.secondary.main,
-                                            fontWeight: 600
+                                            color: 'var(--label)'
                                         }}
                                     >
-                                        {formatMessage({ id: title }).toUpperCase()}
-                                    </TableCell>
+                                        <TableCell>{id}</TableCell>
+                                        <TableCell sx={{
+                                            fontWeight: 600,
+                                            color: 'var(--label)'
+                                        }}>
+                                            {dayjs.utc(dayOfMass).format('dddd, MMMM D')}
+                                        </TableCell>
+                                        <TableCell>{dayjs(dayOfMass).format('HH:mm')}</TableCell>
+                                        <TableCell sx={{
+                                            fontWeight: 600,
+                                            color: 'var(--label)'
+                                        }}>{formatNumber(price, {
+                                            style: 'currency',
+                                            currency: 'xaf'
+                                        })}</TableCell>
+                                        <TableCell>{dayjs(createdAt).format('MMMM D, YYYY')}</TableCell>
+                                        <TableCell>
+                                            {showTransactionStatus(status as string)}
+                                        </TableCell>
+
+                                        <TableCell align='right'>
+                                            <IconButton
+                                                size="small"
+                                                onClick={(event) => handleActionOnRow(event, id)}
+                                            >
+                                                <Icon icon={verticalDotsIcon} fontSize={18} />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {massDataTable.map(({
-                                id, dayOfMass,
-                                price, status, createdAt
-
-                            }, index) => (
-                                <TableRow
-                                    key={`${index} + ${id} + ${dayOfMass}`}
-                                    sx={{
-                                        color: 'var(--label)'
-                                    }}
-                                >
-                                    <TableCell>{id}</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 600,
-                                        color: 'var(--label)'
-                                    }}>
-                                        {dayjs.utc(dayOfMass).format('dddd, MMMM D')}
-                                    </TableCell>
-                                    <TableCell>{dayjs(dayOfMass).format('HH:mm')}</TableCell>
-                                    <TableCell sx={{
-                                        fontWeight: 600,
-                                        color: 'var(--label)'
-                                    }}>{formatNumber(price, {
-                                        style: 'currency',
-                                        currency: 'xaf'
-                                    })}</TableCell>
-                                    <TableCell>{dayjs(createdAt).format('MMMM D, YYYY')}</TableCell>
-                                    <TableCell>
-                                        {showTransactionStatus(status as string)}
-                                    </TableCell>
-
-                                    <TableCell align='right'>
-                                        <IconButton
-                                            size="small"
-                                            onClick={(event) => handleActionOnRow(event, id)}
-                                        >
-                                            <Icon icon={verticalDotsIcon} fontSize={18} />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableBody>
+                        </Table>
+                        <TablePagination
+                            rowsPerPageOptions={[5, 10, 25, 50]} // Options for rows per page
+                            component="div"
+                            count={massDataTable.length} // Total number of rows
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            onPageChange={(_, newPage) => {  // Change the record on the view page
+                                setPage(newPage);
+                            }}
+                            onRowsPerPageChange={(e) => {
+                                setRowsPerPage(parseInt(e.target.value, 10));
+                                setPage(0); // Reset to first page when changing rows per page
+                            }}
+                        />
+                    </>
                 )
             }
 
