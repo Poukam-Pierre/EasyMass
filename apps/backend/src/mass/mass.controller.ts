@@ -64,11 +64,50 @@ export class MassController {
     return this.massService.remove(+id);
   }
 
+  @ApiOperation({
+    summary: 'Find all masses created',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Masses requested successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorize exception',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
   @Get()
-  findAll(
-    @Query('parishId') parishId: string,
-    @Query('role') role?: 'HISTORY'
-  ) {
-    return this.massService.findAllMasses(+parishId, role);
+  @UseGuards(AuthGuard)
+  findAll(@Req() request) {
+    const { id } = request.user;
+    return this.massService.findAllMasses(+id);
+  }
+
+  @ApiOperation({
+    summary: 'Find unique mass',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mass requested successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorize exception',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Data with the correspondant ID does not exis',
+  })
+  @Get('unique_mass')
+  @UseGuards(AuthGuard)
+  findUniqueMass(@Query('massId') massId: string) {
+    return this.massService.getOneMassData(+massId);
   }
 }
