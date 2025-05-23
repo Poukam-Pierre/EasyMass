@@ -3,12 +3,15 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import dayjs, { Dayjs } from 'dayjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMassDto } from './dto/create-mass.dto';
+import utc from 'dayjs/plugin/utc';
 
+dayjs.extend(utc);
 @Injectable()
 export class MassService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -28,12 +31,12 @@ export class MassService {
 
     let dataMassesByPeriod;
     try {
-      const existingMass = await this.findAllMasses(id);
+      const { masses: existingMass } = await this.findAllMasses(id);
 
       // verify if mass exist already
       const isMassAlreadyExists = existingMass.some(
         (mass) =>
-          new Date(mass.processAt).getTime() === new Date(processAt).getTime()
+          new Date(mass.dayOfMass).getTime() === new Date(processAt).getTime()
       );
 
       if (isMassAlreadyExists) throw new ConflictException('massExistAlready');
@@ -89,46 +92,94 @@ export class MassService {
     });
   }
 
-  async findAllMasses(parishId: number, role?) {
-    if (role) {
-      return this.prismaService.mass.findMany({
+  // TODO: JSDocs
+  async findAllMasses(parishId: number) {
+    try {
+      const masses = await this.prismaService.mass.findMany({
         where: {
-          AND: [
-            { parishId },
-            {
-              processAt: {
-                lte: new Date(),
-              },
-            },
-          ],
+          parishId,
+        },
+        select: {
+          id: true,
+          price: true,
+          processAt: true,
+          createdAt: true,
         },
       });
+
+      console.log('masses data :', masses);
+      const restructuredMasses = masses.map(
+        ({ id, price, processAt, createdAt }) => {
+          return {
+            id,
+            price,
+            dayOfMass: processAt,
+            createdAt,
+            status: dayjs(processAt).subtract(30, 'minutes').isAfter(dayjs())
+              ? 'open'
+              : dayjs(processAt).subtract(30, 'minutes').isBefore(dayjs()) &&
+                dayjs(processAt).isAfter(dayjs())
+              ? 'locked'
+              : dayjs(processAt).isBefore(dayjs()) &&
+                dayjs(processAt).isAfter(dayjs().add(2, 'h'))
+              ? 'in progress'
+              : 'done',
+          };
+        }
+      );
+
+      console.log('Masses restructured :', restructuredMasses);
+      return {
+        statusCode: 200,
+        masses: restructuredMasses,
+      };
+    } catch (error) {
+      console.log('Error arise while fetching all mass data :', error);
+      throw new InternalServerErrorException('serverError');
     }
-    return this.prismaService.mass.findMany({
-      where: {
-        parishId,
-      },
-      select: {
-        id: true,
-        price: true,
-        processAt: true,
-        createdAt: true,
-        massType: true,
-      },
-    });
   }
 
-  async findAll(parishId: number) {
-    return this.prismaService.mass.findMany({
-      where: {
-        parishId,
-      },
-      include: {
-        massOrder: true,
-      },
-    });
-  }
+  // async findAll(parishId: number) {
+  //   return this.prismaService.mass.findMany({
+  //     where: {
+  //       parishId,
+  //     },
+  //     include: {
+  //       massOrder: true,
+  //     },
+  //   });
+  // }
 
+  //TODO: Set up JSDocs
+  async getOneMassData(massId: number) {
+    try {
+      const massData = await this.prismaService.mass.findUnique({
+        where: {
+          id: massId,
+          processAt: {
+            lte: new Date(),
+          },
+        },
+        select: {
+          id: true,
+          processAt: true,
+        },
+      });
+
+      if (!massData) throw new NotFoundException('massNotFound');
+
+      return {
+        statusCode: 200,
+        massData,
+      };
+    } catch (error) {
+      console.log('Error arise while fetching mass informations :', error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw new InternalServerErrorException('serverError');
+    }
+  }
   async findOne(id: number) {
     return this.prismaService.mass.findUnique({
       where: {
@@ -178,21 +229,21 @@ export class MassService {
     return data;
   }
 
-  private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
-    const elementCount = new Map<string, number>();
+  // private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
+  //   const elementCount = new Map<string, number>();
 
-    const newArrayDate2 = arrayDate2.filter(
-      (date) => new Date(arrayDate1[0]) <= new Date(date)
-    );
+  //   const newArrayDate2 = arrayDate2.filter(
+  //     (date) => new Date(arrayDate1[0]) <= new Date(date)
+  //   );
 
-    arrayDate1.concat(newArrayDate2).forEach((date) => {
-      elementCount.set(date, (elementCount.get(date) || 0) + 1);
-    });
+  //   arrayDate1.concat(newArrayDate2).forEach((date) => {
+  //     elementCount.set(date, (elementCount.get(date) || 0) + 1);
+  //   });
 
-    const uniqueElements = Array.from(elementCount.entries())
-      .filter(([date, count]) => count === 1)
-      .map(([date]) => date);
+  //   const uniqueElements = Array.from(elementCount.entries())
+  //     .filter(([date, count]) => count === 1)
+  //     .map(([date]) => date);
 
-    return uniqueElements;
-  }
+  //   return uniqueElements;
+  // }
 }
