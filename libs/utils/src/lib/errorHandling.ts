@@ -48,4 +48,5 @@ export function errorHandling({
       toast.error(formatMessage({ id: message ?? 'gatewayTimeout' }));
     }
   }
+  toast.error(formatMessage({ id: 'networkError' }));
 }
