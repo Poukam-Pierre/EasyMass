@@ -1,22 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { apiMiddleware, errorHandling } from '@easy-messe/libs/utils';
+import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
+import { TableMassOwnerData } from '@easyMesseLibs/types';
 import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
-import { Box, Button, InputBase, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import MassesDialog, { MassTypeEnum } from "../../components/Masses/Dialogs/Masses";
-import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
-import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
-import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
 import AppLayout from '../../components/Layout';
-import dayjs from 'dayjs';
+import MassesDialog from "../../components/Masses/Dialogs/Masses";
+import MassOwnerTable from "../../components/Masses/tableMassOwnerData";
+import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
 
 export default function Masses() {
     const { formatMessage } = useIntl()
     const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
     const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
     const [massData, setMassData] = useState<TableMassOwnerData[]>([])
+    const [isMassPending, setIsMassPending] = useState<boolean>(false);
+    const { push } = useRouter();
+
     const menuItem: MenuItem[] = [
         {
             title: formatMessage({ id: 'day' }),
@@ -32,48 +35,32 @@ export default function Masses() {
         }
     ]
 
-    const tableData: TableMassOwnerData[] = [
-        {
-            id: 1,
-            dayOfMass: dayjs('2024-07-22'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 2000,
-            status: 'done'
-        },
-        {
-            id: 2,
-            dayOfMass: dayjs('2024-07-20'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 3500,
-            status: 'in process',
-        },
-        {
-            id: 3,
-            dayOfMass: dayjs('2024-07-19'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 2500,
-            status: 'locked',
-        },
-        {
-            id: 4,
-            dayOfMass: null,
-            massTime: null,
-            massType: MassTypeEnum.Triduum,
-            price: 3000,
-        },
-    ]
-
-    useEffect(() => (
-        // TODO fetch data for all masses ordered into the church.
-        /**
-         * To do so, use SOCKET for more interactions with API calls.
-         * This will allow us to stay tunned from API actions.
-         */
-        setMassData(tableData)
-    ), [])
+    const fetchMasses = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            push('/')
+            return
+        };
+        setIsMassPending(true);
+        apiMiddleware({
+            url: '/masses',
+            method: 'GET',
+            accessToken: token,
+            onSuccess: (response: any) => {
+                console.log(response);
+                setMassData(response.masses)
+            },
+            onFailure: (error) => {
+                errorHandling({ error, formatMessage, redirect: push })
+            },
+            onFinally: () => {
+                setIsMassPending(false)
+            }
+        })
+    }
+    useEffect(() => {
+        fetchMasses();
+    }, [])
 
     const handleMassCreationDialog = () => {
         setIsOpenModify((prev) => !prev)
@@ -90,10 +77,14 @@ export default function Masses() {
                 replicatLabel={formatMessage({ id: 'duplicateAll' })}
                 labelBtn={formatMessage({ id: 'create' })}
                 isOpen={isOpenModify}
-                handleClose={handleMassCreationDialog}
+                handleClose={() => {
+                    handleMassCreationDialog();
+                    fetchMasses()
+                }
+                }
             />
             <Box sx={{
-                padding: '0 16px 8px'
+                padding: '0 16px 16px'
             }}>
                 <Box sx={{
                     display: 'flex',
