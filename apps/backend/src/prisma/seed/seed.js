@@ -2,6 +2,8 @@ const { createId } = require('@paralleldrive/cuid2');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
+const { logger } = require('./logger');
+const { createInitialAdminAccount } = require('./admin.seed');
 
 const cities = [
     { city_name: 'Bamboutos' },
@@ -14,8 +16,40 @@ const cities = [
     { city_name: 'Nde' },
     { city_name: 'Noun' },
 ]
-async function seedEasyMass() {
+async function main() {
+    logger.debug('Seeding initialisation started...');
+
+    const environment = process.env.NODE_ENV;
+    logger.info(`Running in ${environment} environment`);
+
+
+    switch (environment) {
+        case 'development': {
+            const admin = {
+                email: String(process.env.APP_EMAIL || 'admin@easymesse.com'),
+                password: String(process.env.APP_EMAIL_PASS || 'Admin2025*'),
+            }
+
+            return await createInitialAdminAccount(admin);
+        }
+        case 'production': {
+            const admin = {
+                email: String(process.env.APP_EMAIL),
+                password: String(process.env.APP_EMAIL_PASS),
+            }
+
+            return await createInitialAdminAccount(admin);
+        }
+        case 'test':
+            /** data for your test environment */
+            break;
+        default:
+            break;
+
+    }
+
     // create admin first admin user
+    // TODO: Old version of seed. Need to be DELETE
     await prisma.administrator.upsert({
         where: { email: 'admin@easymesse.com' },
         update: {
@@ -47,11 +81,13 @@ async function seedEasyMass() {
 
 }
 
-seedEasyMass()
-    .catch((error) => {
+main()
+    .catch(async (error) => {
         console.error('❌ Error seeding database:', error);
+        await prisma.$disconnect();
         process.exit(1);
     })
     .finally(async () => {
+        logger.success('✅ Database seeded successfully!');
         await prisma.$disconnect();
     });
