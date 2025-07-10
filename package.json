@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "prisma": {
-    "seed": "npx tsx apps/backend/src/prisma/seed.js",
+    "seed": "npx tsx apps/backend/src/prisma/seed/seed.js",
     "schema": "apps/backend/src/prisma/schema.prisma"
   },
   "scripts": {
-    "start:backend": "nodemon --watch apps/backend/src --exec npx nx serve backend"
+    "start:backend": "nodemon --watch apps/backend/src --exec npx nx serve backend",
+    "migrate": "prisma migrate dev"
   },
   "private": true,
   "dependencies": {
