@@ -48,4 +48,4 @@ migration.sql
 # Next.js
 .next
 out
-.env.development
+.env.local
