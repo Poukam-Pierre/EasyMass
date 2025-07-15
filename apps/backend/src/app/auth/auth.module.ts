@@ -2,20 +2,19 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ParishModule } from '../../modules/parish/parish.module';
-import { AdministratorModule } from '../../modules/administrator/administrator.module';
-import { PriestModule } from '../../modules/priest/priest.module';
-import { RefreshTokenModule } from '../../modules/refresh-token/refresh-token.module';
-import { PrismaModule } from '../../prisma/prisma.module';
+import { JwtStrategy } from './jwt/jwt.strategy';
+import { LocalStrategy } from './local/local.strategy';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
   controllers: [AuthController],
   imports: [
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: '24h' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory(configService: ConfigService) {
+        return { secret: configService.get('JWT_SECRET') };
+      },
     }),
     // ParishModule,
     // AdministratorModule,
