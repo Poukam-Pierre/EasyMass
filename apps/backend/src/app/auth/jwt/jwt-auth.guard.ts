@@ -7,13 +7,13 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { MetadataEnum } from '../auth.decorator';
 import { Request } from 'express';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
     super();
   }
-
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(
       MetadataEnum.IS_PUBLIC,
@@ -24,9 +24,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = Express.User>(
+  handleRequest<TUser = User>(
     err: unknown,
-    user: Express.User,
+    user: User,
     info: unknown,
     context: ExecutionContext,
   ): TUser {

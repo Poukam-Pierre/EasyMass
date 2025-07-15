@@ -23,8 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: IJWTPayload) {
-    // return this.authService.validateJwtPayload(payload);
-    // TODO: add validation logic
-    return payload;
+    return this.authService.validateJwtPayload(payload);
   }
 }
