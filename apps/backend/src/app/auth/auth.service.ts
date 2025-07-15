@@ -1,47 +1,135 @@
 import {
-  BadRequestException,
-  ConflictException,
   Injectable,
-  InternalServerErrorException,
+  Logger,
   NotFoundException,
-  UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { createId } from '@paralleldrive/cuid2';
-// import * as bcrypt from 'bcryptjs';
-// import { AdministratorService } from '../administrator/administrator.service';
-// import { ParishService } from '../parish/parish.service';
-// import { PriestService } from '../priest/priest.service';
-// import { PrismaService } from '../prisma/prisma.service';
-// import { RefreshTokenService } from '../refresh-token/refresh-token.service';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
-import {
-  AdminDataDto,
-  LoginDataDto,
-  LogoutDataDto,
-  PriestDataDto,
-} from './dto/login.dto';
-import { NewTokens, RefreshToken } from './dto/refreshToken.dto';
-import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
-import { ParishService } from '../../modules/parish/parish.service';
-import { AdministratorService } from '../../modules/administrator/administrator.service';
-import { PriestService } from '../../modules/priest/priest.service';
-import { RefreshTokenService } from '../../modules/refresh-token/refresh-token.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { Request } from 'express';
-
+import { PrismaService } from '../../prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
+import { IJWTPayload, TokenType } from './jwt/jwt.strategy';
+import { User } from '@prisma/client';
+import { AuthTokensDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
+  private static readonly ACCESS_TOKEN_TYPE: TokenType = 'access_token';
+  private static readonly REFRESH_TOKEN_TYPE: TokenType = 'refresh_token';
+
+  private readonly logger = new Logger(AuthService.name);
   constructor(
-    private readonly JwtService: JwtService,
-    private readonly parishService: ParishService,
-    private readonly adminService: AdministratorService,
-    private readonly priestService: PriestService,
-    private readonly refreshTokenService: RefreshTokenService,
-    private readonly prismaService: PrismaService
+    private readonly jwtService: JwtService,
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Validate a user with the given email and password.
+   * @param request the request used to get the subdomain to authenticate from
+   * @param email the email of the user to validate
+   * @param password the password of the user to validate
+   * @returns the user if the authentication is successful, null otherwise
+   */
+  async validateUser(
+    request: Request,
+    email: string,
+    password: string,
+  ): Promise<User | null> {
+    const person = await this.prismaService.user.findFirst({
+      where: { email },
+    });
+    if (
+      person &&
+      person.password &&
+      bcrypt.compareSync(password, person.password)
+    ) {
+      const subdomain = new URL(request.headers.origin as string).host;
+
+      this.logger.debug(`Authentication user from origin ${subdomain}...`);
+
+      if (subdomain) return { ...person };
+    }
+    return null;
+  }
+
+  /**
+   * This function validates the jwt payload and retrieve the user data.
+   * @param payload the jwt payload
+   * @param type the type of the token, default is access_token
+   * @returns the user data
+   * @throws UnprocessableEntityException when the token type is invalid
+   * @throws NotFoundException when the user is not found
+   */
+  async validateJwtPayload(
+    payload: IJWTPayload,
+    type: TokenType = AuthService.ACCESS_TOKEN_TYPE,
+  ): Promise<User> {
+    if (payload.type !== type)
+      throw new UnprocessableEntityException('Invalid token type!');
+
+    const person = await this.prismaService.user.findUnique({
+      where: { user_id: payload.sub },
+    });
+    if (!person) throw new NotFoundException('Invalid token payload!');
+    return { ...person };
+  }
+
+  /**
+   * Authenticates a user and generates JWT tokens.
+   * @param user The user to authenticate.
+   * @returns An instance of AuthTokensDto containing the refresh and access tokens,
+   *          the issuance date, and optionally an OTP ID.
+   * @throws NotFoundException if the user is not found.
+   */
+  async login(user: User): Promise<AuthTokensDto> {
+    let otpId: string | undefined;
+    if (!user.is_account_verified) {
+      this.logger.debug('Request otp for user...');
+      // TODO: set up requesting otp from otp service
+      // TODO: send otp by email
+      otpId = 'otp_id';
+      this.logger.debug('Successfully sent requested opt user!');
+    }
+
+    // create login log
+    await this.prismaService.log.create({
+      data: {
+        User: {
+          connect: {
+            user_id: user.user_id,
+          },
+        },
+      },
+    });
+    return this.generateTokens(user.user_id, otpId);
+  }
+
+  /**
+   * Generates JWT tokens for a user.
+   * @param userId - The ID of the user for whom to generate tokens.
+   * @param otpId - Optional one-time password identifier for unverified accounts.
+   * @returns An instance of AuthTokensDto containing the refresh and access tokens,
+   *          the issuance date, and optionally an OTP ID.
+   */
+  private async generateTokens(userId: string, otpId?: string) {
+    const refreshToken = this.jwtService.sign(
+      { sub: userId, type: AuthService.REFRESH_TOKEN_TYPE },
+      { expiresIn: '24h' },
+    );
+    const accessToken = this.jwtService.sign(
+      { sub: userId, type: AuthService.ACCESS_TOKEN_TYPE },
+      { expiresIn: '24h' },
+    );
+
+    return new AuthTokensDto({
+      refresh_token: refreshToken,
+      access_token: accessToken,
+      issued_at: Date.now(),
+      otp_id: otpId,
+    });
+  }
   // /**
   //  * This function authenticate the users when login
   //  * @param input
@@ -397,16 +485,16 @@ export class AuthService {
   //     });
   //     const OTP_MESSAGE = `Dear ${user.name},
   //     We have received a request to reset your password. Please use the following link to reset your password:
-  
+
   //     ${
   //       subdomain === 'admin'
   //         ? process.env.NEXT_PUBLIC_ADMIN_URL
   //         : process.env.NEXT_PUBLIC_PARISH_URL
   //     }/recovery/${code}/new-password
-      
+
   //     If you did not request this, please ignore this email.
   //     This link will expire in 10 minutes.
-      
+
   //     Thank you,
   //     Your Team`;
   //     // TODO: send email to the user with OTP_MESSAGE
