@@ -1,12 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 
 export class LoginDataDto {
   @IsEmail()
-  @IsNotEmpty()
+  @Transform(({ value }) => value.trim().toLowerCase())
+  @ApiProperty({
+    description: 'Valid user email',
+  })
   email: string;
 
-  @IsNotEmpty()
+  @IsString()
+  @IsStrongPassword()
+  @ApiProperty({
+    description: 'Strong password',
+  })
   password: string;
 
   constructor(props: LoginDataDto) {
