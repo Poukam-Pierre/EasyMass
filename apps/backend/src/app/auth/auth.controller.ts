@@ -1,39 +1,89 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiPreconditionFailedResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { Request, Response } from 'express';
+import { SkipAuth } from './auth.decorator';
+import { AccessTokenResponse, AuthTokensDto } from './auth.dto';
 import { AuthService } from './auth.service';
-import { Role, ROLE } from './decorator/public.decorator';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgotPassword';
-import { LoginDataDto, LogoutDataDto } from './dto/login.dto';
-import { RefreshToken } from './dto/refreshToken.dto';
-import { SignUpAdminDto } from './dto/signup.dto';
-import { AdminGuard } from './guard/admin.guards';
-import { Request } from 'express';
+import { LoginDataDto } from './dto/login.dto';
+import { LocalGuard } from './local/local.guard';
 
+@SkipAuth()
 @Controller('auth')
-@ApiTags('Auth')
+@ApiTags('Authentication')
+@ApiBadRequestResponse({
+  description:
+    'Bad request. This often happens when the request payload it not respected.',
+})
+@ApiInternalServerErrorResponse({
+  description: 'Internal server error. An unexpected exception was thrown',
+})
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  // @ApiOperation({
-  //   summary: 'Login parishes',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Wrong email or password.',
-  // })
-  // @ApiResponse({
-  //   status: 409,
-  //   description: 'Account already logged in. Logout before from the first one.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'Internal server error',
-  // })
-  // @Post('/login')
-  // loginParish(@Body() input: LoginDataDto, @Req() request: Request) {
-  //   return this.authService.authenticate(input, request);
-  // }
+  @ApiOperation({
+    summary: 'Login to authenticate a user',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Wrong email or password.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized request. Incorrect email or password.',
+  })
+  @ApiPreconditionFailedResponse({
+    description:
+      'Precondition failed, user account must be actived before login.',
+  })
+  @Post('/login')
+  @UseGuards(LocalGuard)
+  @ApiBody({ type: LoginDataDto })
+  @ApiCreatedResponse({ type: AccessTokenResponse })
+  async login(@Req() req: Request, res: Response) {
+    const tokens = await this.authService.login(req.user as User);
 
+    // setnew Htp-Only cookies
+    this.setCookies(tokens, res);
+
+    res.status(HttpStatus.CREATED).json(
+      new AccessTokenResponse({
+        access_token: tokens.access_token,
+        expires_in: 900000, //15 minutes,
+        issued_at: tokens.issued_at,
+        token_type: 'Bearer',
+        otp_id: tokens.otp_id,
+      }),
+    );
+  }
+
+  /**
+   * Set the refresh token cookie on the response.
+   * @param tokens the tokens from the login response
+   * @param res the response object
+   */
+  private setCookies(tokens: AuthTokensDto, res: Response) {
+    res.cookie('refresh_token', tokens.refresh_token, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      maxAge: 24 * 60 * 60 * 1000, // 1 days
+    });
+  }
   // @Post('/signup-admin')
   // @Role(ROLE.ADMIN)
   // @UseGuards(AdminGuard)
