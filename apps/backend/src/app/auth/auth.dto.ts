@@ -32,7 +32,7 @@ export class AccessTokenResponse extends OmitType(AuthTokensDto, [
   @ApiProperty({ description: 'token duration in milliseconds' })
   expires_in: number;
 
-  @ApiProperty({ type: 'Bearer' })
+  @ApiProperty({ description: 'Bearer' })
   token_type = 'Bearer' as const;
 
   constructor(props: AccessTokenResponse) {
