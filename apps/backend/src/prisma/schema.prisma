@@ -251,8 +251,9 @@ model OTP {
   expired_at  DateTime @db.Timestamp()
   is_verified Boolean  @default(false) @db.Boolean
   usage       OtpUsage
-  user_id     String   @db.VarChar(36)
-  User        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_OTP_User1")
+  updated_at  DateTime? @db.Timestamp()
+  user_id     String    @db.VarChar(36)
+  User        User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_OTP_User1")
 
   @@index([user_id], map: "fk_OTP_User1_idx")
   @@map("otps")
