@@ -1,4 +1,11 @@
-import { Controller, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
