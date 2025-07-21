@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -11,7 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { IJWTPayload, TokenType } from './jwt/jwt.strategy';
 import { User } from '@prisma/client';
-import { AuthTokensDto } from './auth.dto';
+import { AuthTokensDto, SignUpDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -104,6 +105,34 @@ export class AuthService {
       },
     });
     return this.generateTokens(user.user_id, otpId);
+  }
+
+  async registerUser(
+    { password, ...payload }: SignUpDto,
+    createdBy?: string,
+  ): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+
+    if (user) throw new ConflictException('Email address already taken');
+
+    const newUser = await this.prismaService.user.create({
+      data: {
+        ...payload,
+        password: bcrypt.hashSync(
+          password,
+          bcrypt.genSaltSync(
+            Number(this.configService.get<number>('SALT_ROUNDS')),
+          ),
+        ),
+        CreatedBy: createdBy ? { connect: { user_id: createdBy } } : undefined,
+      },
+    });
+
+    return newUser;
   }
 
   /**
