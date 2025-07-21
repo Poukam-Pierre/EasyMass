@@ -55,7 +55,7 @@ export class AuthController {
   @UseGuards(LocalGuard)
   @ApiBody({ type: LoginDataDto })
   @ApiCreatedResponse({ type: AccessTokenResponse })
-  async login(@Req() req: Request, res: Response) {
+  async login(@Req() req: Request, @Res() res: Response) {
     const tokens = await this.authService.login(req.user as User);
 
     // setnew Htp-Only cookies

@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { LocalStrategy } from './local/local.strategy';
 import { ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   providers: [AuthService, JwtStrategy, LocalStrategy],
@@ -16,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
         return { secret: configService.get('JWT_SECRET') };
       },
     }),
+    PassportModule,
     // ParishModule,
     // AdministratorModule,
     // PriestModule,

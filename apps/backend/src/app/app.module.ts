@@ -18,6 +18,7 @@ import { HttpExceptionFilter } from '../exception-filters/http-exception.filter'
 import { AjaxErrorFilter } from '../exception-filters/ajax-error.filter';
 import { PrismaExceptionFilter } from '../exception-filters/prisma-exception.filter';
 import { logger } from '../helpers/logger';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { logger } from '../helpers/logger';
     // MailerModule,
 
     // Import other modules here
-    // AuthModule,
+    AuthModule,
     // PaymentModule,
     // MassModule,
     // TransactionsModule,
