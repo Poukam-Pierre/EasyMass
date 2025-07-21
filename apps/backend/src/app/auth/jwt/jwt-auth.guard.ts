@@ -7,7 +7,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { MetadataEnum } from '../auth.decorator';
 import { Request } from 'express';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -15,12 +15,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
   canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest<Request>();
     const isPublic = this.reflector.getAllAndOverride<boolean>(
       MetadataEnum.IS_PUBLIC,
       [context.getHandler(), context.getClass()],
     );
 
-    if (isPublic) return isPublic;
+    // Special case: Allow priest signup without token
+    const isPriestSignup =
+      request.url.includes('auth/sign-up') &&
+      request.body?.role === Role.PRIEST &&
+      !request.headers.authorization;
+
+    if (isPublic || isPriestSignup) return isPublic;
+
     return super.canActivate(context);
   }
 
