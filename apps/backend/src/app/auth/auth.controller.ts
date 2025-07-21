@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpStatus,
   Post,
@@ -11,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
@@ -19,12 +21,16 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import { SkipAuth } from './auth.decorator';
-import { AccessTokenResponse, AuthTokensDto } from './auth.dto';
+import {
+  AccessTokenResponse,
+  AuthTokensDto,
+  LoginDataDto,
+  SignUpDto,
+} from './auth.dto';
 import { AuthService } from './auth.service';
-import { LoginDataDto } from './dto/login.dto';
 import { LocalGuard } from './local/local.guard';
 
 @SkipAuth()
@@ -66,6 +72,46 @@ export class AuthController {
     const tokens = await this.authService.login(req.user as User);
 
     // setnew Htp-Only cookies
+    this.setCookies(tokens, res);
+
+    res.status(HttpStatus.CREATED).json(
+      new AccessTokenResponse({
+        access_token: tokens.access_token,
+        expires_in: 900000, //15 minutes,
+        issued_at: tokens.issued_at,
+        token_type: 'Bearer',
+        otp_id: tokens.otp_id,
+      }),
+    );
+  }
+
+  @SkipAuth(false)
+  @Post('sign-up')
+  @ApiCreatedResponse({ type: AccessTokenResponse })
+  @ApiOperation({
+    summary: 'Create a new user',
+  })
+  @ApiConflictResponse({
+    description:
+      'Conflict, user email is already registered with another account.',
+  })
+  async signUp(
+    @Body() newUser: SignUpDto,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const requestedUser = req.user as User;
+
+    const user = await this.authService.registerUser(newUser);
+
+    if (requestedUser && requestedUser.role === Role.ADMIN) {
+      res.status(HttpStatus.CREATED).json({
+        message: 'User created successfully!',
+      });
+    }
+
+    const tokens = await this.authService.login(user);
+
     this.setCookies(tokens, res);
 
     res.status(HttpStatus.CREATED).json(
