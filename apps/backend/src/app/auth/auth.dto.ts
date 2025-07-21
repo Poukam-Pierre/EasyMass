@@ -1,5 +1,16 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
-import { IsJWT, IsString } from 'class-validator';
+import { PreferredLanguage, Role } from '@prisma/client';
+import { Transform } from 'class-transformer';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsJWT,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 
 export class AuthTokensDto {
   @IsJWT()
@@ -39,4 +50,81 @@ export class AccessTokenResponse extends OmitType(AuthTokensDto, [
     super(props);
     Object.assign(this, props);
   }
+}
+
+export class LoginDataDto {
+  @IsEmail()
+  @Transform(({ value }) => value.trim().toLowerCase())
+  @ApiProperty({
+    description: 'Valid user email',
+  })
+  email: string;
+
+  @IsString()
+  @IsStrongPassword()
+  @ApiProperty({
+    description: 'Strong password',
+  })
+  password: string;
+
+  constructor(props: LoginDataDto) {
+    Object.assign(this, props);
+  }
+}
+
+export class SignUpDto extends LoginDataDto {
+  @IsString()
+  @ApiProperty({
+    description: 'user first name',
+  })
+  first_name: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'user last name',
+  })
+  last_name?: string;
+
+  @IsPhoneNumber()
+  @ApiProperty({
+    description: 'Valid user phone number',
+  })
+  phone_number: string;
+
+  @IsDateString()
+  @IsOptional()
+  @ApiProperty({
+    description: ' User date birth',
+  })
+  birthdate?: Date;
+
+  @IsEnum(PreferredLanguage)
+  @IsOptional()
+  @ApiProperty({
+    enum: PreferredLanguage,
+    default: PreferredLanguage.EN_US,
+  })
+  preferred_language: PreferredLanguage = PreferredLanguage.EN_US;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'user manager name',
+  })
+  manager_name?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'User address',
+  })
+  address?: string;
+
+  @IsEnum(Role)
+  @ApiProperty({
+    enum: Role,
+    description: 'User role',
+  })
+  role: Role;
 }
