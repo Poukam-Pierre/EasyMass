@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { MetadataEnum } from '../auth.decorator';
+import { isTrue, MetadataEnum } from '../auth.decorator';
 import { Request } from 'express';
 import { Role, User } from '@prisma/client';
 
@@ -27,7 +27,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.body?.role === Role.PRIEST &&
       !request.headers.authorization;
 
-    if (isPublic || isPriestSignup) return isPublic;
+    if (isPublic || isPriestSignup) return isTrue;
 
     return super.canActivate(context);
   }

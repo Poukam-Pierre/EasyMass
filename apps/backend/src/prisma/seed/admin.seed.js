@@ -27,7 +27,7 @@ export async function createInitialAdminAccount({
     birthdate: new Date(),
     first_name: 'EasyMass',
     last_name: 'Admin',
-    phone: '+237 696-841-451',
+    phone_number: '+237 696-841-451',
     address: 'Bangangté, Cameroon',
     is_account_verified: true,
     is_active: true,

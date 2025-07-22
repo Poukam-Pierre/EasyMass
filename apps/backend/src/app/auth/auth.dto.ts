@@ -105,7 +105,7 @@ export class SignUpDto extends LoginDataDto {
     enum: PreferredLanguage,
     default: PreferredLanguage.EN_US,
   })
-  preferred_language: PreferredLanguage = PreferredLanguage.EN_US;
+  prefered_language: PreferredLanguage = PreferredLanguage.EN_US;
 
   @IsString()
   @IsOptional()
@@ -119,7 +119,7 @@ export class SignUpDto extends LoginDataDto {
   @ApiProperty({
     description: 'User address',
   })
-  address?: string;
+  address: string;
 
   @IsEnum(Role)
   @ApiProperty({

@@ -108,7 +108,7 @@ export class AuthService {
   }
 
   async registerUser(
-    { password, ...payload }: SignUpDto,
+    { password, birthdate, ...payload }: SignUpDto,
     createdBy?: string,
   ): Promise<User> {
     const user = await this.prismaService.user.findUnique({
@@ -122,6 +122,7 @@ export class AuthService {
     const newUser = await this.prismaService.user.create({
       data: {
         ...payload,
+        birthdate: birthdate ? new Date(birthdate) : undefined,
         password: bcrypt.hashSync(
           password,
           bcrypt.genSaltSync(
