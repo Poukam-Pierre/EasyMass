@@ -137,68 +137,6 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1 days
     });
   }
-  // @Post('/signup-admin')
-  // @Role(ROLE.ADMIN)
-  // @UseGuards(AdminGuard)
-  // signupAdmin(
-  //   @Body()
-  //   input: SignUpAdminDto,
-  // ) {
-  //   return this.authService.signupAdmin(input);
-  // }
-
-  // @Post('/refreshToken')
-  // refreshToken(@Body() refreshToken: RefreshToken) {
-  //   return this.authService.refreshToken(refreshToken);
-  // }
-
-  // @ApiOperation({
-  //   summary: 'Logout the user',
-  //   description:
-  //     'This endpoint logs out the user by invalidating the provided refresh token.',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Logout successful.',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Invalid refresh token.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'Error appears while logging out.',
-  // })
-  // @Post('/logout')
-  // logout(@Body() input: LogoutDataDto) {
-  //   return this.authService.logout(input);
-  // }
-
-  // @ApiOperation({
-  //   summary: 'Send a password reset email to the user',
-  //   description:
-  //     'This endpoint sends a password reset email to the user with the provided email address.',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Password reset email sent successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Invalid email address.',
-  // })
-  // @ApiResponse({
-  //   status: 404,
-  //   description: 'User not found.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'Error appears while sending password reset email.',
-  // })
-  // @Post('/forgot-password')
-  // forgotPassword(@Body() input: ForgotPasswordDto, @Req() request: Request) {
-  //   return this.authService.forgotPassword(input, request);
-  // }
 
   // // TODO: Upon deployement remove this logic and
   // // use request host to know what link is currently requesting
