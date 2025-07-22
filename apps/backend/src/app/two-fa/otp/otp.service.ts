@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { OTP, OtpUsage } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ITwoFAService } from '../two-fa.interface';
+import { generateOtp } from '../../../helpers/otp-generator';
 
 @Injectable()
 export class OTPService implements ITwoFAService<OTP> {
@@ -18,8 +19,7 @@ export class OTPService implements ITwoFAService<OTP> {
         code:
           this.configService.get('NODE_ENV') === 'test'
             ? '66666'
-            : // TODO: Build out a function to automatically generate code
-              Math.floor(Math.random() * 100000).toString(),
+            : generateOtp(5),
         expired_at: new Date(Date.now() + 300_000), //5 minutes
         User: { connect: { user_id: userId } },
       },
