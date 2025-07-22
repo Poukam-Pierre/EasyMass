@@ -1,4 +1,9 @@
-import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PickType,
+} from '@nestjs/swagger';
 import { PreferredLanguage, Role } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
@@ -128,3 +133,5 @@ export class SignUpDto extends LoginDataDto {
   })
   role: Role;
 }
+
+export class ForgotPasswordDto extends PickType(SignUpDto, ['email']) {}

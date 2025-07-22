@@ -6,6 +6,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 import { LocalStrategy } from './local/local.strategy';
 import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
+import { TwoFaModule } from '../two-fa/two-fa.module';
 
 @Module({
   providers: [AuthService, JwtStrategy, LocalStrategy],
@@ -18,6 +19,7 @@ import { PassportModule } from '@nestjs/passport';
       },
     }),
     PassportModule,
+    TwoFaModule,
     // ParishModule,
     // AdministratorModule,
     // PriestModule,
