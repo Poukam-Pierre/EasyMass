@@ -108,21 +108,21 @@ export class AuthController {
       res.status(HttpStatus.CREATED).json({
         message: 'User created successfully!',
       });
+    } else {
+      const tokens = await this.authService.login(user);
+
+      this.setCookies(tokens, res);
+
+      res.status(HttpStatus.CREATED).json(
+        new AccessTokenResponse({
+          access_token: tokens.access_token,
+          expires_in: 900000, //15 minutes,
+          issued_at: tokens.issued_at,
+          token_type: 'Bearer',
+          otp_id: tokens.otp_id,
+        }),
+      );
     }
-
-    const tokens = await this.authService.login(user);
-
-    this.setCookies(tokens, res);
-
-    res.status(HttpStatus.CREATED).json(
-      new AccessTokenResponse({
-        access_token: tokens.access_token,
-        expires_in: 900000, //15 minutes,
-        issued_at: tokens.issued_at,
-        token_type: 'Bearer',
-        otp_id: tokens.otp_id,
-      }),
-    );
   }
 
   /**
