@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpStatus,
   Post,
   Req,
@@ -11,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -21,16 +23,19 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Role, User } from '@prisma/client';
+import { OtpUsage, Role, User } from '@prisma/client';
 import { Request, Response } from 'express';
+import { OTPEntity, OTPPayloadDto } from '../two-fa/two-fa.dto';
 import { SkipAuth } from './auth.decorator';
 import {
   AccessTokenResponse,
   AuthTokensDto,
+  ForgotPasswordDto,
   LoginDataDto,
   SignUpDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
+import { IJWTPayload } from './jwt/jwt.strategy';
 import { LocalGuard } from './local/local.guard';
 
 @SkipAuth()
@@ -125,6 +130,87 @@ export class AuthController {
     }
   }
 
+  @Post('/refresh-token')
+  @ApiBadRequestResponse({ type: AccessTokenResponse })
+  @ApiOperation({
+    summary: 'Refresh the access token',
+  })
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.refresh_token;
+
+    if (!refreshToken) {
+      res.status(HttpStatus.FORBIDDEN).json({
+        statusCode: 403,
+        timestamp: new Date().toISOString(),
+        message: 'Refresh token not found.',
+        path: req.url,
+      });
+    } else {
+      const tokens = await this.authService.refreshAuthToken(refreshToken);
+
+      this.setCookies(tokens, res);
+
+      res.status(HttpStatus.CREATED).json(
+        new AccessTokenResponse({
+          access_token: tokens.access_token,
+          expires_in: 900000, //15 minutes,
+          issued_at: tokens.issued_at,
+          token_type: 'Bearer',
+        }),
+      );
+    }
+  }
+
+  @SkipAuth(false)
+  @ApiBearerAuth()
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  // @ApiOkResponse({ type: UserEntity })
+  async verifyEmail(@Req() req: Request, @Body() otpPayload: OTPPayloadDto) {
+    const user = req.user as User;
+
+    await this.authService.verifyEmail(user, otpPayload.code);
+
+    // TODO: return user entity build from user module
+    return user;
+  }
+
+  @Post('forgot-password')
+  @ApiCreatedResponse({ type: OTPEntity })
+  @ApiOperation({
+    summary: 'Request for reset password OTP.',
+  })
+  async requestTwoFA(@Body() payload: ForgotPasswordDto) {
+    const otp = await this.authService.requestForgotPasswordOTP(payload.email);
+
+    return new OTPEntity({ ...otp, usage: otp.usage as OtpUsage });
+  }
+
+  @Post('logout')
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
+    schema: { properties: { messaage: { type: 'string' } } },
+  })
+  @ApiOperation({
+    summary: 'Close user session.',
+  })
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(HttpStatus.OK).json({ message: 'Logged out successfully' });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const payload = this.jwtService.decode<IJWTPayload>(token);
+    // update database
+    await this.authService.logout(payload.sub);
+
+    // clear credentials from cookies
+    res.clearCookie('refresh_token');
+
+    res.status(HttpStatus.OK).json({ message: 'Logged out successfully' });
+  }
   /**
    * Set the refresh token cookie on the response.
    * @param tokens the tokens from the login response

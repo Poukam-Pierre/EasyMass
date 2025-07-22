@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,8 +12,9 @@ import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { IJWTPayload, TokenType } from './jwt/jwt.strategy';
-import { User } from '@prisma/client';
+import { OtpUsage, User } from '@prisma/client';
 import { AuthTokensDto, SignUpDto } from './auth.dto';
+import { OTPService } from '../two-fa/otp/otp.service';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +26,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly otpService: OTPService,
   ) {}
 
   /**
@@ -88,10 +91,15 @@ export class AuthService {
     let otpId: string | undefined;
     if (!user.is_account_verified) {
       this.logger.debug('Request otp for user...');
-      // TODO: set up requesting otp from otp service
+
+      const otpCode = await this.otpService.request(
+        user.user_id,
+        OtpUsage.VERIFY_EMAIL,
+      );
+
       // TODO: send otp by email
-      otpId = 'otp_id';
-      this.logger.debug('Successfully sent requested opt user!');
+      otpId = otpCode.otp_id;
+      this.logger.debug('Successfully sent requested opt user by mail:', otpId);
     }
 
     // create login log
@@ -107,6 +115,13 @@ export class AuthService {
     return this.generateTokens(user.user_id, otpId);
   }
 
+  /**
+   * Registers a new user in the system.
+   * @param payload The new user's data.
+   * @param createdBy The user ID of the user who created the new user.
+   * @returns The newly created user.
+   * @throws ConflictException if the email address is already taken.
+   */
   async registerUser(
     { password, birthdate, ...payload }: SignUpDto,
     createdBy?: string,
@@ -160,388 +175,117 @@ export class AuthService {
       otp_id: otpId,
     });
   }
-  // /**
-  //  * This function authenticate the users when login
-  //  * @param input
-  //  * @param role
-  //  * @returns all data needed.
-  //  */
-  // async authenticate(input: LoginDataDto, request:Request) {
-  //   const origin = request.headers['origin'];
-  //   const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
 
-  //   try {
-  //     const user = await this.validateUser(input, subdomain as string);
+  /**
+   * Generates new JWT tokens based on a valid refresh token.
+   * @param refreshToken - The refresh token to use when generating new tokens.
+   * @returns An instance of AuthTokensDto containing the new refresh and access tokens,
+   *          the issuance date, and optionally an OTP ID.
+   * @throws UnauthorizedException if the refresh token is invalid or the token payload is invalid.
+   */
+  async refreshAuthToken(refreshToken: string) {
+    let payload: IJWTPayload;
+    const type = AuthService.REFRESH_TOKEN_TYPE;
 
-  //     if (!user) {
-  //       throw new UnauthorizedException('unauthorized');
-  //     }
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+    } catch (error) {
+      // TODO: log user out if refresh token is invalid
+      console.log('refresh token is invalid', error);
+      throw new UnauthorizedException('Invalid refresh token');
+    }
 
-  //     if (user === 'Logged') {
-  //       throw new ConflictException('conflictLogin');
-  //     }
+    if (payload.type !== type)
+      throw new UnauthorizedException('Invalid token type!');
 
-  //     // Set up payload according to the subdomaine name
-  //     const tokenPayload = {
-  //       id: user.id,
-  //       email: user.email,
-  //       ...(subdomain === 'admin' && {
-  //         role: user.role,
-  //       }),
-  //     };
+    const log = await this.prismaService.log.findFirst({
+      orderBy: { login_at: 'desc' },
+      where: {
+        logout_at: null,
+        User: { user_id: payload.sub },
+      },
+    });
 
-  //     const accessToken = await this.JwtService.signAsync(tokenPayload);
-  //     const refreshToken = createId();
+    if (!log) throw new UnauthorizedException('Invalid token payload!');
 
-  //     // create refresh-token record
-  //     await this.refreshTokenService.create({
-  //       id: createId(),
-  //       refreshToken: refreshToken,
-  //       expiredDate: this.addOneDay(new Date()),
-  //       ...(subdomain === 'parish' && {
-  //         parishToken: {
-  //           connect: {
-  //             id: user.id,
-  //           },
-  //         },
-  //       }),
-  //       ...(subdomain === 'admin' && {
-  //         adminToken: {
-  //           connect: {
-  //             id: user.id,
-  //           },
-  //         },
-  //       }),
-  //     });
+    return this.generateTokens(payload.sub);
+  }
 
-  //     return {
-  //       statusCode: 200,
-  //       accessToken,
-  //       refreshToken,
-  //     };
-  //   } catch (error) {
-  //     console.log('Error while authenticating user :', error);
-  //     if (error instanceof ConflictException) {
-  //       throw new ConflictException(error.message);
-  //     }
-  //     if (error instanceof UnauthorizedException) {
-  //       throw new UnauthorizedException(error.message);
-  //     }
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
+  /**
+   * Verifies the email address of a user by OTP.
+   *
+   * @param user The user to verify email address for.
+   * @param code The OTP code sent to the user's email address.
+   *
+   * @throws NotFoundException if the OTP request is invalid.
+   * @throws UnauthorizedException if the OTP code is invalid.
+   * @returns The user with the verified email address.
+   */
+  async verifyEmail(user: User, code: string) {
+    const otp = await this.prismaService.oTP.findFirst({
+      orderBy: { created_at: 'desc' },
+      where: {
+        User: { user_id: user.user_id },
+        usage: OtpUsage.VERIFY_EMAIL,
+      },
+    });
 
-  // /**
-  //  * This function validate weither the parish user exists in db or not.
-  //  * Also check weither all user's credentials are valid or not.
-  //  * @param input
-  //  * @returns
-  //  */
-  // async validateUser(input: LoginDataDto, subdomain: string) {
-  //   const { email, password } = input;
-  //   let user = null;
-  //   const userId = {
-  //     adminId: null,
-  //     parishId: null,
-  //   };
+    if (!otp) {
+      throw new NotFoundException(
+        'Invalid OTP request was found! Please request for a new one.',
+      );
+    }
 
-  //   try {
-  //     if (subdomain === 'admin') {
-  //       user = await this.adminService.findOneByMail(email);
-  //       if (!user) return null;
-  //       userId['adminId'] = user.id;
-  //     }
+    const isVerified = await this.otpService.verify(
+      otp.otp_id,
+      code,
+      OtpUsage.VERIFY_EMAIL,
+    );
 
-  //     if (subdomain === 'parish') {
-  //       user = await this.parishService.findOneByMail(email);
-  //       if (!user) return null;
-  //       userId['parishId'] = user.id;
-  //     }
+    if (!isVerified)
+      throw new UnauthorizedException('Invalid onetime password!');
 
-  //     const { refreshToken } = await this.refreshTokenService.findFirstToken(
-  //       userId
-  //     );
+    return await this.prismaService.user.update({
+      where: { email: user.email },
+      data: { is_account_verified: true },
+    });
+  }
 
-  //     if (refreshToken && Object.values(refreshToken).length !== 0) {
-  //       if (refreshToken.createdAt >= new Date()) {
-  //         return 'Logged';
-  //       } else {
-  //         await this.refreshTokenService.remove(refreshToken.id);
-  //       }
-  //     }
+  /**
+   * Request a one-time password for password reset.
+   * @param email the email address of the user to request a password reset for
+   * @returns the OTP entity
+   * @throws NotFoundException if the user is not found
+   */
+  async requestForgotPasswordOTP(email: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
 
-  //     const validatePassword = await bcrypt.compare(password, user.password);
-  //     if (!validatePassword) {
-  //       return null;
-  //     }
-  //     return user;
-  //   } catch (error) {
-  //     console.log('Error appear while validating user credential :', error);
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
+    if (!user) throw new NotFoundException('User not found!');
 
-  // /**
-  //  * This function passes the input to the other validation function
-  //  * and just wait for the result to perform error actions. If any error occurs
-  //  * the function passes the result to signIn function and returns the result.
-  //  * to client side.
-  //  * @param input
-  //  * @returns successfull result object
-  //  */
-  // async signupAdmin(input: SignUpAdminDto): Promise<AdminDataDto | unknown> {
-  //   const user = await this.signupAdminValidation(input);
+    const otp = await this.otpService.request(
+      user.user_id,
+      OtpUsage.RESET_PASSWORD,
+    );
 
-  //   if (!user) {
-  //     throw new BadRequestException('Bad Request', {
-  //       cause: new Error(),
-  //       description: 'This account is already in use.',
-  //     });
-  //   }
-  //   return { code: 200, message: 'New administrator created successfully' };
-  // }
+    // TODO: Send otp by mail
 
-  // /**
-  //  * This function verifies the input from the db server. If the input exists,
-  //  * the function returns null. If the input does not exist, the function hash password
-  //  * and creates a new user account. Then returns the user object created.
-  //  * @param input
-  //  * @returns null or user object created
-  //  */
-  // async signUpPriestValidation(
-  //   input: SignUpDataDto
-  // ): Promise<PriestDataDto | null> {
-  //   const { email, password, authNumber } = input;
+    return otp;
+  }
 
-  //   const user = await this.priestService.findOneByAuthNumber(
-  //     email,
-  //     authNumber
-  //   );
-  //   if (user) return null;
-
-  //   try {
-  //     const hash = await bcrypt.hash(password, 10);
-  //     input.password = hash;
-
-  //     const newUser = await this.priestService.create(input);
-  //     delete newUser.password;
-  //     delete newUser.updatedAt;
-
-  //     return newUser;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException('serverError', {
-  //       cause: new Error(),
-  //       description:
-  //         'Error appears while processing hash and create new user into db.',
-  //     });
-  //   }
-  // }
-
-  // /**
-  //  * This function verifies the input from the db server. If the input exists,
-  //  * the function returns null. If the input does not exist, the function hash password
-  //  * and creates a new admin user account. Then returns the user object created.
-  //  * @param input
-  //  * @returns
-  //  */
-  // async signupAdminValidation(
-  //   input: SignUpAdminDto
-  // ): Promise<AdminDataDto | null> {
-  //   const { email, password } = input;
-  //   const user = await this.adminService.findOneByMail(email);
-
-  //   if (user) return null;
-
-  //   try {
-  //     const hash = await bcrypt.hash(password, 10);
-  //     input.password = hash;
-
-  //     const newUser = await this.adminService.create(input);
-  //     delete newUser.password;
-  //     delete newUser.updatedAt;
-
-  //     return newUser;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
-
-  // /**
-  //  * This function verifies if refreshToken exists from the refreshToken server.
-  //  * If not, responds with an error unauthorised else return a new access token
-  //  * and refresh token which will be stored in the database
-  //  * @param input all data received from client
-  //  * @returns  an object containing access token and refresh token
-  //  */
-  // async refreshToken(input: RefreshToken): Promise<NewTokens> {
-  //   const refreshData = await this.refreshTokenService.findOne(
-  //     input.refreshToken
-  //   );
-
-  //   if (!refreshData) {
-  //     throw new UnauthorizedException('Unauthorized refresh token', {
-  //       cause: new Error(),
-  //       description: 'User not authorized to refresh token!',
-  //     });
-  //   }
-
-  //   if (new Date(refreshData.expiredDate) <= new Date()) {
-  //     await this.refreshTokenService.remove(refreshData.id);
-
-  //     throw new UnauthorizedException('Unauthorized refresh token', {
-  //       cause: new Error(),
-  //       description: 'Refresh token expired. Please login!',
-  //     });
-  //   }
-
-  //   try {
-  //     const accessToken = await this.JwtService.signAsync({
-  //       id: input.id,
-  //       email: input.email,
-  //     });
-  //     const newRefreshToken = createId();
-
-  //     await this.refreshTokenService.update(refreshData.id, {
-  //       refreshToken: newRefreshToken,
-  //     });
-
-  //     return {
-  //       accessToken: accessToken,
-  //       refreshToken: newRefreshToken,
-  //     };
-  //   } catch (error) {
-  //     console.log('Error appear while refreshing token :', error);
-  //     if (error instanceof BadRequestException) {
-  //       throw new UnauthorizedException(error.message);
-  //     }
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
-
-  // /**
-  //  * This function verifies if refreshToken exists from the refreshToken server.
-  //  * If not, responds with an error unauthorised else delete the refreshToken data
-  //  * corresponding to the refreshToken user and retrun successfully message.
-  //  * @param refreshToken
-  //  * @returns
-  //  */
-  // async logout(input: LogoutDataDto) {
-  //   const { refreshToken } = input;
-  //   try {
-  //     const refreshData = await this.refreshTokenService.findOne(refreshToken);
-
-  //     if (!refreshData) {
-  //       throw new UnauthorizedException('unauthorizerRefreshToken');
-  //     }
-  //     await this.refreshTokenService.remove(refreshData.id);
-
-  //     return { code: 200, message: 'Disconnect token successfully!' };
-  //   } catch (error) {
-  //     console.log('Error arise while disconnection');
-  //     if (error instanceof UnauthorizedException) {
-  //       throw new UnauthorizedException(error.message);
-  //     }
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
-
-  // /**
-  //  * This function is responsible to add days in the actual one.
-  //  * @param date
-  //  * @returns  a future object date.
-  //  */
-  // private addOneDay(date: Date): Date {
-  //   const newDate = new Date(date);
-  //   newDate.setDate(newDate.getDate() + 1);
-  //   return newDate;
-  // }
-
-  // /**
-  //  * This function is responsible to send a password reset email to the user
-  //  * @param input
-  //  * @returns
-  //  */
-  // async forgotPassword(input: ForgotPasswordDto, request:Request) {
-  //   const origin = request.headers['origin'];
-  //   const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
-
-  //   const { email } = input;
-  //   let user;
-  //   const userId = {};
-  //   try {
-  //     if (subdomain === 'admin') {
-  //       user = await this.adminService.findOneByMail(email);
-  //       if (!user) throw new NotFoundException('notFound');
-
-  //       userId['adminId'] = user.id;
-  //     }
-
-  //     if (subdomain === 'parish') {
-  //       user = await this.parishService.findOneByMail(email);
-  //       if (!user) throw new NotFoundException('notFound');
-
-  //       userId['adminId'] = user.id;
-  //     }
-
-  //     // update all previous OTPs to isUsed = true
-  //     await this.prismaService.otp.updateMany({
-  //       where: userId,
-  //       data: {
-  //         isUsed: true,
-  //       },
-  //     });
-
-  //     const { code } = await this.prismaService.otp.create({
-  //       data: {
-  //         otp_id: createId(),
-  //         code: createId(),
-  //         isUsed: false,
-  //         expiredAt: new Date(new Date().getTime() + 10 * 60000), // 10 minutes from now
-  //         ...(subdomain === 'admin' && {
-  //           admin: {
-  //             connect: {
-  //               id: user.id,
-  //             },
-  //           },
-  //         }),
-  //         ...(subdomain === 'parish' && {
-  //           parish: {
-  //             connect: {
-  //               id: user.id,
-  //             },
-  //           },
-  //         }),
-  //       },
-  //     });
-  //     const OTP_MESSAGE = `Dear ${user.name},
-  //     We have received a request to reset your password. Please use the following link to reset your password:
-
-  //     ${
-  //       subdomain === 'admin'
-  //         ? process.env.NEXT_PUBLIC_ADMIN_URL
-  //         : process.env.NEXT_PUBLIC_PARISH_URL
-  //     }/recovery/${code}/new-password
-
-  //     If you did not request this, please ignore this email.
-  //     This link will expire in 10 minutes.
-
-  //     Thank you,
-  //     Your Team`;
-  //     // TODO: send email to the user with OTP_MESSAGE
-  //     console.log(OTP_MESSAGE);
-
-  //     return {
-  //       statusCode: 200,
-  //       message: 'otpSend',
-  //     };
-  //   } catch (error) {
-  //     console.log('Error while resetting password', error);
-  //     if (error instanceof NotFoundException) {
-  //       throw new NotFoundException(error.message);
-  //     }
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
+  /**
+   * Logs out a user by updating their login log with the current date and time.
+   * @param userId - The ID of the user to log out.
+   */
+  async logout(userId: string) {
+    await this.prismaService.log.updateMany({
+      data: { logout_at: new Date() },
+      where: { user_id: userId, logout_at: null },
+    });
+  }
 
   // /**
   //  * This function is responsible to reset the password of the user
