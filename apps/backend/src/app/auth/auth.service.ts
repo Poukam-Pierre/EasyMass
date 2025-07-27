@@ -245,7 +245,7 @@ export class AuthService {
     );
 
     if (!isVerified)
-      throw new UnauthorizedException('Invalid onetime password!');
+      throw new UnauthorizedException('Invalid or expired onetime password!');
 
     return await this.prismaService.user.update({
       where: { email: user.email },
@@ -272,6 +272,7 @@ export class AuthService {
     );
 
     // TODO: Send otp by mail
+    console.log('Successfully sent requested opt user by mail:', otp.code);
 
     return otp;
   }
