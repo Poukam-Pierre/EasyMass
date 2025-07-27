@@ -1,7 +1,14 @@
 import { ApiHideProperty, ApiProperty, PickType } from '@nestjs/swagger';
 import { OTP, OtpUsage } from '@prisma/client';
 import { Exclude } from 'class-transformer';
-import { IsBoolean, IsDate, IsEnum, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsNumberString,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class OTPEntity implements OTP {
   @ApiProperty()
@@ -49,7 +56,8 @@ export class OTPPayloadDto {
   otp_id: string;
 
   @ApiProperty()
-  @IsString()
+  @IsNumberString()
+  @Length(5)
   code: string;
 
   constructor(props: OTPPayloadDto) {
