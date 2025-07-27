@@ -8,14 +8,6 @@ datasource db {
 }
 
 // OLD SCHEMA VERSION
-model Believer {
-  id          String        @id @unique @default(cuid())
-  email       String
-  name        String?
-  mass        Mass[]
-  massOrder   MassOrder[]
-  transaction Transaction[]
-}
 
 model Mass {
   id                 Int                  @id @default(autoincrement())
@@ -28,9 +20,6 @@ model Mass {
   priestId           Int?
   believerId         String?
   processAt          DateTime
-  createdByBeliever  Believer?            @relation(fields: [believerId], references: [id])
-  createdByParish    Parish?              @relation(fields: [parishId], references: [id])
-  assignedToPriest   Priest?              @relation(fields: [priestId], references: [id])
   MassOrderHasMasses MassOrderHasMasses[]
 }
 
@@ -49,15 +38,14 @@ model MassOrder {
   intension          String
   believerId         String
   price              Int
-  orderByBeliever    Believer             @relation(fields: [believerId], references: [id])
   MassOrderHasMasses MassOrderHasMasses[]
 }
 
 model Transaction {
-  id            Int       @id @default(autoincrement())
-  transactionId String    @unique @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            Int      @id @default(autoincrement())
+  transactionId String   @unique @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   price         Int
   status        Status
   priestId      Int?
@@ -65,69 +53,6 @@ model Transaction {
   believerId    String?
   currency      String
   paymentMethod String
-  believer      Believer? @relation(fields: [believerId], references: [id])
-  initByParish  Parish?   @relation(fields: [parishId], references: [id])
-  initByPriest  Priest?   @relation(fields: [priestId], references: [id])
-}
-
-model Priest {
-  id           Int                  @id @default(autoincrement())
-  firstName    String
-  secondName   String
-  image        String?
-  birthDate    String
-  phone        String
-  authNumber   String               @unique
-  authCardImge String?
-  availability Boolean              @default(false)
-  email        String               @unique
-  souscribeAt  DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  password     String
-  balance      Int                  @default(0)
-  receiverId   String?              @unique
-  mass         Mass[]
-  notif        NotificationPriest[]
-  refleshToken RefreshToken[]
-  transaction  Transaction[]
-}
-
-model Parish {
-  id             Int                  @id @default(autoincrement())
-  name           String
-  email          String               @unique
-  phone          String
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  password       String
-  adminId        Int
-  balance        Int                  @default(0)
-  receiverId     String?              @unique
-  city_id        String
-  manager_name   String
-  is_deleted     Boolean              @default(false)
-  deletedAt      DateTime?
-  deletedByAdmin Administrator?       @relation(name: "deleteParish", fields: [adminId], references: [id])
-  mass           Mass[]
-  notif          NotificationParish[]
-  createdByAdmin Administrator?       @relation(name: "createParish", fields: [adminId], references: [id], map: "Parish_adminId_create_fkey")
-  city           City                 @relation(fields: [city_id], references: [city_id])
-  refleshToken   RefreshToken[]
-  transaction    Transaction[]
-}
-
-model Administrator {
-  id             Int            @id @default(autoincrement())
-  name           String
-  email          String         @unique
-  password       String
-  phone          String
-  role           Role
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  parishCreation Parish[]       @relation("createParish")
-  refleshToken   RefreshToken[]
-  ParishDeletion Parish[]       @relation("deleteParish")
 }
 
 model Notification {
@@ -145,7 +70,6 @@ model NotificationParish {
   notifId  Int
   parishId Int
   notif    Notification @relation(fields: [notifId], references: [id])
-  parish   Parish       @relation(fields: [parishId], references: [id])
 }
 
 model NotificationPriest {
@@ -154,28 +78,23 @@ model NotificationPriest {
   notifId  Int
   priestId Int
   notif    Notification @relation(fields: [notifId], references: [id])
-  priest   Priest       @relation(fields: [priestId], references: [id])
 }
 
 model RefreshToken {
-  id           String         @id
-  refreshToken String         @unique
+  id           String   @id
+  refreshToken String   @unique
   expiredDate  DateTime
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   priestId     Int?
   parishId     Int?
   adminId      Int?
-  adminToken   Administrator? @relation(fields: [adminId], references: [id])
-  parishToken  Parish?        @relation(fields: [parishId], references: [id])
-  priestToken  Priest?        @relation(fields: [priestId], references: [id])
 }
 
 model City {
-  city_id   String   @id @default(cuid())
+  city_id   String @id @default(cuid())
   city_name String
-  country   String   @default("Cameroon")
-  parish    Parish[]
+  country   String @default("Cameroon")
 
   @@unique([city_name, country])
 }
