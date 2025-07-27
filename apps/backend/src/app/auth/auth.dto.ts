@@ -5,7 +5,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { PreferredLanguage, Role } from '@prisma/client';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsDateString,
   IsEmail,
@@ -15,9 +15,42 @@ import {
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
+  ValidateIf,
 } from 'class-validator';
 import { OTPPayloadDto } from '../two-fa/two-fa.dto';
+import { UnprocessableEntityException } from '@nestjs/common';
 
+function IsRequiredForRoles() {
+  return ValidateIf(
+    (o) =>
+      o.role === Role.PARISH ||
+      o.role === Role.PRIEST ||
+      o.role === Role.ENGENEER,
+  );
+}
+function IsPasswordStrongEnough() {
+  return IsStrongPassword(
+    {
+      minLength: 4,
+      minLowercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+      minUppercase: 1,
+    },
+    {
+      message: () => {
+        throw new UnprocessableEntityException(
+          'Provided password not strong enough',
+          {
+            cause: new Error(),
+            description:
+              'Provided password not strong enough. Add at least 4 characters, 1 lowercase, 1 number, 1 symbols, 1 uppercase',
+          },
+        );
+      },
+    },
+  );
+}
 export class AuthTokensDto {
   @IsJWT()
   @IsString()
@@ -59,7 +92,7 @@ export class AccessTokenResponse extends OmitType(AuthTokensDto, [
 }
 
 export class LoginDataDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Please enter a valid email' })
   @Transform(({ value }) => value.trim().toLowerCase())
   @ApiProperty({
     description: 'Valid user email',
@@ -67,7 +100,7 @@ export class LoginDataDto {
   email: string;
 
   @IsString()
-  @IsStrongPassword()
+  @IsPasswordStrongEnough()
   @ApiProperty({
     description: 'Strong password',
   })
@@ -80,6 +113,8 @@ export class LoginDataDto {
 
 export class SignUpDto extends LoginDataDto {
   @IsString()
+  @IsOptional()
+  @IsRequiredForRoles()
   @ApiProperty({
     description: 'user first name',
   })
@@ -90,22 +125,32 @@ export class SignUpDto extends LoginDataDto {
   @ApiProperty({
     description: 'user last name',
   })
-  last_name?: string;
+  last_name: string;
 
   @IsPhoneNumber()
+  @IsOptional()
+  @IsRequiredForRoles()
   @ApiProperty({
     description: 'Valid user phone number',
+    example: '+237696841451',
   })
   phone_number: string;
 
   @IsDateString()
   @IsOptional()
+  @ValidateIf((o) => o.role === Role.PRIEST)
   @ApiProperty({
     description: ' User date birth',
+    example: '27/07/2025',
   })
-  birthdate?: Date;
+  @Type(() => Date)
+  birthdate: Date;
 
-  @IsEnum(PreferredLanguage)
+  @IsEnum(PreferredLanguage, {
+    message: `Unsupported prefered language. Supported languages are: ${Object.values(
+      PreferredLanguage,
+    ).join(', ')}`,
+  })
   @IsOptional()
   @ApiProperty({
     enum: PreferredLanguage,
@@ -114,20 +159,26 @@ export class SignUpDto extends LoginDataDto {
   prefered_language: PreferredLanguage = PreferredLanguage.EN_US;
 
   @IsString()
+  @ValidateIf((o) => o.role === Role.PARISH)
   @IsOptional()
   @ApiProperty({
     description: 'user manager name',
   })
-  manager_name?: string;
+  manager_name: string;
 
   @IsString()
   @IsOptional()
+  @IsRequiredForRoles()
   @ApiProperty({
     description: 'User address',
   })
   address: string;
 
-  @IsEnum(Role)
+  @IsEnum(Role, {
+    message: `Unsupported user role. Supported roles are: ${Object.values(
+      Role,
+    ).join(', ')}`,
+  })
   @ApiProperty({
     enum: Role,
     description: 'User role',
@@ -138,10 +189,10 @@ export class SignUpDto extends LoginDataDto {
 export class ForgotPasswordDto extends PickType(SignUpDto, ['email']) {}
 
 export class ResetPasswordDto extends OTPPayloadDto {
-  @IsString()
-  @IsStrongPassword()
+  @IsPasswordStrongEnough()
   @ApiProperty({
     description: 'Strong password',
+    example: 'EasyMess@123',
   })
   new_password: string;
 }
