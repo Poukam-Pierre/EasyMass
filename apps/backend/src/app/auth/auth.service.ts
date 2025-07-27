@@ -13,7 +13,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { IJWTPayload, TokenType } from './jwt/jwt.strategy';
 import { OtpUsage, User } from '@prisma/client';
-import { AuthTokensDto, SignUpDto } from './auth.dto';
+import { AuthTokensDto, ResetPasswordDto, SignUpDto } from './auth.dto';
 import { OTPService } from '../two-fa/otp/otp.service';
 
 @Injectable()
@@ -287,70 +287,38 @@ export class AuthService {
     });
   }
 
-  // /**
-  //  * This function is responsible to reset the password of the user
-  //  * @param input
-  //  * @returns
-  //  */
-  // async resetPassword(input: ResetPasswordDto, request:Request) {
-  //   const { newPassword, token } = input;
-  //   const origin = request.headers['origin'];
-  //   const subdomain = origin ? new URL(origin).hostname.split('.')[0] : null;
+  async resetPassword({ code, new_password, otp_id }: ResetPasswordDto) {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OTP: {
+          some: {
+            otp_id,
+          },
+        },
+      },
+    });
 
-  //   try {
-  //     const otp = await this.prismaService.otp.findFirst({
-  //       where: {
-  //         code: token,
-  //         isUsed: false,
-  //         expiredAt: {
-  //           gte: new Date(),
-  //         },
-  //       },
-  //       select: {
-  //         ...(subdomain === 'admin' && {
-  //           admin: {
-  //             select: {
-  //               id: true,
-  //             },
-  //           },
-  //         }),
-  //         ...(subdomain === 'parish' && {
-  //           parish: {
-  //             select: {
-  //               id: true,
-  //             },
-  //           },
-  //         }),
-  //       },
-  //     });
+    if (!user) throw new NotFoundException('OTP code not found!');
 
-  //     if (!otp) {
-  //       throw new NotFoundException('oTPExpiredOrInvalid');
-  //     }
-  //     const hash = await bcrypt.hash(newPassword, 10);
+    const isVerified = await this.otpService.verify(
+      otp_id,
+      code,
+      OtpUsage.RESET_PASSWORD,
+    );
 
-  //     if (subdomain === 'admin') {
-  //       await this.adminService.update(otp.admin.id, {
-  //         password: hash,
-  //       });
-  //     }
+    if (!isVerified)
+      throw new UnauthorizedException('Invalid or expired onetime password!');
 
-  //     if (subdomain === 'parish') {
-  //       await this.parishService.updateParish(otp.admin.id, {
-  //         password: hash,
-  //       });
-  //     }
-
-  //     return {
-  //       statusCode: 200,
-  //       message: 'passwordChanged',
-  //     };
-  //   } catch (error) {
-  //     console.log('Error while resetting password', error);
-  //     if (error instanceof NotFoundException) {
-  //       throw new NotFoundException(error.message);
-  //     }
-  //     throw new InternalServerErrorException('serverError');
-  //   }
-  // }
+    await this.prismaService.user.update({
+      where: { user_id: user.user_id },
+      data: {
+        password: bcrypt.hashSync(
+          new_password,
+          bcrypt.genSaltSync(
+            Number(this.configService.get<number>('SALT_ROUNDS')),
+          ),
+        ),
+      },
+    });
+  }
 }

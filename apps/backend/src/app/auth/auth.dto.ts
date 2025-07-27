@@ -16,6 +16,7 @@ import {
   IsString,
   IsStrongPassword,
 } from 'class-validator';
+import { OTPPayloadDto } from '../two-fa/two-fa.dto';
 
 export class AuthTokensDto {
   @IsJWT()
@@ -135,3 +136,12 @@ export class SignUpDto extends LoginDataDto {
 }
 
 export class ForgotPasswordDto extends PickType(SignUpDto, ['email']) {}
+
+export class ResetPasswordDto extends OTPPayloadDto {
+  @IsString()
+  @IsStrongPassword()
+  @ApiProperty({
+    description: 'Strong password',
+  })
+  new_password: string;
+}

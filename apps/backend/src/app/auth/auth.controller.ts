@@ -17,6 +17,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
   ApiOperation,
   ApiPreconditionFailedResponse,
   ApiResponse,
@@ -32,6 +33,7 @@ import {
   AuthTokensDto,
   ForgotPasswordDto,
   LoginDataDto,
+  ResetPasswordDto,
   SignUpDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
@@ -211,6 +213,14 @@ export class AuthController {
 
     res.status(HttpStatus.OK).json({ message: 'Logged out successfully' });
   }
+
+  @Post('/reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
+  async resetPassword(@Body() payload: ResetPasswordDto) {
+    await this.authService.resetPassword(payload);
+  }
+
   /**
    * Set the refresh token cookie on the response.
    * @param tokens the tokens from the login response
