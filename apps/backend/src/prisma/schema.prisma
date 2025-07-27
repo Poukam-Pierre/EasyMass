@@ -90,7 +90,6 @@ model Priest {
   notif        NotificationPriest[]
   refleshToken RefreshToken[]
   transaction  Transaction[]
-  otp          otp[]
 }
 
 model Parish {
@@ -115,7 +114,6 @@ model Parish {
   city           City                 @relation(fields: [city_id], references: [city_id])
   refleshToken   RefreshToken[]
   transaction    Transaction[]
-  otp            otp[]
 }
 
 model Administrator {
@@ -129,7 +127,6 @@ model Administrator {
   updatedAt      DateTime       @updatedAt
   parishCreation Parish[]       @relation("createParish")
   refleshToken   RefreshToken[]
-  otp            otp[]
   ParishDeletion Parish[]       @relation("deleteParish")
 }
 
@@ -181,20 +178,6 @@ model City {
   parish    Parish[]
 
   @@unique([city_name, country])
-}
-
-model otp {
-  otp_id    String         @id @default(cuid())
-  code      String
-  createdAt DateTime       @default(now())
-  expiredAt DateTime
-  isUsed    Boolean        @default(false)
-  adminId   Int?
-  parishId  Int?
-  priestId  Int?
-  admin     Administrator? @relation(fields: [adminId], references: [id])
-  parish    Parish?        @relation(fields: [parishId], references: [id])
-  priest    Priest?        @relation(fields: [priestId], references: [id])
 }
 
 enum MassType {
