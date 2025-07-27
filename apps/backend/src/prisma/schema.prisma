@@ -7,14 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Believer {
-  id          String        @id @unique @default(cuid())
-  email       String
-  name        String?
-  mass        Mass[]
-  massOrder   MassOrder[]
-  transaction Transaction[]
-}
+// OLD SCHEMA VERSION
 
 model Mass {
   id                 Int                  @id @default(autoincrement())
@@ -27,9 +20,6 @@ model Mass {
   priestId           Int?
   believerId         String?
   processAt          DateTime
-  createdByBeliever  Believer?            @relation(fields: [believerId], references: [id])
-  createdByParish    Parish?              @relation(fields: [parishId], references: [id])
-  assignedToPriest   Priest?              @relation(fields: [priestId], references: [id])
   MassOrderHasMasses MassOrderHasMasses[]
 }
 
@@ -48,15 +38,14 @@ model MassOrder {
   intension          String
   believerId         String
   price              Int
-  orderByBeliever    Believer             @relation(fields: [believerId], references: [id])
   MassOrderHasMasses MassOrderHasMasses[]
 }
 
 model Transaction {
-  id            Int       @id @default(autoincrement())
-  transactionId String    @unique @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            Int      @id @default(autoincrement())
+  transactionId String   @unique @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   price         Int
   status        Status
   priestId      Int?
@@ -64,72 +53,6 @@ model Transaction {
   believerId    String?
   currency      String
   paymentMethod String
-  believer      Believer? @relation(fields: [believerId], references: [id])
-  initByParish  Parish?   @relation(fields: [parishId], references: [id])
-  initByPriest  Priest?   @relation(fields: [priestId], references: [id])
-}
-
-model Priest {
-  id           Int                  @id @default(autoincrement())
-  firstName    String
-  secondName   String
-  image        String?
-  birthDate    String
-  phone        String
-  authNumber   String               @unique
-  authCardImge String?
-  availability Boolean              @default(false)
-  email        String               @unique
-  souscribeAt  DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  password     String
-  balance      Int                  @default(0)
-  receiverId   String?              @unique
-  mass         Mass[]
-  notif        NotificationPriest[]
-  refleshToken RefreshToken[]
-  transaction  Transaction[]
-  otp          otp[]
-}
-
-model Parish {
-  id             Int                  @id @default(autoincrement())
-  name           String
-  email          String               @unique
-  phone          String
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  password       String
-  adminId        Int
-  balance        Int                  @default(0)
-  receiverId     String?              @unique
-  city_id        String
-  manager_name   String
-  is_deleted     Boolean              @default(false)
-  deletedAt      DateTime?
-  deletedByAdmin Administrator?       @relation(name: "deleteParish", fields: [adminId], references: [id], map: "Parish_adminId_delete_fkey")
-  mass           Mass[]
-  notif          NotificationParish[]
-  createdByAdmin Administrator?       @relation(name: "createParish", fields: [adminId], references: [id], map: "Parish_adminId_create_fkey")
-  city           City                 @relation(fields: [city_id], references: [city_id])
-  refleshToken   RefreshToken[]
-  transaction    Transaction[]
-  otp            otp[]
-}
-
-model Administrator {
-  id             Int            @id @default(autoincrement())
-  name           String
-  email          String         @unique
-  password       String
-  phone          String
-  role           Role
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  parishCreation Parish[]       @relation("createParish")
-  refleshToken   RefreshToken[]
-  otp            otp[]
-  ParishDeletion Parish[]       @relation("deleteParish")
 }
 
 model Notification {
@@ -147,7 +70,6 @@ model NotificationParish {
   notifId  Int
   parishId Int
   notif    Notification @relation(fields: [notifId], references: [id])
-  parish   Parish       @relation(fields: [parishId], references: [id])
 }
 
 model NotificationPriest {
@@ -156,44 +78,25 @@ model NotificationPriest {
   notifId  Int
   priestId Int
   notif    Notification @relation(fields: [notifId], references: [id])
-  priest   Priest       @relation(fields: [priestId], references: [id])
 }
 
 model RefreshToken {
-  id           String         @id
-  refreshToken String         @unique
+  id           String   @id
+  refreshToken String   @unique
   expiredDate  DateTime
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   priestId     Int?
   parishId     Int?
   adminId      Int?
-  adminToken   Administrator? @relation(fields: [adminId], references: [id])
-  parishToken  Parish?        @relation(fields: [parishId], references: [id])
-  priestToken  Priest?        @relation(fields: [priestId], references: [id])
 }
 
 model City {
-  city_id   String   @id @default(cuid())
+  city_id   String @id @default(cuid())
   city_name String
-  country   String   @default("Cameroon")
-  parish    Parish[]
+  country   String @default("Cameroon")
 
   @@unique([city_name, country])
-}
-
-model otp {
-  otp_id    String         @id @default(cuid())
-  code      String
-  createdAt DateTime       @default(now())
-  expiredAt DateTime
-  isUsed    Boolean        @default(false)
-  adminId   Int?
-  parishId  Int?
-  priestId  Int?
-  admin     Administrator? @relation(fields: [adminId], references: [id])
-  parish    Parish?        @relation(fields: [parishId], references: [id])
-  priest    Priest?        @relation(fields: [priestId], references: [id])
 }
 
 enum MassType {
@@ -211,7 +114,94 @@ enum Status {
   INIT
 }
 
+// NEW SCHEMA VERSION
+
+model User {
+  user_id                    String            @id @default(cuid()) @db.VarChar(36)
+  first_name                 String?           @db.VarChar(45) // Main name uses by all user (believer/parish/admin/priest)
+  last_name                  String?           @db.VarChar(45)
+  email                      String            @unique @db.VarChar(100)
+  password                   String?           @db.VarChar(255)
+  phone_number               String?           @db.VarChar(45)
+  is_account_verified        Boolean?          @db.Boolean // Has been verified by email
+  birthdate                  DateTime?         @db.Date
+  created_at                 DateTime          @default(now()) @db.Timestamp
+  prefered_language          PreferredLanguage @default(EN_US)
+  is_active                  Boolean           @default(true) @db.Boolean // Identify all user which ca use the platform
+  notify_mass_recommendation Boolean?          @default(true) @db.Boolean
+  notify_on_platform_updates Boolean?          @default(true) @db.Boolean
+  manager_name               String?           @db.VarChar(45)
+  deleted_at                 DateTime?         @db.Timestamp
+  balance                    Float?
+  profile_ref                String?           @db.VarChar(255)
+  address                    String?           @db.VarChar(90)
+  role                       Role
+  created_by                 String?           @db.VarChar(36)
+  CreatedBy                  User?             @relation("userTouser", fields: [created_by], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_User_User1")
+  User                       User[]            @relation("userTouser")
+  OTP                        OTP[]
+  Log                        Log[]
+
+  @@index([created_by], map: "fk_User_User1_idx")
+  @@map("users")
+}
+
+model OTP {
+  otp_id      String    @id @default(cuid()) @db.VarChar(36)
+  code        String    @db.VarChar(6)
+  created_at  DateTime  @default(now()) @db.Timestamp()
+  expired_at  DateTime  @db.Timestamp()
+  is_verified Boolean   @default(false) @db.Boolean
+  usage       OtpUsage
+  updated_at  DateTime? @db.Timestamp()
+  user_id     String    @db.VarChar(36)
+  User        User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_OTP_User1")
+
+  @@index([user_id], map: "fk_OTP_User1_idx")
+  @@map("otps")
+}
+
+model Log {
+  log_id    String     @id @default(cuid()) @db.VarChar(36)
+  login_at  DateTime   @default(now()) @db.Timestamp()
+  logout_at DateTime?  @db.Timestamp()
+  method    AuthMethod @default(LOCAL)
+  user_id   String     @db.VarChar(36)
+  User      User       @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Log_User1")
+
+  @@index([user_id], map: "fk_Log_User1_idx")
+  @@map("logs")
+}
+
+enum PreferredLanguage {
+  EN_US @map("en-US")
+  FR    @map("fr")
+
+  @@map("preferred_language")
+}
+
 enum Role {
-  ENGENEER
-  ADMIN
+  ENGENEER @map("engeneer")
+  ADMIN    @map("admin")
+  PARISH   @map("parish")
+  BELIEVER @map("believer")
+  PRIEST   @map("priest")
+
+  @@map("roles")
+}
+
+enum OtpUsage {
+  RESET_PASSWORD       @map("reset_password")
+  VERIFY_EMAIL         @map("verify_email")
+  VALIDATE_TRANSACTION @map("validate_transaction")
+
+  @@map("otp_usage")
+}
+
+enum AuthMethod {
+  LOCAL    @map("local")
+  GOOGLE   @map("google")
+  FACEBOOK @map("facebook")
+
+  @@map("auth_method")
 }

@@ -39,6 +39,7 @@ testem.log
 .DS_Store
 Thumbs.db
 migration.sql
+.nx/*
 .nx/cache
 .nx/workspace-data
 .github/workflows
@@ -47,4 +48,4 @@ migration.sql
 # Next.js
 .next
 out
-.env
+.env.local
