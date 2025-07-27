@@ -167,14 +167,15 @@ export class AuthController {
   @ApiBearerAuth()
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
-  // @ApiOkResponse({ type: UserEntity })
   async verifyEmail(@Req() req: Request, @Body() otpPayload: OTPPayloadDto) {
     const user = req.user as User;
 
-    await this.authService.verifyEmail(user, otpPayload.code);
+    const verifyedUser = await this.authService.verifyEmail(
+      user,
+      otpPayload.code,
+    );
 
-    // TODO: return user entity build from user module
-    return user;
+    return verifyedUser;
   }
 
   @Post('forgot-password')
@@ -233,29 +234,4 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000, // 1 days
     });
   }
-
-  // // TODO: Upon deployement remove this logic and
-  // // use request host to know what link is currently requesting
-
-  // @ApiOperation({
-  //   summary: 'Reset the user password',
-  //   description:
-  //     'This endpoint resets the user password using the provided token and new password.',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Password reset successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Invalid token or password.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'Error appears while resetting password.',
-  // })
-  // @Post('/reset-password')
-  // resetPassword(@Body() input: ResetPasswordDto, @Req() request: Request) {
-  //   return this.authService.resetPassword(input, request);
-  // }
 }
