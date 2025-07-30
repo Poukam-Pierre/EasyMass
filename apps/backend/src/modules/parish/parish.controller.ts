@@ -1,182 +1,245 @@
-import { Controller } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import {
+  ApiAcceptedResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Role, User } from '@prisma/client';
+import { Request, Response } from 'express';
+import { RoleEnum, Roles } from '../../app/auth/auth.decorator';
+import { AuthService } from '../../app/auth/auth.service';
+import { CreateParishDto, ParishDto, UpdateParishDto } from './parish.dto';
 import { ParishService } from './parish.service';
+import dayjs from 'dayjs';
+import { first } from 'rxjs';
 
 @Controller('parishes')
 @ApiTags('Parishes')
 export class ParishController {
-  constructor(private readonly parishService: ParishService) {}
+  constructor(
+    private readonly parishService: ParishService,
+    private readonly authService: AuthService,
+  ) {}
 
-  // @ApiOperation({
-  //   summary: 'Get all parishes',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Parishes retrieved successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Get()
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // findAll() {
-  //   return this.parishService.findAll();
-  // }
+  @Get()
+  @Roles(RoleEnum.ADMIN, RoleEnum.ENGENEER)
+  @ApiAcceptedResponse({ type: ParishDto })
+  async getAllParishes(@Req() req: Request, @Res() res: Response) {
+    const { user_id, role } = req.user as User;
 
-  // @ApiOperation({
-  //   summary: 'Retrieve all masses with their parish',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Masses retreive successfully',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description: 'Internal server error',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @Get('/masses')
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // findAllMasses() {
-  //   return this.parishService.findAllMasses();
-  // }
+    let parishes = null;
+    if (role === Role.ADMIN) {
+      parishes = await this.parishService.findAll();
+    }
+    if (role === Role.ADMIN) {
+      parishes = await this.parishService.findAll(user_id);
+    }
 
-  // @ApiOperation({
-  //   summary: 'Get all cities',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Cities retrieves successfully',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Get('/cities')
-  // @UseGuards(AuthGuard)
-  // getAllCities() {
-  //   return this.parishService.findAllCities();
-  // }
+    if (parishes && parishes.length === 0) {
+      throw new NotFoundException('None parish found!');
+    }
 
-  // @ApiOperation({
-  //   summary: 'get such parish informations and its statistics',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Parish statistics retrieves successfully',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Get(':parish_id')
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // findOne(@Param('parish_id') parish_id: string) {
-  //   return this.parishService.findParish(+parish_id);
-  // }
+    res.status(HttpStatus.FOUND).json(
+      parishes?.map(
+        (item) =>
+          new ParishDto({
+            ...item,
+            first_name: item.first_name as string,
+            phone_number: item.phone_number as string,
+            address: item.address as string,
+            manager_name: item.manager_name as string,
+          }),
+      ),
+    );
+  }
 
-  // @ApiOperation({
-  //   summary: 'Update parish data',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Parish updated successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Patch(':id')
-  // @UseGuards(AuthGuard)
-  // updateParish(
-  //   @Param('id') id: string,
-  //   @Body() updateParishDto: UpdateParishData
-  // ) {
-  //   return this.parishService.updateParish(+id, updateParishDto);
-  // }
+  @Get(':parish_id')
+  @Roles(RoleEnum.ADMIN, RoleEnum.ENGENEER)
+  @ApiOkResponse({
+    description: 'Parish retrieved successfully.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Parish not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request. Invalid parish ID.',
+  })
+  @ApiAcceptedResponse({ type: ParishDto })
+  async findOne(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('parish_id') parish_id: string,
+  ) {
+    const { user_id, role } = req.user as User;
 
-  // @ApiOperation({
-  //   summary: 'Delete a parish',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Parish deleted successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Delete(':id')
-  // @UseGuards(AuthGuard)
-  // remove(@Param('id') id: string, @Request() request) {
-  //   return this.parishService.remove(+id, request);
-  // }
+    let parish = null;
+    if (role === Role.ADMIN) {
+      parish = await this.parishService.getCreatedparish(parish_id);
+    }
+    if (role === Role.ENGENEER) {
+      parish = await this.parishService.getCreatedparish(parish_id, user_id);
+    }
+    if (!parish) {
+      throw new NotFoundException('Parish not found');
+    }
 
-  // @ApiOperation({
-  //   summary: 'Create a new parish with the given data',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Unauthorized. Token is missing or invalid.',
-  // })
-  // @ApiResponse({
-  //   status: 403,
-  //   description:
-  //     'Forbidden. You do not have permission to access this resource.',
-  // })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'Parish created successfully.',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Bad Request. Invalid input data.',
-  // })
-  // @ApiResponse({
-  //   status: 500,
-  //   description:
-  //     'Internal Server Error. An error occurred while processing the request.',
-  // })
-  // @Post('/new')
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // create(@Body() input: SignUpParishDto, @Request() request) {
-  //   return this.parishService.createParish(input, request);
-  // }
+    const { first_name, phone_number, address, manager_name, Mass } = parish;
+
+    const restructuredMasses = Mass.flatMap(({ price, UserRequestMass }) => {
+      return UserRequestMass.map(({ purchased_at }) => {
+        return {
+          price,
+          purchased_at,
+        };
+      });
+    });
+    const result: Record<string, object> = {};
+    const startOfYear = dayjs(`${dayjs().year()}-01-01`);
+    for (
+      let month = 0;
+      month <= dayjs().month() - startOfYear.month();
+      month++
+    ) {
+      const startOfMonth = startOfYear.add(month, 'month').startOf('month');
+      const monthKey = startOfMonth.format('DD/MM/YYYY');
+
+      const itemsInMonth = restructuredMasses.filter(({ purchased_at }) => {
+        const itemDate = dayjs(purchased_at);
+
+        return (
+          itemDate.month() === startOfMonth.month() &&
+          itemDate.year() === startOfMonth.year()
+        );
+      });
+
+      result[monthKey] = {
+        numberOfMasses: itemsInMonth.length,
+        totalAmount: itemsInMonth.reduce((acc, { price }) => acc + price, 0),
+      };
+    }
+
+    res.status(HttpStatus.FOUND).json(
+      new ParishDto({
+        ...parish,
+        first_name: first_name as string,
+        phone_number: phone_number as string,
+        address: address as string,
+        manager_name: manager_name as string,
+        statistics: result,
+      }),
+    );
+  }
+
+  @Patch(':parish_id')
+  @Roles(RoleEnum.ADMIN, RoleEnum.ENGENEER)
+  @ApiNotFoundResponse({
+    description: 'Parish not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Bad request. Invalid parish data.',
+  })
+  @ApiAcceptedResponse({ type: UpdateParishDto })
+  async updateParish(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('parish_id') parish_id: string,
+    @Body() updateParishDto: UpdateParishDto,
+  ) {
+    const { user_id, role } = req.user as User;
+
+    let parish = null;
+    if (role === Role.ADMIN) {
+      parish = await this.parishService.getCreatedparish(parish_id);
+    }
+    if (role === Role.ENGENEER) {
+      parish = await this.parishService.getCreatedparish(parish_id, user_id);
+    }
+    if (!parish) {
+      throw new NotFoundException('Parish not found');
+    }
+
+    const updatedParish = await this.parishService.updateParish(
+      parish_id,
+      updateParishDto,
+    );
+
+    res.status(HttpStatus.OK).json(
+      new UpdateParishDto({
+        ...updatedParish,
+        first_name: updatedParish.first_name as string,
+        phone_number: updatedParish.phone_number as string,
+        manager_name: updatedParish.manager_name as string,
+        address: updatedParish.address as string,
+      }),
+    );
+  }
+
+  @Delete(':parish_id')
+  @Roles(RoleEnum.ADMIN, RoleEnum.ENGENEER)
+  @ApiOkResponse({
+    description: 'Parish deleted successfully.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Parish not found',
+  })
+  async deletedUser(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('parish_id') parish_id: string,
+  ) {
+    const { user_id } = req.user as User;
+
+    const parish = await this.parishService.getCreatedparish(
+      user_id,
+      parish_id,
+    );
+
+    if (!parish) {
+      throw new NotFoundException('Parish not found');
+    }
+
+    await this.parishService.deletedParish(parish_id);
+
+    res.status(HttpStatus.OK).json({
+      message: 'user deleted successfully!',
+    });
+  }
+
+  @Post('create')
+  @Roles(RoleEnum.ADMIN, RoleEnum.ENGENEER)
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Parish created successfully.',
+  })
+  async createParish(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() parishpayload: CreateParishDto,
+  ) {
+    const { user_id } = req.user as User;
+
+    await this.authService.registerUser(parishpayload, user_id);
+
+    // TODO: Send email to congratulate the parish
+
+    res.status(HttpStatus.CREATED).json({
+      message: 'User created successfully!',
+    });
+  }
 }
