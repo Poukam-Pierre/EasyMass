@@ -32,8 +32,8 @@ export class OTPEntity implements OTP {
   @IsDate()
   expired_at: Date;
 
-  @ApiProperty({ nullable: true })
-  updated_at: Date | null;
+  @ApiProperty()
+  updated_at: Date;
 
   @ApiProperty()
   @IsDate()
