@@ -2,6 +2,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
@@ -43,6 +44,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
+    const requiredRole = this.reflector.getAllAndOverride<Role[]>(
+      MetadataEnum.ROLES,
+      [context.getHandler(), context.getClass()],
+    );
 
     const isAuthorizedRoute = ['auth', 'otp/request'].some((path) =>
       request.url.includes(path),
@@ -50,6 +55,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     if (!user.is_account_verified && !isAuthorizedRoute) {
       throw new ForbiddenException('Unverified email!');
+    }
+
+    if (request.url.includes('admin') && !requiredRole.includes(user.role)) {
+      throw new UnauthorizedException('Access denied!');
     }
 
     return user as TUser;
