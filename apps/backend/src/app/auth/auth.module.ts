@@ -20,11 +20,6 @@ import { TwoFaModule } from '../two-fa/two-fa.module';
     }),
     PassportModule,
     TwoFaModule,
-    // ParishModule,
-    // AdministratorModule,
-    // PriestModule,
-    // RefreshTokenModule,
-    // PrismaModule,
   ],
 })
 export class AuthModule {}
