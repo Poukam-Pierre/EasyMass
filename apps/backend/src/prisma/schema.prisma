@@ -8,37 +8,10 @@ datasource db {
 }
 
 // OLD SCHEMA VERSION
-
-model Mass {
-  id                 Int                  @id @default(autoincrement())
-  price              Int
-  intension          String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  standardPrice      Int                  @default(5000)
-  parishId           Int
-  priestId           Int?
-  believerId         String?
-  processAt          DateTime
-  MassOrderHasMasses MassOrderHasMasses[]
-}
-
 model MassOrderHasMasses {
-  massOrder_has_mass_id String    @id @default(cuid())
+  massOrder_has_mass_id String @id @default(cuid())
   mass_id               Int
   massOrder_id          Int
-  mass                  Mass      @relation(fields: [mass_id], references: [id])
-  massOrder             MassOrder @relation(fields: [massOrder_id], references: [id])
-}
-
-model MassOrder {
-  id                 Int                  @id @default(autoincrement())
-  createdAt          DateTime             @default(now())
-  massType           MassType             @default(UNIQUE)
-  intension          String
-  believerId         String
-  price              Int
-  MassOrderHasMasses MassOrderHasMasses[]
 }
 
 model Transaction {
@@ -55,56 +28,14 @@ model Transaction {
   paymentMethod String
 }
 
-model Notification {
-  id             Int                  @id @default(autoincrement())
-  content        String
-  createdAt      DateTime             @default(now())
-  notificationId String               @unique
-  parish         NotificationParish[]
-  priest         NotificationPriest[]
-}
-
-model NotificationParish {
-  id       Int          @id @default(autoincrement())
-  isRead   Boolean      @default(false)
-  notifId  Int
-  parishId Int
-  notif    Notification @relation(fields: [notifId], references: [id])
-}
-
-model NotificationPriest {
-  id       Int          @id @default(autoincrement())
-  isRead   Boolean      @default(false)
-  notifId  Int
-  priestId Int
-  notif    Notification @relation(fields: [notifId], references: [id])
-}
-
-model RefreshToken {
-  id           String   @id
-  refreshToken String   @unique
-  expiredDate  DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  priestId     Int?
-  parishId     Int?
-  adminId      Int?
-}
-
-model City {
-  city_id   String @id @default(cuid())
-  city_name String
-  country   String @default("Cameroon")
-
-  @@unique([city_name, country])
-}
-
 enum MassType {
-  UNIQUE
-  TRIDUM
-  SEVEN
-  NOVENA
-  THIRTY
+  UNIQUE @map("unique")
+  TRIDUM @map("tridum")
+  SEVEN  @map("seven")
+  NOVENA @map("novena")
+  THIRTY @map("thirty")
+
+  @@map("mass_type")
 }
 
 enum Status {
@@ -127,7 +58,7 @@ model User {
   birthdate                  DateTime?         @db.Date
   created_at                 DateTime          @default(now()) @db.Timestamp
   prefered_language          PreferredLanguage @default(EN_US)
-  is_active                  Boolean           @default(true) @db.Boolean // Identify all user which ca use the platform
+  is_active                  Boolean           @default(true) @db.Boolean // Identify all user which can use the platform or deleted
   notify_mass_recommendation Boolean?          @default(true) @db.Boolean
   notify_on_platform_updates Boolean?          @default(true) @db.Boolean
   manager_name               String?           @db.VarChar(45)
@@ -141,24 +72,63 @@ model User {
   User                       User[]            @relation("userTouser")
   OTP                        OTP[]
   Log                        Log[]
+  Mass                       Mass[]            @relation("massTouser")
+  MassAssigned               Mass[]            @relation("massToAssignedUser")
+  UserRequestMass            UserRequestMass[]
 
   @@index([created_by], map: "fk_User_User1_idx")
   @@map("users")
 }
 
 model OTP {
-  otp_id      String    @id @default(cuid()) @db.VarChar(36)
-  code        String    @db.VarChar(6)
-  created_at  DateTime  @default(now()) @db.Timestamp()
-  expired_at  DateTime  @db.Timestamp()
-  is_verified Boolean   @default(false) @db.Boolean
+  otp_id      String   @id @default(cuid()) @db.VarChar(36)
+  code        String   @db.VarChar(6)
+  created_at  DateTime @default(now()) @db.Timestamp()
+  expired_at  DateTime @db.Timestamp()
+  is_verified Boolean  @default(false) @db.Boolean
   usage       OtpUsage
-  updated_at  DateTime? @db.Timestamp()
-  user_id     String    @db.VarChar(36)
-  User        User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_OTP_User1")
+  updated_at  DateTime @updatedAt @db.Timestamp()
+  user_id     String   @db.VarChar(36)
+  User        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_OTP_User1")
 
   @@index([user_id], map: "fk_OTP_User1_idx")
   @@map("otps")
+}
+
+model Mass {
+  mass_id           String             @id @default(cuid()) @db.VarChar(36)
+  price             Int
+  intension         String?            @db.VarChar(200)
+  created_at        DateTime           @default(now()) @db.Timestamp()
+  updated_at        DateTime           @updatedAt @db.Timestamp()
+  proceed_at        DateTime           @db.Timestamp()
+  mass_type         MassType           @default(UNIQUE)
+  created_by        String             @db.VarChar(36)
+  assigned_to       String?            @db.VarChar(36)
+  mass_valided_type MassValidadedType?
+  CreatedBy         User               @relation("massTouser", fields: [created_by], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Mass_User1")
+  AssignedTo        User?              @relation("massToAssignedUser", fields: [assigned_to], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Mass_User2")
+  UserRequestMass   UserRequestMass[]
+
+  @@index([created_by], map: "fk_Mass_User1_idx")
+  @@index([assigned_to], map: "fk_Mass_User2_idx")
+  @@map("masses")
+}
+
+model UserRequestMass {
+  user_request_mass_id String   @id @default(cuid()) @db.VarChar(36)
+  intension            String   @db.VarChar(200)
+  requested_amount     Int // Amount of mass requested by user uclinding all taxes
+  user_id              String   @db.VarChar(36)
+  mass_id              String   @db.VarChar(36)
+  purchased_at         DateTime @default(now()) @db.Timestamp()
+  request_type         MassType @default(UNIQUE)
+  User                 User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_UserRequestMass_User1")
+  Mass                 Mass     @relation(fields: [mass_id], references: [mass_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_UserRequestMass_Mass1")
+
+  @@index([user_id], map: "fk_UserRequestMass_User1_idx")
+  @@index([mass_id], map: "fk_UserRequestMass_Mass1_idx")
+  @@map("user_request_masses")
 }
 
 model Log {
@@ -204,4 +174,12 @@ enum AuthMethod {
   FACEBOOK @map("facebook")
 
   @@map("auth_method")
+}
+
+enum MassValidadedType {
+  VALIDATED @map("validated")
+  PENDING   @map("pending")
+  CANCEL    @map("cancel")
+
+  @@map("mass_validated_type")
 }
