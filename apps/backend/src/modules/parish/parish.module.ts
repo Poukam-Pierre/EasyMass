@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ParishService } from './parish.service';
+import { AuthModule } from '../../app/auth/auth.module';
 import { ParishController } from './parish.controller';
-import { PrismaModule } from '../../prisma/prisma.module';
+import { ParishService } from './parish.service';
+import { TwoFaModule } from '../../app/two-fa/two-fa.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [AuthModule, TwoFaModule],
   providers: [ParishService],
   controllers: [ParishController],
   exports: [ParishService],
