@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from '@nestjs/common';
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -5,11 +6,11 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { PreferredLanguage, Role } from '@prisma/client';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
-  IsDateString,
   IsEmail,
   IsEnum,
+  IsISO8601,
   IsJWT,
   IsOptional,
   IsPhoneNumber,
@@ -18,7 +19,6 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { OTPPayloadDto } from '../two-fa/two-fa.dto';
-import { UnprocessableEntityException } from '@nestjs/common';
 
 function IsRequiredForRoles() {
   return ValidateIf(
@@ -113,7 +113,6 @@ export class LoginDataDto {
 
 export class SignUpDto extends LoginDataDto {
   @IsString()
-  @IsOptional()
   @IsRequiredForRoles()
   @ApiProperty({
     description: 'user first name',
@@ -128,7 +127,6 @@ export class SignUpDto extends LoginDataDto {
   last_name: string;
 
   @IsPhoneNumber()
-  @IsOptional()
   @IsRequiredForRoles()
   @ApiProperty({
     description: 'Valid user phone number',
@@ -136,14 +134,12 @@ export class SignUpDto extends LoginDataDto {
   })
   phone_number: string;
 
-  @IsDateString()
-  @IsOptional()
+  @IsISO8601()
   @ValidateIf((o) => o.role === Role.PRIEST)
   @ApiProperty({
     description: ' User date birth',
-    example: '27/07/2025',
+    example: '2025-07-27',
   })
-  @Type(() => Date)
   birthdate: Date;
 
   @IsEnum(PreferredLanguage, {
@@ -160,14 +156,12 @@ export class SignUpDto extends LoginDataDto {
 
   @IsString()
   @ValidateIf((o) => o.role === Role.PARISH)
-  @IsOptional()
   @ApiProperty({
     description: 'user manager name',
   })
   manager_name: string;
 
   @IsString()
-  @IsOptional()
   @IsRequiredForRoles()
   @ApiProperty({
     description: 'User address',
