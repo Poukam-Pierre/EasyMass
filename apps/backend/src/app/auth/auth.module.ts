@@ -21,5 +21,6 @@ import { TwoFaModule } from '../two-fa/two-fa.module';
     PassportModule,
     TwoFaModule,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

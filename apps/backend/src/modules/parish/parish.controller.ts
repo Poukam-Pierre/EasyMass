@@ -14,20 +14,21 @@ import {
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { Role, User } from '@prisma/client';
+import dayjs from 'dayjs';
 import { Request, Response } from 'express';
 import { RoleEnum, Roles } from '../../app/auth/auth.decorator';
 import { AuthService } from '../../app/auth/auth.service';
 import { CreateParishDto, ParishDto, UpdateParishDto } from './parish.dto';
 import { ParishService } from './parish.service';
-import dayjs from 'dayjs';
-import { first } from 'rxjs';
 
+@ApiBearerAuth()
 @Controller('parishes')
 @ApiTags('Parishes')
 export class ParishController {
@@ -46,7 +47,7 @@ export class ParishController {
     if (role === Role.ADMIN) {
       parishes = await this.parishService.findAll();
     }
-    if (role === Role.ADMIN) {
+    if (role === Role.ENGENEER) {
       parishes = await this.parishService.findAll(user_id);
     }
 
@@ -154,7 +155,7 @@ export class ParishController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Bad request. Invalid parish data.',
   })
-  @ApiAcceptedResponse({ type: UpdateParishDto })
+  @ApiAcceptedResponse({ type: ParishDto })
   async updateParish(
     @Req() req: Request,
     @Res() res: Response,
@@ -180,7 +181,7 @@ export class ParishController {
     );
 
     res.status(HttpStatus.OK).json(
-      new UpdateParishDto({
+      new ParishDto({
         ...updatedParish,
         first_name: updatedParish.first_name as string,
         phone_number: updatedParish.phone_number as string,
@@ -202,12 +203,12 @@ export class ParishController {
     @Req() req: Request,
     @Res() res: Response,
     @Param('parish_id') parish_id: string,
-  ) {
+  ): Promise<void> {
     const { user_id } = req.user as User;
 
     const parish = await this.parishService.getCreatedparish(
-      user_id,
       parish_id,
+      user_id,
     );
 
     if (!parish) {

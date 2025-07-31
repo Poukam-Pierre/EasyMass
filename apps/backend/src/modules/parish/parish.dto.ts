@@ -67,11 +67,6 @@ export class UpdateParishDto extends PickType(CreateParishDto, ['balance']) {
     description: 'Valid user email',
   })
   email: string;
-
-  constructor(props: UpdateParishDto) {
-    super(props);
-    Object.assign(this, props);
-  }
 }
 
 export class ParishDto extends UpdateParishDto {
