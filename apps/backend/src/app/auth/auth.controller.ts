@@ -102,34 +102,22 @@ export class AuthController {
     description:
       'Conflict, user email is already registered with another account.',
   })
-  async signUp(
-    @Body() newUser: SignUpDto,
-    @Res() res: Response,
-    @Req() req: Request,
-  ) {
-    const requestedUser = req.user as User;
-
+  async signUp(@Body() newUser: SignUpDto, @Res() res: Response) {
     const user = await this.authService.registerUser(newUser);
 
-    if (requestedUser && requestedUser.role === Role.ADMIN) {
-      res.status(HttpStatus.CREATED).json({
-        message: 'User created successfully!',
-      });
-    } else {
-      const tokens = await this.authService.login(user);
+    const tokens = await this.authService.login(user);
 
-      this.setCookies(tokens, res);
+    this.setCookies(tokens, res);
 
-      res.status(HttpStatus.CREATED).json(
-        new AccessTokenResponse({
-          access_token: tokens.access_token,
-          expires_in: 900000, //15 minutes,
-          issued_at: tokens.issued_at,
-          token_type: 'Bearer',
-          otp_id: tokens.otp_id,
-        }),
-      );
-    }
+    res.status(HttpStatus.CREATED).json(
+      new AccessTokenResponse({
+        access_token: tokens.access_token,
+        expires_in: 900000, //15 minutes,
+        issued_at: tokens.issued_at,
+        token_type: 'Bearer',
+        otp_id: tokens.otp_id,
+      }),
+    );
   }
 
   @Post('/refresh-token')
