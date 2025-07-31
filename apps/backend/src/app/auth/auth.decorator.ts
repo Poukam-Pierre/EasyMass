@@ -10,8 +10,6 @@ export enum MetadataEnum {
   IS_PUBLIC = 'isPublic',
 }
 
-export const isTrue = true;
-
 export const SkipAuth = (bool = true) =>
   SetMetadata(MetadataEnum.IS_PUBLIC, bool);
 

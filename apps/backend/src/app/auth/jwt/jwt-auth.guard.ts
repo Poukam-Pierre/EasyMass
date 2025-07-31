@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { isTrue, MetadataEnum } from '../auth.decorator';
+import { MetadataEnum } from '../auth.decorator';
 import { Request } from 'express';
 import { Role, User } from '@prisma/client';
 
@@ -28,7 +28,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.body?.role === Role.PRIEST &&
       !request.headers.authorization;
 
-    if (isPublic || isPriestSignup) return isTrue;
+    if (isPublic || isPriestSignup) return isPriestSignup || isPublic;
 
     return super.canActivate(context);
   }
@@ -57,7 +57,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new ForbiddenException('Unverified email!');
     }
 
-    if (request.url.includes('admin') && !requiredRole.includes(user.role)) {
+    if (
+      (['admin', 'parishes'].some((path) => request.url.includes(path)) &&
+        !requiredRole.includes(user.role.toLowerCase() as Role)) ||
+      request.url.includes('auth/sign-up')
+    ) {
       throw new UnauthorizedException('Access denied!');
     }
 
