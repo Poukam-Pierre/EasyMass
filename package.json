@@ -1,7 +1,6 @@
 {
   "name": "@easy-messe/source",
   "version": "0.0.0",
-  "license": "MIT",
   "prisma": {
     "seed": "npx tsx apps/backend/src/prisma/seed.js",
     "schema": "apps/backend/src/prisma/schema.prisma"
