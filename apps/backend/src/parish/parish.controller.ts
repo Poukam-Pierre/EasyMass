@@ -38,7 +38,7 @@ export class ParishController {
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
   findOne(@Param('id') id: string) {
-    return this.parishService.findOne(+id);
+    return this.parishService.findParish(+id);
   }
 
   @Patch(':id')
@@ -61,6 +61,6 @@ export class ParishController {
   @Role(ROLE.ADMIN)
   @Role(ROLE.ENGENEER)
   create(@Body() input: SignUpParishDto, @Request() request) {
-    return this.parishService.signupParish(input, request);
+    return this.parishService.createParish(input, request);
   }
 }
