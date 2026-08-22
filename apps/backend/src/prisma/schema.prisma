@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -27,8 +21,8 @@ model Believer {
 model Mass {
   id                Int         @id @default(autoincrement())
   price             Int?
-  processAt         DateTime? // We can use this field wheither as the date and time the useBeliever would like the mass process or the one for a specific mass at church.
-  intension         String? //  We can use this field only when Believer created a mass directly from Priest. So that he can leave intension depending on itself.
+  processAt         DateTime? // The date and time the Believer would like the mass processed, or the date for a specific mass at church.
+  intension         String? // Only used when a Believer creates a mass directly through a Priest, to leave an intension.
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   standardPrice     Int         @default(5000)
@@ -71,25 +65,25 @@ model Transaction {
 }
 
 model Priest {
-  id           Int                  @id @default(autoincrement())
-  firstName    String
-  secondName   String
-  image        String?
-  birthDate    String
-  balance      Int                  @default(0)
-  phone        String
-  authNumber   String               @unique
-  authCardImge String?
-  availability Boolean              @default(false)
-  email        String               @unique
-  password     String
-  souscribeAt  DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  receiverId   String?              @unique
-  transaction  Transaction[]
-  mass         Mass[]
-  notif        NotificationPriest[]
-  refleshToken RefreshToken[]
+  id            Int                  @id @default(autoincrement())
+  firstName     String
+  secondName    String
+  image         String?
+  birthDate     String
+  balance       Int                  @default(0)
+  phone         String
+  authNumber    String               @unique
+  authCardImge  String?
+  availability  Boolean              @default(false)
+  email         String               @unique
+  password      String
+  souscribeAt   DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  receiverId    String?              @unique
+  transaction   Transaction[]
+  mass          Mass[]
+  notif         NotificationPriest[]
+  refreshTokens RefreshToken[]
 }
 
 model Parish {
@@ -106,7 +100,7 @@ model Parish {
   transaction    Transaction[]
   mass           Mass[]
   notif          NotificationParish[]
-  refleshToken   RefreshToken[]
+  refreshTokens  RefreshToken[]
   createdByAdmin Administrator        @relation(fields: [adminId], references: [id])
   adminId        Int
   city           City?                @relation(fields: [city_id], references: [city_id])
@@ -114,16 +108,16 @@ model Parish {
 }
 
 model Administrator {
-  id           Int            @id @default(autoincrement())
-  name         String
-  email        String         @unique
-  password     String
-  phone        String
-  role         Role
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  parish       Parish[]
-  refleshToken RefreshToken[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  phone         String
+  role          Role
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  parish        Parish[]
+  refreshTokens RefreshToken[]
 }
 
 model Notification {

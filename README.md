@@ -21,12 +21,13 @@ There is no separate `docs/` directory yet — this README is the single source 
 │   ├── diocese-ui/        # Diocese-facing frontend (Next.js)
 │   ├── backend/           # API: auth, parishes, priests, masses,
 │   │                      #   mass orders, payments, notifications (NestJS)
-│   │   └── src/prisma/    # Prisma schema, migrations, and seed
+│   │   └── src/prisma/    # Prisma schema, migrations, and seed script
 │   └── *-e2e/             # Cypress E2E suites for each frontend
-└── libs/
-    ├── shared-ui/         # Shared React components
-    ├── theme/             # Theming, language/i18n, and shared contexts
-    └── utils/             # Shared utilities
+├── libs/
+│   ├── shared-ui/         # Shared React components
+│   ├── theme/             # Theming, language/i18n, and shared contexts
+│   └── utils/             # Shared utilities
+└── prisma.config.ts       # Prisma CLI config (schema/migrations/seed location)
 ```
 
 ## 🛠 Getting Started
@@ -65,10 +66,19 @@ DATABASE_URL=          # Postgres connection string (Prisma)
 NEXT_PUBLIC_API_URL=   # e.g. http://localhost:5000/api
 ```
 
-Then generate the Prisma client:
+Prisma CLI settings (schema path, migrations, seed command) live in [`prisma.config.ts`](prisma.config.ts) at the repo root, not in `package.json`. Generate the client:
 
 ```bash
 npx prisma generate
+```
+
+Other common Prisma commands (all read config from `prisma.config.ts` automatically):
+
+```bash
+npx prisma migrate dev      # create/apply a migration in development
+npx prisma migrate deploy   # apply pending migrations (CI/production)
+npx prisma db seed          # run the seed script — no longer runs automatically after migrate
+npx prisma studio           # browse the database
 ```
 
 ### Run the apps
