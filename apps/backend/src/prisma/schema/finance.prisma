@@ -48,6 +48,7 @@ enum PaymentStatus {
   PENDING   @map("pending")
   COMPLETED @map("completed")
   FAILED    @map("failed")
+  REFUNDED  @map("refunded")
 }
 
 enum PaymentAudiAction {
@@ -89,19 +90,23 @@ model Transaction {
   externalPayoutId String?
   note             String?
   paymentId        String?
+  createdByUserId  String? // Who triggered this row, for anything a human did (WITHDRAWAL, INCOME_REVERSAL, ADMIN_CORRECTION). Null for system-generated rows (INCOME, PLATFORM_FEE).
   payment          Payment?        @relation(fields: [paymentId], references: [paymentId], map: "fk_Transaction_Payment")
+  createdByUser    User?           @relation(fields: [createdByUserId], references: [userId], map: "fk_Transaction_User")
 
   @@index([ownerId, ownerType], map: "idx_transaction_owner")
   @@index([paymentId], map: "fk_Transaction_Payment_idx")
   @@index([createdAt], map: "idx_transaction_created_at")
+  @@index([createdByUserId], map: "fk_Transaction_User_idx")
   @@map("transaction")
 }
 
 enum TransactionType {
-  INCOME          @map("income")
-  INCOME_REVERSAL @map("income_reversal")
-  WITHDRAWAL      @map("withdrawal")
-  PLATFORM_FEE    @map("platform_fee")
+  INCOME           @map("income")
+  INCOME_REVERSAL  @map("income_reversal")
+  WITHDRAWAL       @map("withdrawal")
+  PLATFORM_FEE     @map("platform_fee")
+  ADMIN_CORRECTION @map("admin_correction")
 }
 
 enum OwnerType {

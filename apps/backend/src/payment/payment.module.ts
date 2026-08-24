@@ -6,6 +6,7 @@ import { PaymentService } from './payment.service';
 import { BelieverModule } from '../believer/believer.module';
 import { MassModule } from '../mass/mass.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { PlatformSettingsModule } from '../platform-settings/platform-settings.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     BelieverModule,
     MassModule,
     PrismaModule,
+    PlatformSettingsModule,
   ],
   providers: [PaymentService],
   exports: [PaymentService],

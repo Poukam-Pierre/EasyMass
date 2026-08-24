@@ -31,9 +31,13 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = await this.JwtService.verifyAsync(token);
+      // `id` here is the central User.userId (JWT `sub` claim) — not a
+      // role-entity id (parishId/adminId/priestId). Consumers that need a
+      // role-entity id must resolve it via that relation's userId lookup.
       request['user'] = {
-        id: payload.id,
+        id: payload.sub,
         email: payload.email,
+        role: payload.role,
       };
 
       return true;

@@ -1,56 +1,65 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { MassStatus, MassType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { resolveParishForUser } from '../common/user.utils';
 import { CreateMassDto } from './dto/create-mass.dto';
+import { UpdateMassDto } from './dto/update-mass.dto';
+
+export interface MassFilters {
+  status?: MassStatus;
+  massType?: MassType;
+  from?: string;
+  to?: string;
+}
 
 @Injectable()
 export class MassService {
   constructor(private readonly prismaService: PrismaService) {}
 
   /**
-   * This function is responsible to create masses from parish owner. It's take the data of mass and
-   * create them depending on the replicate boolean value. If it's true, then the function will create
-   * masses at the same time on the week until the end of the actual year. Otherwise it will create
-   * one mass at the specific time.
-   * @param input data of a mass to create
-   * @param request express request object that hold cretenrial parish data
-   * @returns
+   * Creates masses for the authenticated parish. If replicate=true, creates
+   * one mass every 7 days at the same time-of-day from startAt until the end
+   * of the current year (skipping any that already exist); otherwise creates
+   * a single mass, rejecting an exact-timestamp duplicate.
    */
   async createMasses(
     input: CreateMassDto,
     request
   ): Promise<{ code: number; message: string }> {
-    const { id } = request.user;
-    const { replicate, processAt } = input;
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      request.user.id
+    );
+    const parishId = parish.parishId;
+    const { replicate, startAt, estimatedDurationMinutes, price, massType } =
+      input;
 
-    const existingMass = await this.findAllByParish(id);
+    const existingMass = await this.findAllByParish(parishId);
 
     if (replicate) {
-      const allDateProcessMasses =
-        this.getDatesEvery7DaysUntilEndOfYear(processAt);
+      const allDates = this.getDatesEvery7DaysUntilEndOfYear(startAt);
 
-      const uniqueDateProcessMasses = this.getUniqueDate(
-        allDateProcessMasses,
-        existingMass.map((mass) => mass.processAt.toISOString())
+      const uniqueDates = this.getUniqueDate(
+        allDates,
+        existingMass.map((mass) => mass.startAt.toISOString())
       );
 
-      if (!uniqueDateProcessMasses)
+      if (!uniqueDates.length)
         return { code: 200, message: 'All masses already exist!' };
 
       const listOfMasses = this.createListOfMasses(
-        uniqueDateProcessMasses,
+        uniqueDates,
         input,
-        id
+        parishId
       );
 
       try {
-        await this.prismaService.mass.createMany({
-          data: listOfMasses,
-        });
+        await this.prismaService.mass.createMany({ data: listOfMasses });
         return { code: 201, message: 'Mass created successfully!' };
       } catch (error) {
         throw new InternalServerErrorException();
@@ -58,8 +67,7 @@ export class MassService {
     }
 
     const isMassAlreadyExists = existingMass.some(
-      (mass) =>
-        new Date(mass.processAt).getTime() === new Date(processAt).getTime()
+      (mass) => mass.startAt.getTime() === new Date(startAt).getTime()
     );
 
     if (isMassAlreadyExists) {
@@ -69,15 +77,12 @@ export class MassService {
       });
     }
 
-    const { replicate: _replicate, ...massData } = input;
-
     const createInput: Prisma.MassCreateInput = {
-      ...massData,
-      parish: {
-        connect: {
-          parishId: id,
-        },
-      },
+      price,
+      startAt: new Date(startAt),
+      estimatedDurationMinutes,
+      massType,
+      parish: { connect: { parishId } },
     };
 
     try {
@@ -94,39 +99,78 @@ export class MassService {
     });
   }
 
-  async update(massId: string, updateMassDto: Prisma.MassUpdateInput) {
+  /** startAt/estimatedDurationMinutes may only change while status=OPEN. */
+  async update(
+    massId: string,
+    updateMassDto: UpdateMassDto,
+    requestUser: { id: string; role: string }
+  ) {
+    const mass = await this.prismaService.mass.findUnique({
+      where: { massId },
+    });
+    if (!mass) {
+      throw new ConflictException('Mass not found');
+    }
+
+    if (requestUser.role !== 'ADMIN') {
+      const parish = await resolveParishForUser(
+        this.prismaService,
+        requestUser.id
+      );
+      if (parish.parishId !== mass.parishId) {
+        throw new ForbiddenException('Forbidden', {
+          cause: new Error(),
+          description: 'You may only manage your own masses.',
+        });
+      }
+    }
+
+    const changesSchedule =
+      updateMassDto.startAt !== undefined ||
+      updateMassDto.estimatedDurationMinutes !== undefined;
+    if (changesSchedule && mass.status !== 'OPEN') {
+      throw new ConflictException('Conflict', {
+        cause: new Error(),
+        description:
+          'startAt/estimatedDurationMinutes can only be changed while the mass is still OPEN.',
+      });
+    }
+
     return this.prismaService.mass.update({
       where: { massId },
-      data: updateMassDto,
+      data: {
+        ...updateMassDto,
+        startAt: updateMassDto.startAt
+          ? new Date(updateMassDto.startAt)
+          : undefined,
+      },
     });
   }
 
-  async findAllByParish(parishId: string, role?) {
-    if (role) {
-      return this.prismaService.mass.findMany({
-        where: {
-          AND: [
-            { parishId },
-            {
-              processAt: {
-                lte: new Date().toISOString(), // TODO check this comparaison
-              },
-            },
-          ],
-        },
-      });
-    }
+  async findAllByParish(parishId: string, filters?: MassFilters) {
     return this.prismaService.mass.findMany({
       where: {
         parishId,
+        status: filters?.status,
+        massType: filters?.massType,
+        startAt:
+          filters?.from || filters?.to
+            ? {
+                gte: filters?.from ? new Date(filters.from) : undefined,
+                lte: filters?.to ? new Date(filters.to) : undefined,
+              }
+            : undefined,
       },
       select: {
         massId: true,
         price: true,
-        processAt: true,
+        startAt: true,
+        estimatedDurationMinutes: true,
+        status: true,
         createdAt: true,
         massType: true,
       },
+      orderBy: { startAt: 'asc' },
     });
   }
 
@@ -182,24 +226,22 @@ export class MassService {
       elementCount.set(date, (elementCount.get(date) || 0) + 1);
     });
 
-    const uniqueElements = Array.from(elementCount.entries())
-      .filter(([date, count]) => count === 1)
+    return Array.from(elementCount.entries())
+      .filter(([, count]) => count === 1)
       .map(([date]) => date);
-
-    return uniqueElements;
   }
 
   private createListOfMasses(
     arrayDate: string[],
     input: CreateMassDto,
     parishId: string
-  ) {
-    const arrayOfMasses = arrayDate.map((date) => ({
+  ): Prisma.MassCreateManyInput[] {
+    return arrayDate.map((date) => ({
       price: input.price,
-      processAt: date,
+      startAt: new Date(date),
+      estimatedDurationMinutes: input.estimatedDurationMinutes,
       massType: input.massType,
       parishId,
     }));
-    return arrayOfMasses;
   }
 }

@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class LoginDataDto {
@@ -24,6 +25,9 @@ export class ParishDataDto {
   @IsNotEmpty()
   email: string;
 
+  @Exclude()
+  password: string;
+
   phone: string;
   managerName: string;
   createdAt: Date;
@@ -46,37 +50,15 @@ export class AdminDataDto {
   @IsNotEmpty()
   email: string;
 
+  @Exclude()
+  password: string;
+
   phone: string;
   createdAt: Date;
   accessToken?: string;
   refreshToken?: string;
 
   constructor(props: AdminDataDto) {
-    Object.assign(this, props);
-  }
-}
-
-export class PriestDataDto {
-  priestId?: string;
-  userId: string;
-
-  @IsNotEmpty()
-  firstName: string;
-  secondName: string;
-  authNumber: string;
-  available: boolean;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  image?: string;
-  birthDate: string;
-  phoneNumber: string;
-  accessToken?: string;
-  refreshToken?: string;
-
-  constructor(props: PriestDataDto) {
     Object.assign(this, props);
   }
 }

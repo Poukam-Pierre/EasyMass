@@ -1,13 +1,19 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { SignUpParishDto } from './dto/signupParish.dto';
-import { ParishDataDto } from './dto/parishData.dto';
 import * as bcrypt from 'bcryptjs';
+import {
+  findUserByEmail,
+  flattenUserRole,
+  resolveAdminForUser,
+  resolveParishForUser,
+} from '../common/user.utils';
 
 @Injectable()
 export class ParishService {
@@ -40,8 +46,16 @@ export class ParishService {
     });
   }
 
-  async findAll() {
+  async findAll(filters?: { city?: string; name?: string }) {
     return this.prismaService.parish.findMany({
+      where: {
+        city: filters?.city
+          ? { city_name: { contains: filters.city, mode: 'insensitive' } }
+          : undefined,
+        name: filters?.name
+          ? { contains: filters.name, mode: 'insensitive' }
+          : undefined,
+      },
       select: {
         parishId: true,
         name: true,
@@ -49,8 +63,51 @@ export class ParishService {
         managerName: true,
         createdAt: true,
         updatedAt: true,
+        isBlocked: true,
+        payoutBlocked: true,
+        city: { select: { city_name: true } },
         user: { select: { email: true } },
       },
+    });
+  }
+
+  /** Believer-facing, public: parishes visible for ordering a mass. */
+  async findAllVisible() {
+    return this.prismaService.parish.findMany({
+      where: { isBlocked: false },
+      select: {
+        parishId: true,
+        name: true,
+        city: { select: { city_name: true } },
+      },
+    });
+  }
+
+  async setBlocked(parishId: string, isBlocked: boolean) {
+    return this.prismaService.parish.update({
+      where: { parishId },
+      data: { isBlocked },
+    });
+  }
+
+  async setPayoutBlocked(parishId: string, payoutBlocked: boolean) {
+    return this.prismaService.parish.update({
+      where: { parishId },
+      data: { payoutBlocked },
+    });
+  }
+
+  async setPayoutNumber(
+    parishId: string,
+    payoutNumber: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    await this.assertCanManage(parishId, requestUser);
+    // Changing the payout number invalidates the previously derived NotchPay
+    // recipient — clear receiverId so the next withdrawal re-derives it.
+    return this.prismaService.parish.update({
+      where: { parishId },
+      data: { payoutNumber, receiverId: null },
     });
   }
 
@@ -63,22 +120,19 @@ export class ParishService {
   }
 
   async findOneByMail(email: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { email },
-      include: { parish: true },
-    });
-
-    if (!user?.parish) return null;
-
-    return {
-      ...user.parish,
-      email: user.email,
-      password: user.password,
-      userId: user.userId,
-    };
+    const user = await findUserByEmail(this.prismaService, email);
+    const flattened = user && flattenUserRole(user);
+    return flattened?.role === 'PARISH' ? flattened : null;
   }
 
-  async update(parishId: string, updateParishDto: Prisma.ParishUpdateInput) {
+  /** requestUser omitted = trusted internal/system call (bypasses the
+   * ownership check); every HTTP-facing caller must pass it. */
+  async update(
+    parishId: string,
+    updateParishDto: Prisma.ParishUpdateInput,
+    requestUser?: { id: string; role: UserRole }
+  ) {
+    if (requestUser) await this.assertCanManage(parishId, requestUser);
     return this.prismaService.parish.update({
       where: {
         parishId,
@@ -87,12 +141,29 @@ export class ParishService {
     });
   }
 
-  async remove(parishId: string) {
+  async remove(parishId: string, requestUser: { id: string; role: UserRole }) {
+    await this.assertCanManage(parishId, requestUser);
     return this.prismaService.parish.delete({
       where: {
         parishId,
       },
     });
+  }
+
+  /** ADMIN may manage any parish; a PARISH caller may only manage its own. */
+  private async assertCanManage(
+    parishId: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    if (requestUser.role === 'ADMIN') return;
+
+    const parish = await resolveParishForUser(this.prismaService, requestUser.id);
+    if (parish.parishId !== parishId) {
+      throw new ForbiddenException('Forbidden', {
+        cause: new Error(),
+        description: 'You may only manage your own parish.',
+      });
+    }
   }
 
   /**
@@ -106,7 +177,7 @@ export class ParishService {
   async createParish(
     input: SignUpParishDto,
     request
-  ): Promise<ParishDataDto | unknown> {
+  ): Promise<{ code: number; message: string }> {
     const user = await this.credentialsParishValidation(input, request);
 
     if (!user) {
@@ -129,16 +200,20 @@ export class ParishService {
    */
   async credentialsParishValidation(input: SignUpParishDto, request) {
     const { email, password } = input;
+    const existing = await findUserByEmail(this.prismaService, email);
+    if (existing) return null;
+
+    // request.user.id is the central User.userId (JWT `sub`), not
+    // Administrator.adminId directly — resolve it. Throws ForbiddenException
+    // if the caller isn't actually an admin (shouldn't happen behind
+    // @Roles(ADMIN), but defends against it either way).
+    const admin = await resolveAdminForUser(this.prismaService, request.user.id);
+
     try {
-      const existing = await this.findOneByMail(email);
-
-      if (existing) return null;
-
       const hash = await bcrypt.hash(password, 10);
       input.password = hash;
 
-      const adminId = request.user.id;
-      await this.create(input, adminId);
+      await this.create(input, admin.adminId);
 
       return {
         statusCode: 200,
@@ -153,29 +228,73 @@ export class ParishService {
     }
   }
 
+  /** Believer-facing, public: masses still open for ordering, at visible parishes. */
   async findAllMasses() {
     const parishWithItsOwnMasses = await this.prismaService.parish.findMany({
+      where: { isBlocked: false },
       select: {
         name: true,
         mass: {
+          where: { status: 'OPEN' },
           select: {
+            massId: true,
             price: true,
-            processAt: true,
+            startAt: true,
             massType: true,
           },
         },
       },
     });
 
-    parishWithItsOwnMasses.forEach((parishData) => {
-      parishData.mass.map((massData) => {
-        massData['dateTime'] = new Date(massData.processAt);
-        delete massData['processAt'];
-      });
-      parishData['massData'] = parishData.mass;
-      delete parishData['mass'];
-    });
+    return parishWithItsOwnMasses.map(({ mass, ...parishData }) => ({
+      ...parishData,
+      massData: mass.map(({ startAt, ...massData }) => ({
+        ...massData,
+        dateTime: startAt,
+      })),
+    }));
+  }
 
-    return parishWithItsOwnMasses;
+  /** masses created, money earned/withdrawn, intentions treated, roster. */
+  async getDashboard(parishId: string) {
+    const [
+      massesCreatedCount,
+      massesByStatusRaw,
+      incomeAgg,
+      withdrawnAgg,
+      intentionsTreatedCount,
+      priests,
+    ] = await Promise.all([
+      this.prismaService.mass.count({ where: { parishId } }),
+      this.prismaService.mass.groupBy({
+        by: ['status'],
+        where: { parishId },
+        _count: { massId: true },
+      }),
+      this.prismaService.transaction.aggregate({
+        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'INCOME' },
+        _sum: { amount: true },
+      }),
+      this.prismaService.transaction.aggregate({
+        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'WITHDRAWAL' },
+        _sum: { amount: true },
+      }),
+      this.prismaService.massOrder.count({
+        where: { mass: { parishId, status: 'COMPLETED' } },
+      }),
+      this.prismaService.priest.findMany({ where: { homeParishId: parishId } }),
+    ]);
+
+    return {
+      massesCreatedCount,
+      massesByStatus: massesByStatusRaw.map((s) => ({
+        status: s.status,
+        count: s._count.massId,
+      })),
+      moneyEarned: incomeAgg._sum.amount ?? 0,
+      moneyWithdrawn: Math.abs(withdrawnAgg._sum.amount ?? 0),
+      intentionsTreatedCount,
+      priests,
+    };
   }
 }

@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { MassService } from '../mass/mass.service';
+import { resolveParishForUser } from '../common/user.utils';
 
 @Injectable()
 export class MassOrderService {
@@ -17,22 +18,19 @@ export class MassOrderService {
   }
 
   /**
-   * This function takes a request data coming from Authorization and extract user inclut early into authorization file.
-   * Then fetch all masses created by parish. Next, filter the result to only have masses that its processAt field data is more than the actual date
-   * and the massOrder field data won't null. The result figure out the masses that won't be process yet and they are ordered. Then extract the massId
-   * field from the new result and fetch the massOrder according to those massId field. The final result will figure out the massOrders with his masses
-   * and the owners.
-   * @param request
-   * @returns
+   * Masses belonging to the authenticated parish whose start time hasn't
+   * passed yet and that have at least one order, with their mass orders.
    */
   async findAllUnprocessMass(request) {
-    const { id } = request.user;
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      request.user.id
+    );
 
     try {
-      const masses = await this.massService.findAll(id);
+      const masses = await this.massService.findAll(parish.parishId);
       const allUnprocessMass = masses.filter(
-        (mass) =>
-          new Date(mass.processAt) >= new Date() && mass.massOrder.length !== 0
+        (mass) => mass.startAt >= new Date() && mass.massOrder.length !== 0
       );
 
       const massIds = allUnprocessMass.map((mass) => mass.massId);
@@ -58,6 +56,7 @@ export class MassOrderService {
     }
   }
 
+  /** Oldest to newest, per the intentions-gathering requirement. */
   async findMassOrderByMass(massId: string) {
     return this.prismaService.massOrder.findMany({
       where: {
@@ -66,6 +65,7 @@ export class MassOrderService {
       include: {
         orderByBeliever: true,
       },
+      orderBy: { createdAt: 'asc' },
     });
   }
 

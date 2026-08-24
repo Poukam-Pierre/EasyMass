@@ -40,7 +40,18 @@ export class RefreshTokenService {
     });
   }
 
-  async findAll() {
-    return this.prismaService.refreshToken.findMany();
+  async findOneWithUser(refreshToken: string) {
+    return this.prismaService.refreshToken.findUnique({
+      where: { refreshToken },
+      include: { user: true },
+    });
+  }
+
+  /** Scoped session lookup — replaces the previous findAll()+.find() full
+   * table scan used to enforce "one active session per user". */
+  async findFirstByUser(userId: string) {
+    return this.prismaService.refreshToken.findFirst({
+      where: { userId },
+    });
   }
 }

@@ -1,36 +1,23 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
-
-export class SignUpDataDto {
-  firstName: string;
-  secondName: string;
-  image?: string;
-  birthDate: string;
-  phoneNumber: string;
-  authCardImage?: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
-  available: boolean;
-  authNumber: string;
-  password: string;
-}
+import { Role } from '@prisma/client';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class SignUpAdminDto {
+  @IsString()
+  @IsNotEmpty()
   name: string;
 
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
+  @IsString()
+  @IsNotEmpty()
   password: string;
-  phone: string;
-  role: Role;
-}
 
-export enum Role {
-  ENGINEER = 'ENGINEER',
-  ADMIN = 'ADMIN',
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+
+  @IsEnum(Role)
+  role: Role;
 }

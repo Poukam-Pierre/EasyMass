@@ -1,13 +1,9 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class RefreshToken {
+export class RefreshTokenDto {
   @IsNotEmpty()
-  id: number;
+  @IsString()
   refreshToken: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
 }
 
 export class NewTokens {

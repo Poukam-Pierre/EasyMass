@@ -1,11 +1,12 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Request } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { PaymentService } from './payment.service';
-import { AuthGuard } from '../auth/guard/auth.guards';
 import { Public } from '../auth/decorator/public.decorator';
+import { Roles } from '../auth/decorator/roles.decorator';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 @Controller('payment')
-@UseGuards(AuthGuard)
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
@@ -18,7 +19,10 @@ export class PaymentController {
     return this.paymentService.handlePayment(handlePaymentDto);
   }
 
-  // TODO As this route is public, check if there is no scam. Put it a new guard just for validate that.
+  // Public because NotchPay calls this server-to-server (no user session to
+  // attach a JWT to). Integrity instead relies on re-fetching the payment
+  // status directly from NotchPay inside notifyPayment rather than trusting
+  // this request body at face value.
   @Public()
   @Post('/notifications')
   notifyPayment(
@@ -29,11 +33,14 @@ export class PaymentController {
   }
 
   @Post('/withdraw')
-  withdrawMoney(
-    @Request() request,
-    @Body() receiverNumber: string,
-    amount: number
-  ) {
-    return this.paymentService.withdrawMoney(request, receiverNumber, amount);
+  @Roles(UserRole.PARISH)
+  withdrawMoney(@Request() request, @Body() dto: WithdrawMoneyDto) {
+    return this.paymentService.withdrawMoney(request, dto.amount);
+  }
+
+  @Post('/:paymentId/refund')
+  @Roles(UserRole.ADMIN)
+  refundPayment(@Param('paymentId') paymentId: string, @Request() request) {
+    return this.paymentService.refundPayment(paymentId, request.user);
   }
 }

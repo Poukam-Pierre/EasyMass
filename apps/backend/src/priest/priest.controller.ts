@@ -1,42 +1,79 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  UseGuards,
+  Query,
+  Request,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { ROLE, Role } from '../auth/decorator/public.decorator';
-import { AdminGuard } from '../auth/guard/admin.guards';
-import { AuthGuard } from '../auth/guard/auth.guards';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { resolveParishForUser } from '../common/user.utils';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreatePriestDto } from './dto/create-priest.dto';
+import { UpdatePriestDto } from './dto/update-priest.dto';
 import { PriestService } from './priest.service';
 
 @Controller('priest')
 export class PriestController {
-  constructor(private readonly priestService: PriestService) {}
+  constructor(
+    private readonly priestService: PriestService,
+    private readonly prismaService: PrismaService
+  ) {}
 
+  /** Parish sees its own roster; admin can filter by any parish. */
   @Get()
-  @UseGuards(AdminGuard)
-  @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGINEER)
-  findAll() {
-    return this.priestService.findAll();
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  async findAll(
+    @Request() request,
+    @Query('available') available?: string,
+    @Query('parishId') parishId?: string
+  ) {
+    const homeParishId =
+      request.user.role === 'ADMIN'
+        ? parishId
+        : (await resolveParishForUser(this.prismaService, request.user.id))
+            .parishId;
+
+    if (!homeParishId) return this.priestService.findAll();
+
+    return this.priestService.findAllForParish(homeParishId, {
+      available: available === undefined ? undefined : available === 'true',
+    });
   }
 
-  findOne(email: string) {
-    return this.priestService.findOne(email);
+  @Get(':id')
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  findOne(@Param('id') id: string) {
+    return this.priestService.findOne(id);
   }
 
-  @Post(':id')
-  @UseGuards(AuthGuard)
-  update(id: string, updatePriestDto: Prisma.PriestUpdateInput) {
-    return this.priestService.update(id, updatePriestDto);
+  @Post()
+  @Roles(UserRole.PARISH)
+  async create(@Body() input: CreatePriestDto, @Request() request) {
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      request.user.id
+    );
+    return this.priestService.create(input, parish.parishId);
   }
 
-  @UseGuards(AuthGuard)
+  @Patch(':id')
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  update(
+    @Param('id') id: string,
+    @Body() updatePriestDto: UpdatePriestDto,
+    @Request() request
+  ) {
+    return this.priestService.update(id, updatePriestDto, request.user);
+  }
+
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.priestService.remove(id);
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  remove(@Param('id') id: string, @Request() request) {
+    return this.priestService.remove(id, request.user);
   }
 }

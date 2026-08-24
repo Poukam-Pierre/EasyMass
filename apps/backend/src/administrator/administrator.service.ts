@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { findUserByEmail, flattenUserRole } from '../common/user.utils';
 
 @Injectable()
 export class AdministratorService {
@@ -39,19 +40,25 @@ export class AdministratorService {
   }
 
   async findOneByMail(email: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { email },
-      include: { admin: true },
+    const user = await findUserByEmail(this.prismaService, email);
+    const flattened = user && flattenUserRole(user);
+    return flattened?.role === 'ADMIN' ? flattened : null;
+  }
+
+  async findByUserId(userId: string) {
+    return this.prismaService.administrator.findUnique({
+      where: { userId },
     });
+  }
 
-    if (!user?.admin) return null;
-
-    return {
-      ...user.admin,
-      email: user.email,
-      password: user.password,
-      userId: user.userId,
-    };
+  async updateByUserId(
+    userId: string,
+    updateAdminDto: Prisma.AdministratorUpdateInput
+  ) {
+    return this.prismaService.administrator.update({
+      where: { userId },
+      data: updateAdminDto,
+    });
   }
 
   async update(

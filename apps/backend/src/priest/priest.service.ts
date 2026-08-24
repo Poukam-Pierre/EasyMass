@@ -1,28 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { CreatePriestDto } from './dto/create-priest.dto';
+import { UpdatePriestDto } from './dto/update-priest.dto';
+
+export interface PriestFilters {
+  available?: boolean;
+}
 
 @Injectable()
 export class PriestService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(
-    createPriestDto: Omit<Prisma.PriestCreateInput, 'user'>,
-    email: string,
-    password: string
-  ) {
+  /** Parish-managed roster entry — no User/login, per MVP scope. */
+  async create(createPriestDto: CreatePriestDto, homeParishId: string) {
     return this.prismaService.priest.create({
       data: {
         ...createPriestDto,
-        user: {
-          create: {
-            email,
-            password,
-            role: 'PRIEST',
-          },
-        },
+        homeParish: { connect: { parishId: homeParishId } },
       },
-      include: { user: true },
+    });
+  }
+
+  async findAllForParish(homeParishId: string, filters?: PriestFilters) {
+    return this.prismaService.priest.findMany({
+      where: { homeParishId, available: filters?.available },
     });
   }
 
@@ -30,48 +31,46 @@ export class PriestService {
     return this.prismaService.priest.findMany();
   }
 
-  async findOne(email: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { email },
-      include: { priest: true },
-    });
-
-    if (!user?.priest) return null;
-
-    return {
-      ...user.priest,
-      email: user.email,
-      password: user.password,
-      userId: user.userId,
-    };
+  async findOne(priestId: string) {
+    return this.prismaService.priest.findUnique({ where: { priestId } });
   }
 
-  async findOneByAuthNumber(
-    email: string,
-    authNumber: string
-  ): Promise<boolean> {
-    const [existingUser, existingPriest] = await Promise.all([
-      this.prismaService.user.findUnique({ where: { email } }),
-      this.prismaService.priest.findUnique({ where: { authNumber } }),
-    ]);
-
-    return Boolean(existingUser || existingPriest);
-  }
-
-  async update(priestId: string, updatePriestDto: Prisma.PriestUpdateInput) {
+  async update(
+    priestId: string,
+    updatePriestDto: UpdatePriestDto,
+    requestUser: { id: string; role: string }
+  ) {
+    await this.assertOwnsPriest(priestId, requestUser);
     return this.prismaService.priest.update({
-      where: {
-        priestId,
-      },
+      where: { priestId },
       data: updatePriestDto,
     });
   }
 
-  async remove(priestId: string) {
-    return this.prismaService.priest.delete({
-      where: {
-        priestId,
-      },
+  async remove(priestId: string, requestUser: { id: string; role: string }) {
+    await this.assertOwnsPriest(priestId, requestUser);
+    return this.prismaService.priest.delete({ where: { priestId } });
+  }
+
+  private async assertOwnsPriest(
+    priestId: string,
+    requestUser: { id: string; role: string }
+  ) {
+    if (requestUser.role === 'ADMIN') return;
+
+    const priest = await this.prismaService.priest.findUnique({
+      where: { priestId },
     });
+    if (!priest) throw new NotFoundException('Priest not found');
+
+    const parish = await this.prismaService.parish.findUnique({
+      where: { userId: requestUser.id },
+    });
+    if (!parish || priest.homeParishId !== parish.parishId) {
+      throw new ForbiddenException('Forbidden', {
+        cause: new Error(),
+        description: 'You may only manage priests on your own roster.',
+      });
+    }
   }
 }
