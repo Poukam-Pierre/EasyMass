@@ -47,7 +47,7 @@ export class SignUpParishDto {
   })
   @IsString()
   @IsNotEmpty()
-  manager_name: string;
+  managerName: string;
 
   @ApiProperty({
     description: 'The email of the lead parish',

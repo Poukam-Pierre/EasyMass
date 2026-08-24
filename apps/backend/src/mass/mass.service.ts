@@ -69,15 +69,19 @@ export class MassService {
       });
     }
 
-    input.createdByParish = {
-      connect: {
-        id: id,
+    const { replicate: _replicate, ...massData } = input;
+
+    const createInput: Prisma.MassCreateInput = {
+      ...massData,
+      parish: {
+        connect: {
+          parishId: id,
+        },
       },
     };
-    delete input.replicate;
 
     try {
-      await this.create(input);
+      await this.create(createInput);
       return { code: 200, message: 'Mass created successfully!' };
     } catch (error) {
       throw new InternalServerErrorException();
@@ -90,22 +94,14 @@ export class MassService {
     });
   }
 
-  async update(id: number, updateMassDto: Prisma.MassUpdateInput) {
+  async update(massId: string, updateMassDto: Prisma.MassUpdateInput) {
     return this.prismaService.mass.update({
-      where: { id },
+      where: { massId },
       data: updateMassDto,
     });
   }
 
-  async findAllByBeliever(believerId: string) {
-    return this.prismaService.mass.findMany({
-      where: {
-        believerId,
-      },
-    });
-  }
-
-  async findAllByParish(parishId: number, role?) {
+  async findAllByParish(parishId: string, role?) {
     if (role) {
       return this.prismaService.mass.findMany({
         where: {
@@ -125,7 +121,7 @@ export class MassService {
         parishId,
       },
       select: {
-        id: true,
+        massId: true,
         price: true,
         processAt: true,
         createdAt: true,
@@ -134,7 +130,7 @@ export class MassService {
     });
   }
 
-  async findAll(parishId: number) {
+  async findAll(parishId: string) {
     return this.prismaService.mass.findMany({
       where: {
         parishId,
@@ -145,18 +141,18 @@ export class MassService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(massId: string) {
     return this.prismaService.mass.findUnique({
       where: {
-        id,
+        massId,
       },
     });
   }
 
-  async remove(id: number) {
+  async remove(massId: string) {
     return this.prismaService.mass.delete({
       where: {
-        id,
+        massId,
       },
     });
   }
@@ -196,13 +192,13 @@ export class MassService {
   private createListOfMasses(
     arrayDate: string[],
     input: CreateMassDto,
-    id: number
+    parishId: string
   ) {
     const arrayOfMasses = arrayDate.map((date) => ({
       price: input.price,
       processAt: date,
       massType: input.massType,
-      parishId: id,
+      parishId,
     }));
     return arrayOfMasses;
   }

@@ -13,8 +13,8 @@ import * as bcrypt from 'bcryptjs';
 export class ParishService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(parishData: SignUpParishDto, request: any) {
-    const { city, ...rest } = parishData;
+  async create(parishData: SignUpParishDto, adminId: string) {
+    const { city, email, password, ...rest } = parishData;
     return this.prismaService.parish.create({
       data: {
         ...rest,
@@ -25,58 +25,72 @@ export class ParishService {
         },
         createdByAdmin: {
           connect: {
-            // TODO: get the id from the request
-            id: 1,
+            adminId,
+          },
+        },
+        user: {
+          create: {
+            email,
+            password,
+            role: 'PARISH',
           },
         },
       },
+      include: { user: true },
     });
   }
 
   async findAll() {
     return this.prismaService.parish.findMany({
       select: {
-        id: true,
+        parishId: true,
         name: true,
-        email: true,
         phone: true,
-        manager_name: true,
+        managerName: true,
         createdAt: true,
         updatedAt: true,
-        balance: true,
+        user: { select: { email: true } },
       },
     });
   }
 
-  async findParish(id: number) {
+  async findParish(parishId: string) {
     return await this.prismaService.parish.findUnique({
       where: {
-        id,
+        parishId,
       },
     });
   }
 
   async findOneByMail(email: string) {
-    return this.prismaService.parish.findUnique({
-      where: {
-        email,
-      },
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+      include: { parish: true },
     });
+
+    if (!user?.parish) return null;
+
+    return {
+      ...user.parish,
+      email: user.email,
+      password: user.password,
+      userId: user.userId,
+    };
   }
 
-  async update(id: number, updateParishDto: Prisma.ParishUpdateInput) {
+  async update(parishId: string, updateParishDto: Prisma.ParishUpdateInput) {
     return this.prismaService.parish.update({
       where: {
-        id,
+        parishId,
       },
       data: updateParishDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(parishId: string) {
     return this.prismaService.parish.delete({
       where: {
-        id,
+        parishId,
       },
     });
   }
@@ -116,14 +130,15 @@ export class ParishService {
   async credentialsParishValidation(input: SignUpParishDto, request) {
     const { email, password } = input;
     try {
-      const user = await this.findOneByMail(email);
+      const existing = await this.findOneByMail(email);
 
-      if (user) return null;
+      if (existing) return null;
 
       const hash = await bcrypt.hash(password, 10);
       input.password = hash;
 
-      await this.create(input, request);
+      const adminId = request.user.id;
+      await this.create(input, adminId);
 
       return {
         statusCode: 200,

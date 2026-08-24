@@ -43,7 +43,7 @@ export class AuthController {
   // @Post('/signup-parish')
   // @UseGuards(AdminGuard)
   // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
+  // @Role(ROLE.ENGINEER)
   // signupParish(@Body() input: SignUpParishDto, @Request() request) {
   //   return this.authService.signupParish(input, request);
   // }

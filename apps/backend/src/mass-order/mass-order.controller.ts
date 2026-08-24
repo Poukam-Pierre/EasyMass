@@ -15,6 +15,6 @@ export class MassOrderController {
   @Get()
   @UseGuards(AuthGuard)
   findMassOrderByMass(@Query('massId') massId: string) {
-    return this.massOrderService.findMassOrderByMass(+massId);
+    return this.massOrderService.findMassOrderByMass(massId);
   }
 }

@@ -23,7 +23,7 @@ export class ParishController {
   @Get()
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGENEER)
+  @Role(ROLE.ENGINEER)
   findAll() {
     return this.parishService.findAll();
   }
@@ -36,9 +36,9 @@ export class ParishController {
   @Get(':id')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGENEER)
+  @Role(ROLE.ENGINEER)
   findOne(@Param('id') id: string) {
-    return this.parishService.findParish(+id);
+    return this.parishService.findParish(id);
   }
 
   @Patch(':id')
@@ -47,19 +47,19 @@ export class ParishController {
     @Param('id') id: string,
     @Body() updateParishDto: Prisma.ParishUpdateInput
   ) {
-    return this.parishService.update(+id, updateParishDto);
+    return this.parishService.update(id, updateParishDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
-    return this.parishService.remove(+id);
+    return this.parishService.remove(id);
   }
 
   @Post('/new')
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGENEER)
+  @Role(ROLE.ENGINEER)
   create(@Body() input: SignUpParishDto, @Request() request) {
     return this.parishService.createParish(input, request);
   }

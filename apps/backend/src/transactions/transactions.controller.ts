@@ -9,6 +9,6 @@ export class TransactionsController {
   @Get()
   @UseGuards(AuthGuard)
   findTransactionByParish(@Query('parishId') parishId: string) {
-    return this.transactionService.findAllTransactionByParish(+parishId);
+    return this.transactionService.findAllTransactionByParish(parishId);
   }
 }

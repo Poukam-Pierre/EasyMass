@@ -4,13 +4,17 @@ import { ParishService } from '../parish/parish.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from '../transactions/transactions.service';
 import { BelieverService } from '../believer/believer.service';
+import { MassService } from '../mass/mass.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly parishService: ParishService,
     private readonly transactionsService: TransactionsService,
-    private readonly believerService: BelieverService
+    private readonly believerService: BelieverService,
+    private readonly massService: MassService,
+    private readonly prismaService: PrismaService
   ) {}
 
   async handlePayment(handlePaymentDto: CreateTransactionDto) {
@@ -63,8 +67,6 @@ export class PaymentService {
       paymentResult.data
     );
 
-    const believerId = createId();
-
     const checkPayment = {
       port: 443,
       method: 'GET',
@@ -82,35 +84,50 @@ export class PaymentService {
       // If payment status is positif, then save the believer owner in db.
       // Then return the confirmation message for ordering masses.
       if (paymentStatus) {
-        const massOrders = massInfos.map((massInfo) => ({
-          intension: massInfo.intension,
-          price: massInfo.price,
-          massId: massInfo.id,
-        }));
-
-        await this.believerService.create({
-          id: believerId,
-          name: believerInfo.name,
+        const believer = await this.believerService.create({
+          fullName: believerInfo.name,
           phone: believerInfo.phone,
-          massOrder: {
-            createMany: {
-              data: massOrders,
-            },
+        });
+
+        const massOrders = await Promise.all(
+          massInfos.map((massInfo) =>
+            this.prismaService.massOrder.create({
+              data: {
+                intension: massInfo.intension,
+                price: massInfo.price,
+                orderByBeliever: {
+                  connect: { believerId: believer.believerId },
+                },
+                mass: { connect: { massId: massInfo.id } },
+              },
+            })
+          )
+        );
+
+        // All masses in one checkout are assumed to belong to the same
+        // parish, so the ledger income is attributed to that parish.
+        const mass = await this.massService.findOne(massInfos[0].id);
+
+        const payment = await this.prismaService.payment.create({
+          data: {
+            amount: paymentInfo.amount,
+            paymentMethod: paymentInfo.paymentMethod,
+            status: 'COMPLETED',
+            currency: 'XAF',
+            paidAt: new Date(),
+            referenceId: reference,
+            believer: { connect: { believerId: believer.believerId } },
+            massOrder: { connect: { massOrderId: massOrders[0].massOrderId } },
           },
         });
 
-        // Extract all data from webhook parameters
         await this.transactionsService.create({
           transactionId: reference,
-          currency: 'xaf',
-          price: paymentInfo.amount,
-          status: 'VALIDED',
-          paymentMethod: paymentInfo.paymentMethod,
-          believer: {
-            connect: {
-              id: believerId,
-            },
-          },
+          amount: paymentInfo.amount,
+          ownerId: mass.parishId,
+          ownerType: 'PARISH',
+          transactionType: 'INCOME',
+          payment: { connect: { paymentId: payment.paymentId } },
         });
       }
       return 'Bill of masses ordered';
@@ -149,15 +166,11 @@ export class PaymentService {
       if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
         await this.transactionsService.create({
           transactionId: withdrawalData.transfer.reference,
-          price: withdrawalData.transfer.amount_total,
-          status: 'INIT',
-          paymentMethod: 'MoMo',
-          currency: 'XAF',
-          initByParish: {
-            connect: {
-              id,
-            },
-          },
+          amount: -Math.abs(withdrawalData.transfer.amount_total),
+          ownerId: id,
+          ownerType: 'PARISH',
+          transactionType: 'WITHDRAWAL',
+          externalPayoutId: withdrawalData.transfer.reference,
         });
 
         return { code: 201, message: 'Payment initiated successfully' };
@@ -168,7 +181,7 @@ export class PaymentService {
   }
 
   async createOrRetreiveRecipient(
-    id: number,
+    id: string,
     receiverNumber: string
   ): Promise<string> {
     const referenceId = createId();

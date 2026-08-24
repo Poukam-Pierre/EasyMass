@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -17,14 +16,10 @@ import { PriestService } from './priest.service';
 export class PriestController {
   constructor(private readonly priestService: PriestService) {}
 
-  create(@Body() createPriestDto: Prisma.PriestCreateInput) {
-    return this.priestService.create(createPriestDto);
-  }
-
   @Get()
   @UseGuards(AdminGuard)
   @Role(ROLE.ADMIN)
-  @Role(ROLE.ENGENEER)
+  @Role(ROLE.ENGINEER)
   findAll() {
     return this.priestService.findAll();
   }
@@ -36,12 +31,12 @@ export class PriestController {
   @Post(':id')
   @UseGuards(AuthGuard)
   update(id: string, updatePriestDto: Prisma.PriestUpdateInput) {
-    return this.priestService.update(+id, updatePriestDto);
+    return this.priestService.update(id, updatePriestDto);
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.priestService.remove(+id);
+    return this.priestService.remove(id);
   }
 }

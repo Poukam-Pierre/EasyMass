@@ -5,15 +5,15 @@ export class SignUpDataDto {
   secondName: string;
   image?: string;
   birthDate: string;
-  phone: string;
-  authCardImge?: string;
+  phoneNumber: string;
+  authCardImage?: string;
 
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
-  availability: boolean;
+  available: boolean;
   authNumber: string;
   password: string;
 }
@@ -31,6 +31,6 @@ export class SignUpAdminDto {
 }
 
 export enum Role {
-  ENGENEER = 'ENGENEER',
+  ENGINEER = 'ENGINEER',
   ADMIN = 'ADMIN',
 }
