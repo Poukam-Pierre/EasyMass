@@ -35,7 +35,7 @@ export class MassOrderService {
           new Date(mass.processAt) >= new Date() && mass.massOrder.length !== 0
       );
 
-      const massIds = allUnprocessMass.map((mass) => mass.id);
+      const massIds = allUnprocessMass.map((mass) => mass.massId);
 
       const allUnprocessMasses = await this.prismaService.massOrder.findMany({
         where: {
@@ -58,7 +58,7 @@ export class MassOrderService {
     }
   }
 
-  async findMassOrderByMass(massId: number) {
+  async findMassOrderByMass(massId: string) {
     return this.prismaService.massOrder.findMany({
       where: {
         massId,

@@ -120,7 +120,7 @@ export class AuthService {
 
     const existingRefreshToken = (
       await this.refreshTokenService.findAll()
-    ).find((token) => token.parishId === user.id);
+    ).find((token) => token.userId === user.userId);
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
@@ -162,7 +162,7 @@ export class AuthService {
 
     const existingRefreshToken = (
       await this.refreshTokenService.findAll()
-    ).find((token) => token.adminId === user.id);
+    ).find((token) => token.userId === user.userId);
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
@@ -199,7 +199,7 @@ export class AuthService {
 
     const existingRefreshToken = (
       await this.refreshTokenService.findAll()
-    ).find((token) => token.priestId === user.id);
+    ).find((token) => token.userId === user.userId);
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
@@ -230,11 +230,13 @@ export class AuthService {
    * @returns user object
    */
   async signIn(
-    user: ParishDataDto | AdminDataDto | PriestDataDto,
+    user: ParishDataDto | PriestDataDto,
     role: string
-  ): Promise<ParishDataDto | AdminDataDto | PriestDataDto> {
+  ): Promise<ParishDataDto | PriestDataDto> {
+    const id = role === 'parish' ? (user as ParishDataDto).parishId : (user as PriestDataDto).priestId;
+
     const tokenPayload = {
-      id: user.id,
+      id,
       email: user.email,
     };
 
@@ -242,29 +244,16 @@ export class AuthService {
       const accessToken = await this.JwtService.signAsync(tokenPayload);
       const refreshToken = createId();
 
-      if (role === 'parish') {
-        await this.refreshTokenService.create({
-          id: createId(),
-          refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()).toISOString(),
-          parishToken: {
-            connect: {
-              id: user.id,
-            },
+      await this.refreshTokenService.create({
+        id: createId(),
+        refreshToken: refreshToken,
+        expiredDate: this.addOneDay(new Date()),
+        user: {
+          connect: {
+            userId: user.userId,
           },
-        });
-      } else if (role === 'priest') {
-        await this.refreshTokenService.create({
-          id: createId(),
-          refreshToken: refreshToken,
-          expiredDate: this.addOneDay(new Date()).toISOString(),
-          priestToken: {
-            connect: {
-              id: user.id,
-            },
-          },
-        });
-      }
+        },
+      });
 
       user.accessToken = accessToken;
       user.refreshToken = refreshToken;
@@ -285,7 +274,7 @@ export class AuthService {
    */
   async signInAdmin(user: AdminDataDto): Promise<AdminDataDto> {
     const tokenPayload = {
-      id: user.id,
+      id: user.adminId,
       email: user.email,
       role: user.role,
     };
@@ -297,10 +286,10 @@ export class AuthService {
       await this.refreshTokenService.create({
         id: createId(),
         refreshToken: refreshToken,
-        expiredDate: this.addOneDay(new Date()).toISOString(),
-        adminToken: {
+        expiredDate: this.addOneDay(new Date()),
+        user: {
           connect: {
-            id: user.id,
+            userId: user.userId,
           },
         },
       });
@@ -377,23 +366,24 @@ export class AuthService {
   async signUpPriestValidation(
     input: SignUpDataDto
   ): Promise<PriestDataDto | null> {
-    const { email, password, authNumber } = input;
+    const { email, password, authNumber, ...rest } = input;
 
-    const user = await this.priestService.findOneByAuthNumber(
+    const exists = await this.priestService.findOneByAuthNumber(
       email,
       authNumber
     );
-    if (user) return null;
+    if (exists) return null;
 
     try {
       const hash = await bcrypt.hash(password, 10);
-      input.password = hash;
 
-      const newUser = await this.priestService.create(input);
-      delete newUser.password;
-      delete newUser.updatedAt;
+      const newUser = await this.priestService.create(
+        { ...rest, authNumber },
+        email,
+        hash
+      );
 
-      return newUser;
+      return this.priestService.findOne(newUser.user.email);
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),
@@ -413,20 +403,17 @@ export class AuthService {
   async signupAdminValidation(
     input: SignUpAdminDto
   ): Promise<AdminDataDto | null> {
-    const { email, password } = input;
+    const { email, password, ...rest } = input;
     const user = await this.adminService.findOneByMail(email);
 
     if (user) return null;
 
     try {
       const hash = await bcrypt.hash(password, 10);
-      input.password = hash;
 
-      const newUser = await this.adminService.create(input);
-      delete newUser.password;
-      delete newUser.updatedAt;
+      const newUser = await this.adminService.create(rest, email, hash);
 
-      return newUser;
+      return this.adminService.findOneByMail(newUser.user.email);
     } catch (error) {
       throw new InternalServerErrorException('Internal Server Error', {
         cause: new Error(),

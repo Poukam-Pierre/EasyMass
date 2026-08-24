@@ -30,12 +30,12 @@ export class MassController {
     @Param('id') id: string,
     @Body() updateMassDto: Prisma.MassUpdateInput
   ) {
-    return this.massService.update(+id, updateMassDto);
+    return this.massService.update(id, updateMassDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.massService.remove(+id);
+    return this.massService.remove(id);
   }
 
   @Get()
@@ -43,6 +43,6 @@ export class MassController {
     @Query('parishId') parishId: string,
     @Query('role') role?: 'HISTORY'
   ) {
-    return this.massService.findAllByParish(+parishId, role);
+    return this.massService.findAllByParish(parishId, role);
   }
 }

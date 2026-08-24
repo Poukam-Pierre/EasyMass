@@ -2,7 +2,7 @@ import { SetMetadata } from '@nestjs/common';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export enum ROLE {
-  ENGENEER = 'ENGENEER',
+  ENGINEER = 'ENGINEER',
   ADMIN = 'ADMIN',
 }
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);

@@ -6,9 +6,23 @@ import { Prisma } from '@prisma/client';
 export class PriestService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createPriestDto: Prisma.PriestCreateInput) {
+  async create(
+    createPriestDto: Omit<Prisma.PriestCreateInput, 'user'>,
+    email: string,
+    password: string
+  ) {
     return this.prismaService.priest.create({
-      data: createPriestDto,
+      data: {
+        ...createPriestDto,
+        user: {
+          create: {
+            email,
+            password,
+            role: 'PRIEST',
+          },
+        },
+      },
+      include: { user: true },
     });
   }
 
@@ -17,34 +31,46 @@ export class PriestService {
   }
 
   async findOne(email: string) {
-    return this.prismaService.priest.findUnique({
-      where: {
-        email,
-      },
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+      include: { priest: true },
     });
+
+    if (!user?.priest) return null;
+
+    return {
+      ...user.priest,
+      email: user.email,
+      password: user.password,
+      userId: user.userId,
+    };
   }
 
-  async findOneByAuthNumber(email: string, authNumber: string) {
-    return this.prismaService.priest.findMany({
-      where: {
-        OR: [{ email: email }, { authNumber: authNumber }],
-      },
-    });
+  async findOneByAuthNumber(
+    email: string,
+    authNumber: string
+  ): Promise<boolean> {
+    const [existingUser, existingPriest] = await Promise.all([
+      this.prismaService.user.findUnique({ where: { email } }),
+      this.prismaService.priest.findUnique({ where: { authNumber } }),
+    ]);
+
+    return Boolean(existingUser || existingPriest);
   }
 
-  async update(id: number, updatePriestDto: Prisma.PriestUpdateInput) {
+  async update(priestId: string, updatePriestDto: Prisma.PriestUpdateInput) {
     return this.prismaService.priest.update({
       where: {
-        id,
+        priestId,
       },
       data: updatePriestDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(priestId: string) {
     return this.prismaService.priest.delete({
       where: {
-        id,
+        priestId,
       },
     });
   }

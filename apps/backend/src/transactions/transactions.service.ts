@@ -13,37 +13,42 @@ export class TransactionsService {
   }
 
   async update(
-    id: number,
+    transactionId: string,
     updateTransactionDto: Prisma.TransactionUpdateInput
   ) {
     return this.prismaService.transaction.update({
-      where: { id },
+      where: { transactionId },
       data: updateTransactionDto,
     });
   }
 
-  async findAllTransactionByParish(id: number) {
+  async findAllTransactionByParish(parishId: string) {
     return this.prismaService.transaction.findMany({
       where: {
-        parishId: id,
+        ownerId: parishId,
+        ownerType: 'PARISH',
       },
       select: {
-        id: true,
         transactionId: true,
         createdAt: true,
-        price: true,
-        status: true,
-        paymentMethod: true,
-        currency: true,
-        updatedAt: true,
+        amount: true,
+        transactionType: true,
+        balanceAfter: true,
+        payment: {
+          select: {
+            paymentMethod: true,
+            status: true,
+            currency: true,
+          },
+        },
       },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(transactionId: string) {
     return this.prismaService.transaction.findUnique({
       where: {
-        transactionId: id,
+        transactionId,
       },
     });
   }
