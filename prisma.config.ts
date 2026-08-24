@@ -3,7 +3,7 @@ import { defineConfig, env } from 'prisma/config';
 
 export default defineConfig({
   engine: 'classic',
-  schema: 'apps/backend/src/prisma/schema.prisma',
+  schema: 'apps/backend/src/prisma/schema',
   migrations: {
     path: 'apps/backend/src/prisma/migrations',
     seed: 'npx tsx apps/backend/src/prisma/seed.js',
