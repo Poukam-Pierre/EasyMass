@@ -1,10 +1,9 @@
-import { Currency } from '@prisma/client';
+import { Currency, PaymentMethod } from '@prisma/client';
 import {
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsString,
-  Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -19,36 +18,40 @@ export class BelieverInfoDto {
   phone: string;
 }
 
+/** No `price` here — trusting a client-supplied amount for what a mass
+ * costs would let a checkout be submitted for less than the parish's
+ * actual listed price. PaymentService resolves the real price server-side
+ * from Mass.price/MassPrice, keyed by `id` + the checkout's currency. */
 export class MassInfoDto {
   @IsString()
   @IsNotEmpty()
   id: string;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
 
   @IsString()
   @IsNotEmpty()
   intension: string;
 }
 
+/** No `amount` here, for the same reason MassInfoDto has no `price` — the
+ * total actually charged is the server-computed sum of each mass's
+ * resolved price plus the platform fee, never a client-supplied number. */
 export class PaymentInfoDto {
-  @IsNotEmpty()
-  @IsNumber()
-  amount: number;
-
   @IsEnum(Currency)
   currency: Currency;
 
+  /** Which gateway processes this checkout — MOBILE_MONEY (NotchPay) or
+   * PAYPAL. BANK_TRANSFER exists in the schema's PaymentMethod enum but has
+   * no gateway wired up yet. */
+  @IsEnum(PaymentMethod)
+  paymentMethod: PaymentMethod;
+
+  /** Only meaningful for MOBILE_MONEY — the number NotchPay charges. */
+  @ValidateIf((o) => o.paymentMethod === PaymentMethod.MOBILE_MONEY)
   @IsString()
-  phone: string;
+  @IsNotEmpty()
+  phone?: string;
 }
 
-/** Field names here (believerInfo/massInfos/paymentInfo) must match exactly
- * what PaymentService.notifyPayment parses back out of the NotchPay webhook
- * metadata — they previously didn't (massInfo vs massInfos), so no real
- * webhook call could ever succeed. */
 export class CreateTransactionDto {
   @ValidateNested()
   @Type(() => BelieverInfoDto)

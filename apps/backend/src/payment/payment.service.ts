@@ -8,14 +8,29 @@ import {
 import { createId } from '@paralleldrive/cuid2';
 import { PaymentMethod, UserRole } from '@prisma/client';
 import { ParishService } from '../parish/parish.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import {
+  CreateTransactionDto,
+  MassInfoDto,
+  PaymentInfoDto,
+} from './dto/create-transaction.dto';
 import { TransactionsService } from '../transactions/transactions.service';
 import { BelieverService } from '../believer/believer.service';
 import { MassService } from '../mass/mass.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
+import { MassPriceService } from '../mass-price/mass-price.service';
+import { CurrencyConversionService } from '../currency-conversion/currency-conversion.service';
 import { resolveParishForUser } from '../common/user.utils';
 import { PLATFORM_OWNER_ID } from '../common/constants';
+import { PaypalService } from './paypal.service';
+
+/** One resolved line item in a checkout — massInfo carries the client's
+ * legitimate input (which mass, its intension text); total is the
+ * server-computed amount for that mass (base price + platform fee). */
+interface CheckoutItem {
+  massInfo: MassInfoDto;
+  total: number;
+}
 
 @Injectable()
 export class PaymentService {
@@ -25,40 +40,181 @@ export class PaymentService {
     private readonly believerService: BelieverService,
     private readonly massService: MassService,
     private readonly prismaService: PrismaService,
-    private readonly platformSettingsService: PlatformSettingsService
+    private readonly platformSettingsService: PlatformSettingsService,
+    private readonly massPriceService: MassPriceService,
+    private readonly currencyConversionService: CurrencyConversionService,
+    private readonly paypalService: PaypalService
   ) {}
 
-  /** "Collect" step — initiates the NotchPay payment page. Does not write
-   * anything to our DB; the actual order/payment/ledger records are created
-   * in notifyPayment once NotchPay confirms the charge. */
-  async handlePayment(handlePaymentDto: CreateTransactionDto) {
+  /**
+   * "Collect" step — validates the checkout, creates the Believer, one
+   * MassOrder per mass, and one Payment per MassOrder with status
+   * INITIATED (all sharing one reference — our own, for NotchPay; PayPal's
+   * order id, patched in right after createOrder returns it, since PayPal
+   * doesn't take a caller-supplied order id). Only then calls the gateway,
+   * and flips those rows to PENDING once the gateway has actually accepted
+   * the checkout. Payment.status is the lifecycle record itself
+   * (INITIATED -> PENDING -> COMPLETED/FAILED/EXPIRED/REFUNDED), so a
+   * checkout that's never confirmed still leaves a real, queryable trace
+   * instead of vanishing — see finalizeCheckout.
+   */
+  async handlePayment(handlePaymentDto: CreateTransactionDto): Promise<string> {
     const { believerInfo, massInfos, paymentInfo } = handlePaymentDto;
 
+    const masses = await this.massService.findManyByIds(
+      massInfos.map((m) => m.id)
+    );
+    const massById = new Map(masses.map((m) => [m.massId, m]));
+    if (massInfos.some((m) => !massById.has(m.id))) {
+      throw new NotFoundException('One or more masses no longer exist.');
+    }
+
+    // All masses in one checkout must belong to the same parish — the
+    // ledger attribution in finalizeCheckout assumes a single owner per
+    // batch.
+    if (new Set(masses.map((m) => m.parishId)).size > 1) {
+      throw new BadRequestException(
+        'A single checkout cannot span multiple parishes.'
+      );
+    }
+
+    // Re-checked here, server-side, at the moment of checkout — the
+    // scheduler's sweep only flips OPEN->CLOSED once a minute, so without
+    // this a checkout could still start right at that boundary. Once
+    // initiated, a Mass closing underneath an in-flight gateway attempt is
+    // NOT re-checked at confirmation (finalizeCheckout) — by then money
+    // may have already moved, and rejecting a successful charge would be
+    // worse than honoring it a few minutes late.
+    if (masses.some((m) => m.status !== 'OPEN')) {
+      throw new BadRequestException(
+        'Ordering has closed for one or more of these masses.'
+      );
+    }
+
+    // The only source of truth for what each mass costs — never trust a
+    // client-submitted price (see CreateTransactionDto). The platform fee
+    // is added on top; the parish's ledger share is always this exact
+    // base price, in full.
+    const basePriceByMassId = await this.massPriceService.resolvePrices(
+      this.prismaService,
+      masses,
+      paymentInfo.currency
+    );
+    const settings = await this.platformSettingsService.get();
+
+    const items: CheckoutItem[] = massInfos.map((massInfo) => {
+      // resolvePrices resolves every mass passed to it or throws — this
+      // set is exactly the masses just looked up above.
+      const basePrice = basePriceByMassId.get(massInfo.id) as number;
+      const fee = this.platformSettingsService.computeFee(
+        settings,
+        basePrice
+      );
+      return { massInfo, total: basePrice + fee };
+    });
+    const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+
+    // Our own reference, generated up front — passed to NotchPay directly
+    // as `reference`. PayPal generates its own order id instead, so its
+    // Payment rows get this overwritten right after createOrder returns
+    // (see initiatePaypalCheckout).
+    const reference = createId();
+
+    const paymentIds = await this.prismaService.$transaction(async (tx) => {
+      const believer = await tx.believer.create({
+        data: { fullName: believerInfo.name, phone: believerInfo.phone },
+      });
+
+      const ids: string[] = [];
+      for (const { massInfo, total } of items) {
+        const massOrder = await tx.massOrder.create({
+          data: {
+            intension: massInfo.intension,
+            price: total,
+            currency: paymentInfo.currency,
+            orderByBeliever: { connect: { believerId: believer.believerId } },
+            mass: { connect: { massId: massInfo.id } },
+          },
+        });
+
+        const payment = await tx.payment.create({
+          data: {
+            amount: total,
+            paymentMethod: paymentInfo.paymentMethod,
+            status: 'INITIATED',
+            currency: paymentInfo.currency,
+            referenceId: reference,
+            believer: { connect: { believerId: believer.believerId } },
+            massOrder: { connect: { massOrderId: massOrder.massOrderId } },
+          },
+        });
+        ids.push(payment.paymentId);
+      }
+      return ids;
+    });
+
+    try {
+      let checkoutUrl: string;
+      switch (paymentInfo.paymentMethod) {
+        case PaymentMethod.PAYPAL:
+          checkoutUrl = await this.initiatePaypalCheckout(
+            items,
+            paymentInfo,
+            paymentIds
+          );
+          break;
+        case PaymentMethod.MOBILE_MONEY:
+          checkoutUrl = await this.initiateNotchPayCheckout(
+            paymentInfo,
+            reference,
+            grandTotal
+          );
+          break;
+        default:
+          throw new UnprocessableEntityException(
+            `Payment method ${paymentInfo.paymentMethod} is not yet supported.`
+          );
+      }
+
+      // The gateway has now actually accepted the checkout — genuinely
+      // awaiting the customer's action on its side.
+      await this.prismaService.payment.updateMany({
+        where: { paymentId: { in: paymentIds }, status: 'INITIATED' },
+        data: { status: 'PENDING' },
+      });
+
+      return checkoutUrl;
+    } catch (error) {
+      // The gateway rejected the checkout outright (or we refused to even
+      // ask, e.g. unsupported method) — mark FAILED rather than leaving
+      // these rows stuck INITIATED for a reconciliation job to eventually
+      // find.
+      await this.prismaService.payment.updateMany({
+        where: { paymentId: { in: paymentIds }, status: 'INITIATED' },
+        data: { status: 'FAILED' },
+      });
+      throw error;
+    }
+  }
+
+  private async initiateNotchPayCheckout(
+    paymentInfo: PaymentInfoDto,
+    reference: string,
+    amount: number
+  ): Promise<string> {
     const optionPaymentInit = {
       method: 'POST',
       headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY,
+        Authorization: process.env.NOTCH_PUBLIC_KEY ?? '',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount: paymentInfo.amount,
+        amount,
         currency: paymentInfo.currency,
         description: 'Mass offering payment',
         email: 'easyMess@gmail.com',
-        reference: createId(),
+        reference,
         callback: 'https://onlinepreps.net',
-        // Each field individually stringified — metadata values are
-        // commonly required to be strings, not nested objects, by payment
-        // gateways. notifyPayment reads this back via
-        // paymentStatus.transaction.metadata.{believerInfo,massInfos,
-        // paymentInfo} and JSON.parses each — these key names must match
-        // exactly (they previously didn't: massInfo vs massInfos, and
-        // paymentInfo wasn't sent at all, so no webhook could ever succeed).
-        metadata: {
-          believerInfo: JSON.stringify(believerInfo),
-          massInfos: JSON.stringify(massInfos),
-          paymentInfo: JSON.stringify(paymentInfo),
-        },
       }),
     };
 
@@ -80,11 +236,42 @@ export class PaymentService {
     }
   }
 
+  private async initiatePaypalCheckout(
+    items: CheckoutItem[],
+    paymentInfo: PaymentInfoDto,
+    paymentIds: string[]
+  ): Promise<string> {
+    const appBaseUrl = process.env.APP_PUBLIC_URL;
+    if (!appBaseUrl) {
+      throw new UnprocessableEntityException(
+        'APP_PUBLIC_URL is not configured — required to build PayPal return/cancel URLs.'
+      );
+    }
+
+    const { orderId, approveUrl } = await this.paypalService.createOrder(
+      items.map(({ massInfo, total }) => ({
+        referenceId: massInfo.id,
+        amount: total,
+        currency: paymentInfo.currency,
+      })),
+      `${appBaseUrl}/api/payment/paypal/return`,
+      `${appBaseUrl}/api/payment/paypal/cancel`
+    );
+
+    // PayPal generates its own order id — swap it in for the temporary
+    // reference generated in handlePayment, since the return/webhook
+    // handlers only ever get PayPal's order id back, never ours.
+    await this.prismaService.payment.updateMany({
+      where: { paymentId: { in: paymentIds } },
+      data: { referenceId: orderId },
+    });
+
+    return approveUrl;
+  }
+
   /**
-   * Webhook handler — confirms the charge with NotchPay, then creates the
-   * Believer, one MassOrder + Payment per mass in the checkout (all
-   * Payments share the gateway's referenceId), and the income/platform-fee
-   * ledger split for each. All-or-nothing via one DB transaction.
+   * Webhook handler — confirms the charge with NotchPay, then hands off to
+   * finalizeCheckout to actually write the ledger.
    */
   async notifyPayment(paymentResult) {
     const {
@@ -94,7 +281,7 @@ export class PaymentService {
     const checkPayment = {
       method: 'GET',
       headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY,
+        Authorization: process.env.NOTCH_PUBLIC_KEY ?? '',
       },
     };
 
@@ -103,68 +290,152 @@ export class PaymentService {
       checkPayment
     ).then((response) => response.json());
 
+    const gatewayStatus = paymentStatus?.transaction?.status;
+
     // NotchPay's transaction.status: pending/processing/complete/failed/
     // canceled/expired — only 'complete' means money actually moved.
-    if (paymentStatus?.transaction?.status !== 'complete') {
+    if (gatewayStatus !== 'complete') {
+      // A terminal negative status: mark FAILED now rather than leaving it
+      // for a reconciliation job. 'pending'/'processing' aren't terminal —
+      // leave PENDING so a retried webhook delivery can still complete it.
+      if (['failed', 'canceled', 'expired'].includes(gatewayStatus)) {
+        await this.prismaService.payment.updateMany({
+          where: { referenceId: reference, status: 'PENDING' },
+          data: { status: 'FAILED' },
+        });
+      }
       return {
         code: 200,
-        message: `Payment not complete (status: ${paymentStatus?.transaction?.status}); ignoring.`,
+        message: `Payment not complete (status: ${gatewayStatus}); ignoring.`,
       };
     }
 
-    // Sourced from the verify response (paymentStatus.transaction.metadata),
-    // not the webhook body — NotchPay's webhook payload docs don't document
-    // a metadata field at all, while the payment object schema does. Each
-    // field was individually JSON-stringified in handlePayment (metadata
-    // values commonly must be strings, not nested objects), so parse each
-    // back out here.
-    const metadata = paymentStatus.transaction?.metadata ?? {};
-    const believerInfo = JSON.parse(metadata.believerInfo);
-    const massInfos = JSON.parse(metadata.massInfos);
-    const paymentInfo = JSON.parse(metadata.paymentInfo);
+    return this.finalizeCheckout(reference);
+  }
 
-    // Reconcile: what the client says each mass costs must sum to what was
-    // actually charged — don't trust the gateway total alone for the split.
-    const sumOfCapturedPrices = massInfos.reduce(
-      (total: number, m) => total + m.price,
-      0
+  /**
+   * Hit by the customer's browser after approving the charge on PayPal's
+   * site (application_context.return_url from initiatePaypalCheckout) —
+   * no session/JWT available here, PayPal drives this redirect directly.
+   * Captures the order, then hands off to finalizeCheckout. Also called
+   * from handlePaypalWebhook as a durability backstop.
+   */
+  async handlePaypalReturn(orderId: string) {
+    // Idempotent on PayPal's side — capturing an already-captured order
+    // returns the existing capture instead of double-charging, so this is
+    // safe to call from both the return handler and the webhook.
+    const capture = await this.paypalService.captureOrder(orderId);
+    if (capture.status !== 'COMPLETED') {
+      await this.prismaService.payment.updateMany({
+        where: { referenceId: orderId, status: 'PENDING' },
+        data: { status: 'FAILED' },
+      });
+      return {
+        code: 200,
+        message: `PayPal order not completed (status: ${capture.status}).`,
+      };
+    }
+
+    return this.finalizeCheckout(orderId);
+  }
+
+  /** Customer backed out on PayPal's approval page. */
+  async handlePaypalCancel(orderId: string) {
+    await this.prismaService.payment.updateMany({
+      where: { referenceId: orderId, status: 'PENDING' },
+      data: { status: 'FAILED' },
+    });
+    return { code: 200, message: 'Checkout cancelled.' };
+  }
+
+  /** Durability backstop for handlePaypalReturn — covers a customer
+   * closing the tab right after approving, before the return redirect
+   * completes. Must verify the signature itself: this endpoint is
+   * necessarily @Public() (PayPal calls it server-to-server), so signature
+   * verification is what stands in for auth here. */
+  async handlePaypalWebhook(
+    headers: Record<string, string | undefined>,
+    event: { event_type?: string; resource?: { id?: string } }
+  ) {
+    const verified = await this.paypalService.verifyWebhookSignature(
+      headers,
+      event
     );
-    if (Math.abs(sumOfCapturedPrices - paymentInfo.amount) > 0.01) {
+    if (!verified) {
       throw new UnprocessableEntityException(
-        'Mass order prices do not sum to the amount charged.'
+        'Invalid PayPal webhook signature.'
       );
     }
 
-    // One round trip for every mass in the checkout instead of one findOne
-    // per mass.
-    const masses = await this.massService.findManyByIds(
-      massInfos.map((m) => m.id)
-    );
-    const massById = new Map(masses.map((m) => [m.massId, m]));
-    if (massInfos.some((m) => !massById.has(m.id))) {
-      throw new NotFoundException('One or more masses no longer exist.');
+    // Fires as soon as the customer approves, before capture — resource IS
+    // the order object, so resource.id is the order id finalizeCheckout
+    // needs, same as the return handler's `token` query param.
+    if (event.event_type !== 'CHECKOUT.ORDER.APPROVED') {
+      return { code: 200, message: 'Ignored event type.' };
     }
 
-    // All masses in one checkout must belong to the same parish — the
-    // ledger attribution below assumes a single owner per batch.
-    const parishIds = new Set(masses.map((m) => m.parishId));
-    if (parishIds.size > 1) {
-      throw new BadRequestException(
-        'A single checkout cannot span multiple parishes.'
+    const orderId = event.resource?.id;
+    if (!orderId) {
+      return { code: 200, message: 'Malformed event: no order id.' };
+    }
+
+    return this.handlePaypalReturn(orderId);
+  }
+
+  /**
+   * Flips every PENDING Payment sharing `reference` to COMPLETED and writes
+   * the income/platform-fee ledger split for each. Believer/MassOrder/
+   * Payment already exist (created in handlePayment) — this only runs once
+   * the gateway has confirmed the charge.
+   *
+   * The conditional updateMany (status: 'PENDING' in the where clause) is
+   * the idempotency guard: only rows still PENDING get flipped, and
+   * `count` tells us whether *this* call is the one that won the race —
+   * a retried NotchPay webhook, or PayPal's return-redirect and webhook
+   * both firing for the same order, becomes a safe no-op on the loser.
+   */
+  private async finalizeCheckout(reference: string) {
+    // Peek at the payment currency and fetch its rate to BASE_CURRENCY
+    // (XAF) BEFORE opening the transaction below — Transaction has no
+    // currency column, so every ledger amount must already be in XAF
+    // regardless of what currency the believer actually paid in. Doing
+    // the (possibly network-bound) rate lookup up front means a hiccup on
+    // that external call fails fast and lets the caller (webhook/return
+    // handler) retry cleanly, instead of forcing a rollback of the
+    // COMPLETED status flip that's about to happen inside the transaction
+    // — the charge has already succeeded on the gateway by this point.
+    const sample = await this.prismaService.payment.findFirst({
+      where: { referenceId: reference },
+      select: { currency: true },
+    });
+    if (!sample) {
+      return { code: 200, message: 'Already processed or unknown reference.' };
+    }
+    const rateToBaseCurrency =
+      await this.currencyConversionService.getRateToBaseCurrency(
+        sample.currency
       );
-    }
-    const parishId = masses[0].parishId;
-
-    const settings = await this.platformSettingsService.get();
 
     // Runs at SERIALIZABLE isolation (see PrismaService.runSerializableTransaction)
     // so a concurrent payment/withdrawal/refund touching the same parish or
     // platform balance can't produce a lost update — Postgres aborts one
-    // side with a retryable conflict instead. Starting balances are read
-    // inside this same transaction (not before it) so the read is part of
-    // what gets serialized; they're then tracked in memory across the loop
-    // to avoid a query per split row.
+    // side with a retryable conflict instead.
     return this.prismaService.runSerializableTransaction(async (tx) => {
+      const { count } = await tx.payment.updateMany({
+        where: { referenceId: reference, status: 'PENDING' },
+        data: { status: 'COMPLETED', paidAt: new Date() },
+      });
+      if (count === 0) {
+        return { code: 200, message: 'Already processed.' };
+      }
+
+      const payments = await tx.payment.findMany({
+        where: { referenceId: reference },
+        include: { massOrder: { include: { mass: true } } },
+      });
+
+      const parishId = payments[0].massOrder.mass.parishId;
+
       let parishBalance = await this.transactionsService.getCurrentBalance(
         tx,
         parishId,
@@ -176,42 +447,26 @@ export class PaymentService {
         'ADMIN'
       );
 
-      const believer = await tx.believer.create({
-        data: { fullName: believerInfo.name, phone: believerInfo.phone },
-      });
+      for (const payment of payments) {
+        // The parish's ledger share is always exactly the mass's own
+        // base-currency price — set by the parish, read fresh, never
+        // converted or re-derived through a currency-specific MassPrice
+        // override (that override only affects what the believer was
+        // actually charged, not what the parish is owed).
+        const parishShare = payment.massOrder.mass.price;
 
-      for (const massInfo of massInfos) {
-        const massOrder = await tx.massOrder.create({
-          data: {
-            intension: massInfo.intension,
-            price: massInfo.price,
-            currency: paymentInfo.currency,
-            orderByBeliever: {
-              connect: { believerId: believer.believerId },
-            },
-            mass: { connect: { massId: massInfo.id } },
-          },
-        });
-
-        const payment = await tx.payment.create({
-          data: {
-            amount: massInfo.price,
-            // NotchPay's collect flow is charged against paymentInfo.phone —
-            // every payment this integration processes is a mobile money
-            // charge (matching the payout side's channel: 'cm.mobile'), so
-            // this reflects the actual method used, not a placeholder.
-            paymentMethod: PaymentMethod.MOBILE_MONEY,
-            status: 'COMPLETED',
-            currency: paymentInfo.currency,
-            paidAt: new Date(),
-            referenceId: reference,
-            believer: { connect: { believerId: believer.believerId } },
-            massOrder: { connect: { massOrderId: massOrder.massOrderId } },
-          },
-        });
-
-        const { platformFee, parishShare } =
-          this.platformSettingsService.splitPrice(settings, massInfo.price);
+        // The platform's fee is defined as a REMAINDER — whatever was
+        // actually charged (payment.amount, in the currency the believer
+        // paid in), converted to BASE_CURRENCY, minus the parish's fixed
+        // share. This guarantees parishShare + platformFee always equals
+        // exactly what was collected, with nothing left unaccounted for —
+        // even across FX-rate drift between initiation and confirmation,
+        // or a MassPrice that wasn't set as a strict conversion of
+        // Mass.price. Independently recomputing a percentage+fixed fee
+        // and converting both halves separately (the previous approach)
+        // could leave a gap between the two; this can't.
+        const totalInBaseCurrency = payment.amount * rateToBaseCurrency;
+        const platformFee = totalInBaseCurrency - parishShare;
 
         ({ balanceAfter: parishBalance } =
           await this.transactionsService.createAtBalance(

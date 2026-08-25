@@ -42,9 +42,8 @@ export class MassOrderService {
 
       const allUnprocessMasses = await this.prismaService.massOrder.findMany({
         where: {
-          massId: {
-            in: massIds,
-          },
+          massId: { in: massIds },
+          payments: { some: { status: 'COMPLETED' } },
         },
         include: {
           mass: true,
@@ -82,9 +81,14 @@ export class MassOrderService {
       }
     }
 
+    // Scoped to orders with at least one COMPLETED payment — MassOrder
+    // rows now exist from checkout initiation (see
+    // PaymentService.handlePayment), not only once paid, so an intentions
+    // list must not surface something nobody actually paid for.
     return this.prismaService.massOrder.findMany({
       where: {
         massId,
+        payments: { some: { status: 'COMPLETED' } },
       },
       include: {
         orderByBeliever: true,

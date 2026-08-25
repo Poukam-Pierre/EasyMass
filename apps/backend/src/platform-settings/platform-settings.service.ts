@@ -27,24 +27,24 @@ export class PlatformSettingsService {
   }
 
   /**
-   * Splits a mass order's price into the platform's cut and the parish's
-   * share, per the current fee settings. platformFee is clamped so it never
-   * exceeds price (the parish's share can never go negative). Pure/sync so
-   * callers splitting many orders in one checkout can fetch settings once
-   * (via get()) and call this N times without N DB round trips — important
-   * when called from inside an interactive $transaction.
+   * The platform's fee for one mass order, ADDED ON TOP of the mass's base
+   * price (Mass.price/MassPrice) — the parish always receives that base
+   * price in full; this is purely additional platform revenue, not a cut
+   * carved out of the parish's share. Pure/sync so callers computing fees
+   * for many orders in one checkout can fetch settings once (via get())
+   * and call this N times without N DB round trips — important when called
+   * from inside an interactive $transaction.
    */
-  splitPrice(
+  computeFee(
     settings: Pick<
       PlatformSettings,
       'platformFeePercentage' | 'platformFeeFixedAmount'
     >,
-    price: number
-  ): { platformFee: number; parishShare: number } {
-    const rawFee =
-      price * (settings.platformFeePercentage / 100) +
-      settings.platformFeeFixedAmount;
-    const platformFee = Math.min(Math.max(rawFee, 0), price);
-    return { platformFee, parishShare: price - platformFee };
+    basePrice: number
+  ): number {
+    return (
+      basePrice * (settings.platformFeePercentage / 100) +
+      settings.platformFeeFixedAmount
+    );
   }
 }

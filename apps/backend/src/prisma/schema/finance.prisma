@@ -45,9 +45,21 @@ enum PaymentMethod {
 }
 
 enum PaymentStatus {
+  /// Set the moment the Payment row is created — before the gateway has
+  /// even been asked to start the checkout. The believer/mass/amount are
+  /// fixed at this point; only the gateway's response is still pending.
+  INITIATED @map("initiated")
+  /// The gateway accepted the checkout (NotchPay returned an
+  /// authorization_url, or PayPal's order was created) — now genuinely
+  /// awaiting the customer to complete it on the gateway's side.
   PENDING   @map("pending")
   COMPLETED @map("completed")
   FAILED    @map("failed")
+  /// Reserved for a reconciliation job to apply to rows stuck INITIATED or
+  /// PENDING past some cutoff — the customer never came back. Distinct
+  /// from FAILED (gateway actively rejected/declined it): "never returned"
+  /// and "was declined" are different problems for support/analytics.
+  EXPIRED   @map("expired")
   REFUNDED  @map("refunded")
 }
 

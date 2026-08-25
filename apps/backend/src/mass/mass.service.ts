@@ -180,13 +180,19 @@ export class MassService {
     });
   }
 
+  /** massOrder is scoped to orders with at least one COMPLETED payment —
+   * MassOrder rows now exist from the moment checkout is initiated (see
+   * PaymentService.handlePayment), not only once paid, so an abandoned or
+   * failed checkout must not be counted as a real order here. */
   async findAll(parishId: string) {
     return this.prismaService.mass.findMany({
       where: {
         parishId,
       },
       include: {
-        massOrder: true,
+        massOrder: {
+          where: { payments: { some: { status: 'COMPLETED' } } },
+        },
       },
     });
   }
@@ -275,7 +281,12 @@ export class MassService {
       },
       include: {
         parish: { include: { user: true } },
+        // Scoped to COMPLETED payments — MassOrder rows now exist from
+        // checkout initiation (see PaymentService.handlePayment), not only
+        // once paid, so an abandoned/failed checkout must never end up in
+        // the PDF/email actually sent to the parish.
         massOrder: {
+          where: { payments: { some: { status: 'COMPLETED' } } },
           include: { orderByBeliever: true },
           orderBy: { createdAt: 'asc' },
         },
