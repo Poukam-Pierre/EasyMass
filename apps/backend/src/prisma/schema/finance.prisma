@@ -41,7 +41,7 @@ enum Currency {
 enum PaymentMethod {
   PAYPAL        @map("paypal")
   BANK_TRANSFER @map("bank_transfer")
-  ONLINE        @map("online")
+  MOBILE_MONEY  @map("mobile_money")
 }
 
 enum PaymentStatus {
