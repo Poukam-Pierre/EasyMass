@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { resolveParishForUser } from '../common/user.utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePriestDto } from './dto/create-priest.dto';
@@ -28,12 +29,12 @@ export class PriestController {
   @Get()
   @Roles(UserRole.PARISH, UserRole.ADMIN)
   async findAll(
-    @Request() request,
+    @Request() request: AuthenticatedRequest,
     @Query('available') available?: string,
     @Query('parishId') parishId?: string
   ) {
     const homeParishId =
-      request.user.role === 'ADMIN'
+      request.user.role === UserRole.ADMIN
         ? parishId
         : (await resolveParishForUser(this.prismaService, request.user.id))
             .parishId;
@@ -47,13 +48,16 @@ export class PriestController {
 
   @Get(':id')
   @Roles(UserRole.PARISH, UserRole.ADMIN)
-  findOne(@Param('id') id: string) {
-    return this.priestService.findOne(id);
+  findOne(@Param('id') id: string, @Request() request: AuthenticatedRequest) {
+    return this.priestService.findOne(id, request.user);
   }
 
   @Post()
   @Roles(UserRole.PARISH)
-  async create(@Body() input: CreatePriestDto, @Request() request) {
+  async create(
+    @Body() input: CreatePriestDto,
+    @Request() request: AuthenticatedRequest
+  ) {
     const parish = await resolveParishForUser(
       this.prismaService,
       request.user.id
@@ -66,14 +70,14 @@ export class PriestController {
   update(
     @Param('id') id: string,
     @Body() updatePriestDto: UpdatePriestDto,
-    @Request() request
+    @Request() request: AuthenticatedRequest
   ) {
     return this.priestService.update(id, updatePriestDto, request.user);
   }
 
   @Delete(':id')
   @Roles(UserRole.PARISH, UserRole.ADMIN)
-  remove(@Param('id') id: string, @Request() request) {
+  remove(@Param('id') id: string, @Request() request: AuthenticatedRequest) {
     return this.priestService.remove(id, request.user);
   }
 }

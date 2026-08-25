@@ -6,6 +6,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
+import { PaymentMethod, UserRole } from '@prisma/client';
 import { ParishService } from '../parish/parish.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from '../transactions/transactions.service';
@@ -134,10 +135,13 @@ export class PaymentService {
       );
     }
 
-    const masses = await Promise.all(
-      massInfos.map((m) => this.massService.findOne(m.id))
+    // One round trip for every mass in the checkout instead of one findOne
+    // per mass.
+    const masses = await this.massService.findManyByIds(
+      massInfos.map((m) => m.id)
     );
-    if (masses.some((m) => !m)) {
+    const massById = new Map(masses.map((m) => [m.massId, m]));
+    if (massInfos.some((m) => !massById.has(m.id))) {
       throw new NotFoundException('One or more masses no longer exist.');
     }
 
@@ -153,98 +157,104 @@ export class PaymentService {
 
     const settings = await this.platformSettingsService.get();
 
-    // Starting balances fetched once, outside the transaction, then tracked
-    // in memory as each row is written — avoids a findFirst+create round
-    // trip per split row (this loop can otherwise easily exceed Prisma's
-    // interactive-transaction timeout under real network latency, as
-    // observed against Neon's pooler).
-    let parishBalance = await this.transactionsService.getCurrentBalance(
-      this.prismaService,
-      parishId,
-      'PARISH'
-    );
-    let platformBalance = await this.transactionsService.getCurrentBalance(
-      this.prismaService,
-      PLATFORM_OWNER_ID,
-      'ADMIN'
-    );
+    // Runs at SERIALIZABLE isolation (see PrismaService.runSerializableTransaction)
+    // so a concurrent payment/withdrawal/refund touching the same parish or
+    // platform balance can't produce a lost update — Postgres aborts one
+    // side with a retryable conflict instead. Starting balances are read
+    // inside this same transaction (not before it) so the read is part of
+    // what gets serialized; they're then tracked in memory across the loop
+    // to avoid a query per split row.
+    return this.prismaService.runSerializableTransaction(async (tx) => {
+      let parishBalance = await this.transactionsService.getCurrentBalance(
+        tx,
+        parishId,
+        'PARISH'
+      );
+      let platformBalance = await this.transactionsService.getCurrentBalance(
+        tx,
+        PLATFORM_OWNER_ID,
+        'ADMIN'
+      );
 
-    return this.prismaService.$transaction(
-      async (tx) => {
-        const believer = await tx.believer.create({
-          data: { fullName: believerInfo.name, phone: believerInfo.phone },
+      const believer = await tx.believer.create({
+        data: { fullName: believerInfo.name, phone: believerInfo.phone },
+      });
+
+      for (const massInfo of massInfos) {
+        const massOrder = await tx.massOrder.create({
+          data: {
+            intension: massInfo.intension,
+            price: massInfo.price,
+            currency: paymentInfo.currency,
+            orderByBeliever: {
+              connect: { believerId: believer.believerId },
+            },
+            mass: { connect: { massId: massInfo.id } },
+          },
         });
 
-        for (const massInfo of massInfos) {
-          const massOrder = await tx.massOrder.create({
-            data: {
-              intension: massInfo.intension,
-              price: massInfo.price,
-              currency: paymentInfo.currency,
-              orderByBeliever: {
-                connect: { believerId: believer.believerId },
-              },
-              mass: { connect: { massId: massInfo.id } },
+        const payment = await tx.payment.create({
+          data: {
+            amount: massInfo.price,
+            // NotchPay's collect flow is charged against paymentInfo.phone —
+            // every payment this integration processes is a mobile money
+            // charge (matching the payout side's channel: 'cm.mobile'), so
+            // this reflects the actual method used, not a placeholder.
+            paymentMethod: PaymentMethod.MOBILE_MONEY,
+            status: 'COMPLETED',
+            currency: paymentInfo.currency,
+            paidAt: new Date(),
+            referenceId: reference,
+            believer: { connect: { believerId: believer.believerId } },
+            massOrder: { connect: { massOrderId: massOrder.massOrderId } },
+          },
+        });
+
+        const { platformFee, parishShare } =
+          this.platformSettingsService.splitPrice(settings, massInfo.price);
+
+        ({ balanceAfter: parishBalance } =
+          await this.transactionsService.createAtBalance(
+            tx,
+            {
+              transactionType: 'INCOME',
+              ownerId: parishId,
+              ownerType: 'PARISH',
+              amount: parishShare,
+              payment: { connect: { paymentId: payment.paymentId } },
             },
-          });
+            parishBalance
+          ));
 
-          const payment = await tx.payment.create({
-            data: {
-              amount: massInfo.price,
-              paymentMethod: 'ONLINE',
-              status: 'COMPLETED',
-              currency: paymentInfo.currency,
-              paidAt: new Date(),
-              referenceId: reference,
-              believer: { connect: { believerId: believer.believerId } },
-              massOrder: { connect: { massOrderId: massOrder.massOrderId } },
+        ({ balanceAfter: platformBalance } =
+          await this.transactionsService.createAtBalance(
+            tx,
+            {
+              transactionType: 'PLATFORM_FEE',
+              ownerId: PLATFORM_OWNER_ID,
+              ownerType: 'ADMIN',
+              amount: platformFee,
+              payment: { connect: { paymentId: payment.paymentId } },
             },
-          });
+            platformBalance
+          ));
+      }
 
-          const { platformFee, parishShare } =
-            this.platformSettingsService.splitPrice(settings, massInfo.price);
-
-          ({ balanceAfter: parishBalance } =
-            await this.transactionsService.createAtBalance(
-              tx,
-              {
-                transactionType: 'INCOME',
-                ownerId: parishId,
-                ownerType: 'PARISH',
-                amount: parishShare,
-                payment: { connect: { paymentId: payment.paymentId } },
-              },
-              parishBalance
-            ));
-
-          ({ balanceAfter: platformBalance } =
-            await this.transactionsService.createAtBalance(
-              tx,
-              {
-                transactionType: 'PLATFORM_FEE',
-                ownerId: PLATFORM_OWNER_ID,
-                ownerType: 'ADMIN',
-                amount: platformFee,
-                payment: { connect: { paymentId: payment.paymentId } },
-              },
-              platformBalance
-            ));
-        }
-
-        return { code: 200, message: 'Bill of masses ordered' };
-      },
-      { timeout: 15000, maxWait: 10000 }
-    );
+      return { code: 200, message: 'Bill of masses ordered' };
+    });
   }
 
   /** Parish-only — there's no priest balance to withdraw from in this MVP.
    * Uses the parish's persisted payoutNumber (set via
    * PATCH /parishes/:id/payout-method) rather than trusting a client-
    * supplied number on every call. */
-  async withdrawMoney(request, amount: number) {
+  async withdrawMoney(
+    requestUser: { id: string; role: UserRole },
+    amount: number
+  ) {
     const parish = await resolveParishForUser(
       this.prismaService,
-      request.user.id
+      requestUser.id
     );
 
     if (parish.payoutBlocked) {
@@ -270,7 +280,7 @@ export class PaymentService {
     const optionWithdrawMoney = {
       method: 'POST',
       headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY,
+        Authorization: process.env.NOTCH_PUBLIC_KEY || '',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -288,14 +298,19 @@ export class PaymentService {
       ).then((response) => response.json());
 
       if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
-        await this.transactionsService.createWithBalance(this.prismaService, {
-          transactionType: 'WITHDRAWAL',
-          ownerId: parish.parishId,
-          ownerType: 'PARISH',
-          amount: -Math.abs(withdrawalData.transfer.amount_total),
-          externalPayoutId: withdrawalData.transfer.reference,
-          createdByUser: { connect: { userId: request.user.id } },
-        });
+        // Serializable so a withdrawal racing with a concurrent payment/
+        // refund for the same parish can't produce a lost update on the
+        // running balance (see PrismaService.runSerializableTransaction).
+        await this.prismaService.runSerializableTransaction((tx) =>
+          this.transactionsService.createWithBalance(tx, {
+            transactionType: 'WITHDRAWAL',
+            ownerId: parish.parishId,
+            ownerType: 'PARISH',
+            amount: -Math.abs(withdrawalData.transfer.amount_total),
+            externalPayoutId: withdrawalData.transfer.reference,
+            createdByUser: { connect: { userId: requestUser.id } },
+          })
+        );
 
         return { code: 201, message: 'Payment initiated successfully' };
       }
@@ -314,23 +329,23 @@ export class PaymentService {
 
     const parish = await this.parishService.findParish(parishId);
 
-    if (parish.receiverId) {
+    if (parish?.receiverId) {
       return parish.receiverId;
     }
 
     const optionCreateRecipient = {
       method: 'POST',
       headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY,
+        Authorization: process.env.NOTCH_PUBLIC_KEY || '',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         channel: 'cm.mobile',
         number: payoutNumber,
-        phone: parish.phone,
+        phone: parish?.phone,
         email: 'easyMess@gmail.com',
         country: 'CM',
-        name: parish.name,
+        name: parish?.name,
         description: 'Cash out parish money',
         reference: referenceId,
       }),
@@ -379,10 +394,29 @@ export class PaymentService {
       ['INCOME', 'PLATFORM_FEE'].includes(t.transactionType)
     );
 
-    return this.prismaService.$transaction(
-      async (tx) => {
-        for (const row of reversibleRows) {
-          await this.transactionsService.createWithBalance(tx, {
+    // Serializable (see PrismaService.runSerializableTransaction) so a
+    // refund racing with a concurrent payment/withdrawal for the same
+    // owner can't produce a lost update. Starting balances are cached
+    // per (ownerId, ownerType) as they're encountered, instead of one
+    // query per reversed row — the same pattern notifyPayment uses,
+    // reintroduced here after a review found this loop had regressed to
+    // the per-row query it was meant to avoid.
+    return this.prismaService.runSerializableTransaction(async (tx) => {
+      const balanceCache = new Map<string, number>();
+
+      for (const row of reversibleRows) {
+        const cacheKey = `${row.ownerType}:${row.ownerId}`;
+        const previousBalance =
+          balanceCache.get(cacheKey) ??
+          (await this.transactionsService.getCurrentBalance(
+            tx,
+            row.ownerId,
+            row.ownerType
+          ));
+
+        const { balanceAfter } = await this.transactionsService.createAtBalance(
+          tx,
+          {
             transactionType: 'INCOME_REVERSAL',
             ownerId: row.ownerId,
             ownerType: row.ownerType,
@@ -390,17 +424,18 @@ export class PaymentService {
             payment: { connect: { paymentId } },
             createdByUser: { connect: { userId: requestUser.id } },
             note: `Reversal of ${row.transactionType} ${row.transactionId}`,
-          });
-        }
+          },
+          previousBalance
+        );
+        balanceCache.set(cacheKey, balanceAfter);
+      }
 
-        await tx.payment.update({
-          where: { paymentId },
-          data: { status: 'REFUNDED' },
-        });
+      await tx.payment.update({
+        where: { paymentId },
+        data: { status: 'REFUNDED' },
+      });
 
-        return { code: 200, message: 'Payment refunded and ledger reversed.' };
-      },
-      { timeout: 15000, maxWait: 10000 }
-    );
+      return { code: 200, message: 'Payment refunded and ledger reversed.' };
+    });
   }
 }

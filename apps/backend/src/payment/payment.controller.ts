@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import { PaymentService } from './payment.service';
 import { Public } from '../auth/decorator/public.decorator';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
@@ -34,13 +35,19 @@ export class PaymentController {
 
   @Post('/withdraw')
   @Roles(UserRole.PARISH)
-  withdrawMoney(@Request() request, @Body() dto: WithdrawMoneyDto) {
-    return this.paymentService.withdrawMoney(request, dto.amount);
+  withdrawMoney(
+    @Request() request: AuthenticatedRequest,
+    @Body() dto: WithdrawMoneyDto
+  ) {
+    return this.paymentService.withdrawMoney(request.user, dto.amount);
   }
 
   @Post('/:paymentId/refund')
   @Roles(UserRole.ADMIN)
-  refundPayment(@Param('paymentId') paymentId: string, @Request() request) {
+  refundPayment(
+    @Param('paymentId') paymentId: string,
+    @Request() request: AuthenticatedRequest
+  ) {
     return this.paymentService.refundPayment(paymentId, request.user);
   }
 }

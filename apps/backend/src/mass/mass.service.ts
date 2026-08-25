@@ -4,7 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { MassStatus, MassType, Prisma } from '@prisma/client';
+import { MassStatus, MassType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
 import { CreateMassDto } from './dto/create-mass.dto';
@@ -29,11 +29,11 @@ export class MassService {
    */
   async createMasses(
     input: CreateMassDto,
-    request
+    requestUser: { id: string; role: UserRole }
   ): Promise<{ code: number; message: string }> {
     const parish = await resolveParishForUser(
       this.prismaService,
-      request.user.id
+      requestUser.id
     );
     const parishId = parish.parishId;
     const { replicate, startAt, estimatedDurationMinutes, price, massType } =
@@ -99,40 +99,38 @@ export class MassService {
     });
   }
 
-  /** startAt/estimatedDurationMinutes may only change while status=OPEN. */
+  /** Once a mass is no longer OPEN, none of its fields are editable — the
+   * ordering window has closed and/or intentions may already have been
+   * gathered into a PDF and emailed, so schedule, intention, and priest
+   * assignment must all stay frozen to match what was sent. */
   async update(
     massId: string,
     updateMassDto: UpdateMassDto,
-    requestUser: { id: string; role: string }
+    requestUser: { id: string; role: UserRole }
   ) {
-    const mass = await this.prismaService.mass.findUnique({
-      where: { massId },
-    });
+    const [mass, parish] = await Promise.all([
+      this.prismaService.mass.findUnique({ where: { massId } }),
+      requestUser.role === UserRole.ADMIN
+        ? null
+        : resolveParishForUser(this.prismaService, requestUser.id),
+    ]);
     if (!mass) {
       throw new ConflictException('Mass not found');
     }
 
-    if (requestUser.role !== 'ADMIN') {
-      const parish = await resolveParishForUser(
-        this.prismaService,
-        requestUser.id
-      );
-      if (parish.parishId !== mass.parishId) {
-        throw new ForbiddenException('Forbidden', {
-          cause: new Error(),
-          description: 'You may only manage your own masses.',
-        });
-      }
+    if (parish && parish.parishId !== mass.parishId) {
+      throw new ForbiddenException('Forbidden', {
+        cause: new Error(),
+        description: 'You may only manage your own masses.',
+      });
     }
 
-    const changesSchedule =
-      updateMassDto.startAt !== undefined ||
-      updateMassDto.estimatedDurationMinutes !== undefined;
-    if (changesSchedule && mass.status !== 'OPEN') {
+    const changesAnyLockedField = Object.keys(updateMassDto).length > 0;
+    if (changesAnyLockedField && mass.status !== 'OPEN') {
       throw new ConflictException('Conflict', {
         cause: new Error(),
         description:
-          'startAt/estimatedDurationMinutes can only be changed while the mass is still OPEN.',
+          'This mass can no longer be edited — ordering has closed.',
       });
     }
 
@@ -144,6 +142,14 @@ export class MassService {
           ? new Date(updateMassDto.startAt)
           : undefined,
       },
+    });
+  }
+
+  /** Used by payment confirmation to fetch every mass in a checkout in one
+   * round trip instead of one findOne per mass. */
+  async findManyByIds(massIds: string[]) {
+    return this.prismaService.mass.findMany({
+      where: { massId: { in: massIds } },
     });
   }
 
@@ -198,6 +204,89 @@ export class MassService {
       where: {
         massId,
       },
+    });
+  }
+
+  private static readonly ORDERING_CUTOFF_MINUTES = 30;
+
+  /** The Mass status state machine: OPEN -> CLOSED -> PROCESSING ->
+   * COMPLETED. Owned here (not by the scheduler) so every direct write to
+   * Mass.status lives in one place. Called once a minute by
+   * MassSchedulerService, which only owns the cron trigger and the
+   * PDF/email side effect (sendPendingIntentions). */
+  async sweepStatusTransitions() {
+    await this.closeOrdering();
+    await this.startProcessing();
+    await this.completeProcessing();
+  }
+
+  /** OPEN -> CLOSED once 30 minutes before startAt — a hard business
+   * deadline, applied regardless of whether the intentions email succeeds. */
+  private async closeOrdering() {
+    const cutoff = new Date(
+      Date.now() + MassService.ORDERING_CUTOFF_MINUTES * 60 * 1000
+    );
+    await this.prismaService.mass.updateMany({
+      where: { status: 'OPEN', startAt: { lte: cutoff } },
+      data: { status: 'CLOSED' },
+    });
+  }
+
+  private async startProcessing() {
+    await this.prismaService.mass.updateMany({
+      where: { status: 'CLOSED', startAt: { lte: new Date() } },
+      data: { status: 'PROCESSING' },
+    });
+  }
+
+  /** startAt + estimatedDurationMinutes varies per row, so this can't be a
+   * single conditional updateMany — fetch PROCESSING masses and filter in
+   * JS (cheap at this scale: only currently-processing masses). */
+  private async completeProcessing() {
+    const processing = await this.prismaService.mass.findMany({
+      where: { status: 'PROCESSING' },
+      select: { massId: true, startAt: true, estimatedDurationMinutes: true },
+    });
+
+    const now = Date.now();
+    const doneIds = processing
+      .filter(
+        (m) =>
+          m.startAt.getTime() + m.estimatedDurationMinutes * 60 * 1000 <= now
+      )
+      .map((m) => m.massId);
+
+    if (doneIds.length === 0) return;
+
+    await this.prismaService.mass.updateMany({
+      where: { massId: { in: doneIds } },
+      data: { status: 'COMPLETED' },
+    });
+  }
+
+  /** Masses ready for the intentions PDF/email but not yet sent —
+   * independent of status transitions so a mail failure can be retried
+   * every tick without blocking the ordering-cutoff deadline. */
+  async findPendingIntentions() {
+    return this.prismaService.mass.findMany({
+      where: {
+        status: { in: ['CLOSED', 'PROCESSING', 'COMPLETED'] },
+        intentionsSentAt: null,
+      },
+      include: {
+        parish: { include: { user: true } },
+        massOrder: {
+          include: { orderByBeliever: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+  }
+
+  async markIntentionsSent(massId: string) {
+    await this.prismaService.mass.update({
+      where: { massId },
+      data: { intentionsSentAt: new Date() },
     });
   }
 

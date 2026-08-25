@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { OwnerType, Prisma } from '@prisma/client';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { OwnerType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { resolveParishForUser } from '../common/user.utils';
 
 /** Either the top-level PrismaService or an interactive-transaction client
  * (`tx` inside `prisma.$transaction(async (tx) => ...)`) — both expose the
@@ -27,7 +28,23 @@ export class TransactionsService {
     });
   }
 
-  async findAllTransactionByParish(parishId: string) {
+  async findAllTransactionByParish(
+    parishId: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    if (requestUser.role !== UserRole.ADMIN) {
+      const parish = await resolveParishForUser(
+        this.prismaService,
+        requestUser.id
+      );
+      if (parish.parishId !== parishId) {
+        throw new ForbiddenException('Forbidden', {
+          cause: new Error(),
+          description: "You may only view your own parish's transactions.",
+        });
+      }
+    }
+
     return this.prismaService.transaction.findMany({
       where: {
         ownerId: parishId,
@@ -117,7 +134,8 @@ export class TransactionsService {
   }
 
   /** Admin-only manual ledger fix — an ADMIN_CORRECTION row, never an edit
-   * to an existing row. */
+   * to an existing row. Serializable so it can't race a concurrent
+   * payment/withdrawal/refund for the same owner into a lost update. */
   async createCorrection(
     ownerId: string,
     ownerType: OwnerType,
@@ -125,13 +143,15 @@ export class TransactionsService {
     note: string,
     createdByUserId: string
   ) {
-    return this.createWithBalance(this.prismaService, {
-      transactionType: 'ADMIN_CORRECTION',
-      ownerId,
-      ownerType,
-      amount,
-      note,
-      createdByUser: { connect: { userId: createdByUserId } },
-    });
+    return this.prismaService.runSerializableTransaction((tx) =>
+      this.createWithBalance(tx, {
+        transactionType: 'ADMIN_CORRECTION',
+        ownerId,
+        ownerType,
+        amount,
+        note,
+        createdByUser: { connect: { userId: createdByUserId } },
+      })
+    );
   }
 }

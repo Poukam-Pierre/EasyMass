@@ -1,6 +1,11 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { MassService } from '../mass/mass.service';
 import { resolveParishForUser } from '../common/user.utils';
 
@@ -21,10 +26,10 @@ export class MassOrderService {
    * Masses belonging to the authenticated parish whose start time hasn't
    * passed yet and that have at least one order, with their mass orders.
    */
-  async findAllUnprocessMass(request) {
+  async findAllUnprocessMass(requestUser: { id: string; role: UserRole }) {
     const parish = await resolveParishForUser(
       this.prismaService,
-      request.user.id
+      requestUser.id
     );
 
     try {
@@ -56,8 +61,27 @@ export class MassOrderService {
     }
   }
 
-  /** Oldest to newest, per the intentions-gathering requirement. */
-  async findMassOrderByMass(massId: string) {
+  /** Oldest to newest, per the intentions-gathering requirement. Scoped to
+   * the calling parish unless the caller is an admin. */
+  async findMassOrderByMass(
+    massId: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    if (requestUser.role !== UserRole.ADMIN) {
+      const mass = await this.massService.findOne(massId);
+      if (!mass) throw new NotFoundException('Mass not found');
+      const parish = await resolveParishForUser(
+        this.prismaService,
+        requestUser.id
+      );
+      if (parish.parishId !== mass.parishId) {
+        throw new ForbiddenException('Forbidden', {
+          cause: new Error(),
+          description: 'You may only view orders for your own masses.',
+        });
+      }
+    }
+
     return this.prismaService.massOrder.findMany({
       where: {
         massId,

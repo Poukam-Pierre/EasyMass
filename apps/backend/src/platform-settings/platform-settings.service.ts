@@ -47,12 +47,4 @@ export class PlatformSettingsService {
     const platformFee = Math.min(Math.max(rawFee, 0), price);
     return { platformFee, parishShare: price - platformFee };
   }
-
-  /** Convenience for a single split — fetches settings then applies them. */
-  async computeSplit(
-    price: number
-  ): Promise<{ platformFee: number; parishShare: number }> {
-    const settings = await this.get();
-    return this.splitPrice(settings, price);
-  }
 }

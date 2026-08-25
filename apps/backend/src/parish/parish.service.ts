@@ -38,7 +38,7 @@ export class ParishService {
           create: {
             email,
             password,
-            role: 'PARISH',
+            role: UserRole.PARISH,
           },
         },
       },
@@ -122,7 +122,7 @@ export class ParishService {
   async findOneByMail(email: string) {
     const user = await findUserByEmail(this.prismaService, email);
     const flattened = user && flattenUserRole(user);
-    return flattened?.role === 'PARISH' ? flattened : null;
+    return flattened?.role === UserRole.PARISH ? flattened : null;
   }
 
   /** requestUser omitted = trusted internal/system call (bypasses the
@@ -155,7 +155,7 @@ export class ParishService {
     parishId: string,
     requestUser: { id: string; role: UserRole }
   ) {
-    if (requestUser.role === 'ADMIN') return;
+    if (requestUser.role === UserRole.ADMIN) return;
 
     const parish = await resolveParishForUser(this.prismaService, requestUser.id);
     if (parish.parishId !== parishId) {
@@ -176,9 +176,9 @@ export class ParishService {
    */
   async createParish(
     input: SignUpParishDto,
-    request
+    requestUser: { id: string; role: UserRole }
   ): Promise<{ code: number; message: string }> {
-    const user = await this.credentialsParishValidation(input, request);
+    const user = await this.credentialsParishValidation(input, requestUser);
 
     if (!user) {
       throw new BadRequestException('Bad Request', {
@@ -195,19 +195,22 @@ export class ParishService {
    * the function returns null. Otherwise, the function hash password and creates a new
    * user account. Then returns the user object created.
    * @param input
-   * @param request
+   * @param requestUser
    * @returns
    */
-  async credentialsParishValidation(input: SignUpParishDto, request) {
+  async credentialsParishValidation(
+    input: SignUpParishDto,
+    requestUser: { id: string; role: UserRole }
+  ) {
     const { email, password } = input;
     const existing = await findUserByEmail(this.prismaService, email);
     if (existing) return null;
 
-    // request.user.id is the central User.userId (JWT `sub`), not
+    // requestUser.id is the central User.userId (JWT `sub`), not
     // Administrator.adminId directly — resolve it. Throws ForbiddenException
     // if the caller isn't actually an admin (shouldn't happen behind
     // @Roles(ADMIN), but defends against it either way).
-    const admin = await resolveAdminForUser(this.prismaService, request.user.id);
+    const admin = await resolveAdminForUser(this.prismaService, requestUser.id);
 
     try {
       const hash = await bcrypt.hash(password, 10);

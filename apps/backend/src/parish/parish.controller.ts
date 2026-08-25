@@ -12,6 +12,7 @@ import {
 import { Prisma, UserRole } from '@prisma/client';
 import { Public } from '../auth/decorator/public.decorator';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { resolveParishForUser } from '../common/user.utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { ParishService } from './parish.service';
@@ -26,7 +27,7 @@ export class ParishController {
 
   @Get('/me/dashboard')
   @Roles(UserRole.PARISH)
-  async myDashboard(@Request() request) {
+  async myDashboard(@Request() request: AuthenticatedRequest) {
     const parish = await resolveParishForUser(
       this.prismaService,
       request.user.id
@@ -59,23 +60,25 @@ export class ParishController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
   update(
     @Param('id') id: string,
     @Body() updateParishDto: Prisma.ParishUpdateInput,
-    @Request() request
+    @Request() request: AuthenticatedRequest
   ) {
     return this.parishService.update(id, updateParishDto, request.user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() request) {
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  remove(@Param('id') id: string, @Request() request: AuthenticatedRequest) {
     return this.parishService.remove(id, request.user);
   }
 
   @Post('/new')
   @Roles(UserRole.ADMIN)
-  create(@Body() input: SignUpParishDto, @Request() request) {
-    return this.parishService.createParish(input, request);
+  create(@Body() input: SignUpParishDto, @Request() request: AuthenticatedRequest) {
+    return this.parishService.createParish(input, request.user);
   }
 
   @Patch(':id/block')
@@ -98,7 +101,7 @@ export class ParishController {
   payoutMethod(
     @Param('id') id: string,
     @Body('payoutNumber') payoutNumber: string,
-    @Request() request
+    @Request() request: AuthenticatedRequest
   ) {
     return this.parishService.setPayoutNumber(id, payoutNumber, request.user);
   }

@@ -11,6 +11,7 @@ import {
 import { Currency, UserRole } from '@prisma/client';
 import { Public } from '../auth/decorator/public.decorator';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { SetMassPriceDto } from './dto/set-mass-price.dto';
 import { MassPriceService } from './mass-price.service';
 
@@ -29,7 +30,7 @@ export class MassPriceController {
   setPrice(
     @Param('massId') massId: string,
     @Body() dto: SetMassPriceDto,
-    @Request() request
+    @Request() request: AuthenticatedRequest
   ) {
     return this.massPriceService.setPrice(massId, dto, request.user.id);
   }

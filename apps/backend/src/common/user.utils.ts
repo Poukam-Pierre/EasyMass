@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { Administrator, Parish, Priest, User } from '@prisma/client';
+import { Administrator, Parish, Priest, User, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type UserWithRoles = User & {
@@ -7,6 +7,19 @@ type UserWithRoles = User & {
   parish: Parish | null;
   priest: Priest | null;
 };
+
+/** Common fields every flattened shape carries, spread from the central
+ * User record on top of the role-specific entity's own fields. */
+interface FlattenedCommon {
+  email: string;
+  password: string;
+  userId: string;
+}
+
+export type FlattenedUser =
+  | (Administrator & FlattenedCommon & { role: typeof UserRole.ADMIN })
+  | (Parish & FlattenedCommon & { role: typeof UserRole.PARISH })
+  | (Priest & FlattenedCommon & { role: typeof UserRole.PRIEST });
 
 /**
  * Single shared lookup for "find the User account for this email, with all
@@ -28,27 +41,33 @@ export async function findUserByEmail(
  * the shape auth/login consumers expect: role fields plus email/password/
  * userId/role from the central User record. Returns null if the user's
  * role doesn't have its corresponding relation populated (data integrity
- * issue) or isn't one of the roles this MVP supports.
+ * issue). The return type is a discriminated union on `role`, so a caller
+ * that narrows on `flattened.role` gets a properly-typed shape back instead
+ * of needing to cast.
  */
-export function flattenUserRole(user: UserWithRoles) {
-  const roleEntity =
-    user.role === 'ADMIN'
-      ? user.admin
-      : user.role === 'PARISH'
-        ? user.parish
-        : user.role === 'PRIEST'
-          ? user.priest
-          : null;
-
-  if (!roleEntity) return null;
-
-  return {
-    ...roleEntity,
+export function flattenUserRole(user: UserWithRoles): FlattenedUser | null {
+  const common: FlattenedCommon = {
     email: user.email,
     password: user.password,
     userId: user.userId,
-    role: user.role,
   };
+
+  switch (user.role) {
+    case UserRole.ADMIN:
+      return user.admin
+        ? { ...user.admin, ...common, role: UserRole.ADMIN }
+        : null;
+    case UserRole.PARISH:
+      return user.parish
+        ? { ...user.parish, ...common, role: UserRole.PARISH }
+        : null;
+    case UserRole.PRIEST:
+      return user.priest
+        ? { ...user.priest, ...common, role: UserRole.PRIEST }
+        : null;
+    default:
+      return null;
+  }
 }
 
 /**

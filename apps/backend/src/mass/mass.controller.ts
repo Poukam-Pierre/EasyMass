@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { MassStatus, MassType, UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { CreateMassDto } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
 import { MassService } from './mass.service';
@@ -21,8 +22,8 @@ export class MassController {
 
   @Post('/create')
   @Roles(UserRole.PARISH)
-  create(@Request() request, @Body() input: CreateMassDto) {
-    return this.massService.createMasses(input, request);
+  create(@Request() request: AuthenticatedRequest, @Body() input: CreateMassDto) {
+    return this.massService.createMasses(input, request.user);
   }
 
   @Patch(':id')
@@ -30,7 +31,7 @@ export class MassController {
   updateMass(
     @Param('id') id: string,
     @Body() updateMassDto: UpdateMassDto,
-    @Request() request
+    @Request() request: AuthenticatedRequest
   ) {
     return this.massService.update(id, updateMassDto, request.user);
   }
@@ -42,6 +43,7 @@ export class MassController {
   }
 
   @Get()
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
   findAll(
     @Query('parishId') parishId: string,
     @Query('status') status?: MassStatus,

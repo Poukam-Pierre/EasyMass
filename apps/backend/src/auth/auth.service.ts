@@ -83,15 +83,49 @@ export class AuthService {
       user.email,
       user.role
     );
-    const responseData = { ...flattened, ...tokens };
 
-    // flattenUserRole's return type spans admin/parish/priest shapes since
-    // it's shared across all three; `allowedRoles` (always exactly one of
-    // ADMIN/PARISH per route, MVP scope) already guarantees which one this
-    // actually is at runtime.
-    return user.role === 'ADMIN'
-      ? new AdminDataDto(responseData as unknown as AdminDataDto)
-      : new ParishDataDto(responseData as unknown as ParishDataDto);
+    // Narrowing on flattened.role (not user.role) lets TS actually narrow
+    // `flattened`'s type via its own discriminant, so each branch below is
+    // real compile-time-checked field access — no cast standing in for a
+    // check that was never actually performed. A field renamed in
+    // flattenUserRole now fails to compile here instead of silently
+    // producing an undefined field at runtime.
+    if (flattened.role === UserRole.ADMIN) {
+      return new AdminDataDto({
+        adminId: flattened.adminId,
+        userId: flattened.userId,
+        name: flattened.name,
+        role: flattened.role,
+        email: flattened.email,
+        password: flattened.password,
+        phone: flattened.phone,
+        createdAt: flattened.createdAt,
+        ...tokens,
+      });
+    }
+
+    if (flattened.role === UserRole.PARISH) {
+      return new ParishDataDto({
+        parishId: flattened.parishId,
+        userId: flattened.userId,
+        name: flattened.name,
+        adminId: flattened.adminId,
+        email: flattened.email,
+        password: flattened.password,
+        phone: flattened.phone,
+        managerName: flattened.managerName,
+        createdAt: flattened.createdAt,
+        ...tokens,
+      });
+    }
+
+    // Unreachable in practice — `allowedRoles` already restricted this to
+    // ADMIN/PARISH above (PRIEST login is deferred, MVP scope) — but keeps
+    // the function's return type honest instead of falling through.
+    throw new UnauthorizedException('Unauthorized', {
+      cause: new Error(),
+      description: 'Wrong email or password.',
+    });
   }
 
   /**
