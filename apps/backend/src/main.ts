@@ -1,5 +1,5 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 
@@ -10,6 +10,9 @@ async function bootstrap() {
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(new ValidationPipe());
+  // Strips @Exclude()-marked fields (e.g. password) from every response
+  // whose payload is an instance of a DTO class using that decorator.
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableCors({
     origin: 'http://localhost:4200', // remote url server should be added here to avoid CORS issue
     methods: 'GET, POST, PATCH, DELETE',

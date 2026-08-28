@@ -1,11 +1,24 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Query,
+  Request,
+  Res,
+} from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { Response } from 'express';
 import { PaymentService } from './payment.service';
-import { AuthGuard } from '../auth/guard/auth.guards';
 import { Public } from '../auth/decorator/public.decorator';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 @Controller('payment')
-@UseGuards(AuthGuard)
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
@@ -18,7 +31,10 @@ export class PaymentController {
     return this.paymentService.handlePayment(handlePaymentDto);
   }
 
-  // TODO As this route is public, check if there is no scam. Put it a new guard just for validate that.
+  // Public because NotchPay calls this server-to-server (no user session to
+  // attach a JWT to). Integrity instead relies on re-fetching the payment
+  // status directly from NotchPay inside notifyPayment rather than trusting
+  // this request body at face value.
   @Public()
   @Post('/notifications')
   notifyPayment(
@@ -28,12 +44,70 @@ export class PaymentController {
     return this.paymentService.notifyPayment(paymentResult);
   }
 
-  @Post('/withdraw')
-  withdrawMoney(
-    @Request() request,
-    @Body() receiverNumber: string,
-    amount: number
+  // Public: PayPal redirects the customer's browser here directly after
+  // approval (application_context.return_url), no session to attach a JWT
+  // to. `token` is PayPal's own query param name for the order id.
+  @Public()
+  @Get('/paypal/return')
+  async paypalReturn(
+    @Query('token') orderId: string,
+    @Res() res: Response
   ) {
-    return this.paymentService.withdrawMoney(request, receiverNumber, amount);
+    const result = await this.paymentService.handlePaypalReturn(orderId);
+    this.respondToPaypalRedirect(res, result);
+  }
+
+  @Public()
+  @Get('/paypal/cancel')
+  async paypalCancel(@Query('token') orderId: string, @Res() res: Response) {
+    const result = await this.paymentService.handlePaypalCancel(orderId);
+    this.respondToPaypalRedirect(res, result);
+  }
+
+  // Public: PayPal calls this server-to-server. Integrity relies on
+  // handlePaypalWebhook verifying the signature, not on this route being
+  // unguessable.
+  @Public()
+  @Post('/paypal/webhook')
+  paypalWebhook(
+    @Headers() headers: Record<string, string>,
+    @Body() event
+  ) {
+    return this.paymentService.handlePaypalWebhook(headers, event);
+  }
+
+  /** No real checkout frontend is wired up yet (see
+   * apps/easy-messe/components/OfferMass/ModalPayment.tsx — its confirm
+   * button isn't connected to anything), so this redirects only if
+   * FRONTEND_CHECKOUT_RETURN_URL is set; otherwise it falls back to a
+   * plain JSON body so the flow is still testable end-to-end today. */
+  private respondToPaypalRedirect(
+    res: Response,
+    result: { code: number; message: string }
+  ) {
+    const redirectBase = process.env.FRONTEND_CHECKOUT_RETURN_URL;
+    if (redirectBase) {
+      res.redirect(`${redirectBase}?message=${encodeURIComponent(result.message)}`);
+      return;
+    }
+    res.status(result.code).json(result);
+  }
+
+  @Post('/withdraw')
+  @Roles(UserRole.PARISH)
+  withdrawMoney(
+    @Request() request: AuthenticatedRequest,
+    @Body() dto: WithdrawMoneyDto
+  ) {
+    return this.paymentService.withdrawMoney(request.user, dto.amount);
+  }
+
+  @Post('/:paymentId/refund')
+  @Roles(UserRole.ADMIN)
+  refundPayment(
+    @Param('paymentId') paymentId: string,
+    @Request() request: AuthenticatedRequest
+  ) {
+    return this.paymentService.refundPayment(paymentId, request.user);
   }
 }
