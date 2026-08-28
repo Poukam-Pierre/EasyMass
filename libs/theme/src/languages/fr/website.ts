@@ -172,4 +172,32 @@ export const website = {
   email: 'Email',
   emailWarningMsg: 'Email obligatoire',
   invalidEmail: 'Email invalide',
+  footerDescription:
+    "EasyMesse met le numérique au service de la mission de l'Église pour un accueil attentif et une organisation simplifiée.",
+  usefulLinks: 'Liens utiles',
+  resources: 'Ressources',
+  contact: 'Contact',
+  faq: 'FAQ',
+  blog: 'Blog',
+  legalNotice: 'Mentions légales',
+  privacyPolicy: 'Politique de confidentialité',
+  allRightsReserved: 'Tous droits réservés.',
+  madeWith: 'Made with',
+  aboutHeroTitle: "Le numérique au service de la mission de l'Église",
+  aboutHeroSubtitle:
+    "EasyMesse accompagne les fidèles et les paroisses pour un accueil attentif, une organisation simplifiée et une prière portée jusqu'à l'autel.",
+  ourValues: 'Nos valeurs',
+  ourValuesSubtitle: 'Ce qui guide chacune de nos actions, au quotidien.',
+  valueFaithTitle: 'Foi',
+  valueFaithDescription:
+    "Chaque demande de messe est portée avec le respect et le sérieux qu'elle mérite, dans l'esprit de la prière de l'Église.",
+  valueSimplicityTitle: 'Simplicité',
+  valueSimplicityDescription:
+    "Une plateforme claire et intuitive, pensée pour qu'offrir une messe ne prenne que quelques instants.",
+  valueTrustTitle: 'Confiance',
+  valueTrustDescription:
+    'Nous travaillons main dans la main avec les paroisses pour garantir que chaque intention soit honorée.',
+  valueAccessibilityTitle: 'Accessibilité',
+  valueAccessibilityDescription:
+    "Demander une messe où que vous soyez, à tout moment, jusqu'à une heure avant la célébration.",
 };
