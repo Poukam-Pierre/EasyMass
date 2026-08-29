@@ -11,7 +11,6 @@ export default function NavBarItem({
   const { push, asPath } = useRouter();
   const isActive = asPath === link || asPath.startsWith(link + '/');
 
-  console.log({ label, icon, link, isActive });
   return (
     <Box
       onClick={() => push(link)}

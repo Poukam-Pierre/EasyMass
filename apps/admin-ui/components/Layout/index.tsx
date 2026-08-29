@@ -19,7 +19,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
     const { formatMessage } = useIntl()
     const { admin, logout } = useAuth()
 
-    const { query: { rubrics } } = useRouter()
+    const router = useRouter()
+    const { query: { rubrics } } = router
 
     const sideBarSectionParish: SideBarSection[] = [
         {
@@ -152,6 +153,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                 sideBarSection={sideBarSectionParish}
                 profile={{ name: admin?.name ?? '', email: admin?.email ?? '' }}
                 onLogout={logout}
+                onProfileClick={() => router.push('/profile')}
             />
             <Box sx={{
                 display: 'grid',

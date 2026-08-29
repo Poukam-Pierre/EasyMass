@@ -5,10 +5,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Head from 'next/head';
 import { PropsWithChildren } from 'react';
 
-export function EasyMassAdminLayout({ children }: PropsWithChildren) {
+export function EasyMassAdminLayout({
+  children,
+  defaultLang = 'fr',
+}: PropsWithChildren<{ defaultLang?: 'en' | 'fr' }>) {
   const { activeLanguage } = useLanguage();
   return (
-    <EasyMassThemeProvider defaultLang="en">
+    <EasyMassThemeProvider defaultLang={defaultLang}>
       <LocalizationProvider
         dateAdapter={AdapterDayjs}
         adapterLocale={activeLanguage}

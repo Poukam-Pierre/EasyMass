@@ -1,5 +1,4 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
-import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
 
 export interface ProfileProps {
@@ -11,13 +10,14 @@ export default function Profile({
         name,
         email
     },
-    onLogout
+    onLogout,
+    onProfileClick
 }: {
     profile: ProfileProps
     onLogout?: () => void
+    onProfileClick?: () => void
 }) {
     const { formatMessage } = useIntl()
-    const { push } = useRouter()
     return (
         <Box sx={{
             display: 'grid',
@@ -25,16 +25,16 @@ export default function Profile({
             alignSelf: 'end'
         }}>
             <Box
-                onClick={() => push('/profile')}
+                onClick={onProfileClick}
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr',
                     alignItems: 'center',
                     columnGap: 1,
-                    cursor: 'pointer',
+                    cursor: onProfileClick ? 'pointer' : 'default',
                     borderRadius: '8px',
                     padding: '4px',
-                    '&:hover': { bgcolor: 'var(--line)' }
+                    ...(onProfileClick && { '&:hover': { bgcolor: 'var(--line)' } })
                 }}>
                 <Avatar
                     alt={name}

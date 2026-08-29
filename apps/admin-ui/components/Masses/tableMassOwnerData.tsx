@@ -22,8 +22,30 @@ import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import historyIcon from '@iconify-icons/fluent/history-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
-import { showTransactionStatus } from "../Finances/FinanceTable";
 
+const massStatusColor: Record<string, { bg: string; color: string }> = {
+    open: { bg: 'rgba(92, 179, 96, 0.15)', color: 'var(--success)' },
+    processing: { bg: 'rgba(255, 184, 0, 0.3)', color: 'var(--warning)' },
+    closed: { bg: 'rgba(199, 0, 0, 0.15)', color: 'var(--error)' },
+    completed: { bg: 'rgba(2, 109, 169, 0.3)', color: 'var(--primary)' },
+};
+
+const showMassStatus = (label: string) => {
+    const style = massStatusColor[label];
+    if (!style) return undefined;
+    return (
+        <Typography sx={{
+            bgcolor: style.bg,
+            color: style.color,
+            width: 'fit-content',
+            borderRadius: '20px',
+            padding: 1,
+            fontWeight: 'bold',
+        }}>
+            {label}
+        </Typography>
+    );
+};
 
 export interface TableMassOwnerData {
     id: string;
@@ -174,7 +196,7 @@ export default function MassOwnerTable({
                                 currency: 'xaf'
                             })}</TableCell>
                             <TableCell>
-                                {showTransactionStatus(status as string) ?? status}
+                                {showMassStatus(status as string) ?? status}
                             </TableCell>
 
                             <TableCell align='right'>

@@ -5,7 +5,7 @@ import RequireAuth from "./RequireAuth";
 
 export function withAdminLayout(page: ReactNode) {
     return (
-        <EasyMassAdminLayout>
+        <EasyMassAdminLayout defaultLang="en">
             <RequireAuth>
                 <AppLayout>{page}</AppLayout>
             </RequireAuth>

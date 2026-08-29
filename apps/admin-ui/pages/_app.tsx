@@ -15,7 +15,7 @@ type NextPageWithoutLayout = AppProps & {
 function CustomApp({ Component, pageProps }: NextPageWithoutLayout) {
     const getLayout = Component.getLayout ??
         ((page) =>
-            <EasyMassAdminLayout>
+            <EasyMassAdminLayout defaultLang="en">
                 {page}
             </EasyMassAdminLayout>
         );

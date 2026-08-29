@@ -19,9 +19,15 @@ interface SideBarProps {
   sideBarSection: SideBarSection[];
   profile: ProfileProps;
   onLogout?: () => void;
+  onProfileClick?: () => void;
 }
 
-export function SideBar({ sideBarSection, profile, onLogout }: SideBarProps) {
+export function SideBar({
+  sideBarSection,
+  profile,
+  onLogout,
+  onProfileClick,
+}: SideBarProps) {
   return (
     <Box
       sx={{
@@ -47,10 +53,16 @@ export function SideBar({ sideBarSection, profile, onLogout }: SideBarProps) {
         <Divider />
       </Box>
 
-      {sideBarSection.map((sideBarNav, index) => (
-        <NavBar key={index} sideBarNav={sideBarNav} />
-      ))}
-      <Profile profile={profile} onLogout={onLogout} />
+      <Box>
+        {sideBarSection.map((sideBarNav, index) => (
+          <NavBar key={index} sideBarNav={sideBarNav} />
+        ))}
+      </Box>
+      <Profile
+        profile={profile}
+        onLogout={onLogout}
+        onProfileClick={onProfileClick}
+      />
     </Box>
   );
 }
