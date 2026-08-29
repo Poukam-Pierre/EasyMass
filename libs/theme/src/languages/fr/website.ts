@@ -174,6 +174,47 @@ export const website = {
   email: 'Email',
   emailWarningMsg: 'Email obligatoire',
   invalidEmail: 'Email invalide',
+  footerDescription:
+    "EasyMesse met le numérique au service de la mission de l'Église pour un accueil attentif et une organisation simplifiée.",
+  usefulLinks: 'Liens utiles',
+  resources: 'Ressources',
+  contact: 'Contact',
+  faq: 'FAQ',
+  blog: 'Blog',
+  legalNotice: 'Mentions légales',
+  privacyPolicy: 'Politique de confidentialité',
+  allRightsReserved: 'Tous droits réservés.',
+  madeWith: 'Made with',
+  aboutHeroTitle: "Le numérique au service de la mission de l'Église",
+  aboutHeroSubtitle:
+    "EasyMesse accompagne les fidèles et les paroisses pour un accueil attentif, une organisation simplifiée et une prière portée jusqu'à l'autel.",
+  ourValues: 'Nos valeurs',
+  ourValuesSubtitle: 'Ce qui guide chacune de nos actions, au quotidien.',
+  valueFaithTitle: 'Foi',
+  valueFaithDescription:
+    "Chaque demande de messe est portée avec le respect et le sérieux qu'elle mérite, dans l'esprit de la prière de l'Église.",
+  valueSimplicityTitle: 'Simplicité',
+  valueSimplicityDescription:
+    "Une plateforme claire et intuitive, pensée pour qu'offrir une messe ne prenne que quelques instants.",
+  valueTrustTitle: 'Confiance',
+  valueTrustDescription:
+    'Nous travaillons main dans la main avec les paroisses pour garantir que chaque intention soit honorée.',
+  valueAccessibilityTitle: 'Accessibilité',
+  valueAccessibilityDescription:
+    "Demander une messe où que vous soyez, à tout moment, jusqu'à une heure avant la célébration.",
+  phoneWarningMsg: 'Téléphone obligatoire',
+  yourInformations: 'Vos coordonnées',
+  paypalRedirectInfo:
+    'Vous serez redirigé vers une page de paiement PayPal sécurisée pour finaliser votre paiement.',
+  checkoutRequiredFields:
+    'Veuillez renseigner votre nom et votre numéro de téléphone.',
+  checkoutError:
+    'Une erreur est survenue lors du paiement. Veuillez réessayer.',
+  processing: 'Traitement...',
+  estimatedBilling: 'Total estimé',
+  checkoutReturnTitle: 'Merci !',
+  checkoutReturnDefaultMessage: 'Votre paiement est en cours de traitement.',
+  backToHome: "Retour à l'accueil",
   dashboard: 'Tableau de bord',
   overview: 'Vue d’ensemble',
   management: 'Gestion',
@@ -189,7 +230,6 @@ export const website = {
   cannotDeleteSelf: 'Vous ne pouvez pas supprimer votre propre compte.',
   you: 'Vous',
   saved: 'Enregistré avec succès.',
-  processing: 'Traitement...',
   loading: 'Chargement...',
   noDataYet: 'Aucune donnée pour le moment.',
   loadErrorGeneric: 'Impossible de charger les données.',

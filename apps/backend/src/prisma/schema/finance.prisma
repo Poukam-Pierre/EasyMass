@@ -70,15 +70,19 @@ enum PaymentAudiAction {
 }
 
 /// An audit trail entry recording who changed a Payment's status and when.
+/// changedByUserId is nullable: most transitions are gateway/system-driven
+/// (checkout creation, webhook confirmation, the reconciliation cron) with
+/// no authenticated user in the request at all — only withdraw/refund
+/// (PARISH/ADMIN-initiated) have a real actor to attribute.
 model PaymentAudit {
   auditId           String            @id @default(cuid())
   paymentId         String
   status            PaymentStatus
   changedAt         DateTime          @default(now())
-  changedByUserId   String
+  changedByUserId   String?
   paymentAudiAction PaymentAudiAction
   payment           Payment           @relation(fields: [paymentId], references: [paymentId], map: "fk_PaymentAudit_Payment")
-  changedByUser     User              @relation(fields: [changedByUserId], references: [userId], map: "fk_PaymentAudit_User")
+  changedByUser     User?             @relation(fields: [changedByUserId], references: [userId], map: "fk_PaymentAudit_User")
 
   @@index([paymentId], map: "fk_PaymentAudit_Payment_idx")
   @@index([changedByUserId], map: "fk_PaymentAudit_User_idx")

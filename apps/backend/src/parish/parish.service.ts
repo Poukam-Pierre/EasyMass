@@ -157,7 +157,10 @@ export class ParishService {
   ) {
     if (requestUser.role === UserRole.ADMIN) return;
 
-    const parish = await resolveParishForUser(this.prismaService, requestUser.id);
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      requestUser.id
+    );
     if (parish.parishId !== parishId) {
       throw new ForbiddenException('Forbidden', {
         cause: new Error(),
@@ -237,6 +240,7 @@ export class ParishService {
       where: { isBlocked: false },
       select: {
         name: true,
+        city: { select: { city_name: true } },
         mass: {
           where: { status: 'OPEN' },
           select: {
@@ -249,8 +253,9 @@ export class ParishService {
       },
     });
 
-    return parishWithItsOwnMasses.map(({ mass, ...parishData }) => ({
+    return parishWithItsOwnMasses.map(({ mass, city, ...parishData }) => ({
       ...parishData,
+      city: city?.city_name,
       massData: mass.map(({ startAt, ...massData }) => ({
         ...massData,
         dateTime: startAt,
@@ -275,11 +280,19 @@ export class ParishService {
         _count: { massId: true },
       }),
       this.prismaService.transaction.aggregate({
-        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'INCOME' },
+        where: {
+          ownerId: parishId,
+          ownerType: 'PARISH',
+          transactionType: 'INCOME',
+        },
         _sum: { amount: true },
       }),
       this.prismaService.transaction.aggregate({
-        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'WITHDRAWAL' },
+        where: {
+          ownerId: parishId,
+          ownerType: 'PARISH',
+          transactionType: 'WITHDRAWAL',
+        },
         _sum: { amount: true },
       }),
       this.prismaService.massOrder.count({
