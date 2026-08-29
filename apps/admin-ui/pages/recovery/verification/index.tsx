@@ -1,5 +1,6 @@
-import { Footer, GetMailVerification } from "@easy-messe/shared-ui";
+import { Footer } from "@easy-messe/shared-ui";
 import { Box } from "@mui/material";
+import PasswordRecoveryUnavailable from "../../../components/PasswordRecoveryUnavailable";
 
 export default function MailVerification() {
     return (
@@ -8,7 +9,7 @@ export default function MailVerification() {
             display: 'grid',
             gridTemplateRows: '1fr auto'
         }}>
-            <GetMailVerification />
+            <PasswordRecoveryUnavailable />
             <Footer />
         </Box>
 
