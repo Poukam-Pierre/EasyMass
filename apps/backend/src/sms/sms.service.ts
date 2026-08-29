@@ -73,8 +73,11 @@ export class SmsService {
     if (!accessToken) return;
 
     const senderAddress = this.toTelUri(senderNumber);
+    // The tel: URI's ':' and '+' are valid in a URL path per RFC 3986, but
+    // percent-encoding them here is a safe no-op against a spec-compliant
+    // server and avoids relying on Orange's own parser tolerating raw ones.
     const response = await fetch(
-      `https://api.orange.com/smsmessaging/v1/outbound/${senderAddress}/requests`,
+      `https://api.orange.com/smsmessaging/v1/outbound/${encodeURIComponent(senderAddress)}/requests`,
       {
         method: 'POST',
         headers: {
