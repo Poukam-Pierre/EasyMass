@@ -6,7 +6,13 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
-import { PaymentMethod, UserRole } from '@prisma/client';
+import {
+  PaymentAudiAction,
+  PaymentMethod,
+  PaymentStatus,
+  Prisma,
+  UserRole,
+} from '@prisma/client';
 import { ParishService } from '../parish/parish.service';
 import {
   CreateTransactionDto,
@@ -45,6 +51,45 @@ export class PaymentService {
     private readonly currencyConversionService: CurrencyConversionService,
     private readonly paypalService: PaypalService
   ) {}
+
+  /** One PaymentAudit row per paymentId, recording the status it just
+   * moved to. changedByUserId is null for every gateway/system-driven
+   * transition (checkout creation, webhook confirmation, the
+   * reconciliation cron) — only withdraw/refund have a real actor to
+   * attribute (see refundPayment). Accepts either the plain PrismaService
+   * or a transaction client so callers already inside a $transaction can
+   * write the audit atomically with the status change itself. */
+  private async recordPaymentAudits(
+    client: PrismaService | Prisma.TransactionClient,
+    paymentIds: string[],
+    status: PaymentStatus,
+    action: PaymentAudiAction,
+    changedByUserId: string | null = null
+  ) {
+    if (paymentIds.length === 0) return;
+    await client.paymentAudit.createMany({
+      data: paymentIds.map((paymentId) => ({
+        paymentId,
+        status,
+        paymentAudiAction: action,
+        changedByUserId,
+      })),
+    });
+  }
+
+  /** Looks up which Payments sharing `referenceId` are currently in
+   * `status`, for audit purposes right after an updateMany — Prisma's
+   * updateMany only returns a count, not the affected rows' ids. */
+  private async findPaymentIdsByReference(
+    referenceId: string,
+    status: PaymentStatus
+  ): Promise<string[]> {
+    const rows = await this.prismaService.payment.findMany({
+      where: { referenceId, status },
+      select: { paymentId: true },
+    });
+    return rows.map((r) => r.paymentId);
+  }
 
   /**
    * "Collect" step — validates the checkout, creates the Believer, one
@@ -106,10 +151,7 @@ export class PaymentService {
       // resolvePrices resolves every mass passed to it or throws — this
       // set is exactly the masses just looked up above.
       const basePrice = basePriceByMassId.get(massInfo.id) as number;
-      const fee = this.platformSettingsService.computeFee(
-        settings,
-        basePrice
-      );
+      const fee = this.platformSettingsService.computeFee(settings, basePrice);
       return { massInfo, total: basePrice + fee };
     });
     const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -150,6 +192,14 @@ export class PaymentService {
         });
         ids.push(payment.paymentId);
       }
+
+      await this.recordPaymentAudits(
+        tx,
+        ids,
+        PaymentStatus.INITIATED,
+        PaymentAudiAction.CREATED
+      );
+
       return ids;
     });
 
@@ -167,7 +217,8 @@ export class PaymentService {
           checkoutUrl = await this.initiateNotchPayCheckout(
             paymentInfo,
             reference,
-            grandTotal
+            grandTotal,
+            paymentIds
           );
           break;
         default:
@@ -182,6 +233,12 @@ export class PaymentService {
         where: { paymentId: { in: paymentIds }, status: 'INITIATED' },
         data: { status: 'PENDING' },
       });
+      await this.recordPaymentAudits(
+        this.prismaService,
+        paymentIds,
+        PaymentStatus.PENDING,
+        PaymentAudiAction.UPDATED
+      );
 
       return checkoutUrl;
     } catch (error) {
@@ -193,6 +250,12 @@ export class PaymentService {
         where: { paymentId: { in: paymentIds }, status: 'INITIATED' },
         data: { status: 'FAILED' },
       });
+      await this.recordPaymentAudits(
+        this.prismaService,
+        paymentIds,
+        PaymentStatus.FAILED,
+        PaymentAudiAction.UPDATED
+      );
       throw error;
     }
   }
@@ -200,8 +263,16 @@ export class PaymentService {
   private async initiateNotchPayCheckout(
     paymentInfo: PaymentInfoDto,
     reference: string,
-    amount: number
+    amount: number,
+    paymentIds: string[]
   ): Promise<string> {
+    const callbackUrl = process.env.FRONTEND_CHECKOUT_RETURN_URL;
+    if (!callbackUrl) {
+      throw new UnprocessableEntityException(
+        'FRONTEND_CHECKOUT_RETURN_URL is not configured — required to build the NotchPay callback URL.'
+      );
+    }
+
     const optionPaymentInit = {
       method: 'POST',
       headers: {
@@ -212,9 +283,9 @@ export class PaymentService {
         amount,
         currency: paymentInfo.currency,
         description: 'Mass offering payment',
-        email: 'easyMess@gmail.com',
+        email: 'poukamtech@gmail.com',
         reference,
-        callback: 'https://onlinepreps.net',
+        callback: callbackUrl,
       }),
     };
 
@@ -225,6 +296,17 @@ export class PaymentService {
       ).then((response) => response.json());
 
       if (paymentInit.code === 201 && paymentInit.status === 'Accepted') {
+        // NotchPay assigns its own transaction reference (e.g.
+        // "trx.xxx"), distinct from the `reference` we sent (which comes
+        // back as transaction.merchant_reference/trxref instead). Both the
+        // webhook and GET /payments/:reference only resolve against
+        // NotchPay's own reference — swap it in for the temporary one
+        // generated in handlePayment, same as initiatePaypalCheckout does
+        // for PayPal's order id.
+        await this.prismaService.payment.updateMany({
+          where: { paymentId: { in: paymentIds } },
+          data: { referenceId: paymentInit.transaction.reference },
+        });
         return paymentInit.authorization_url;
       }
 
@@ -241,7 +323,7 @@ export class PaymentService {
     paymentInfo: PaymentInfoDto,
     paymentIds: string[]
   ): Promise<string> {
-    const appBaseUrl = process.env.APP_PUBLIC_URL;
+    const appBaseUrl = process.env.APP_PUBLIC_URL?.replace(/\/+$/, '');
     if (!appBaseUrl) {
       throw new UnprocessableEntityException(
         'APP_PUBLIC_URL is not configured — required to build PayPal return/cancel URLs.'
@@ -278,6 +360,21 @@ export class PaymentService {
       data: { reference },
     } = paymentResult;
 
+    return this.reconcileNotchPayPayment(reference);
+  }
+
+  /**
+   * Re-checks one NotchPay payment's current status and, only if it has
+   * moved to a terminal state since we last recorded it, updates the DB —
+   * 'complete' finalizes the checkout (ledger + MassOrder/Mass side
+   * effects), 'failed'/'canceled'/'expired' marks the Payment FAILED.
+   * 'pending'/'processing' are left untouched: not yet terminal, so there's
+   * nothing to reconcile. Shared by the webhook handler (notifyPayment,
+   * reacting to one delivery) and PaymentSchedulerService's cron sweep
+   * (reconciling every still-PENDING mobile-money payment as a fallback for
+   * a webhook that was missed or never configured).
+   */
+  async reconcileNotchPayPayment(reference: string) {
     const checkPayment = {
       method: 'GET',
       headers: {
@@ -295,14 +392,26 @@ export class PaymentService {
     // NotchPay's transaction.status: pending/processing/complete/failed/
     // canceled/expired — only 'complete' means money actually moved.
     if (gatewayStatus !== 'complete') {
-      // A terminal negative status: mark FAILED now rather than leaving it
-      // for a reconciliation job. 'pending'/'processing' aren't terminal —
-      // leave PENDING so a retried webhook delivery can still complete it.
+      // A terminal negative status: mark FAILED now. 'pending'/'processing'
+      // aren't terminal — leave PENDING so a later check (retried webhook
+      // delivery, or the next cron sweep) can still complete it.
       if (['failed', 'canceled', 'expired'].includes(gatewayStatus)) {
-        await this.prismaService.payment.updateMany({
+        const { count } = await this.prismaService.payment.updateMany({
           where: { referenceId: reference, status: 'PENDING' },
           data: { status: 'FAILED' },
         });
+        if (count > 0) {
+          const paymentIds = await this.findPaymentIdsByReference(
+            reference,
+            PaymentStatus.FAILED
+          );
+          await this.recordPaymentAudits(
+            this.prismaService,
+            paymentIds,
+            PaymentStatus.FAILED,
+            PaymentAudiAction.UPDATED
+          );
+        }
       }
       return {
         code: 200,
@@ -311,6 +420,18 @@ export class PaymentService {
     }
 
     return this.finalizeCheckout(reference);
+  }
+
+  /** referenceId of every mobile-money Payment still awaiting a terminal
+   * status — the working set for PaymentSchedulerService's cron sweep. */
+  async findPendingMobileMoneyReferences(): Promise<string[]> {
+    const pending = await this.prismaService.payment.findMany({
+      where: { status: 'PENDING', paymentMethod: PaymentMethod.MOBILE_MONEY },
+      select: { referenceId: true },
+    });
+    return pending
+      .map((p) => p.referenceId)
+      .filter((referenceId): referenceId is string => !!referenceId);
   }
 
   /**
@@ -326,10 +447,7 @@ export class PaymentService {
     // safe to call from both the return handler and the webhook.
     const capture = await this.paypalService.captureOrder(orderId);
     if (capture.status !== 'COMPLETED') {
-      await this.prismaService.payment.updateMany({
-        where: { referenceId: orderId, status: 'PENDING' },
-        data: { status: 'FAILED' },
-      });
+      await this.failPendingPaymentsByReference(orderId);
       return {
         code: 200,
         message: `PayPal order not completed (status: ${capture.status}).`,
@@ -341,11 +459,30 @@ export class PaymentService {
 
   /** Customer backed out on PayPal's approval page. */
   async handlePaypalCancel(orderId: string) {
-    await this.prismaService.payment.updateMany({
-      where: { referenceId: orderId, status: 'PENDING' },
+    await this.failPendingPaymentsByReference(orderId);
+    return { code: 200, message: 'Checkout cancelled.' };
+  }
+
+  /** Shared by handlePaypalReturn (order not completed) and
+   * handlePaypalCancel (customer backed out) — flips every still-PENDING
+   * Payment sharing `referenceId` to FAILED and audits the change. */
+  private async failPendingPaymentsByReference(referenceId: string) {
+    const { count } = await this.prismaService.payment.updateMany({
+      where: { referenceId, status: 'PENDING' },
       data: { status: 'FAILED' },
     });
-    return { code: 200, message: 'Checkout cancelled.' };
+    if (count === 0) return;
+
+    const paymentIds = await this.findPaymentIdsByReference(
+      referenceId,
+      PaymentStatus.FAILED
+    );
+    await this.recordPaymentAudits(
+      this.prismaService,
+      paymentIds,
+      PaymentStatus.FAILED,
+      PaymentAudiAction.UPDATED
+    );
   }
 
   /** Durability backstop for handlePaypalReturn — covers a customer
@@ -433,6 +570,13 @@ export class PaymentService {
         where: { referenceId: reference },
         include: { massOrder: { include: { mass: true } } },
       });
+
+      await this.recordPaymentAudits(
+        tx,
+        payments.map((p) => p.paymentId),
+        PaymentStatus.COMPLETED,
+        PaymentAudiAction.SETTLED
+      );
 
       const parishId = payments[0].massOrder.mass.parishId;
 
@@ -689,6 +833,13 @@ export class PaymentService {
         where: { paymentId },
         data: { status: 'REFUNDED' },
       });
+      await this.recordPaymentAudits(
+        tx,
+        [paymentId],
+        PaymentStatus.REFUNDED,
+        PaymentAudiAction.UPDATED,
+        requestUser.id
+      );
 
       return { code: 200, message: 'Payment refunded and ledger reversed.' };
     });
