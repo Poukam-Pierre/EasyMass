@@ -1,81 +1,37 @@
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
-import { Box, InputBase, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import MassOfferTable, { TableData } from "../../components/Masses/MassOffer/MassofferTable";
-import MassMenu, { MenuItem } from '../../components/Menus/MassMenu';
-import AppLayout from '../../components/Layout';
-import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
+import { toast } from "react-toastify";
+import IntentionMassesTable, { MassIntentionRow } from "../../components/Masses/IntentionMassesTable";
+import MassSelector, { MassOption } from "../../components/MassSelector";
+import ParishSelector, { ParishOption } from "../../components/ParishSelector";
+import { withAdminLayout } from "../../components/withAdminLayout";
+import api, { apiErrorMessage } from "../../lib/api";
 
-
-
+// GET /mass-order?massId= and GET /masses/:massId/intentions call the exact
+// same backend method (MassOrderService.findMassOrderByMass) — this page is
+// just a different entry point into the same data: browse by parish → mass
+// instead of drilling in from a specific mass's row.
 export default function MassOffer() {
     const { formatMessage } = useIntl()
-    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
-    const [massDate, setMassData] = useState<TableData[]>([])
-    const menuItem: MenuItem[] = [
-        {
-            title: formatMessage({ id: 'year' }),
-            icon: checkmarkIcon
-        },
-        {
-            title: formatMessage({ id: 'month' }),
-            icon: checkmarkIcon
-        },
-        {
-            title: formatMessage({ id: 'week' }),
-            icon: checkmarkIcon
-        }
-    ]
-    const tableDate: TableData[] = [
-        {
-            id: 1,
-            name: 'Meulak Kouam',
-            registrationDate: '2015-01-01',
-            massType: 'single',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/1'
-        },
-        {
-            id: 2,
-            name: 'Ngamaleu Pierre',
-            registrationDate: '2015-01-01',
-            massType: 'Tridum',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/2'
-        },
-        {
-            id: 3,
-            name: 'Poukam irénée',
-            registrationDate: '2015-01-01',
-            massType: 'Neuvaine',
-            startDate: '2015-01-01',
-            endDate: '2015-01-01',
-            status: '1/9'
-        }
-    ]
+    const [parish, setParish] = useState<ParishOption | null>(null)
+    const [mass, setMass] = useState<MassOption | null>(null)
+    const [orders, setOrders] = useState<MassIntentionRow[]>([])
 
-    useEffect(() => (
-        // TODO fetch data for all masses ordered into the church.
-        setMassData(tableDate)
-    ), [])
+    useEffect(() => {
+        if (!mass) { setOrders([]); return }
+        api.get('/mass-order', { params: { massId: mass.massId } })
+            .then(({ data }) => setOrders(data))
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+    }, [mass, formatMessage])
+
     return (
         <>
-            <MassMenu
-                anchorEl={anchorEl}
-                setAnchorEl={setAnchorEl}
-                menuItem={menuItem}
-            />
             <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: 1
+                marginBottom: 2
 
             }}>
                 <Typography
@@ -87,30 +43,22 @@ export default function MassOffer() {
                 >
                     {formatMessage({ id: 'listOfMassSupply' })}
                 </Typography>
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    alignItems: 'center',
-                    columnGap: 1
-                }}>
-                    <Icon icon={searchIcon} fontSize={20} />
-                    <InputBase
-                        placeholder={formatMessage({ id: 'search' })}
-                        size='small'
-                    />
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <ParishSelector value={parish} onChange={(p) => { setParish(p); setMass(null); }} />
+                    <MassSelector parishId={parish?.parishId ?? null} value={mass} onChange={setMass} />
                 </Box>
             </Box>
-            <MassOfferTable massDataTable={massDate} />
+            {mass ? (
+                <IntentionMassesTable intentions={orders} />
+            ) : (
+                <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
+                    {formatMessage({ id: 'selectMassPrompt' })}
+                </Typography>
+            )}
         </>
     );
 }
 
 MassOffer.getLayout = function getLayout(page: ReactNode) {
-    return (
-        <EasyMassAdminLayout>
-            <AppLayout>
-                {page}
-            </AppLayout>
-        </EasyMassAdminLayout>
-    );
+    return withAdminLayout(page);
 };

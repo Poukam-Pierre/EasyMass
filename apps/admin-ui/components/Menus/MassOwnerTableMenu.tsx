@@ -11,7 +11,7 @@ interface MassOwnerTableMenuProps {
     handleModify: () => void;
     handleCancel: () => void;
     menuItem: MenuItemForMassOwner[]
-    idSelected?: number;
+    idSelected?: string;
 }
 
 

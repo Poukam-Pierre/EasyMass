@@ -1,144 +1,98 @@
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
-import { Box, Button, InputBase, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import FinanceTable from "../../components/Finances/FinanceTable";
-import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
-import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
-import AppLayout from '../../components/Layout';
-
-
+import { toast } from "react-toastify";
+import CorrectionDialog from "../../components/Finances/CorrectionDialog";
+import FinanceTable, { TransactionRow } from "../../components/Finances/FinanceTable";
+import ParishSelector, { ParishOption } from "../../components/ParishSelector";
+import { withAdminLayout } from "../../components/withAdminLayout";
+import api, { apiErrorMessage } from "../../lib/api";
 
 export default function Finances() {
     const { formatNumber, formatMessage } = useIntl()
-    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
-    const [amountReceived, setAmountReceived] = useState<number>(0);
+    const [parish, setParish] = useState<ParishOption | null>(null)
+    const [transactions, setTransactions] = useState<TransactionRow[]>([])
+    const [isCorrectionOpen, setIsCorrectionOpen] = useState<boolean>(false)
 
-    const menuItem: MenuItem[] = [
-        {
-            title: 'Valide',
-            icon: checkmarkIcon
-        },
-        {
-            title: 'Echec',
-            icon: checkmarkIcon
-        },
-        {
-            title: 'MOMO',
-            icon: checkmarkIcon
-        },
-        {
-            title: 'OM',
-            icon: checkmarkIcon
-        },
-        {
-            title: 'CARD',
-            icon: checkmarkIcon
-        }
-    ]
-    useEffect(() => (
-        // TODO fetch data amount received.
-        setAmountReceived(0)
-    ), [])
+    const loadTransactions = () => {
+        if (!parish) return
+        api.get('/transactions', { params: { parishId: parish.parishId } })
+            .then(({ data }) => setTransactions(data))
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+    }
+
+    useEffect(loadTransactions, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const currentBalance = transactions[0]?.balanceAfter ?? 0
+
     return (
         <>
-            <MassMenu
-                anchorEl={anchorEl}
-                setAnchorEl={setAnchorEl}
-                menuItem={menuItem}
-            />
+            {parish && (
+                <CorrectionDialog
+                    isOpen={isCorrectionOpen}
+                    handleClose={() => setIsCorrectionOpen(false)}
+                    parishId={parish.parishId}
+                    onSaved={loadTransactions}
+                />
+            )}
 
             <Box>
                 <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    paddingBottom: '50px'
+                    paddingBottom: '24px'
                 }}>
-                    <Box>
-                        <Typography
-                            variant='body2'
-                        >
-                            {formatMessage({ id: 'cashRegister' })}
-                        </Typography>
-                        <Typography
-                            variant="h1"
-                        >
-                            {formatNumber(amountReceived, { style: 'currency', currency: 'xaf' })}
-                        </Typography>
-                    </Box>
-                    <Button
-                        variant="contained"
-                        disabled
-                    >
-                        {formatMessage({ id: 'withdrawal' })}
-                    </Button>
+                    <ParishSelector value={parish} onChange={setParish} />
                 </Box>
-                <Box sx={{
-                    border: '1px solid var(--line)',
-                    borderRadius: '10px'
-                }}>
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: 1,
-                        padding: '0 16px'
-                    }}>
-                        <Typography
-                            variant='h3'
-                            color='primary'
-                            sx={{
-                                padding: '10px 0'
-                            }}
-                        >
 
-                            {formatMessage({ id: 'transactionHistory' })}
-                        </Typography>
+                {parish && (
+                    <>
                         <Box sx={{
-                            display: 'grid',
-                            gridTemplateColumns: 'auto 1fr',
+                            display: 'flex',
                             alignItems: 'center',
-                            columnGap: 1
+                            justifyContent: 'space-between',
+                            paddingBottom: '50px'
                         }}>
-                            <Icon icon={searchIcon} fontSize={20} />
-                            <InputBase
-                                placeholder={formatMessage({ id: 'search' })}
-                            />
+                            <Box>
+                                <Typography variant='body2'>
+                                    {formatMessage({ id: 'cashRegister' })}
+                                </Typography>
+                                <Typography variant="h1">
+                                    {formatNumber(currentBalance, { style: 'currency', currency: 'xaf' })}
+                                </Typography>
+                            </Box>
+                            <Button variant="contained" onClick={() => setIsCorrectionOpen(true)}>
+                                {formatMessage({ id: 'ledgerCorrection' })}
+                            </Button>
                         </Box>
                         <Box sx={{
-                            display: 'grid',
-                            gridTemplateColumns: 'auto 1fr',
-                            alignItems: 'center',
-                            columnGap: 1,
-                            cursor: 'pointer',
-                        }}
-                            onClick={(event) => setAnchorEl(event.target as HTMLAnchorElement)}
-                        >
-                            <Icon icon={filterIcon} fontSize={20} />
+                            border: '1px solid var(--line)',
+                            borderRadius: '10px'
+                        }}>
                             <Typography
-                                variant='body2'
+                                variant='h3'
+                                color='primary'
+                                sx={{
+                                    padding: '10px 16px'
+                                }}
                             >
-                                {formatMessage({ id: 'filter' })}
+                                {formatMessage({ id: 'transactionHistory' })}
                             </Typography>
+                            <FinanceTable transactions={transactions} />
                         </Box>
-                    </Box>
-                    <FinanceTable />
-                </Box>
+                    </>
+                )}
+                {!parish && (
+                    <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
+                        {formatMessage({ id: 'selectParishPrompt' })}
+                    </Typography>
+                )}
             </Box>
         </>
     );
 }
 
 Finances.getLayout = function getLayout(page: ReactNode) {
-    return (
-        <EasyMassAdminLayout>
-            <AppLayout>
-                {page}
-            </AppLayout>
-        </EasyMassAdminLayout>
-    );
+    return withAdminLayout(page);
 };

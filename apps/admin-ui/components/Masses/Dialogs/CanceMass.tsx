@@ -1,26 +1,38 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
 import { useIntl } from "react-intl";
+import { toast } from "react-toastify";
+import api, { apiErrorMessage } from "../../../lib/api";
 
 interface CancelMassDialogProps {
     isOpen: boolean;
     handleClose: () => void;
-    idSelected: number | undefined;
+    idSelected: string | undefined;
+    onDeleted: () => void;
 }
 
 export default function CancelMassDialog({
     isOpen,
     handleClose,
-    idSelected
+    idSelected,
+    onDeleted
 }: CancelMassDialogProps) {
     const { formatMessage } = useIntl()
-    const handleDeleteMass = () => {
-        // TODO update data by deleting mass selected
-        console.log(idSelected)
+    const handleDeleteMass = async () => {
+        if (!idSelected) return
+        try {
+            await api.delete(`/masses/${idSelected}`);
+            toast.success(formatMessage({ id: 'saved' }));
+            onDeleted();
+            handleClose();
+        } catch (error) {
+            toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        }
     }
 
     return (
         <Dialog
             open={isOpen}
+            onClose={handleClose}
             sx={{
                 '& .MuiPaper-root': {
                     borderRadius: '15px',

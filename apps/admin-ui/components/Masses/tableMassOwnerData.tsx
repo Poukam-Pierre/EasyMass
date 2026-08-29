@@ -22,15 +22,38 @@ import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import historyIcon from '@iconify-icons/fluent/history-28-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
-import { showTransactionStatus } from "../Finances/FinanceTable";
 
+const massStatusColor: Record<string, { bg: string; color: string }> = {
+    open: { bg: 'rgba(92, 179, 96, 0.15)', color: 'var(--success)' },
+    processing: { bg: 'rgba(255, 184, 0, 0.3)', color: 'var(--warning)' },
+    closed: { bg: 'rgba(199, 0, 0, 0.15)', color: 'var(--error)' },
+    completed: { bg: 'rgba(2, 109, 169, 0.3)', color: 'var(--primary)' },
+};
+
+const showMassStatus = (label: string) => {
+    const style = massStatusColor[label];
+    if (!style) return undefined;
+    return (
+        <Typography sx={{
+            bgcolor: style.bg,
+            color: style.color,
+            width: 'fit-content',
+            borderRadius: '20px',
+            padding: 1,
+            fontWeight: 'bold',
+        }}>
+            {label}
+        </Typography>
+    );
+};
 
 export interface TableMassOwnerData {
-    id: number;
+    id: string;
     dayOfMass: Dayjs | null;
     massTime: Dayjs | null;
     massType: MassTypeEnum | string;
     price: number;
+    estimatedDurationMinutes?: number;
     status?: string
 }
 
@@ -39,15 +62,19 @@ export interface MenuItemForMassOwner extends MenuItem {
 }
 
 export default function MassOwnerTable({
-    massDataTable
+    massDataTable,
+    parishId,
+    onChanged,
 }: {
     massDataTable: TableMassOwnerData[]
+    parishId: string
+    onChanged: () => void
 }) {
     const { formatMessage, formatNumber } = useIntl()
     const titles = ['dayOfMass', 'massHour', 'massType', 'price', 'status', 'action']
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const [isMassModify, setIsMassModify] = useState<boolean>(false)
-    const [idSelected, setIdSelected] = useState<number | undefined>()
+    const [idSelected, setIdSelected] = useState<string | undefined>()
     const [isOpenDelete, setIsOpenDelete] = useState<boolean>(false)
     const [massSelected, setMassSelected] = useState<TableMassOwnerData>()
     const dayOfWeek: Record<number, string> = {
@@ -76,7 +103,7 @@ export default function MassOwnerTable({
         },
     ]
 
-    const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: number) => {
+    const handleActionOnRow = (event: MouseEvent<HTMLElement>, id: string) => {
         setAnchorEl(event.currentTarget);
         setIdSelected(id)
     }
@@ -105,11 +132,14 @@ export default function MassOwnerTable({
                 isOpen={isMassModify}
                 handleClose={() => setIsMassModify(false)}
                 massData={massSelected}
+                parishId={parishId}
+                onSaved={onChanged}
             />
             <CancelMassDialog
                 isOpen={isOpenDelete}
                 handleClose={handleCancelClose}
                 idSelected={idSelected}
+                onDeleted={onChanged}
             />
 
             <Table>
@@ -142,17 +172,17 @@ export default function MassOwnerTable({
 
                     }, index) => (
                         <TableRow
-                            key={`${index} + ${id} + ${dayOfMass}`}
+                            key={id}
                             sx={{
                                 color: 'var(--label)'
                             }}
                         >
-                            <TableCell>{id}</TableCell>
+                            <TableCell>{index + 1}</TableCell>
                             <TableCell sx={{
                                 fontWeight: 600,
                                 color: 'var(--label)'
                             }}>
-                                {dayOfMass ? formatMessage({ id: dayOfWeek[dayOfMass.day()] })
+                                {dayOfMass ? formatMessage({ id: dayOfWeek[dayOfMass.day() === 0 ? 7 : dayOfMass.day()] })
                                     .toUpperCase() : '-'
                                 }
                             </TableCell>
@@ -166,7 +196,7 @@ export default function MassOwnerTable({
                                 currency: 'xaf'
                             })}</TableCell>
                             <TableCell>
-                                {showTransactionStatus(status as string)}
+                                {showMassStatus(status as string) ?? status}
                             </TableCell>
 
                             <TableCell align='right'>

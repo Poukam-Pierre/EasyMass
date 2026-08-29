@@ -27,13 +27,6 @@ export default function Breadcrumb({
                 }}
             >{title}</Typography>
             <Breadcrumbs>
-                <Link
-                    variant="body2"
-                    underline="hover"
-                    color="inherit"
-                >
-                    Management
-                </Link>
                 {subPaths.map((_, index) => {
                     const islastPath = index === subPaths.length - 1;
                     const pathRoute = `/${subPaths.slice(0, index + 1).join('/')}`;

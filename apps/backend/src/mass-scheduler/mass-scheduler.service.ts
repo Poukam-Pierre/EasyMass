@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { MassService } from '../mass/mass.service';
-import { PdfService } from '../pdf/pdf.service';
+import { formatMassSubtitle, PdfService } from '../pdf/pdf.service';
 import { MailService } from '../mail/mail.service';
 
 /** How many masses' PDF+email sends run concurrently per tick — bounded so
@@ -39,7 +39,8 @@ export class MassSchedulerService {
   >[number]) {
     try {
       const pdf = await this.pdfService.generateIntentionsPdf(
-        `Mass Intentions — ${mass.startAt.toISOString()}`,
+        'Mass Intentions',
+        formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name),
         mass.massOrder.map((o) => ({
           believerName: o.orderByBeliever.fullName,
           intension: o.intension,
