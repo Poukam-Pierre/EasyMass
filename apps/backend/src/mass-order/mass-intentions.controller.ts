@@ -1,16 +1,26 @@
-import { Controller, Get, Header, Param, Request, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  NotFoundException,
+  Param,
+  Request,
+  Res,
+} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
-import { PdfService } from '../pdf/pdf.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { formatMassSubtitle, PdfService } from '../pdf/pdf.service';
 import { MassOrderService } from './mass-order.service';
 
 @Controller('masses/:massId/intentions')
 export class MassIntentionsController {
   constructor(
     private readonly massOrderService: MassOrderService,
-    private readonly pdfService: PdfService
+    private readonly pdfService: PdfService,
+    private readonly prismaService: PrismaService
   ) {}
 
   @Get()
@@ -34,8 +44,15 @@ export class MassIntentionsController {
       massId,
       request.user
     );
+    const mass = await this.prismaService.mass.findUnique({
+      where: { massId },
+      include: { parish: { select: { name: true } } },
+    });
+    if (!mass) throw new NotFoundException('Mass not found');
+
     const pdf = await this.pdfService.generateIntentionsPdf(
-      `Mass Intentions — ${massId}`,
+      'Mass Intentions',
+      formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name),
       orders.map((o) => ({
         believerName: o.orderByBeliever.fullName,
         intension: o.intension,
