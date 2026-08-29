@@ -65,7 +65,7 @@ export default function OfferList({ children }: OfferListProps) {
                         display: !massRequested.length ? 'none' : 'inherit'
                     }}
                 >
-                    {formatMessage({ id: 'billing' })} : {formatNumber(totalBillingAmount + (totalBillingAmount * 0.1), {
+                    {formatMessage({ id: 'estimatedBilling' })} : {formatNumber(totalBillingAmount + (totalBillingAmount * 0.1), {
                         style: 'currency',
                         currency: 'xaf',
                     })}
@@ -74,6 +74,7 @@ export default function OfferList({ children }: OfferListProps) {
             <ModalPayment
                 isOpen={isPaymenDialogOpen}
                 onClose={handlePaymenDialogClose}
+                massRequested={massRequested}
             />
         </Box>
     );

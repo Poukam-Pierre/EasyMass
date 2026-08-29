@@ -15,7 +15,7 @@ export default function OfferMassCart({ massInfos }: OfferMassCartProps): JSX.El
     const { formatMessage, formatNumber } = useIntl()
 
 
-    const staticData: string[] = ['city', 'parish', 'dateTime', 'applicant']
+    const staticData: string[] = ['city', 'parishes', 'dateTime', 'applicant']
 
     const removeMass = (index: number) => {
         const massArray = massInfos;
