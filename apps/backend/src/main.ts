@@ -14,7 +14,8 @@ async function bootstrap() {
   // whose payload is an instance of a DTO class using that decorator.
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableCors({
-    origin: 'http://localhost:4200', // remote url server should be added here to avoid CORS issue
+    // remote url server should be added here to avoid CORS issue
+    origin: ['http://localhost:4200', 'http://localhost:4300'], // easy-messe, admin-ui
     methods: 'GET, POST, PATCH, DELETE',
     credentials: true,
   });
