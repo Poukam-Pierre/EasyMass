@@ -38,6 +38,10 @@ model Believer {
   believerId String      @id @unique @default(cuid())
   fullName   String      @default("Unknown")
   phone      String?
+  /// Optional — only collected for PayPal checkouts, where it's the
+  /// channel the invoice gets emailed to (mobile-money checkouts get the
+  /// invoice by SMS to `phone` instead, since that's always present).
+  email      String?
   createdAt  DateTime    @default(now())
   payment    Payment[]
   massOrder  MassOrder[]
