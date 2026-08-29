@@ -25,7 +25,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "admin-ui:build",
-        "dev": true
+        "dev": true,
+        "port": 4300
       },
       "configurations": {
         "development":{
@@ -56,6 +57,6 @@
       "outputs": ["{options.outputFile}"]
     }
   },
-  "tagd": []
+  "tags": []
 }
  

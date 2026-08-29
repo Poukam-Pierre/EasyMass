@@ -17,6 +17,8 @@ import { PlatformSettingsModule } from './platform-settings/platform-settings.mo
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { MassSchedulerModule } from './mass-scheduler/mass-scheduler.module';
 import { PaymentSchedulerModule } from './payment-scheduler/payment-scheduler.module';
+import { PriestModule } from './priest/priest.module';
+
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { PaymentSchedulerModule } from './payment-scheduler/payment-scheduler.mo
     AdminDashboardModule,
     MassSchedulerModule,
     PaymentSchedulerModule,
+    PriestModule,
   ],
   controllers: [AppController],
   providers: [

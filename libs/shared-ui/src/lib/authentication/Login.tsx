@@ -20,7 +20,13 @@ import HeroHeader from "./HeroHeader";
 
 
 
-export function LoginCretentials() {
+export interface LoginCretentialsProps {
+    onSubmit?: (values: { email: string; password: string }) => void | Promise<void>;
+    errorMessage?: string;
+    isSubmitting?: boolean;
+}
+
+export function LoginCretentials({ onSubmit, errorMessage, isSubmitting }: LoginCretentialsProps = {}) {
     const [isVisible, setIsVisible] = useState<boolean>(false)
     const { formatMessage } = useIntl()
     const { push } = useRouter()
@@ -36,8 +42,11 @@ export function LoginCretentials() {
             email: '',
             password: '',
         },
-        onSubmit: (values, { resetForm }) => {
-            // TODO fetch data to API for authentication
+        onSubmit: async (values, { resetForm }) => {
+            if (onSubmit) {
+                await onSubmit(values)
+                return
+            }
             console.log(values)
             resetForm()
         },
@@ -120,11 +129,17 @@ export function LoginCretentials() {
                     )}
 
                 </FormControl>
+                {errorMessage && (
+                    <FormHelperText error sx={{ textAlign: 'center', fontSize: '14px' }}>
+                        {errorMessage}
+                    </FormHelperText>
+                )}
                 <Button
                     variant="contained"
                     type="submit"
+                    disabled={isSubmitting}
                 >
-                    {formatMessage({ id: 'connexion' })}
+                    {isSubmitting ? formatMessage({ id: 'processing' }) : formatMessage({ id: 'connexion' })}
                 </Button>
                 <Button
                     variant='text'

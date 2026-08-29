@@ -157,7 +157,10 @@ export class ParishService {
   ) {
     if (requestUser.role === UserRole.ADMIN) return;
 
-    const parish = await resolveParishForUser(this.prismaService, requestUser.id);
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      requestUser.id
+    );
     if (parish.parishId !== parishId) {
       throw new ForbiddenException('Forbidden', {
         cause: new Error(),
@@ -277,11 +280,19 @@ export class ParishService {
         _count: { massId: true },
       }),
       this.prismaService.transaction.aggregate({
-        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'INCOME' },
+        where: {
+          ownerId: parishId,
+          ownerType: 'PARISH',
+          transactionType: 'INCOME',
+        },
         _sum: { amount: true },
       }),
       this.prismaService.transaction.aggregate({
-        where: { ownerId: parishId, ownerType: 'PARISH', transactionType: 'WITHDRAWAL' },
+        where: {
+          ownerId: parishId,
+          ownerType: 'PARISH',
+          transactionType: 'WITHDRAWAL',
+        },
         _sum: { amount: true },
       }),
       this.prismaService.massOrder.count({
