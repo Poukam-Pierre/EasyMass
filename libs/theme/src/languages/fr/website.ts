@@ -200,4 +200,16 @@ export const website = {
   valueAccessibilityTitle: 'Accessibilité',
   valueAccessibilityDescription:
     "Demander une messe où que vous soyez, à tout moment, jusqu'à une heure avant la célébration.",
+  phoneWarningMsg: 'Téléphone obligatoire',
+  yourInformations: 'Vos coordonnées',
+  paypalRedirectInfo:
+    'Vous serez redirigé vers une page de paiement PayPal sécurisée pour finaliser votre paiement.',
+  invoiceEmailHelper: 'Votre reçu de paiement sera envoyé à cette adresse.',
+  checkoutRequiredFields: 'Veuillez renseigner votre nom et votre numéro de téléphone.',
+  checkoutError: 'Une erreur est survenue lors du paiement. Veuillez réessayer.',
+  processing: 'Traitement...',
+  estimatedBilling: 'Total estimé',
+  checkoutReturnTitle: 'Merci !',
+  checkoutReturnDefaultMessage: 'Votre paiement est en cours de traitement.',
+  backToHome: "Retour à l'accueil",
 };

@@ -196,4 +196,16 @@ export const website = {
   valueAccessibilityTitle: 'Accessibility',
   valueAccessibilityDescription:
     'Request a mass from anywhere, at any time, up to one hour before the celebration.',
+  phoneWarningMsg: 'Phone number is required',
+  yourInformations: 'Your details',
+  paypalRedirectInfo:
+    'You will be redirected to a secure PayPal payment page to complete your payment.',
+  invoiceEmailHelper: "Your payment receipt will be sent to this address.",
+  checkoutRequiredFields: 'Please enter your name and phone number.',
+  checkoutError: 'Something went wrong during payment. Please try again.',
+  processing: 'Processing...',
+  estimatedBilling: 'Estimated total',
+  checkoutReturnTitle: 'Thank you!',
+  checkoutReturnDefaultMessage: 'Your payment is being processed.',
+  backToHome: 'Back to home',
 };
