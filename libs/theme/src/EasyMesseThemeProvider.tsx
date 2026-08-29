@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
 import { Flip, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import LanguageContextProvider, {
     useLanguage,
 } from './contexts/language/languageContextProvider';
