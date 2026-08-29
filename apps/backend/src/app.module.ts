@@ -16,7 +16,9 @@ import { MassPriceModule } from './mass-price/mass-price.module';
 import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { MassSchedulerModule } from './mass-scheduler/mass-scheduler.module';
+import { PaymentSchedulerModule } from './payment-scheduler/payment-scheduler.module';
 import { PriestModule } from './priest/priest.module';
+
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { PriestModule } from './priest/priest.module';
     PlatformSettingsModule,
     AdminDashboardModule,
     MassSchedulerModule,
+    PaymentSchedulerModule,
     PriestModule,
   ],
   controllers: [AppController],

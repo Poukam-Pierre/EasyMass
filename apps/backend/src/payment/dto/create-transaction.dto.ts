@@ -1,7 +1,9 @@
 import { Currency, PaymentMethod } from '@prisma/client';
 import {
+  IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateIf,
   ValidateNested,
@@ -11,11 +13,21 @@ import { Type } from 'class-transformer';
 export class BelieverInfoDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  phone: string;
+  phone!: string;
+
+  /** Not required at the DTO level — the frontend only asks for it on the
+   * PayPal tab (where it's the invoice-delivery channel; mobile-money
+   * checkouts get their invoice by SMS to `phone` instead). Left optional
+   * here rather than cross-validated against paymentInfo.paymentMethod so
+   * a missing email never blocks a checkout — PaymentService just skips
+   * sending the invoice email if it's absent. */
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 }
 
 /** No `price` here — trusting a client-supplied amount for what a mass

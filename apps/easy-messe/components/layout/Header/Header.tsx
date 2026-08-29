@@ -23,7 +23,7 @@ export default function Header() {
     const isActive = asPath.startsWith('/offer-mass')
     const navItems: INavItem[] = [
         { item: formatMessage({ id: 'home' }), route: '/' },
-        { item: formatMessage({ id: 'aboutUs' }), route: '#' }
+        { item: formatMessage({ id: 'aboutUs' }), route: '/about' }
     ]
     const closeSideBar = () => {
         setIsSideBarOpen(false)

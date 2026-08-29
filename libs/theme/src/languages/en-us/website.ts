@@ -202,6 +202,7 @@ export const website = {
   yourInformations: 'Your details',
   paypalRedirectInfo:
     'You will be redirected to a secure PayPal payment page to complete your payment.',
+  invoiceEmailHelper: "Your payment receipt will be sent to this address.",
   checkoutRequiredFields: 'Please enter your name and phone number.',
   checkoutError: 'Something went wrong during payment. Please try again.',
   estimatedBilling: 'Estimated total',
