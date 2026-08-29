@@ -93,6 +93,25 @@ export class PaymentController {
     res.status(result.code).json(result);
   }
 
+  // Public: this is the link texted to mobile-money payers (see
+  // PaymentService.sendInvoice) — no session to attach a JWT to, since it's
+  // opened directly from an SMS. Security relies on `reference` being an
+  // unguessable token (NotchPay's own reference / PayPal's order id), the
+  // same model Stripe/PayPal use for their own checkout confirmation pages.
+  @Public()
+  @Get('/:reference/invoice')
+  async downloadInvoice(
+    @Param('reference') reference: string,
+    @Res() res: Response
+  ) {
+    const pdf = await this.paymentService.getInvoicePdf(reference);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="invoice-${reference}.pdf"`,
+    });
+    res.send(pdf);
+  }
+
   @Post('/withdraw')
   @Roles(UserRole.PARISH)
   withdrawMoney(

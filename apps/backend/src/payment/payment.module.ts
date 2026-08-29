@@ -10,6 +10,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PlatformSettingsModule } from '../platform-settings/platform-settings.module';
 import { MassPriceModule } from '../mass-price/mass-price.module';
 import { CurrencyConversionModule } from '../currency-conversion/currency-conversion.module';
+import { SmsModule } from '../sms/sms.module';
+import { MailModule } from '../mail/mail.module';
+import { PdfModule } from '../pdf/pdf.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { CurrencyConversionModule } from '../currency-conversion/currency-conver
     PlatformSettingsModule,
     MassPriceModule,
     CurrencyConversionModule,
+    SmsModule,
+    MailModule,
+    PdfModule,
   ],
   providers: [PaymentService, PaypalService],
   exports: [PaymentService],

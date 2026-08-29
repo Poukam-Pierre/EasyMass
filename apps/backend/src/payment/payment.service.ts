@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -29,6 +30,16 @@ import { CurrencyConversionService } from '../currency-conversion/currency-conve
 import { resolveParishForUser } from '../common/user.utils';
 import { PLATFORM_OWNER_ID } from '../common/constants';
 import { PaypalService } from './paypal.service';
+import { SmsService } from '../sms/sms.service';
+import { MailService } from '../mail/mail.service';
+import { InvoiceDetails, PdfService } from '../pdf/pdf.service';
+
+type InvoicePayments = Prisma.PaymentGetPayload<{
+  include: {
+    believer: true;
+    massOrder: { include: { mass: { include: { parish: true } } } };
+  };
+}>[];
 
 /** One resolved line item in a checkout — massInfo carries the client's
  * legitimate input (which mass, its intension text); total is the
@@ -40,6 +51,8 @@ interface CheckoutItem {
 
 @Injectable()
 export class PaymentService {
+  private readonly logger = new Logger(PaymentService.name);
+
   constructor(
     private readonly parishService: ParishService,
     private readonly transactionsService: TransactionsService,
@@ -49,7 +62,10 @@ export class PaymentService {
     private readonly platformSettingsService: PlatformSettingsService,
     private readonly massPriceService: MassPriceService,
     private readonly currencyConversionService: CurrencyConversionService,
-    private readonly paypalService: PaypalService
+    private readonly paypalService: PaypalService,
+    private readonly smsService: SmsService,
+    private readonly mailService: MailService,
+    private readonly pdfService: PdfService
   ) {}
 
   /** One PaymentAudit row per paymentId, recording the status it just
@@ -557,18 +573,21 @@ export class PaymentService {
     // so a concurrent payment/withdrawal/refund touching the same parish or
     // platform balance can't produce a lost update — Postgres aborts one
     // side with a retryable conflict instead.
-    return this.prismaService.runSerializableTransaction(async (tx) => {
+    const result = await this.prismaService.runSerializableTransaction(async (tx) => {
       const { count } = await tx.payment.updateMany({
         where: { referenceId: reference, status: 'PENDING' },
         data: { status: 'COMPLETED', paidAt: new Date() },
       });
       if (count === 0) {
-        return { code: 200, message: 'Already processed.' };
+        return { code: 200, message: 'Already processed.', payments: null };
       }
 
       const payments = await tx.payment.findMany({
         where: { referenceId: reference },
-        include: { massOrder: { include: { mass: true } } },
+        include: {
+          believer: true,
+          massOrder: { include: { mass: { include: { parish: true } } } },
+        },
       });
 
       await this.recordPaymentAudits(
@@ -639,8 +658,110 @@ export class PaymentService {
           ));
       }
 
-      return { code: 200, message: 'Bill of masses ordered' };
+      return { code: 200, message: 'Bill of masses ordered', payments };
     });
+
+    // Outside the transaction and awaited-but-caught: an SMS/email hiccup
+    // must never roll back a payment that already succeeded on the
+    // gateway, but this is called from server-to-server webhook handlers
+    // and the cron sweep (never a waiting browser request), so there's no
+    // reason to leave it as an un-awaited orphaned promise either.
+    if (result.payments) {
+      try {
+        await this.sendInvoice(reference, result.payments);
+      } catch (error) {
+        this.logger.error(
+          `Failed to send invoice for ${reference}: ${error?.message ?? error}`
+        );
+      }
+    }
+
+    return { code: result.code, message: result.message };
+  }
+
+  private buildInvoiceDetails(
+    reference: string,
+    payments: InvoicePayments
+  ): InvoiceDetails {
+    return {
+      believerName: payments[0].believer.fullName,
+      reference,
+      paidAt: payments[0].paidAt ?? new Date(),
+      lines: payments.map((p) => ({
+        parishName: p.massOrder.mass.parish.name,
+        massDate: p.massOrder.mass.startAt,
+        intension: p.massOrder.intension,
+        amount: p.amount,
+        currency: p.currency,
+      })),
+    };
+  }
+
+  /** Dispatches the paid-checkout notification on the channel matching how
+   * they paid: MOBILE_MONEY payers always have a phone (required at
+   * checkout) so they get an SMS pointing at getInvoicePdf's download
+   * link — a real PDF wouldn't fit in a text message, and a link is also
+   * the one thing that survives them leaving the page before the gateway
+   * confirms. PAYPAL payers get the same PDF emailed directly as an
+   * attachment instead, if they gave an email (optional — silently skipped
+   * if absent, since a missing email must never be treated as a failure). */
+  private async sendInvoice(reference: string, payments: InvoicePayments) {
+    const believer = payments[0].believer;
+    const paymentMethod = payments[0].paymentMethod;
+
+    if (paymentMethod === PaymentMethod.MOBILE_MONEY) {
+      if (!believer.phone) return;
+      const appBaseUrl = process.env.APP_PUBLIC_URL?.replace(/\/+$/, '');
+      if (!appBaseUrl) {
+        this.logger.error(
+          'APP_PUBLIC_URL is not configured — cannot build the invoice download link for SMS.'
+        );
+        return;
+      }
+      await this.smsService.send(
+        believer.phone,
+        `EasyMesse: your payment was received. Download your receipt here: ${appBaseUrl}/api/payment/${reference}/invoice`
+      );
+      return;
+    }
+
+    if (paymentMethod === PaymentMethod.PAYPAL) {
+      if (!believer.email) return;
+      const pdf = await this.pdfService.generateInvoicePdf(
+        this.buildInvoiceDetails(reference, payments)
+      );
+      await this.mailService.sendWithAttachment(
+        believer.email,
+        'Your EasyMesse payment receipt',
+        `Thank you for your payment. Your receipt for ${payments.length} mass(es) is attached.`,
+        { filename: `invoice-${reference}.pdf`, content: pdf }
+      );
+    }
+  }
+
+  /** Backs the public GET /payment/:reference/invoice download link — the
+   * one sent by SMS to mobile-money payers, and usable as a "view online"
+   * fallback for anyone else who has the reference. Regenerated on demand
+   * rather than stored anywhere: invoice data is immutable once a Payment
+   * is COMPLETED, so re-rendering is always correct and needs no file
+   * storage. Only ever exposes a checkout that's actually COMPLETED — a
+   * PENDING/FAILED reference has nothing to show yet. */
+  async getInvoicePdf(reference: string): Promise<Buffer> {
+    const payments = await this.prismaService.payment.findMany({
+      where: { referenceId: reference, status: 'COMPLETED' },
+      include: {
+        believer: true,
+        massOrder: { include: { mass: { include: { parish: true } } } },
+      },
+    });
+    if (payments.length === 0) {
+      throw new NotFoundException(
+        'No completed payment found for this reference.'
+      );
+    }
+    return this.pdfService.generateInvoicePdf(
+      this.buildInvoiceDetails(reference, payments)
+    );
   }
 
   /** Parish-only — there's no priest balance to withdraw from in this MVP.

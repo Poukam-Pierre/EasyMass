@@ -27,6 +27,7 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
     const [name, setName] = useState<string>('')
     const [phone, setPhone] = useState<string>('')
+    const [email, setEmail] = useState<string>('')
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string>('')
     const { formatMessage } = useIntl()
@@ -36,6 +37,7 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
         const lastNamedRequest = [...massRequested].reverse().find((request) => request.faithInfos)
         setName(lastNamedRequest?.faithInfos?.name ?? '')
         setPhone(lastNamedRequest?.faithInfos?.phone ?? '')
+        setEmail('')
         setErrorMessage('')
     }, [isOpen, massRequested])
 
@@ -68,21 +70,35 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
 
     const paymentMethodField: PaymentMethodField = {
         [PAYPAL_TAB_INDEX]: (
-            <Typography variant="body2" sx={{ color: 'var(--body)' }}>
-                {formatMessage({ id: 'paypalRedirectInfo' })}
-            </Typography>
+            <Box sx={{ display: 'grid', rowGap: 1 }}>
+                <Typography variant="body2" sx={{ color: 'var(--body)' }}>
+                    {formatMessage({ id: 'paypalRedirectInfo' })}
+                </Typography>
+                <TextField
+                    placeholder={formatMessage({ id: 'email' })}
+                    type="email"
+                    size="small"
+                    fullWidth
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    helperText={formatMessage({ id: 'invoiceEmailHelper' })}
+                />
+            </Box>
         ),
     }
 
+    const isPaypalTab = activeTabIndex === PAYPAL_TAB_INDEX
+
     const handleConfirm = () => {
-        if (!name.trim() || !phone.trim()) {
+        if (!name.trim() || !phone.trim() || (isPaypalTab && !email.trim())) {
             setErrorMessage(formatMessage({ id: 'checkoutRequiredFields' }))
             return
         }
         setErrorMessage('')
         setIsSubmitting(true)
 
-        const paymentMethodValue = activeTabIndex === PAYPAL_TAB_INDEX ? 'PAYPAL' : 'MOBILE_MONEY'
+        const paymentMethodValue = isPaypalTab ? 'PAYPAL' : 'MOBILE_MONEY'
 
         apiMiddleware({
             url: `${process.env.NEXT_PUBLIC_API_URL}/payment/collect`,
@@ -90,7 +106,8 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
             data: {
                 believerInfo: {
                     name,
-                    phone
+                    phone,
+                    ...(isPaypalTab ? { email } : {})
                 },
                 massInfos: massRequested.map(({ massInfos: { massId, intention } }) => ({
                     id: massId,
