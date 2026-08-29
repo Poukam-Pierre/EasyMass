@@ -7,6 +7,9 @@ import Head from 'next/head';
 import EasyMassLayout from '../components/layout';
 import '@easy-messe/shared-ui';
 import 'dayjs/locale/fr';
+// Next.js only allows global CSS imports from the custom App component,
+// so this can't live in the shared EasyMassThemeProvider that renders ToastContainer.
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function CustomApp({ Component, pageProps }: AppProps) {
