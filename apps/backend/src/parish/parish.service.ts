@@ -237,6 +237,7 @@ export class ParishService {
       where: { isBlocked: false },
       select: {
         name: true,
+        city: { select: { city_name: true } },
         mass: {
           where: { status: 'OPEN' },
           select: {
@@ -249,8 +250,9 @@ export class ParishService {
       },
     });
 
-    return parishWithItsOwnMasses.map(({ mass, ...parishData }) => ({
+    return parishWithItsOwnMasses.map(({ mass, city, ...parishData }) => ({
       ...parishData,
+      city: city?.city_name,
       massData: mass.map(({ startAt, ...massData }) => ({
         ...massData,
         dateTime: startAt,
