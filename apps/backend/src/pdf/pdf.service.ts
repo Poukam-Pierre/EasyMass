@@ -20,6 +20,7 @@ export interface InvoiceDetails {
   reference: string;
   paidAt: Date;
   lines: InvoiceLine[];
+}
 
 const MASS_TYPE_LABELS: Record<MassType, string> = {
   UNIQUE: 'Unique',

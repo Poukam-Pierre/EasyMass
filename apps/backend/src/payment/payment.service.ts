@@ -778,17 +778,30 @@ export class PaymentService {
     );
 
     if (parish.payoutBlocked) {
-      throw new ForbiddenException('Forbidden', {
+      throw new ForbiddenException('withdrawalBlocked', {
         cause: new Error(),
         description: 'Payouts are currently blocked for this parish.',
       });
     }
 
     if (!parish.payoutNumber) {
-      throw new BadRequestException('Bad Request', {
+      throw new BadRequestException('withdrawalNoPayoutNumber', {
         cause: new Error(),
         description:
           'No payout number on file. Set one via PATCH /parishes/:id/payout-method first.',
+      });
+    }
+
+    const currentBalance = await this.transactionsService.getCurrentBalance(
+      this.prismaService,
+      parish.parishId,
+      'PARISH'
+    );
+
+    if (amount > currentBalance) {
+      throw new BadRequestException('withdrawalInsufficientBalance', {
+        cause: new Error(),
+        description: `Withdrawal amount (${amount}) exceeds available balance (${currentBalance}).`,
       });
     }
 
@@ -811,34 +824,45 @@ export class PaymentService {
       }),
     };
 
+    // Only the network call itself is wrapped — a deliberately thrown
+    // HttpException below (e.g. the "not accepted" case) must propagate
+    // as-is, not get caught by this same try and re-wrapped into a
+    // malformed, doubly-nested exception body.
+    let withdrawalData: { code?: number; status?: string; transfer?: { amount_total: number; reference: string } };
     try {
-      const withdrawalData = await fetch(
+      withdrawalData = await fetch(
         'https://api.notchpay.co/transfers',
         optionWithdrawMoney
       ).then((response) => response.json());
-
-      if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
-        // Serializable so a withdrawal racing with a concurrent payment/
-        // refund for the same parish can't produce a lost update on the
-        // running balance (see PrismaService.runSerializableTransaction).
-        await this.prismaService.runSerializableTransaction((tx) =>
-          this.transactionsService.createWithBalance(tx, {
-            transactionType: 'WITHDRAWAL',
-            ownerId: parish.parishId,
-            ownerType: 'PARISH',
-            amount: -Math.abs(withdrawalData.transfer.amount_total),
-            externalPayoutId: withdrawalData.transfer.reference,
-            createdByUser: { connect: { userId: requestUser.id } },
-          })
-        );
-
-        return { code: 201, message: 'Payment initiated successfully' };
-      }
-
-      throw new UnprocessableEntityException('Withdrawal was not accepted.');
     } catch (error) {
-      throw new UnprocessableEntityException(error);
+      throw new UnprocessableEntityException('withdrawalFailed', {
+        cause: error instanceof Error ? error : new Error(String(error)),
+        description: 'Could not reach the payment provider.',
+      });
     }
+
+    if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
+      // Serializable so a withdrawal racing with a concurrent payment/
+      // refund for the same parish can't produce a lost update on the
+      // running balance (see PrismaService.runSerializableTransaction).
+      await this.prismaService.runSerializableTransaction((tx) =>
+        this.transactionsService.createWithBalance(tx, {
+          transactionType: 'WITHDRAWAL',
+          ownerId: parish.parishId,
+          ownerType: 'PARISH',
+          amount: -Math.abs(withdrawalData.transfer.amount_total),
+          externalPayoutId: withdrawalData.transfer.reference,
+          createdByUser: { connect: { userId: requestUser.id } },
+        })
+      );
+
+      return { code: 201, message: 'Payment initiated successfully' };
+    }
+
+    throw new UnprocessableEntityException('withdrawalNotAccepted', {
+      cause: new Error(),
+      description: 'Withdrawal was not accepted by the payment provider.',
+    });
   }
 
   async createOrRetreiveRecipient(
@@ -871,26 +895,34 @@ export class PaymentService {
       }),
     };
 
+    // Same split as withdrawMoney: only the network call is caught here, so
+    // the "creation rejected" business exception below propagates as-is
+    // instead of being re-caught and re-wrapped by this same try.
+    let createRecipient: { code?: number };
     try {
-      const createRecipient = await fetch(
+      createRecipient = await fetch(
         'https://api.notchpay.co/recipients',
         optionCreateRecipient
       ).then((response) => response.json());
-
-      if (createRecipient.code === 200) {
-        // Internal update — this is a system-derived cache of the NotchPay
-        // recipient id, not a user-initiated edit, so no requestUser/
-        // ownership check applies here.
-        await this.parishService.update(parishId, { receiverId: referenceId });
-        return referenceId;
-      }
-
-      throw new UnprocessableEntityException(
-        'Failed to create payout recipient.'
-      );
     } catch (error) {
-      throw new UnprocessableEntityException(error);
+      throw new UnprocessableEntityException('withdrawalRecipientFailed', {
+        cause: error instanceof Error ? error : new Error(String(error)),
+        description: 'Could not reach the payment provider.',
+      });
     }
+
+    if (createRecipient.code === 200) {
+      // Internal update — this is a system-derived cache of the NotchPay
+      // recipient id, not a user-initiated edit, so no requestUser/
+      // ownership check applies here.
+      await this.parishService.update(parishId, { receiverId: referenceId });
+      return referenceId;
+    }
+
+    throw new UnprocessableEntityException('withdrawalRecipientFailed', {
+      cause: new Error(),
+      description: 'Failed to create payout recipient.',
+    });
   }
 
   /**

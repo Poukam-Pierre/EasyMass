@@ -50,6 +50,11 @@ export class TransactionsService {
         ownerId: parishId,
         ownerType: 'PARISH',
       },
+      // Callers (parish-ui, admin-ui) read transactions[0].balanceAfter as
+      // the current running balance, same assumption getCurrentBalance
+      // makes below — findMany has no default order, so this must be
+      // explicit or that balance is whatever Postgres happens to return first.
+      orderBy: { createdAt: 'desc' },
       select: {
         transactionId: true,
         createdAt: true,
