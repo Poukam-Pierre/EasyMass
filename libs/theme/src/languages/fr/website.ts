@@ -97,6 +97,7 @@ export const website = {
   cancel: 'Annuler',
   delete: 'Supprimer',
   name: 'Nom',
+  secondName: 'prénom',
   registrationDate: "Date d'enregistrement",
   massType: 'Type de messes',
   startDate: 'Date debut',
@@ -207,8 +208,10 @@ export const website = {
   paypalRedirectInfo:
     'Vous serez redirigé vers une page de paiement PayPal sécurisée pour finaliser votre paiement.',
   invoiceEmailHelper: 'Votre reçu de paiement sera envoyé à cette adresse.',
-  checkoutRequiredFields: 'Veuillez renseigner votre nom et votre numéro de téléphone.',
-  checkoutError: 'Une erreur est survenue lors du paiement. Veuillez réessayer.',
+  checkoutRequiredFields:
+    'Veuillez renseigner votre nom et votre numéro de téléphone.',
+  checkoutError:
+    'Une erreur est survenue lors du paiement. Veuillez réessayer.',
   processing: 'Traitement...',
   estimatedBilling: 'Total estimé',
   checkoutReturnTitle: 'Merci !',
@@ -286,4 +289,28 @@ export const website = {
   lastUpdated: 'Dernière mise à jour',
   massesCreateHint:
     "Les messes sont créées depuis l'espace paroisse. Vous pouvez modifier ou supprimer une messe ici.",
+  createPriest: 'Créer un prêtre',
+  birthDate: 'Date de naissance',
+  massesCreatedCount: 'Messes créées',
+  moneyEarned: 'Revenus gagnés',
+  moneyWithdrawn: 'Montant retiré',
+  intentionsTreatedCount: 'Intentions traitées',
+  massesByStatus: 'Messes par statut',
+  massPrices: 'Prix par devise',
+  currency: 'Devise',
+  withdrawalHint:
+    "Renseignez d'abord votre numéro de paiement dans votre profil pour pouvoir effectuer un retrait.",
+  payoutNumberHint:
+    'Ce numéro sera utilisé pour recevoir vos retraits (mobile money).',
+  withdrawalNoPayoutNumber:
+    "Renseignez d'abord votre numéro de paiement dans votre profil avant de faire un retrait.",
+  withdrawalRecipientFailed:
+    "Ce numéro n'a pas pu être validé comme destinataire mobile money. Vérifiez le numéro dans votre profil et réessayez.",
+  withdrawalBlocked:
+    'Les retraits sont actuellement bloqués pour votre paroisse. Contactez un administrateur.',
+  withdrawalInsufficientBalance: 'Solde insuffisant pour effectuer ce retrait.',
+  withdrawalNotAccepted:
+    "Le retrait n'a pas été accepté par le prestataire de paiement. Veuillez réessayer.",
+  withdrawalFailed:
+    "Une erreur s'est produite lors du retrait. Veuillez réessayer.",
 };
