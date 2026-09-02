@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Dayjs } from 'dayjs';
 
 type NumberUnit = 'K' | 'M' | 'B' | 'T' | 'P' | 'E';
@@ -122,4 +123,24 @@ export function getFirstTwoNameInitials(name: string) {
 export function formattedDateTime(dateTime: Dayjs): string {
   // TODO Adjust formating according to the current language
   return `${dateTime.format('DD MMMM YYYY')} - ${dateTime.format('HH:mm')}`;
+}
+
+/**
+ * The backend returns a stable i18n key as an error's `message` field for
+ * failures the caller should show a specific, translated message for
+ * (rather than raw English text leaking into the UI). Extracts that key,
+ * but only if it's one the caller actually knows how to render — an
+ * unrecognized key falls through to `undefined` so callers can fall back
+ * to a generic translated message instead of rendering it verbatim.
+ */
+export function extractApiErrorKey(
+  error: unknown,
+  knownKeys: Set<string>
+): string | undefined {
+  if (!axios.isAxiosError(error)) return undefined;
+  const message = (error.response?.data as { message?: string } | undefined)
+    ?.message;
+  return typeof message === 'string' && knownKeys.has(message)
+    ? message
+    : undefined;
 }

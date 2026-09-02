@@ -72,9 +72,10 @@ export class MassPriceService {
       } else if (currency === BASE_CURRENCY) {
         resolved.set(mass.massId, mass.price);
       } else {
-        throw new UnprocessableEntityException(
-          `Mass ${mass.massId} has no listed price in ${currency}.`
-        );
+        throw new UnprocessableEntityException('priceNotAvailableInCurrency', {
+          cause: new Error(),
+          description: `Mass ${mass.massId} has no listed price in ${currency}.`,
+        });
       }
     }
     return resolved;

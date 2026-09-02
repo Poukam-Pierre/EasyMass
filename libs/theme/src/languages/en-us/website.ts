@@ -95,7 +95,8 @@ export const website = {
   modify: 'Modify',
   cancel: 'Cancel',
   delete: 'Delete',
-  name: 'Name',
+  name: 'First name',
+  secondName: 'last Name',
   registrationDate: 'Registration time',
   massType: 'Type of masses',
   startDate: 'Start date',
@@ -202,7 +203,7 @@ export const website = {
   yourInformations: 'Your details',
   paypalRedirectInfo:
     'You will be redirected to a secure PayPal payment page to complete your payment.',
-  invoiceEmailHelper: "Your payment receipt will be sent to this address.",
+  invoiceEmailHelper: 'Your payment receipt will be sent to this address.',
   checkoutRequiredFields: 'Please enter your name and phone number.',
   checkoutError: 'Something went wrong during payment. Please try again.',
   estimatedBilling: 'Estimated total',
@@ -283,4 +284,36 @@ export const website = {
   lastUpdated: 'Last updated',
   massesCreateHint:
     'Masses are created from the parish workspace. You can edit or remove a mass here.',
+  createPriest: 'Create priest',
+  birthDate: 'Birth date',
+  massesCreatedCount: 'Masses created',
+  moneyEarned: 'Money earned',
+  moneyWithdrawn: 'Money withdrawn',
+  intentionsTreatedCount: 'Intentions treated',
+  massesByStatus: 'Masses by status',
+  massPrices: 'Prices by currency',
+  currency: 'Currency',
+  withdrawalHint:
+    'Set your payout number in your profile first before you can withdraw.',
+  payoutNumberHint:
+    'This number will be used to receive your withdrawals (mobile money).',
+  withdrawalNoPayoutNumber:
+    'Set your payout number in your profile before making a withdrawal.',
+  withdrawalRecipientFailed:
+    "This number couldn't be validated as a mobile money recipient. Check the number in your profile and try again.",
+  withdrawalBlocked:
+    'Withdrawals are currently blocked for your parish. Contact an administrator.',
+  withdrawalInsufficientBalance: 'Insufficient balance to complete this withdrawal.',
+  withdrawalNotAccepted:
+    'The withdrawal was not accepted by the payment provider. Please try again.',
+  withdrawalFailed:
+    'Something went wrong with the withdrawal. Please try again.',
+  addCurrencyFee: 'Add a currency',
+  currencyWarningMsg: 'Currency is required',
+  baseCurrencyCannotBeRemoved:
+    'The base currency configuration cannot be removed.',
+  priceNotAvailableInCurrency:
+    "This price isn't available in that currency yet.",
+  platformFeeNotConfiguredForCurrency:
+    'No platform fee is configured for this currency yet.',
 };

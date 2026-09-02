@@ -15,7 +15,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.enableCors({
     // remote url server should be added here to avoid CORS issue
-    origin: ['http://localhost:4200', 'http://localhost:4300'], // easy-messe, admin-ui
+    origin: ['http://localhost:4200', 'http://localhost:4300', 'http://localhost:4400'], // easy-messe, admin-ui, parish
     methods: 'GET, POST, PATCH, DELETE',
     credentials: true,
   });

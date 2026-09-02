@@ -1,9 +1,10 @@
 import { apiMiddleware } from "@easy-messe/libs/utils";
 import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
-import { Box, Button, Dialog, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Box, Button, Dialog, MenuItem, Tab, Tabs, TextField, Typography } from "@mui/material";
 import Image from "next/image";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
+import { usePaymentPreview } from "./usePaymentPreview";
 
 interface ModalPaymentProps {
     isOpen: boolean;
@@ -22,15 +23,23 @@ interface PaymentMethods {
 }
 
 const PAYPAL_TAB_INDEX = 2
+const MOBILE_MONEY_CURRENCY = 'XAF'
+const PAYPAL_CURRENCIES = ['USD', 'EUR'] as const
 
 export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPaymentProps) {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
     const [name, setName] = useState<string>('')
     const [phone, setPhone] = useState<string>('')
     const [email, setEmail] = useState<string>('')
+    const [paypalCurrency, setPaypalCurrency] = useState<typeof PAYPAL_CURRENCIES[number]>('USD')
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string>('')
-    const { formatMessage } = useIntl()
+    const { formatMessage, formatNumber } = useIntl()
+
+    const isPaypalTab = activeTabIndex === PAYPAL_TAB_INDEX
+    const checkoutCurrency = isPaypalTab ? paypalCurrency : MOBILE_MONEY_CURRENCY
+    const { preview, errorKey, isLoading: isPreviewLoading } = usePaymentPreview(massRequested, checkoutCurrency, isOpen)
+    const previewError = errorKey ? formatMessage({ id: errorKey }) : ''
 
     useEffect(() => {
         if (!isOpen) return
@@ -75,6 +84,18 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
                     {formatMessage({ id: 'paypalRedirectInfo' })}
                 </Typography>
                 <TextField
+                    select
+                    label={formatMessage({ id: 'currency' })}
+                    size="small"
+                    fullWidth
+                    value={paypalCurrency}
+                    onChange={(e) => setPaypalCurrency(e.target.value as typeof paypalCurrency)}
+                >
+                    {PAYPAL_CURRENCIES.map((currency) => (
+                        <MenuItem key={currency} value={currency}>{currency}</MenuItem>
+                    ))}
+                </TextField>
+                <TextField
                     placeholder={formatMessage({ id: 'email' })}
                     type="email"
                     size="small"
@@ -87,8 +108,6 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
             </Box>
         ),
     }
-
-    const isPaypalTab = activeTabIndex === PAYPAL_TAB_INDEX
 
     const handleConfirm = () => {
         if (!name.trim() || !phone.trim() || (isPaypalTab && !email.trim())) {
@@ -114,7 +133,7 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
                     intension: intention
                 })),
                 paymentInfo: {
-                    currency: 'XAF',
+                    currency: checkoutCurrency,
                     paymentMethod: paymentMethodValue,
                     ...(paymentMethodValue === 'MOBILE_MONEY' ? { phone } : {})
                 }
@@ -211,6 +230,26 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
                     </Tabs>
                     {paymentMethodField[activeTabIndex]}
                 </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                    {isPreviewLoading && (
+                        <Typography variant="body2" sx={{ color: 'var(--body)' }}>
+                            {formatMessage({ id: 'loading' })}
+                        </Typography>
+                    )}
+                    {!isPreviewLoading && previewError && (
+                        <Typography variant="body2" sx={{ color: 'var(--error)' }}>
+                            {previewError}
+                        </Typography>
+                    )}
+                    {!isPreviewLoading && !previewError && preview && (
+                        <Typography variant="h5" sx={{ paddingBottom: 0, fontWeight: 'bold' }}>
+                            {formatMessage({ id: 'estimatedBilling' })} : {formatNumber(preview.grandTotal, {
+                                style: 'currency',
+                                currency: preview.currency.toLowerCase(),
+                            })}
+                        </Typography>
+                    )}
+                </Box>
                 {errorMessage && (
                     <Typography variant="body2" sx={{ color: 'var(--error)', textAlign: 'center' }}>
                         {errorMessage}
@@ -218,7 +257,7 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
                 )}
                 <Button
                     variant="contained"
-                    disabled={isSubmitting || massRequested.length === 0}
+                    disabled={isSubmitting || massRequested.length === 0 || isPreviewLoading || !!previewError || !preview}
                     onClick={handleConfirm}
                 >
                     {formatMessage({ id: isSubmitting ? 'processing' : 'confirmPayment' })}

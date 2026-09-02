@@ -59,7 +59,25 @@ export class MassService {
       );
 
       try {
-        await this.prismaService.mass.createMany({ data: listOfMasses });
+        await this.prismaService.$transaction(async (tx) => {
+          await tx.mass.createMany({ data: listOfMasses });
+          // createMany returns no rows, so the new masses have to be
+          // looked back up by their (parishId, startAt) to seed each one's
+          // MassPrice(XAF) — same purpose as the nested create below, just
+          // done as a second step since createMany can't do nested writes.
+          const created = await tx.mass.findMany({
+            where: { parishId, startAt: { in: uniqueDates.map((d) => new Date(d)) } },
+            select: { massId: true },
+          });
+          await tx.massPrice.createMany({
+            data: created.map(({ massId }) => ({
+              massId,
+              currency: 'XAF' as const,
+              amount: price,
+              setByUserId: requestUser.id,
+            })),
+          });
+        });
         return { code: 201, message: 'Mass created successfully!' };
       } catch (error) {
         throw new InternalServerErrorException();
@@ -83,6 +101,17 @@ export class MassService {
       estimatedDurationMinutes,
       massType,
       parish: { connect: { parishId } },
+      // Parishes set price in XAF (they're Cameroonian entities) — seed the
+      // authoritative MassPrice(XAF) row at creation so resolvePrices()
+      // resolves from MassPrice consistently, same as any other currency,
+      // rather than only via the Mass.price fallback.
+      massPrices: {
+        create: {
+          currency: 'XAF',
+          amount: price,
+          setByUser: { connect: { userId: requestUser.id } },
+        },
+      },
     };
 
     try {
@@ -134,14 +163,38 @@ export class MassService {
       });
     }
 
-    return this.prismaService.mass.update({
-      where: { massId },
-      data: {
-        ...updateMassDto,
-        startAt: updateMassDto.startAt
-          ? new Date(updateMassDto.startAt)
-          : undefined,
-      },
+    return this.prismaService.$transaction(async (tx) => {
+      const updated = await tx.mass.update({
+        where: { massId },
+        data: {
+          ...updateMassDto,
+          startAt: updateMassDto.startAt
+            ? new Date(updateMassDto.startAt)
+            : undefined,
+        },
+      });
+
+      // Keep MassPrice(XAF) in sync with Mass.price — resolvePrices()
+      // always prefers a MassPrice row over Mass.price once one exists, so
+      // without this an edited price would silently stop taking effect at
+      // checkout (the stale MassPrice(XAF) row would keep winning).
+      if (updateMassDto.price !== undefined) {
+        await tx.massPrice.upsert({
+          where: { massId_currency: { massId, currency: 'XAF' } },
+          create: {
+            massId,
+            currency: 'XAF',
+            amount: updateMassDto.price,
+            setByUserId: requestUser.id,
+          },
+          update: {
+            amount: updateMassDto.price,
+            setByUserId: requestUser.id,
+          },
+        });
+      }
+
+      return updated;
     });
   }
 
