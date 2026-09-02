@@ -308,4 +308,12 @@ export const website = {
     'The withdrawal was not accepted by the payment provider. Please try again.',
   withdrawalFailed:
     'Something went wrong with the withdrawal. Please try again.',
+  addCurrencyFee: 'Add a currency',
+  currencyWarningMsg: 'Currency is required',
+  baseCurrencyCannotBeRemoved:
+    'The base currency configuration cannot be removed.',
+  priceNotAvailableInCurrency:
+    "This price isn't available in that currency yet.",
+  platformFeeNotConfiguredForCurrency:
+    'No platform fee is configured for this currency yet.',
 };

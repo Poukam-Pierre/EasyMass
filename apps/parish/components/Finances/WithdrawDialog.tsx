@@ -12,12 +12,10 @@ interface WithdrawDialogProps {
     onWithdrawn: () => void;
 }
 
-// The withdrawal endpoint now returns a stable i18n key as `message` (see
+// The withdrawal endpoint returns a stable i18n key as `message` (see
 // payment.service.ts's withdrawMoney/createOrRetreiveRecipient) instead of a
-// hardcoded English string, plus optional `params` for messages that need
-// interpolation (e.g. the specific amount/balance in a "insufficient
-// balance" error). Whitelisted so an unexpected backend message never
-// renders as a raw, untranslated key string.
+// hardcoded English string. Whitelisted so an unexpected backend message
+// never renders as a raw, untranslated key string.
 const WITHDRAWAL_ERROR_KEYS = new Set([
     'withdrawalNoPayoutNumber',
     'withdrawalRecipientFailed',
@@ -29,9 +27,9 @@ const WITHDRAWAL_ERROR_KEYS = new Set([
 
 function getWithdrawErrorMessage(error: unknown, formatMessage: IntlShape['formatMessage']): string {
     if (axios.isAxiosError(error)) {
-        const data = error.response?.data as { message?: string; params?: Record<string, string | number> } | undefined;
-        if (data?.message && WITHDRAWAL_ERROR_KEYS.has(data.message)) {
-            return formatMessage({ id: data.message }, data.params);
+        const message = (error.response?.data as { message?: string } | undefined)?.message;
+        if (message && WITHDRAWAL_ERROR_KEYS.has(message)) {
+            return formatMessage({ id: message });
         }
     }
     return formatMessage({ id: 'genericErrorMsg' });

@@ -313,4 +313,12 @@ export const website = {
     "Le retrait n'a pas été accepté par le prestataire de paiement. Veuillez réessayer.",
   withdrawalFailed:
     "Une erreur s'est produite lors du retrait. Veuillez réessayer.",
+  addCurrencyFee: 'Ajouter une devise',
+  currencyWarningMsg: 'La devise est obligatoire',
+  baseCurrencyCannotBeRemoved:
+    'La configuration de la devise de base ne peut pas être supprimée.',
+  priceNotAvailableInCurrency:
+    "Ce prix n'est pas disponible dans cette devise pour le moment.",
+  platformFeeNotConfiguredForCurrency:
+    "Aucun frais de plateforme n'est configuré pour cette devise.",
 };
