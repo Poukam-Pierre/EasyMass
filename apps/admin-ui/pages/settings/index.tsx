@@ -6,6 +6,7 @@ import {
     TableHead, TableRow, TextField, Typography
 } from "@mui/material";
 import { theme } from "@easy-messe/libs/theme";
+import { extractApiErrorKey } from "@easy-messe/libs/utils";
 import { useFormik } from "formik";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
@@ -18,6 +19,14 @@ import api, { apiErrorMessage } from "../../lib/api";
 // the DB column value, not the string the API actually sends/expects).
 const CURRENCIES = ['XAF', 'USD', 'EUR', 'GBP', 'NGN', 'XOF', 'GHS'] as const;
 const BASE_CURRENCY = 'XAF';
+
+// PlatformSettingsService returns a stable i18n key (not raw English text)
+// for these two failures — whitelisted so an unexpected message still
+// falls back to the generic toast instead of rendering a raw key.
+const KNOWN_DELETE_ERROR_KEYS = new Set([
+    'baseCurrencyCannotBeRemoved',
+    'platformFeeNotConfiguredForCurrency',
+])
 
 interface PlatformSettingsRow {
     currency: typeof CURRENCIES[number];
@@ -81,7 +90,12 @@ export default function Settings() {
             toast.success(formatMessage({ id: 'saved' }));
             loadSettings();
         } catch (error) {
-            toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+            const key = extractApiErrorKey(error, KNOWN_DELETE_ERROR_KEYS);
+            toast.error(
+                key
+                    ? formatMessage({ id: key })
+                    : apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' }))
+            );
         }
     }
 
