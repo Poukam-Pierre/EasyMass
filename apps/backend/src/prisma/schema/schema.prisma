@@ -192,11 +192,21 @@ model Administrator {
 /// Platform-wide fee configuration. Expected to hold exactly one row,
 /// enforced at the application layer (always read/upsert id=1), not by the
 /// schema. Applied per mass order at payment time: platformFee =
-/// price*(platformFeePercentage/100) + platformFeeFixedAmount, clamped to
-/// price; the parish receives the remainder. No priest split — priest has no
-/// financial relation in this MVP.
+/// One row per currency the platform accepts at checkout (mirrors
+/// MassPrice's per-currency model). The fee for a checkout in a given
+/// currency is computed entirely from that currency's own row —
+/// price*(platformFeePercentage/100) + platformFeeFixedAmount, both
+/// already in that currency, no FX conversion at this step. The parish
+/// receives the mass's own base price regardless of checkout currency (see
+/// Mass/MassPrice); the platform fee is the remainder captured at
+/// settlement (see PaymentService.finalizeCheckout). No priest split —
+/// priest has no financial relation in this MVP. XAF must always resolve
+/// (see PlatformSettingsService.getForCurrency's auto-create default) since
+/// mobile money checkouts are XAF-only; every other currency requires an
+/// explicit admin-created row or checkout in that currency is rejected.
 model PlatformSettings {
   id                     Int      @id @default(autoincrement())
+  currency               Currency @unique
   platformFeePercentage  Float    @default(0)
   platformFeeFixedAmount Float    @default(0)
   updatedAt              DateTime @updatedAt

@@ -35,6 +35,16 @@ async function seedEasyMass() {
         },
     });
 
+    // XAF must always have a working fee config — mobile money checkouts
+    // are XAF-only. Idempotent: leaves an existing row (e.g. one an admin
+    // already configured via the Settings page) untouched, only fills in
+    // a missing one.
+    await prisma.platformSettings.upsert({
+        where: { currency: 'XAF' },
+        update: {},
+        create: { currency: 'XAF', platformFeePercentage: 0, platformFeeFixedAmount: 0 },
+    });
+
     // Create cities
     for (const city of cities) {
         await prisma.city.upsert({
