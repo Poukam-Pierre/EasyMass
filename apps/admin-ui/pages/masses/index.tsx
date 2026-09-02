@@ -1,105 +1,59 @@
-import checkmarkIcon from '@iconify-icons/fluent/checkmark-circle-24-regular';
-import filterIcon from '@iconify-icons/fluent/filter-24-regular';
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import { Icon } from "@iconify/react";
-import { Box, Button, InputBase, Typography } from "@mui/material";
+import { Box, InputBase, Typography } from "@mui/material";
+import dayjs from 'dayjs';
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
-import MassesDialog, { MassTypeEnum } from "../../components/Masses/Dialogs/Masses";
+import { toast } from "react-toastify";
 import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
-import MassMenu, { MenuItem } from "../../components/Menus/MassMenu";
-import { EasyMassAdminLayout } from '@easy-messe/shared-ui';
-import AppLayout from '../../components/Layout';
-import dayjs from 'dayjs';
+import ParishSelector, { ParishOption } from "../../components/ParishSelector";
+import { withAdminLayout } from "../../components/withAdminLayout";
+import api, { apiErrorMessage } from "../../lib/api";
+
+interface MassApiRow {
+    massId: string;
+    price: number;
+    startAt: string;
+    estimatedDurationMinutes: number;
+    status: string;
+    massType: string;
+}
 
 export default function Masses() {
     const { formatMessage } = useIntl()
-    const [isOpenModify, setIsOpenModify] = useState<boolean>(false)
-    const [anchorEl, setAnchorEl] = useState<HTMLAnchorElement | null>(null);
+    const [parish, setParish] = useState<ParishOption | null>(null)
     const [massData, setMassData] = useState<TableMassOwnerData[]>([])
-    const menuItem: MenuItem[] = [
-        {
-            title: formatMessage({ id: 'day' }),
-            icon: checkmarkIcon
-        },
-        {
-            title: formatMessage({ id: 'hour' }),
-            icon: checkmarkIcon
-        },
-        {
-            title: formatMessage({ id: 'massType' }),
-            icon: checkmarkIcon
-        }
-    ]
+    const [search, setSearch] = useState<string>('')
 
-    const tableData: TableMassOwnerData[] = [
-        {
-            id: 1,
-            dayOfMass: dayjs('2024-07-22'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 2000,
-            status: 'done'
-        },
-        {
-            id: 2,
-            dayOfMass: dayjs('2024-07-20'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 3500,
-            status: 'in process',
-        },
-        {
-            id: 3,
-            dayOfMass: dayjs('2024-07-19'),
-            massTime: dayjs(),
-            massType: MassTypeEnum.One,
-            price: 2500,
-            status: 'locked',
-        },
-        {
-            id: 4,
-            dayOfMass: null,
-            massTime: null,
-            massType: MassTypeEnum.Triduum,
-            price: 3000,
-        },
-    ]
-
-    useEffect(() => (
-        // TODO fetch data for all masses ordered into the church.
-        /**
-         * To do so, use SOCKET for more interactions with API calls.
-         * This will allow us to stay tunned from API actions.
-         */
-        setMassData(tableData)
-    ), [])
-
-    const handleMassCreationDialog = () => {
-        setIsOpenModify((prev) => !prev)
+    const loadMasses = () => {
+        if (!parish) return
+        api.get('/masses', { params: { parishId: parish.parishId } })
+            .then(({ data }: { data: MassApiRow[] }) => {
+                setMassData(data.map((row) => ({
+                    id: row.massId,
+                    dayOfMass: dayjs(row.startAt),
+                    massTime: dayjs(row.startAt),
+                    massType: row.massType,
+                    price: row.price,
+                    estimatedDurationMinutes: row.estimatedDurationMinutes,
+                    status: row.status.toLowerCase(),
+                })));
+            })
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
     }
+
+    useEffect(loadMasses, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const filteredMassData = search
+        ? massData.filter((mass) => mass.massType.toLowerCase().includes(search.toLowerCase()))
+        : massData
+
     return (
         <>
-            <MassMenu
-                anchorEl={anchorEl}
-                setAnchorEl={setAnchorEl}
-                menuItem={menuItem}
-            />
-            <MassesDialog
-                title={formatMessage({ id: 'createMass' })}
-                replicatLabel={formatMessage({ id: 'duplicateAll' })}
-                labelBtn={formatMessage({ id: 'create' })}
-                isOpen={isOpenModify}
-                handleClose={handleMassCreationDialog}
-            />
             <Box sx={{
                 padding: '0 16px 8px'
             }}>
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}>
+                <Box>
                     <Typography
                         variant="h3"
                         color='primary'
@@ -109,19 +63,19 @@ export default function Masses() {
                     >
                         {formatMessage({ id: 'listOfMasses' })}
                     </Typography>
-                    <Button
-                        variant="contained"
-                        onClick={handleMassCreationDialog}
-                    >
-                        + {formatMessage({ id: 'addMass' })}
-                    </Button>
+                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>
+                        {formatMessage({ id: 'massesCreateHint' })}
+                    </Typography>
                 </Box>
                 <Box sx={{
                     display: 'grid',
                     gridAutoFlow: 'column',
                     width: 'fit-content',
-                    columnGap: 3
+                    columnGap: 3,
+                    alignItems: 'center',
+                    paddingTop: '16px'
                 }}>
+                    <ParishSelector value={parish} onChange={setParish} />
                     <Box sx={{
                         display: 'grid',
                         gridTemplateColumns: 'auto 1fr',
@@ -131,21 +85,23 @@ export default function Masses() {
                         <Icon icon={searchIcon} fontSize={20} />
                         <InputBase
                             placeholder={formatMessage({ id: 'search' })}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
                     </Box>
                 </Box>
             </Box>
-            <MassOwnerTable massDataTable={massData} />
+            {parish ? (
+                <MassOwnerTable massDataTable={filteredMassData} parishId={parish.parishId} onChanged={loadMasses} />
+            ) : (
+                <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
+                    {formatMessage({ id: 'selectParishPrompt' })}
+                </Typography>
+            )}
         </>
     );
 }
 
 Masses.getLayout = function getLayout(page: ReactNode) {
-    return (
-        <EasyMassAdminLayout>
-            <AppLayout>
-                {page}
-            </AppLayout>
-        </EasyMassAdminLayout>
-    );
+    return withAdminLayout(page);
 };

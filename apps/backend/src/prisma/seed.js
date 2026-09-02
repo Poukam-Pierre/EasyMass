@@ -14,24 +14,41 @@ const cities = [
 ]
 async function seedEasyMass() {
     // create admin first admin user
-    await prisma.administrator.upsert({
+    const hashedPassword = await bcrypt.hash('Admin2025*', 10);
+
+    await prisma.user.upsert({
         where: { email: 'admin@easymesse.com' },
         update: {
-            password: await bcrypt.hash('Admin2025*', 10),
+            password: hashedPassword,
         },
         create: {
-            name: 'Admin',
             email: 'admin@easymesse.com',
-            password: await bcrypt.hash('Admin2024*', 10),
-            phone: '+237696841451',
+            password: hashedPassword,
             role: 'ADMIN',
+            admin: {
+                create: {
+                    name: 'Admin',
+                    phone: '+237696841451',
+                    role: 'ADMIN',
+                },
+            },
         },
+    });
+
+    // XAF must always have a working fee config — mobile money checkouts
+    // are XAF-only. Idempotent: leaves an existing row (e.g. one an admin
+    // already configured via the Settings page) untouched, only fills in
+    // a missing one.
+    await prisma.platformSettings.upsert({
+        where: { currency: 'XAF' },
+        update: {},
+        create: { currency: 'XAF', platformFeePercentage: 0, platformFeeFixedAmount: 0 },
     });
 
     // Create cities
     for (const city of cities) {
         await prisma.city.upsert({
-            where: { country: 'Cameroon' },
+            where: { city_name_country: { city_name: city, country: 'Cameroon' } },
             update: {},
             create: {
                 city_name: city,

@@ -1,58 +1,41 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { AuthService } from './auth.service';
-import { Role, ROLE } from './decorator/public.decorator';
+import { Roles } from './decorator/roles.decorator';
 import { LoginDataDto } from './dto/login.dto';
-import { RefreshToken } from './dto/refreshToken.dto';
-import { SignUpAdminDto, SignUpDataDto } from './dto/signup.dto';
-import { AdminGuard } from './guard/admin.guards';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { SignUpAdminDto } from './dto/signup.dto';
+import { Public } from './decorator/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('/login-parish')
   loginParish(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'parish');
+    return this.authService.login(input, [UserRole.PARISH]);
   }
 
+  @Public()
   @Post('/login-admin')
   loginAdmin(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'admin');
-  }
-
-  @Post('/login-priest')
-  loginPriest(@Body() input: LoginDataDto) {
-    return this.authService.authenticate(input, 'priest');
-  }
-
-  @Post('/signup')
-  signUpPriest(@Body() input: SignUpDataDto) {
-    return this.authService.signupPriest(input);
+    return this.authService.login(input, [UserRole.ADMIN]);
   }
 
   @Post('/signup-admin')
-  @Role(ROLE.ADMIN)
-  @UseGuards(AdminGuard)
-  signupAdmin(
-    @Body()
-    input: SignUpAdminDto
-  ) {
+  @Roles(UserRole.ADMIN)
+  signupAdmin(@Body() input: SignUpAdminDto) {
     return this.authService.signupAdmin(input);
   }
 
-  // @Post('/signup-parish')
-  // @UseGuards(AdminGuard)
-  // @Role(ROLE.ADMIN)
-  // @Role(ROLE.ENGENEER)
-  // signupParish(@Body() input: SignUpParishDto, @Request() request) {
-  //   return this.authService.signupParish(input, request);
-  // }
-
+  @Public()
   @Post('/refreshToken')
-  refreshToken(@Body() refreshToken: RefreshToken) {
-    return this.authService.refreshToken(refreshToken);
+  refreshToken(@Body() input: RefreshTokenDto) {
+    return this.authService.refreshToken(input.refreshToken);
   }
 
+  @Public()
   @Post('/logout')
   logout(@Body() input: { refreshToken: string }) {
     return this.authService.logout(input.refreshToken);

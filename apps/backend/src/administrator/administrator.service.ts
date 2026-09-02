@@ -1,14 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
+import { findUserByEmail, flattenUserRole } from '../common/user.utils';
 
 @Injectable()
 export class AdministratorService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createAdminDto: Prisma.AdministratorCreateInput) {
+  async create(
+    createAdminDto: Omit<Prisma.AdministratorCreateInput, 'user'>,
+    email: string,
+    password: string
+  ) {
     return this.prismaService.administrator.create({
-      data: createAdminDto,
+      data: {
+        ...createAdminDto,
+        user: {
+          create: {
+            email,
+            password,
+            role: UserRole.ADMIN,
+          },
+        },
+      },
+      include: { user: true },
     });
   }
 
@@ -16,34 +31,36 @@ export class AdministratorService {
     return this.prismaService.administrator.findMany();
   }
 
-  async findOne(id: number) {
+  async findOne(adminId: string) {
     return this.prismaService.administrator.findUnique({
       where: {
-        id,
-      },
-    });
-  }
-  async findOneByMail(email: string) {
-    return this.prismaService.administrator.findUnique({
-      where: {
-        email,
+        adminId,
       },
     });
   }
 
-  async update(id: number, updateAdminDto: Prisma.AdministratorUpdateInput) {
+  async findOneByMail(email: string) {
+    const user = await findUserByEmail(this.prismaService, email);
+    const flattened = user && flattenUserRole(user);
+    return flattened?.role === UserRole.ADMIN ? flattened : null;
+  }
+
+  async update(
+    adminId: string,
+    updateAdminDto: Prisma.AdministratorUpdateInput
+  ) {
     return this.prismaService.administrator.update({
       where: {
-        id,
+        adminId,
       },
       data: updateAdminDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(adminId: string) {
     return this.prismaService.administrator.delete({
       where: {
-        id,
+        adminId,
       },
     });
   }

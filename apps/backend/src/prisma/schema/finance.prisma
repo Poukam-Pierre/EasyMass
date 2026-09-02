@@ -1,0 +1,155 @@
+// ======================================
+// FINANCE INTEGRATION TABLES
+// ======================================
+
+/// One payment attempt against a MassOrder, tracking the external gateway's
+/// method, status, and currency. A MassOrder can have more than one Payment
+/// (e.g. a failed attempt followed by a successful retry).
+model Payment {
+  paymentId          String         @id @unique @default(cuid())
+  amount             Float
+  paymentInitiatedAt DateTime       @default(now())
+  paymentMethod      PaymentMethod
+  paidAt             DateTime?
+  status             PaymentStatus
+  currency           Currency
+  referenceId        String?
+  initiatedBy        String
+  massOrderId        String
+  believer           Believer       @relation(fields: [initiatedBy], references: [believerId], map: "fk_Payment_Believer")
+  massOrder          MassOrder      @relation(fields: [massOrderId], references: [massOrderId], map: "fk_Payment_MassOrder")
+  paymentAudits      PaymentAudit[]
+  transactions       Transaction[]
+
+  @@index([initiatedBy], map: "fk_Payment_Believer_idx")
+  @@index([massOrderId], map: "fk_Payment_MassOrder_idx")
+  @@index([referenceId], map: "idx_payment_reference_id")
+  @@index([status], map: "idx_payment_status")
+  @@map("payment")
+}
+
+enum Currency {
+  USD @map("usd")
+  EUR @map("eur")
+  GBP @map("gbp")
+  NGN @map("ngn")
+  XAF @map("xaf")
+  XOF @map("xof")
+  GHS @map("ghs")
+}
+
+enum PaymentMethod {
+  PAYPAL        @map("paypal")
+  BANK_TRANSFER @map("bank_transfer")
+  MOBILE_MONEY  @map("mobile_money")
+}
+
+enum PaymentStatus {
+  /// Set the moment the Payment row is created — before the gateway has
+  /// even been asked to start the checkout. The believer/mass/amount are
+  /// fixed at this point; only the gateway's response is still pending.
+  INITIATED @map("initiated")
+  /// The gateway accepted the checkout (NotchPay returned an
+  /// authorization_url, or PayPal's order was created) — now genuinely
+  /// awaiting the customer to complete it on the gateway's side.
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  FAILED    @map("failed")
+  /// Reserved for a reconciliation job to apply to rows stuck INITIATED or
+  /// PENDING past some cutoff — the customer never came back. Distinct
+  /// from FAILED (gateway actively rejected/declined it): "never returned"
+  /// and "was declined" are different problems for support/analytics.
+  EXPIRED   @map("expired")
+  REFUNDED  @map("refunded")
+}
+
+enum PaymentAudiAction {
+  CREATED @map("created")
+  UPDATED @map("updated")
+  SETTLED @map("settled")
+}
+
+/// An audit trail entry recording who changed a Payment's status and when.
+/// changedByUserId is nullable: most transitions are gateway/system-driven
+/// (checkout creation, webhook confirmation, the reconciliation cron) with
+/// no authenticated user in the request at all — only withdraw/refund
+/// (PARISH/ADMIN-initiated) have a real actor to attribute.
+model PaymentAudit {
+  auditId           String            @id @default(cuid())
+  paymentId         String
+  status            PaymentStatus
+  changedAt         DateTime          @default(now())
+  changedByUserId   String?
+  paymentAudiAction PaymentAudiAction
+  payment           Payment           @relation(fields: [paymentId], references: [paymentId], map: "fk_PaymentAudit_Payment")
+  changedByUser     User?             @relation(fields: [changedByUserId], references: [userId], map: "fk_PaymentAudit_User")
+
+  @@index([paymentId], map: "fk_PaymentAudit_Payment_idx")
+  @@index([changedByUserId], map: "fk_PaymentAudit_User_idx")
+  @@map("payment_audit")
+}
+
+// When a Payment is successful, the system triggers an internal Transaction Ledger.
+// This ledger does not store user card details; it strictly tracks the split of funds
+// (Income for Parish, Income for Priest, Platform Fee for Admin) and handles subsequent withdrawals.
+/// A ledger entry recording a fund movement for a Parish, Priest, or Admin
+/// (polymorphic owner via ownerId/ownerType) — income, withdrawal, reversal,
+/// or platform fee.
+model Transaction {
+  transactionId    String          @id @default(cuid())
+  createdAt        DateTime        @default(now())
+  amount           Float
+  ownerId          String
+  ownerType        OwnerType
+  transactionType  TransactionType
+  balanceAfter     Float           @default(0)
+  externalPayoutId String?
+  note             String?
+  paymentId        String?
+  createdByUserId  String? // Who triggered this row, for anything a human did (WITHDRAWAL, INCOME_REVERSAL, ADMIN_CORRECTION). Null for system-generated rows (INCOME, PLATFORM_FEE).
+  payment          Payment?        @relation(fields: [paymentId], references: [paymentId], map: "fk_Transaction_Payment")
+  createdByUser    User?           @relation(fields: [createdByUserId], references: [userId], map: "fk_Transaction_User")
+
+  @@index([ownerId, ownerType], map: "idx_transaction_owner")
+  @@index([paymentId], map: "fk_Transaction_Payment_idx")
+  @@index([createdAt], map: "idx_transaction_created_at")
+  @@index([createdByUserId], map: "fk_Transaction_User_idx")
+  @@map("transaction")
+}
+
+enum TransactionType {
+  INCOME           @map("income")
+  INCOME_REVERSAL  @map("income_reversal")
+  WITHDRAWAL       @map("withdrawal")
+  PLATFORM_FEE     @map("platform_fee")
+  ADMIN_CORRECTION @map("admin_correction")
+}
+
+enum OwnerType {
+  ADMIN  @map("admin")
+  PRIEST @map("priest")
+  PARISH @map("parish")
+}
+
+/// An explicit, per-currency listed price for a Mass. Prices are set
+/// directly here rather than derived from a live FX conversion, since a
+/// parish or the platform may price a currency differently than a strict
+/// conversion of `Mass.price` would produce. A Mass with no MassPrice row
+/// for a given currency has no listed price in that currency. `setByUserId`
+/// records who set/last changed it, for the same auditability as PaymentAudit.
+model MassPrice {
+  massPriceId String   @id @default(cuid())
+  massId      String
+  currency    Currency
+  amount      Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  setByUserId String
+  mass        Mass     @relation(fields: [massId], references: [massId], map: "fk_MassPrice_Mass")
+  setByUser   User     @relation(fields: [setByUserId], references: [userId], map: "fk_MassPrice_User")
+
+  @@unique([massId, currency])
+  @@index([massId], map: "fk_MassPrice_Mass_idx")
+  @@index([setByUserId], map: "fk_MassPrice_User_idx")
+  @@map("mass_price")
+}

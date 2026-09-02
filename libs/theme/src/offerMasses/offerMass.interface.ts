@@ -6,10 +6,11 @@ export interface OfferMassContextProviderProps {
 
 interface Person {
   name: string;
-  email: string;
+  phone: string;
 }
 
 interface MassInformation {
+  massId: string | null;
   city: string;
   parish: string;
   dateTime: Dayjs | null;

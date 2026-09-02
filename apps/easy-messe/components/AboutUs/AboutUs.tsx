@@ -2,6 +2,7 @@ import { theme } from "@easy-messe/libs/theme";
 import { Box, Button, Divider, Typography } from "@mui/material";
 import StatisticMass from "./statisticMass";
 import { useIntl } from "react-intl";
+import { useRouter } from "next/router";
 
 export interface StatisticMassProps {
     label: string
@@ -9,6 +10,7 @@ export interface StatisticMassProps {
 }
 export default function AboutUs() {
     const { formatMessage } = useIntl()
+    const { push } = useRouter()
     const statisticsMass: StatisticMassProps[] = [
         {
             label: formatMessage({ id: 'masses' }),
@@ -73,6 +75,7 @@ export default function AboutUs() {
                     </Typography>
                     <Button
                         variant="contained"
+                        onClick={() => push('/about')}
                         sx={{
                             width: 'fit-content',
                             height: 'fit-content'

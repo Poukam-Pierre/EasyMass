@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Models
+
+/// Central identity/auth record. Exactly one User backs one of Priest, Parish,
+/// or Administrator, and owns the login credentials and refresh tokens shared
+/// across all three account types.
+model User {
+  userId                  String             @id @default(cuid())
+  email                   String             @unique
+  password                String
+  role                    UserRole           @default(ADMIN)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  refreshTokens           RefreshToken[]
+  priest                  Priest?
+  parish                  Parish?
+  admin                   Administrator?
+  paymentAudits           PaymentAudit[]
+  massPrices              MassPrice[]
+  platformSettingsUpdates PlatformSettings[]
+  createdTransactions     Transaction[]
+
+  @@index([role], map: "idx_user_role")
+  @@map("user")
+}
+
+/// A person who orders masses. Not authenticated — identified by contact
+/// info only, no login credentials of their own.
+model Believer {
+  believerId String      @id @unique @default(cuid())
+  fullName   String      @default("Unknown")
+  phone      String?
+  /// Optional — only collected for PayPal checkouts, where it's the
+  /// channel the invoice gets emailed to (mobile-money checkouts get the
+  /// invoice by SMS to `phone` instead, since that's always present).
+  email      String?
+  createdAt  DateTime    @default(now())
+  payment    Payment[]
+  massOrder  MassOrder[]
+
+  @@map("believer")
+}
+
+/// A single mass slot offered by a Parish, optionally assigned to a Priest.
+/// Believers order a slot through MassOrder. `price` is the base/default
+/// price (in the platform's home currency, XAF); currency-specific listed
+/// prices that aren't a straight FX conversion live in MassPrice.
+///
+/// Lifecycle: OPEN (accepting orders) -> CLOSED (ordering cutoff reached,
+/// 30 min before startAt) -> PROCESSING (mass underway) -> COMPLETED (past
+/// startAt + estimatedDurationMinutes). startAt/estimatedDurationMinutes can
+/// only be edited while status is OPEN.
+model Mass {
+  massId                   String      @id @default(cuid())
+  price                    Float       @default(2500)
+  startAt                  DateTime // The date and time the mass starts. Ordering closes 30 minutes before this.
+  estimatedDurationMinutes Int         @default(60)
+  status                   MassStatus  @default(OPEN)
+  intentionsSentAt         DateTime? // When the gathered intentions PDF was last successfully emailed to the parish; independent of `status` so a mail failure can be retried without blocking the ordering-cutoff transition.
+  intension                String? // Optional default intention for this mass slot, set by the Parish.
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+  parishId                 String
+  priestId                 String?
+  massType                 MassType    @default(UNIQUE)
+  parish                   Parish      @relation(fields: [parishId], references: [parishId], map: "fk_Mass_Parish")
+  assignedToPriest         Priest?     @relation(fields: [priestId], references: [priestId], map: "fk_Mass_Priest")
+  massOrder                MassOrder[]
+  massPrices               MassPrice[]
+
+  @@index([parishId], map: "fk_Mass_Parish_idx")
+  @@index([priestId], map: "fk_Mass_Priest_idx")
+  @@index([startAt], map: "idx_mass_start_at")
+  @@index([status], map: "idx_mass_status")
+  @@map("mass")
+}
+
+enum MassStatus {
+  OPEN       @map("open")
+  CLOSED     @map("closed")
+  PROCESSING @map("processing")
+  COMPLETED  @map("completed")
+}
+
+/// A Believer's purchase of one Mass slot, capturing the price, currency,
+/// and intention at the time of order so later price changes on Mass or
+/// MassPrice don't affect it.
+model MassOrder {
+  massOrderId     String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  intension       String
+  price           Float // Captured at the moment of order, to protect against later price changes.
+  currency        Currency  @default(XAF) // Which currency `price` is denominated in.
+  believerId      String
+  massId          String
+  orderByBeliever Believer  @relation(fields: [believerId], references: [believerId], map: "fk_MassOrder_Believer")
+  mass            Mass      @relation(fields: [massId], references: [massId], map: "fk_MassOrder_Mass")
+  payments        Payment[]
+
+  @@index([believerId], map: "fk_MassOrder_Believer_idx")
+  @@index([massId], map: "fk_MassOrder_Mass_idx")
+  @@index([createdAt], map: "idx_mass_order_created_at")
+  @@map("mass_order")
+}
+
+/// A priest roster entry, managed by a Parish. Priest self-service login is
+/// deferred (MVP scope), so `userId`/`user` are optional — a priest is purely
+/// an assignment target (homeParish, and optionally assignedToPriest on Mass)
+/// with no financial relation of their own; income splits go to the Parish
+/// only. When priest auth ships, `userId` becomes how they log in.
+model Priest {
+  priestId      String       @id @default(cuid())
+  firstName     String
+  secondName    String
+  image         String?
+  birthDate     String
+  phoneNumber   String
+  authNumber    String       @unique
+  authCardImage String?
+  available     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  createdMethod CreateMethod @default(PARISH)
+  updatedAt     DateTime     @updatedAt
+  userId        String?      @unique
+  user          User?        @relation(fields: [userId], references: [userId], map: "fk_Priest_User")
+  homeParishId  String?
+  homeParish    Parish?      @relation(fields: [homeParishId], references: [parishId], map: "fk_Priest_Parish")
+  mass          Mass[]
+
+  @@index([homeParishId], map: "fk_Priest_Parish_idx")
+  @@map("priest")
+}
+
+enum CreateMethod {
+  PARISH @map("parish")
+  MANUAL @map("manual")
+}
+
+/// A parish account. Linked 1:1 to a User for login, to the Administrator
+/// who created it, and to the City it's located in.
+model Parish {
+  parishId       String        @id @default(cuid())
+  name           String
+  phone          String
+  managerName    String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  receiverId     String?       @unique
+  payoutNumber   String? // The parish's mobile money number for payouts; distinct from receiverId (the opaque NotchPay recipient reference derived from it).
+  isBlocked      Boolean       @default(false) // Admin-controlled: hides the parish from believer-facing listings when true.
+  payoutBlocked  Boolean       @default(false) // Admin-controlled: rejects withdrawal attempts when true.
+  city_id        String
+  adminId        String
+  userId         String        @unique
+  mass           Mass[]
+  priests        Priest[]
+  user           User          @relation(fields: [userId], references: [userId], map: "fk_Parish_User")
+  createdByAdmin Administrator @relation(fields: [adminId], references: [adminId], map: "fk_Parish_Administrator")
+  city           City?         @relation(fields: [city_id], references: [city_id], map: "fk_Parish_City")
+
+  @@index([city_id], map: "fk_Parish_City_idx")
+  @@index([adminId], map: "fk_Parish_Administrator_idx")
+  @@index([isBlocked], map: "idx_parish_is_blocked")
+  @@map("parish")
+}
+
+/// A staff/admin account. Linked 1:1 to a User for login. `role` here is the
+/// admin's internal staff role (e.g. engineer vs admin), distinct from the
+/// account-type discriminator on User.role.
+model Administrator {
+  adminId   String   @id @default(cuid())
+  name      String
+  phone     String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [userId], map: "fk_Administrator_User")
+  parish    Parish[]
+
+  @@map("administrator")
+}
+
+/// Platform-wide fee configuration. Expected to hold exactly one row,
+/// enforced at the application layer (always read/upsert id=1), not by the
+/// schema. Applied per mass order at payment time: platformFee =
+/// One row per currency the platform accepts at checkout (mirrors
+/// MassPrice's per-currency model). The fee for a checkout in a given
+/// currency is computed entirely from that currency's own row —
+/// price*(platformFeePercentage/100) + platformFeeFixedAmount, both
+/// already in that currency, no FX conversion at this step. The parish
+/// receives the mass's own base price regardless of checkout currency (see
+/// Mass/MassPrice); the platform fee is the remainder captured at
+/// settlement (see PaymentService.finalizeCheckout). No priest split —
+/// priest has no financial relation in this MVP. XAF must always resolve
+/// (see PlatformSettingsService.getForCurrency's auto-create default) since
+/// mobile money checkouts are XAF-only; every other currency requires an
+/// explicit admin-created row or checkout in that currency is rejected.
+model PlatformSettings {
+  id                     Int      @id @default(autoincrement())
+  currency               Currency @unique
+  platformFeePercentage  Float    @default(0)
+  platformFeeFixedAmount Float    @default(0)
+  updatedAt              DateTime @updatedAt
+  updatedByUserId        String?
+  updatedByUser          User?    @relation(fields: [updatedByUserId], references: [userId], map: "fk_PlatformSettings_User")
+
+  @@index([updatedByUserId], map: "fk_PlatformSettings_User_idx")
+  @@map("platform_settings")
+}
+
+/// An active refresh token for a User's session.
+model RefreshToken {
+  id           String   @id
+  refreshToken String   @unique
+  expiredDate  DateTime @db.Timestamptz(6)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [userId], map: "fk_RefreshToken_User")
+
+  @@index([userId], map: "fk_RefreshToken_User_idx")
+  @@map("refresh_token")
+}
+
+/// A city within a country, used to locate a Parish.
+model City {
+  city_id   String   @id @default(cuid())
+  city_name String
+  country   String   @default("Cameroon")
+  parish    Parish[]
+
+  @@unique([city_name, country])
+  @@map("city")
+}
+
+enum MassType {
+  UNIQUE  @map("unique")
+  TRIDUUM @map("triduum")
+  SEVEN   @map("seven")
+  NOVENA  @map("novena")
+  THIRTY  @map("thirty")
+}
+
+enum Role {
+  ENGINEER @map("engineer")
+  ADMIN    @map("admin")
+}
+
+enum UserRole {
+  PRIEST @map("priest")
+  PARISH @map("parish")
+  ADMIN  @map("admin")
+}

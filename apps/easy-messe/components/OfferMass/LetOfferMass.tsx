@@ -29,6 +29,7 @@ interface MassGroupCategory {
 }
 
 interface Mass {
+    massId: string,
     price: number,
     dateTime: Date,
     massType: MassTypeEnum | null
@@ -42,13 +43,14 @@ export interface ParishData {
 
 export interface UseformikProps {
     name: string,
-    email: string,
+    phone: string,
     anonymous: boolean,
     city: string,
     parish: string,
     dateTime: Dayjs | null,
     intention: string,
-    price: number | null
+    price: number | null,
+    massId: string | null
 
 }
 
@@ -88,8 +90,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             url: `${process.env.NEXT_PUBLIC_API_URL}/parishes/masses`,
             method: 'GET',
             onSuccess: (response: unknown) => {
-                const { data } = response as { data: ParishData[] };
-                setParishData(data);
+                setParishData(response as ParishData[]);
             },
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             onFailure: () => { }
@@ -98,21 +99,22 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const selectedCityParishes = parishData.filter((parish) => parish.city === selectedCity)
 
-    const { handleChange, handleSubmit, setFieldValue, errors, touched, values } = useFormik<UseformikProps>({
+    const { handleChange, handleSubmit, setFieldValue, resetForm, errors, touched, values } = useFormik<UseformikProps>({
         initialValues: {
             name: '',
-            email: '',
+            phone: '',
             anonymous: false,
             city: '',
             parish: '',
             dateTime: null,
             intention: '',
-            price: null
+            price: null,
+            massId: null
         },
         onSubmit: ({
-            name, email, anonymous,
+            name, phone, anonymous,
             city, parish, dateTime,
-            intention, price
+            intention, price, massId
         }) => {
             massRequestDispatch(
                 [
@@ -121,9 +123,10 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         faithInfos: anonymous ?
                             undefined : {
                                 name: name,
-                                email: email,
+                                phone: phone,
                             },
                         massInfos: {
+                            massId: massId,
                             city: city,
                             parish: parish,
                             dateTime: dateTime,
@@ -131,13 +134,19 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             price: price
                         }
                     }]);
+            resetForm();
+            setSelectedCity('');
+            setSelectedParish('');
             if (handleIndexTab) handleIndexTab(0)
         },
         validationSchema: yup.object().shape({
-            email: yup.string()
-                .email(formatMessage({ id: 'invalidEmail' }))
-                .required(formatMessage({ id: 'emailWarningMsg' })),
-            dateTime: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
+            phone: yup.string()
+                .when('anonymous', {
+                    is: false,
+                    then: (schema) => schema.required(formatMessage({ id: 'phoneWarningMsg' }))
+                }),
+            dateTime: yup.mixed().required(formatMessage({ id: 'dateTimeChecked' })),
+            massId: yup.string().required(formatMessage({ id: 'dateTimeChecked' })),
             intention: yup
                 .string()
                 .required(formatMessage({ id: 'intentionChecked' }))
@@ -147,10 +156,18 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
     const handleCity = (city: string) => {
         setFieldValue('city', city);
+        setFieldValue('parish', '');
+        setFieldValue('dateTime', null);
+        setFieldValue('price', null);
+        setFieldValue('massId', null);
         setSelectedCity(city)
+        setSelectedParish('')
     }
     const handleParish = (parish: string) => {
         setFieldValue('parish', parish);
+        setFieldValue('dateTime', null);
+        setFieldValue('price', null);
+        setFieldValue('massId', null);
         setSelectedParish(parish)
 
     }
@@ -261,15 +278,15 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         <Icon icon={contactIcon} fontSize={32} color="var(--offWhite)" />
                         <TextField
                             required={!values.anonymous}
-                            name='email'
-                            id='email'
-                            type='email'
-                            placeholder={formatMessage({ id: 'email' })}
+                            name='phone'
+                            id='phone'
+                            type='tel'
+                            placeholder={formatMessage({ id: 'phoneNumber' })}
                             size="small"
                             disabled={values.anonymous}
                             onChange={handleChange}
-                            helperText={(errors.email && touched.email) && errors.email}
-                            error={errors.email && touched.email ? true : false}
+                            helperText={(errors.phone && touched.phone) && errors.phone}
+                            error={errors.phone && touched.phone ? true : false}
                         />
                     </Box>
                 </Box>
@@ -349,6 +366,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                         color="var(--offWhite)"
                     />
                     <DateTimeMassPicker
+                        key={`${selectedCity}-${selectedParish}`}
                         id='dateTime'
                         name='dateTime'
                         parishData={

@@ -1,11 +1,15 @@
-import { Box, Button, Dialog, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { apiMiddleware } from "@easy-messe/libs/utils";
+import { OfferMass } from "libs/theme/src/offerMasses/offerMass.interface";
+import { Box, Button, Dialog, MenuItem, Tab, Tabs, TextField, Typography } from "@mui/material";
 import Image from "next/image";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
+import { usePaymentPreview } from "./usePaymentPreview";
 
 interface ModalPaymentProps {
     isOpen: boolean;
     onClose: () => void
+    massRequested: OfferMass[]
 }
 type PaymentMethodField = Record<number, ReactNode>
 
@@ -18,9 +22,34 @@ interface PaymentMethods {
     serviceName: string;
 }
 
-export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
+const PAYPAL_TAB_INDEX = 2
+const MOBILE_MONEY_CURRENCY = 'XAF'
+const PAYPAL_CURRENCIES = ['USD', 'EUR'] as const
+
+export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPaymentProps) {
     const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
-    const { formatMessage } = useIntl()
+    const [name, setName] = useState<string>('')
+    const [phone, setPhone] = useState<string>('')
+    const [email, setEmail] = useState<string>('')
+    const [paypalCurrency, setPaypalCurrency] = useState<typeof PAYPAL_CURRENCIES[number]>('USD')
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<string>('')
+    const { formatMessage, formatNumber } = useIntl()
+
+    const isPaypalTab = activeTabIndex === PAYPAL_TAB_INDEX
+    const checkoutCurrency = isPaypalTab ? paypalCurrency : MOBILE_MONEY_CURRENCY
+    const { preview, errorKey, isLoading: isPreviewLoading } = usePaymentPreview(massRequested, checkoutCurrency, isOpen)
+    const previewError = errorKey ? formatMessage({ id: errorKey }) : ''
+
+    useEffect(() => {
+        if (!isOpen) return
+        const lastNamedRequest = [...massRequested].reverse().find((request) => request.faithInfos)
+        setName(lastNamedRequest?.faithInfos?.name ?? '')
+        setPhone(lastNamedRequest?.faithInfos?.phone ?? '')
+        setEmail('')
+        setErrorMessage('')
+    }, [isOpen, massRequested])
+
     const paymentMethod: PaymentMethods[] = [
         {
             serviceName: 'Orange Money',
@@ -39,7 +68,7 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
             }
         },
         {
-            serviceName: 'Visa',
+            serviceName: 'PayPal',
             image: {
                 ref: '/assets/visa.png',
                 height: 20,
@@ -47,59 +76,76 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
             }
         }
     ]
+
     const paymentMethodField: PaymentMethodField = {
-        0: (
-            <TextField
-                placeholder="699 527 317"
-                type='number'
-                size='small'
-                fullWidth
-            />
-        ),
-        1: (
-            <TextField
-                placeholder="680 090 489"
-                type='tel'
-                size='small'
-                fullWidth
-            />
-        ),
-        2: (
-            <Box sx={{
-                display: 'grid',
-                rowGap: 1,
-            }}>
+        [PAYPAL_TAB_INDEX]: (
+            <Box sx={{ display: 'grid', rowGap: 1 }}>
+                <Typography variant="body2" sx={{ color: 'var(--body)' }}>
+                    {formatMessage({ id: 'paypalRedirectInfo' })}
+                </Typography>
                 <TextField
-                    placeholder="6971 6491 0871"
-                    type='number'
-                    size='small'
-
+                    select
+                    label={formatMessage({ id: 'currency' })}
+                    size="small"
+                    fullWidth
+                    value={paypalCurrency}
+                    onChange={(e) => setPaypalCurrency(e.target.value as typeof paypalCurrency)}
+                >
+                    {PAYPAL_CURRENCIES.map((currency) => (
+                        <MenuItem key={currency} value={currency}>{currency}</MenuItem>
+                    ))}
+                </TextField>
+                <TextField
+                    placeholder={formatMessage({ id: 'email' })}
+                    type="email"
+                    size="small"
+                    fullWidth
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    helperText={formatMessage({ id: 'invoiceEmailHelper' })}
                 />
-                <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto auto',
-                    columnGap: 1
-                }}>
-                    <TextField
-                        placeholder={formatMessage({ id: 'expiredDate' })}
-                        type='number'
-                        size='small'
-                        sx={{
-                            width: '200px'
-                        }}
-                    />
-                    <TextField
-                        placeholder="CVC"
-                        type='number'
-                        size='small'
-                        sx={{
-                            width: '75px'
-                        }}
-                    />
-                </Box>
-
             </Box>
         ),
+    }
+
+    const handleConfirm = () => {
+        if (!name.trim() || !phone.trim() || (isPaypalTab && !email.trim())) {
+            setErrorMessage(formatMessage({ id: 'checkoutRequiredFields' }))
+            return
+        }
+        setErrorMessage('')
+        setIsSubmitting(true)
+
+        const paymentMethodValue = isPaypalTab ? 'PAYPAL' : 'MOBILE_MONEY'
+
+        apiMiddleware({
+            url: `${process.env.NEXT_PUBLIC_API_URL}/payment/collect`,
+            method: 'POST',
+            data: {
+                believerInfo: {
+                    name,
+                    phone,
+                    ...(isPaypalTab ? { email } : {})
+                },
+                massInfos: massRequested.map(({ massInfos: { massId, intention } }) => ({
+                    id: massId,
+                    intension: intention
+                })),
+                paymentInfo: {
+                    currency: checkoutCurrency,
+                    paymentMethod: paymentMethodValue,
+                    ...(paymentMethodValue === 'MOBILE_MONEY' ? { phone } : {})
+                }
+            },
+            onSuccess: (data: unknown) => {
+                window.location.href = data as string
+            },
+            onFailure: () => {
+                setIsSubmitting(false)
+                setErrorMessage(formatMessage({ id: 'checkoutError' }))
+            }
+        })
     }
 
     return (
@@ -141,6 +187,29 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                 </Typography>
                 <Box sx={{
                     display: 'grid',
+                    rowGap: 1.5
+                }}>
+                    <Typography variant="h5" sx={{ paddingBottom: 0 }}>
+                        {formatMessage({ id: 'yourInformations' })}
+                    </Typography>
+                    <TextField
+                        placeholder={formatMessage({ id: 'fullName' })}
+                        size="small"
+                        fullWidth
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <TextField
+                        placeholder={formatMessage({ id: 'phoneNumber' })}
+                        type='tel'
+                        size="small"
+                        fullWidth
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                    />
+                </Box>
+                <Box sx={{
+                    display: 'grid',
                     rowGap: 2
                 }}>
                     <Tabs
@@ -161,10 +230,37 @@ export default function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
                     </Tabs>
                     {paymentMethodField[activeTabIndex]}
                 </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                    {isPreviewLoading && (
+                        <Typography variant="body2" sx={{ color: 'var(--body)' }}>
+                            {formatMessage({ id: 'loading' })}
+                        </Typography>
+                    )}
+                    {!isPreviewLoading && previewError && (
+                        <Typography variant="body2" sx={{ color: 'var(--error)' }}>
+                            {previewError}
+                        </Typography>
+                    )}
+                    {!isPreviewLoading && !previewError && preview && (
+                        <Typography variant="h5" sx={{ paddingBottom: 0, fontWeight: 'bold' }}>
+                            {formatMessage({ id: 'estimatedBilling' })} : {formatNumber(preview.grandTotal, {
+                                style: 'currency',
+                                currency: preview.currency.toLowerCase(),
+                            })}
+                        </Typography>
+                    )}
+                </Box>
+                {errorMessage && (
+                    <Typography variant="body2" sx={{ color: 'var(--error)', textAlign: 'center' }}>
+                        {errorMessage}
+                    </Typography>
+                )}
                 <Button
                     variant="contained"
+                    disabled={isSubmitting || massRequested.length === 0 || isPreviewLoading || !!previewError || !preview}
+                    onClick={handleConfirm}
                 >
-                    {formatMessage({ id: 'confirmPayment' })}
+                    {formatMessage({ id: isSubmitting ? 'processing' : 'confirmPayment' })}
                 </Button>
             </Box>
         </Dialog>

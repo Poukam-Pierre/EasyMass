@@ -14,7 +14,7 @@ interface DateTimeMassPickerProps {
     id: string,
     name: string,
     parishData: ParishData | undefined
-    handleChange: (field: string, value: Dayjs | number) =>
+    handleChange: (field: string, value: Dayjs | number | string) =>
         Promise<FormikErrors<UseformikProps>> | Promise<void>
     error?: boolean,
     helperText?: string
@@ -47,14 +47,15 @@ export default function DateTimeMassPicker({
 
     const handleSelectedTime = (time: Dayjs) => {
         const dateTime = selectedDateTime.date.hour(time.hour()).minute(time.minute()).second(0)
-        const price = parishData?.massData.find((mass) => dayjs(mass.dateTime).isSame(dateTime))
+        const selectedMass = parishData?.massData.find((mass) => dayjs(mass.dateTime).isSame(dateTime))
         setSelectedDateTime(prevState => {
             return { ...prevState, time: time }
         })
         setIsClockDialog(false)
         setIsCalendarDialog(false)
         handleChange('dateTime', dateTime)
-        handleChange('price', price?.price as number)
+        handleChange('price', selectedMass?.price as number)
+        handleChange('massId', selectedMass?.massId as string)
     }
 
     const allMassDates = parishData?.massData.map((data) => new Date(data.dateTime))
@@ -67,7 +68,7 @@ export default function DateTimeMassPicker({
         if (selectedDateTime.date) {
             const dateSelected = allMassDates?.filter((date) => isSameDay(date, selectedDateTime.date.toDate()))
             return dateSelected?.some((allowedTime) =>
-                allowedTime.getUTCHours() === time.getHours() && allowedTime.getUTCMinutes() === time.getMinutes())
+                allowedTime.getHours() === time.getHours() && allowedTime.getMinutes() === time.getMinutes())
         }
     }, [allMassDates, selectedDateTime.date])
 

@@ -1,15 +1,30 @@
-export class CreateMassDto {
-  price: number;
-  processAt: string;
-  massType: MassType;
-  replicate: boolean;
-  createdByParish: { connect: { id: number } };
-}
+import { MassType } from '@prisma/client';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Min,
+} from 'class-validator';
 
-enum MassType {
-  UNIQUE = 'UNIQUE',
-  TRIDUM = 'TRIDUM',
-  SEVEN = 'SEVEN',
-  NOVENA = 'NOVENA',
-  THIRTY = 'THIRTY',
+export class CreateMassDto {
+  @IsNumber()
+  @Min(0)
+  price: number;
+
+  @IsDateString()
+  startAt: string;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  estimatedDurationMinutes?: number;
+
+  @IsEnum(MassType)
+  massType: MassType;
+
+  @IsBoolean()
+  replicate: boolean;
 }
