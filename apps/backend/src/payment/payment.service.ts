@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import {
+  Currency,
   PaymentAudiAction,
   PaymentMethod,
   PaymentStatus,
@@ -46,6 +47,16 @@ type InvoicePayments = Prisma.PaymentGetPayload<{
  * server-computed amount for that mass (base price + platform fee). */
 interface CheckoutItem {
   massInfo: MassInfoDto;
+  total: number;
+}
+
+/** One mass's resolved pricing in a given currency — shared shape between
+ * the real checkout (handlePayment) and the read-only preview
+ * (previewCheckout). */
+interface PricedMassItem {
+  massId: string;
+  basePrice: number;
+  fee: number;
   total: number;
 }
 
@@ -122,55 +133,14 @@ export class PaymentService {
   async handlePayment(handlePaymentDto: CreateTransactionDto): Promise<string> {
     const { believerInfo, massInfos, paymentInfo } = handlePaymentDto;
 
-    const masses = await this.massService.findManyByIds(
-      massInfos.map((m) => m.id)
-    );
-    const massById = new Map(masses.map((m) => [m.massId, m]));
-    if (massInfos.some((m) => !massById.has(m.id))) {
-      throw new NotFoundException('One or more masses no longer exist.');
-    }
-
-    // All masses in one checkout must belong to the same parish — the
-    // ledger attribution in finalizeCheckout assumes a single owner per
-    // batch.
-    if (new Set(masses.map((m) => m.parishId)).size > 1) {
-      throw new BadRequestException(
-        'A single checkout cannot span multiple parishes.'
-      );
-    }
-
-    // Re-checked here, server-side, at the moment of checkout — the
-    // scheduler's sweep only flips OPEN->CLOSED once a minute, so without
-    // this a checkout could still start right at that boundary. Once
-    // initiated, a Mass closing underneath an in-flight gateway attempt is
-    // NOT re-checked at confirmation (finalizeCheckout) — by then money
-    // may have already moved, and rejecting a successful charge would be
-    // worse than honoring it a few minutes late.
-    if (masses.some((m) => m.status !== 'OPEN')) {
-      throw new BadRequestException(
-        'Ordering has closed for one or more of these masses.'
-      );
-    }
-
-    // The only source of truth for what each mass costs — never trust a
-    // client-submitted price (see CreateTransactionDto). The platform fee
-    // is added on top; the parish's ledger share is always this exact
-    // base price, in full.
-    const basePriceByMassId = await this.massPriceService.resolvePrices(
-      this.prismaService,
-      masses,
+    const { pricedItems, grandTotal } = await this.resolveCheckoutPricing(
+      massInfos.map((m) => m.id),
       paymentInfo.currency
     );
-    const settings = await this.platformSettingsService.get();
-
-    const items: CheckoutItem[] = massInfos.map((massInfo) => {
-      // resolvePrices resolves every mass passed to it or throws — this
-      // set is exactly the masses just looked up above.
-      const basePrice = basePriceByMassId.get(massInfo.id) as number;
-      const fee = this.platformSettingsService.computeFee(settings, basePrice);
-      return { massInfo, total: basePrice + fee };
-    });
-    const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+    const items: CheckoutItem[] = massInfos.map((massInfo, index) => ({
+      massInfo,
+      total: pricedItems[index].total,
+    }));
 
     // Our own reference, generated up front — passed to NotchPay directly
     // as `reference`. PayPal generates its own order id instead, so its
@@ -274,6 +244,97 @@ export class PaymentService {
       );
       throw error;
     }
+  }
+
+  /**
+   * Shared by handlePayment (real checkout) and previewCheckout (read-only,
+   * no side effects) — validates the mass batch and resolves each mass's
+   * price + platform fee in the requested currency. Never trust a client-
+   * submitted price (see CreateTransactionDto): MassPrice/Mass.price is the
+   * only source of truth for what a mass costs, and PlatformSettings for
+   * that same currency is the only source of truth for the fee — both
+   * already in `currency`, so no FX conversion happens here.
+   */
+  private async resolveCheckoutPricing(
+    massIds: string[],
+    currency: Currency
+  ): Promise<{ pricedItems: PricedMassItem[]; grandTotal: number }> {
+    const masses = await this.massService.findManyByIds(massIds);
+    const massById = new Map(masses.map((m) => [m.massId, m]));
+    if (massIds.some((id) => !massById.has(id))) {
+      throw new NotFoundException('One or more masses no longer exist.');
+    }
+
+    // All masses in one checkout must belong to the same parish — the
+    // ledger attribution in finalizeCheckout assumes a single owner per
+    // batch.
+    if (new Set(masses.map((m) => m.parishId)).size > 1) {
+      throw new BadRequestException(
+        'A single checkout cannot span multiple parishes.'
+      );
+    }
+
+    // Re-checked here, server-side, at the moment of pricing — the
+    // scheduler's sweep only flips OPEN->CLOSED once a minute, so without
+    // this a checkout (or its preview) could still start right at that
+    // boundary. Once initiated, a Mass closing underneath an in-flight
+    // gateway attempt is NOT re-checked at confirmation (finalizeCheckout)
+    // — by then money may have already moved, and rejecting a successful
+    // charge would be worse than honoring it a few minutes late.
+    if (masses.some((m) => m.status !== 'OPEN')) {
+      throw new BadRequestException(
+        'Ordering has closed for one or more of these masses.'
+      );
+    }
+
+    const basePriceByMassId = await this.massPriceService.resolvePrices(
+      this.prismaService,
+      masses,
+      currency
+    );
+    const settings = await this.platformSettingsService.getForCurrency(
+      currency
+    );
+    if (!settings) {
+      throw new UnprocessableEntityException(
+        'platformFeeNotConfiguredForCurrency',
+        {
+          cause: new Error(),
+          description: `No platform fee configuration exists for ${currency}.`,
+        }
+      );
+    }
+
+    const pricedItems: PricedMassItem[] = massIds.map((massId) => {
+      // resolvePrices resolves every mass passed to it or throws — this
+      // set is exactly the masses just looked up above.
+      const basePrice = basePriceByMassId.get(massId) as number;
+      const fee = this.platformSettingsService.computeFee(settings, basePrice);
+      return { massId, basePrice, fee, total: basePrice + fee };
+    });
+    const grandTotal = pricedItems.reduce((sum, item) => sum + item.total, 0);
+
+    return { pricedItems, grandTotal };
+  }
+
+  /** Read-only price preview — no Believer/MassOrder/Payment rows, no
+   * gateway call. Lets the frontend show a "friendly UI price" in the
+   * payer's chosen currency before they commit to a PayPal/mobile-money
+   * request, using the exact same pricing logic the real checkout uses so
+   * the preview always matches what gets charged (and later invoiced). */
+  async previewCheckout(
+    massIds: string[],
+    currency: Currency
+  ): Promise<{
+    items: PricedMassItem[];
+    grandTotal: number;
+    currency: Currency;
+  }> {
+    const { pricedItems, grandTotal } = await this.resolveCheckoutPricing(
+      massIds,
+      currency
+    );
+    return { items: pricedItems, grandTotal, currency };
   }
 
   private async initiateNotchPayCheckout(

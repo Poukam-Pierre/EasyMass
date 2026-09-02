@@ -1,5 +1,13 @@
-import { Body, Controller, Get, Patch, Request } from '@nestjs/common';
-import { UserRole } from '@prisma/client';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Query,
+  Request,
+} from '@nestjs/common';
+import { Currency, UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
 import { UpdatePlatformSettingsDto } from './dto/update-platform-settings.dto';
@@ -13,15 +21,21 @@ export class PlatformSettingsController {
   ) {}
 
   @Get()
-  get() {
-    return this.platformSettingsService.get();
+  findAll() {
+    return this.platformSettingsService.findAll();
   }
 
   @Patch()
-  update(
+  upsert(
     @Body() dto: UpdatePlatformSettingsDto,
     @Request() request: AuthenticatedRequest
   ) {
-    return this.platformSettingsService.update(dto, request.user.id);
+    const { currency, ...rest } = dto;
+    return this.platformSettingsService.upsert(currency, rest, request.user.id);
+  }
+
+  @Delete()
+  remove(@Query('currency') currency: Currency) {
+    return this.platformSettingsService.remove(currency);
   }
 }

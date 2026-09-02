@@ -16,6 +16,7 @@ import { Public } from '../auth/decorator/public.decorator';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { PreviewCheckoutDto } from './dto/preview-checkout.dto';
 import { WithdrawMoneyDto } from './dto/withdraw-money.dto';
 
 @Controller('payment')
@@ -29,6 +30,15 @@ export class PaymentController {
     handlePaymentDto: CreateTransactionDto
   ) {
     return this.paymentService.handlePayment(handlePaymentDto);
+  }
+
+  // Public — the believer hasn't checked out yet, this is just a read-only
+  // price lookup so the frontend can show "1 Mass = $8.80" before they
+  // commit to a PayPal/mobile-money request.
+  @Public()
+  @Post('/preview')
+  previewCheckout(@Body() dto: PreviewCheckoutDto) {
+    return this.paymentService.previewCheckout(dto.massIds, dto.currency);
   }
 
   // Public because NotchPay calls this server-to-server (no user session to
