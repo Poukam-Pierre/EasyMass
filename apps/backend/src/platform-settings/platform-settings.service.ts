@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Currency, PlatformSettings } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { BASE_CURRENCY } from '../common/constants';
@@ -47,9 +51,18 @@ export class PlatformSettingsService {
    * for the one currency that's supposed to never fail. */
   async remove(currency: Currency) {
     if (currency === BASE_CURRENCY) {
-      throw new BadRequestException('platformFeeCannotRemoveBaseCurrency', {
+      throw new BadRequestException('baseCurrencyCannotBeRemoved', {
         cause: new Error(),
         description: `The ${BASE_CURRENCY} platform fee configuration cannot be removed.`,
+      });
+    }
+    const existing = await this.prismaService.platformSettings.findUnique({
+      where: { currency },
+    });
+    if (!existing) {
+      throw new NotFoundException('platformFeeNotConfiguredForCurrency', {
+        cause: new Error(),
+        description: `No platform fee configuration exists for ${currency}.`,
       });
     }
     return this.prismaService.platformSettings.delete({

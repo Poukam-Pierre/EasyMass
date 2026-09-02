@@ -7,9 +7,10 @@ import {
   Query,
   Request,
 } from '@nestjs/common';
-import { Currency, UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
+import { RemovePlatformSettingsDto } from './dto/remove-platform-settings.dto';
 import { UpdatePlatformSettingsDto } from './dto/update-platform-settings.dto';
 import { PlatformSettingsService } from './platform-settings.service';
 
@@ -35,7 +36,7 @@ export class PlatformSettingsController {
   }
 
   @Delete()
-  remove(@Query('currency') currency: Currency) {
+  remove(@Query() { currency }: RemovePlatformSettingsDto) {
     return this.platformSettingsService.remove(currency);
   }
 }
