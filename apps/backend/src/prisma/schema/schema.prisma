@@ -99,6 +99,7 @@ model MassOrder {
   intension       String
   price           Float // Captured at the moment of order, to protect against later price changes.
   currency        Currency  @default(XAF) // Which currency `price` is denominated in.
+  anonymous       Boolean   @default(false) // When true, this order's requester name is masked to "Unknown" wherever intentions are listed — independent of who paid (see Believer).
   believerId      String
   massId          String
   orderByBeliever Believer  @relation(fields: [believerId], references: [believerId], map: "fk_MassOrder_Believer")
