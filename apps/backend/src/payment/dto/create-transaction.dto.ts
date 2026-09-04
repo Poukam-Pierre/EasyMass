@@ -1,5 +1,6 @@
 import { Currency, PaymentMethod } from '@prisma/client';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -42,6 +43,13 @@ export class MassInfoDto {
   @IsString()
   @IsNotEmpty()
   intension: string;
+
+  /** Whether this intention's requester name should be hidden ("Unknown")
+   * on the final intentions list — independent of believerInfo, which is
+   * always the payer's real identity. Defaults to false when omitted. */
+  @IsOptional()
+  @IsBoolean()
+  anonymous?: boolean;
 }
 
 /** No `amount` here, for the same reason MassInfoDto has no `price` — the

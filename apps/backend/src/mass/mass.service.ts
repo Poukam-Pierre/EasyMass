@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
 import { CreateMassDto } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
+import { maskAnonymousOrders } from '../mass-order/anonymous-believer.util';
 
 export interface MassFilters {
   status?: MassStatus;
@@ -327,7 +328,7 @@ export class MassService {
    * independent of status transitions so a mail failure can be retried
    * every tick without blocking the ordering-cutoff deadline. */
   async findPendingIntentions() {
-    return this.prismaService.mass.findMany({
+    const masses = await this.prismaService.mass.findMany({
       where: {
         status: { in: ['CLOSED', 'PROCESSING', 'COMPLETED'] },
         intentionsSentAt: null,
@@ -345,6 +346,10 @@ export class MassService {
         },
       },
     });
+    return masses.map((mass) => ({
+      ...mass,
+      massOrder: maskAnonymousOrders(mass.massOrder),
+    }));
   }
 
   async markIntentionsSent(massId: string) {

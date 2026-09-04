@@ -63,9 +63,11 @@ export class SmsService {
   }
 
   async send(to: string, message: string): Promise<void> {
-    const senderNumber = process.env.ORANGE_SENDER_NUMBER;
+    const senderNumber = process.env.COUNTRY_SENDER_NUMBER;
     if (!senderNumber) {
-      this.logger.error('ORANGE_SENDER_NUMBER not configured — cannot send SMS.');
+      this.logger.error(
+        'COUNTRY_SENDER_NUMBER not configured — cannot send SMS.'
+      );
       return;
     }
 

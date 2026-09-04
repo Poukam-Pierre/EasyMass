@@ -128,9 +128,10 @@ export default function ModalPayment({ isOpen, onClose, massRequested }: ModalPa
                     phone,
                     ...(isPaypalTab ? { email } : {})
                 },
-                massInfos: massRequested.map(({ massInfos: { massId, intention } }) => ({
+                massInfos: massRequested.map(({ massInfos: { massId, intention, anonymous } }) => ({
                     id: massId,
-                    intension: intention
+                    intension: intention,
+                    anonymous: anonymous
                 })),
                 paymentInfo: {
                     currency: checkoutCurrency,

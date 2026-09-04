@@ -131,7 +131,8 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                             parish: parish,
                             dateTime: dateTime,
                             intention: intention,
-                            price: price
+                            price: price,
+                            anonymous: anonymous
                         }
                     }]);
             resetForm();

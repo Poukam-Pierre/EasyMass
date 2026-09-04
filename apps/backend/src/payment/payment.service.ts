@@ -160,6 +160,7 @@ export class PaymentService {
             intension: massInfo.intension,
             price: total,
             currency: paymentInfo.currency,
+            anonymous: massInfo.anonymous ?? false,
             orderByBeliever: { connect: { believerId: believer.believerId } },
             mass: { connect: { massId: massInfo.id } },
           },
@@ -499,11 +500,54 @@ export class PaymentService {
     return this.finalizeCheckout(reference);
   }
 
-  /** referenceId of every mobile-money Payment still awaiting a terminal
-   * status — the working set for PaymentSchedulerService's cron sweep. */
-  async findPendingMobileMoneyReferences(): Promise<string[]> {
+  /**
+   * Re-checks one PayPal order's current status and, only if it's reached a
+   * terminal state since we last recorded it, resolves it — the PayPal
+   * counterpart to reconcileNotchPayPayment, filling the same durability gap
+   * mobile money already had a cron backstop for (see
+   * PaymentSchedulerService): a customer who closed the tab before the
+   * return redirect completed, whose webhook was also missed or never
+   * configured, otherwise leaves that Payment stuck PENDING forever even
+   * though PayPal already captured the charge.
+   *
+   * PayPal orders have no 'pending'/'processing' distinct from "not yet
+   * approved" — CREATED/SAVED/PAYER_ACTION_REQUIRED all just mean the
+   * customer hasn't finished approving on PayPal's side yet, so those are
+   * left untouched. APPROVED/COMPLETED delegate to handlePaypalReturn, which
+   * already does the capture-then-finalize dance (capture is idempotent, so
+   * this is safe even if the return/webhook handler is racing this same
+   * call). VOIDED is the one terminal-negative status, handled the same way
+   * failPendingPaymentsByReference already handles a cancelled checkout.
+   */
+  async reconcilePaypalPayment(orderId: string) {
+    const order = await this.paypalService.getOrderStatus(orderId);
+    const status = order?.status;
+
+    if (status === 'VOIDED') {
+      await this.failPendingPaymentsByReference(orderId);
+      return {
+        code: 200,
+        message: `PayPal order not completed (status: ${status}).`,
+      };
+    }
+
+    if (status !== 'APPROVED' && status !== 'COMPLETED') {
+      return {
+        code: 200,
+        message: `PayPal order not yet approved (status: ${status}); ignoring.`,
+      };
+    }
+
+    return this.handlePaypalReturn(orderId);
+  }
+
+  /** referenceId of every Payment of the given method still awaiting a
+   * terminal status — the working set for PaymentSchedulerService's cron
+   * sweep, shared by both the mobile-money (NotchPay reference) and PayPal
+   * (order id) reconciliation passes. */
+  async findPendingReferences(paymentMethod: PaymentMethod): Promise<string[]> {
     const pending = await this.prismaService.payment.findMany({
-      where: { status: 'PENDING', paymentMethod: PaymentMethod.MOBILE_MONEY },
+      where: { status: 'PENDING', paymentMethod },
       select: { referenceId: true },
     });
     return pending

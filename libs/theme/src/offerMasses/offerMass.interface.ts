@@ -16,6 +16,9 @@ interface MassInformation {
   dateTime: Dayjs | null;
   intention: string;
   price: number | null;
+  /** Whether this intention's requester name should be hidden ("Unknown")
+   * on the final intentions list — independent of who paid for it. */
+  anonymous: boolean;
 }
 
 export interface OfferMass {

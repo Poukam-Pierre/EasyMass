@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, UserRole } from '@prisma/client';
 import { MassService } from '../mass/mass.service';
 import { resolveParishForUser } from '../common/user.utils';
+import { maskAnonymousOrders } from './anonymous-believer.util';
 
 @Injectable()
 export class MassOrderService {
@@ -52,7 +53,7 @@ export class MassOrderService {
       });
       return {
         code: 200,
-        data: allUnprocessMasses,
+        data: maskAnonymousOrders(allUnprocessMasses),
         message: 'Successfull request',
       };
     } catch (error) {
@@ -85,7 +86,7 @@ export class MassOrderService {
     // rows now exist from checkout initiation (see
     // PaymentService.handlePayment), not only once paid, so an intentions
     // list must not surface something nobody actually paid for.
-    return this.prismaService.massOrder.findMany({
+    const orders = await this.prismaService.massOrder.findMany({
       where: {
         massId,
         payments: { some: { status: 'COMPLETED' } },
@@ -95,14 +96,16 @@ export class MassOrderService {
       },
       orderBy: { createdAt: 'asc' },
     });
+    return maskAnonymousOrders(orders);
   }
 
   async findAll() {
-    return this.prismaService.massOrder.findMany({
+    const orders = await this.prismaService.massOrder.findMany({
       include: {
         mass: true,
         orderByBeliever: true,
       },
     });
+    return maskAnonymousOrders(orders);
   }
 }
