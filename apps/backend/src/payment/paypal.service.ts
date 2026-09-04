@@ -115,6 +115,23 @@ export class PaypalService {
   }
 
   /**
+   * Read-only order lookup — the working set for the reconciliation cron's
+   * PayPal pass (mirroring reconcileNotchPayPayment): checks whether an
+   * order stuck PENDING in our own DB (e.g. the customer closed the tab
+   * before the return redirect completed, and the webhook was missed too)
+   * has actually been approved/completed on PayPal's side, without
+   * capturing anything itself.
+   */
+  async getOrderStatus(orderId: string): Promise<{ status?: string }> {
+    const accessToken = await this.getAccessToken();
+
+    return fetch(`${this.apiBase}/v2/checkout/orders/${orderId}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }).then((res) => res.json());
+  }
+
+  /**
    * Confirms the charge. Called from the return-URL handler and, as a
    * durability backstop, from the webhook handler — capturing an
    * already-captured PayPal order id just returns the existing capture
