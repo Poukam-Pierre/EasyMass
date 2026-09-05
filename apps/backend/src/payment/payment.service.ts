@@ -158,7 +158,11 @@ export class PaymentService {
     // read-then-write-based-on-a-shared-value pattern.
     const paymentIds = await this.prismaService.$transaction(async (tx) => {
       const believer = await tx.believer.create({
-        data: { fullName: believerInfo.name, phone: believerInfo.phone },
+        data: {
+          fullName: believerInfo.name,
+          phone: believerInfo.phone,
+          email: believerInfo.email,
+        },
       });
 
       const ids: string[] = [];
