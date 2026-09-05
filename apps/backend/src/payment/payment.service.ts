@@ -148,6 +148,14 @@ export class PaymentService {
     // (see initiatePaypalCheckout).
     const reference = createId();
 
+    // Explicit timeout — Prisma's default interactive-transaction ceiling is
+    // 5000ms, and the loop below does two sequential round trips per mass in
+    // the checkout (MassOrder + Payment), which a multi-mass cart on a
+    // cold/remote connection (e.g. Neon scaling up from idle) can exceed,
+    // aborting an otherwise-successful checkout. 15000ms matches the default
+    // already used by runSerializableTransaction elsewhere in this file.
+    // SERIALIZABLE isolation isn't needed here — this is pure inserts, not a
+    // read-then-write-based-on-a-shared-value pattern.
     const paymentIds = await this.prismaService.$transaction(async (tx) => {
       const believer = await tx.believer.create({
         data: { fullName: believerInfo.name, phone: believerInfo.phone },
@@ -188,7 +196,7 @@ export class PaymentService {
       );
 
       return ids;
-    });
+    }, { timeout: 15000 });
 
     try {
       let checkoutUrl: string;
