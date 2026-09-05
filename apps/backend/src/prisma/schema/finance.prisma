@@ -153,3 +153,31 @@ model MassPrice {
   @@index([setByUserId], map: "fk_MassPrice_User_idx")
   @@map("mass_price")
 }
+
+/// A fallback price for a whole bracket of masses in a given currency,
+/// keyed off the mass's own Mass.price (always XAF) rather than its type —
+/// two masses of the same MassType can have very different XAF prices (a
+/// regular Sunday mass vs. a special/papal one), so bracketing by price is
+/// what actually keeps them priced correctly in other currencies without
+/// needing a MassPrice row on every single mass. Only consulted when a mass
+/// has no MassPrice override of its own for that currency (see
+/// MassPriceService.resolvePrices) — an explicit per-mass MassPrice always
+/// wins over a band. `minPrice` is inclusive, `maxPrice` is exclusive, so
+/// adjacent bands can share a boundary (0–3000, 3000–6000, ...) without
+/// overlapping; MassPriceBandService rejects overlapping bands for the same
+/// currency at write time.
+model MassPriceBand {
+  massPriceBandId String   @id @default(cuid())
+  currency        Currency
+  minPrice        Float
+  maxPrice        Float
+  amount          Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  setByUserId     String
+  setByUser       User     @relation(fields: [setByUserId], references: [userId], map: "fk_MassPriceBand_User")
+
+  @@index([currency], map: "idx_mass_price_band_currency")
+  @@index([setByUserId], map: "fk_MassPriceBand_User_idx")
+  @@map("mass_price_band")
+}

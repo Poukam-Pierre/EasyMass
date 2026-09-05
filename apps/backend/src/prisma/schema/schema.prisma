@@ -25,6 +25,7 @@ model User {
   admin                   Administrator?
   paymentAudits           PaymentAudit[]
   massPrices              MassPrice[]
+  massPriceBands          MassPriceBand[]
   platformSettingsUpdates PlatformSettings[]
   createdTransactions     Transaction[]
 
