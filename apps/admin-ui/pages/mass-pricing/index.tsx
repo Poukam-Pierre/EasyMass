@@ -6,7 +6,6 @@ import {
     TableHead, TableRow, TextField, Typography
 } from "@mui/material";
 import { theme } from "@easy-messe/libs/theme";
-import { extractApiErrorKey } from "@easy-messe/libs/utils";
 import { useFormik } from "formik";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
@@ -14,65 +13,67 @@ import { toast } from "react-toastify";
 import * as yup from 'yup';
 import { withAdminLayout } from "../../components/withAdminLayout";
 import api, { apiErrorMessage } from "../../lib/api";
-import { CURRENCIES, BASE_CURRENCY } from "../../lib/currencies";
+import { CURRENCIES } from "../../lib/currencies";
 
-// PlatformSettingsService returns a stable i18n key (not raw English text)
-// for these two failures — whitelisted so an unexpected message still
-// falls back to the generic toast instead of rendering a raw key.
-const KNOWN_DELETE_ERROR_KEYS = new Set([
-    'baseCurrencyCannotBeRemoved',
-    'platformFeeNotConfiguredForCurrency',
-])
-
-interface PlatformSettingsRow {
+interface PriceBandRow {
+    massPriceBandId: string;
     currency: typeof CURRENCIES[number];
-    platformFeePercentage: number;
-    platformFeeFixedAmount: number;
-    updatedAt: string;
+    minPrice: number;
+    maxPrice: number;
+    amount: number;
 }
 
-export default function Settings() {
-    const { formatMessage, formatDate } = useIntl()
-    const [settings, setSettings] = useState<PlatformSettingsRow[]>([])
+export default function MassPricing() {
+    const { formatMessage } = useIntl()
+    const [bands, setBands] = useState<PriceBandRow[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-    const [editing, setEditing] = useState<PlatformSettingsRow | null>(null)
-    const [deletingCurrency, setDeletingCurrency] = useState<string | null>(null)
+    const [editing, setEditing] = useState<PriceBandRow | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
-    const loadSettings = () => {
-        api.get('/platform-settings')
-            .then(({ data }) => setSettings(data))
+    const loadBands = () => {
+        api.get('/mass-price-bands')
+            .then(({ data }) => setBands(data))
             .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
             .finally(() => setIsLoading(false))
     }
 
-    useEffect(loadSettings, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-    const configuredCurrencies = new Set(settings.map((s) => s.currency))
-    const availableToAdd = CURRENCIES.filter((c) => !configuredCurrencies.has(c))
+    useEffect(loadBands, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const openCreate = () => { setEditing(null); setIsDialogOpen(true); }
-    const openEdit = (row: PlatformSettingsRow) => { setEditing(row); setIsDialogOpen(true); }
+    const openEdit = (row: PriceBandRow) => { setEditing(row); setIsDialogOpen(true); }
     const handleClose = () => setIsDialogOpen(false)
 
     const { handleChange, handleSubmit, errors, touched, values, setFieldValue, isSubmitting, resetForm } = useFormik({
         enableReinitialize: true,
         initialValues: {
-            currency: editing?.currency ?? (availableToAdd[0] ?? ''),
-            platformFeePercentage: editing?.platformFeePercentage ?? 0,
-            platformFeeFixedAmount: editing?.platformFeeFixedAmount ?? 0,
+            currency: editing?.currency ?? '',
+            minPrice: editing?.minPrice ?? 0,
+            maxPrice: editing?.maxPrice ?? 0,
+            amount: editing?.amount ?? 0,
         },
         validationSchema: yup.object().shape({
             currency: yup.string().required(formatMessage({ id: 'currencyWarningMsg' })),
-            platformFeePercentage: yup.number().min(0, formatMessage({ id: 'numberChecked' })).required(),
-            platformFeeFixedAmount: yup.number().min(0, formatMessage({ id: 'numberChecked' })).required(),
+            minPrice: yup.number().min(0, formatMessage({ id: 'numberChecked' })).required(),
+            maxPrice: yup.number()
+                .moreThan(yup.ref('minPrice'), formatMessage({ id: 'numberChecked' }))
+                .required(),
+            amount: yup.number().min(0, formatMessage({ id: 'numberChecked' })).required(),
         }),
         onSubmit: async (formValues) => {
             try {
-                await api.patch('/platform-settings', formValues);
+                if (editing) {
+                    await api.patch(`/mass-price-bands/${editing.massPriceBandId}`, {
+                        minPrice: formValues.minPrice,
+                        maxPrice: formValues.maxPrice,
+                        amount: formValues.amount,
+                    });
+                } else {
+                    await api.post('/mass-price-bands', formValues);
+                }
                 toast.success(formatMessage({ id: 'saved' }));
                 resetForm();
-                loadSettings();
+                loadBands();
                 handleClose();
             } catch (error) {
                 toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
@@ -80,22 +81,17 @@ export default function Settings() {
         },
     });
 
-    const handleDelete = async (row: PlatformSettingsRow) => {
+    const handleDelete = async (row: PriceBandRow) => {
         if (!window.confirm(formatMessage({ id: 'deleteMassMsgWarning' }))) return;
-        setDeletingCurrency(row.currency)
+        setDeletingId(row.massPriceBandId)
         try {
-            await api.delete('/platform-settings', { params: { currency: row.currency } });
+            await api.delete(`/mass-price-bands/${row.massPriceBandId}`);
             toast.success(formatMessage({ id: 'saved' }));
-            loadSettings();
+            loadBands();
         } catch (error) {
-            const key = extractApiErrorKey(error, KNOWN_DELETE_ERROR_KEYS);
-            toast.error(
-                key
-                    ? formatMessage({ id: key })
-                    : apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' }))
-            );
+            toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
         } finally {
-            setDeletingCurrency(null)
+            setDeletingId(null)
         }
     }
 
@@ -112,11 +108,11 @@ export default function Settings() {
             >
                 <Box sx={{ padding: '48px 60px', minWidth: '440px', display: 'grid', rowGap: 2 }} component="form" onSubmit={handleSubmit}>
                     <Typography variant="h2" textAlign="center">
-                        {formatMessage({ id: editing ? 'modify' : 'addCurrencyFee' })}
+                        {formatMessage({ id: editing ? 'editPriceBand' : 'addPriceBand' })}
                     </Typography>
                     <Autocomplete
                         disabled={!!editing}
-                        options={editing ? [editing.currency] : availableToAdd}
+                        options={CURRENCIES}
                         value={values.currency || null}
                         size="small"
                         onChange={(_, currency) => setFieldValue('currency', currency)}
@@ -128,19 +124,25 @@ export default function Settings() {
                         }
                     />
                     <TextField
-                        name="platformFeePercentage" type="number" size="small"
-                        label={formatMessage({ id: 'platformFeePercentage' })}
-                        value={values.platformFeePercentage} onChange={handleChange}
-                        error={!!(errors.platformFeePercentage && touched.platformFeePercentage)}
-                        helperText={touched.platformFeePercentage && errors.platformFeePercentage}
-                        inputProps={{ step: '0.01' }}
+                        name="minPrice" type="number" size="small"
+                        label={formatMessage({ id: 'minPrice' })}
+                        value={values.minPrice} onChange={handleChange}
+                        error={!!(errors.minPrice && touched.minPrice)}
+                        helperText={touched.minPrice && errors.minPrice}
                     />
                     <TextField
-                        name="platformFeeFixedAmount" type="number" size="small"
-                        label={formatMessage({ id: 'platformFeeFixedAmount' })}
-                        value={values.platformFeeFixedAmount} onChange={handleChange}
-                        error={!!(errors.platformFeeFixedAmount && touched.platformFeeFixedAmount)}
-                        helperText={touched.platformFeeFixedAmount && errors.platformFeeFixedAmount}
+                        name="maxPrice" type="number" size="small"
+                        label={formatMessage({ id: 'maxPrice' })}
+                        value={values.maxPrice} onChange={handleChange}
+                        error={!!(errors.maxPrice && touched.maxPrice)}
+                        helperText={touched.maxPrice && errors.maxPrice}
+                    />
+                    <TextField
+                        name="amount" type="number" size="small"
+                        label={formatMessage({ id: 'amount' })}
+                        value={values.amount} onChange={handleChange}
+                        error={!!(errors.amount && touched.amount)}
+                        helperText={touched.amount && errors.amount}
                         inputProps={{ step: '0.01' }}
                     />
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px', marginTop: '10px' }}>
@@ -155,21 +157,21 @@ export default function Settings() {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                     <Typography variant="h2" color="primary" sx={{ paddingBottom: 0 }}>
-                        {formatMessage({ id: 'settings' })}
+                        {formatMessage({ id: 'priceBands' })}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>
-                        {formatMessage({ id: 'platformFeeHelp' })}
+                    <Typography variant="body2" sx={{ color: 'var(--body)', maxWidth: '640px' }}>
+                        {formatMessage({ id: 'priceBandsHelp' })}
                     </Typography>
                 </Box>
-                <Button variant="contained" onClick={openCreate} disabled={availableToAdd.length === 0}>
-                    + {formatMessage({ id: 'addCurrencyFee' })}
+                <Button variant="contained" onClick={openCreate}>
+                    + {formatMessage({ id: 'addPriceBand' })}
                 </Button>
             </Box>
 
             <Table>
                 <TableHead>
                     <TableRow>
-                        {['currency', 'platformFeePercentage', 'platformFeeFixedAmount', 'lastUpdated', 'action'].map((key) => (
+                        {['currency', 'minPrice', 'maxPrice', 'amount', 'action'].map((key) => (
                             <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
                                 {formatMessage({ id: key }).toUpperCase()}
                             </TableCell>
@@ -177,28 +179,27 @@ export default function Settings() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {settings.map((row) => (
-                        <TableRow key={row.currency}>
+                    {bands.map((row) => (
+                        <TableRow key={row.massPriceBandId}>
                             <TableCell sx={{ fontWeight: 600 }}>{row.currency}</TableCell>
-                            <TableCell>{row.platformFeePercentage}%</TableCell>
-                            <TableCell>{row.platformFeeFixedAmount}</TableCell>
-                            <TableCell>{formatDate(row.updatedAt)}</TableCell>
+                            <TableCell>{row.minPrice}</TableCell>
+                            <TableCell>{row.maxPrice}</TableCell>
+                            <TableCell>{row.amount}</TableCell>
                             <TableCell align="right">
-                                <IconButton size="small" onClick={() => openEdit(row)} disabled={deletingCurrency === row.currency}>
+                                <IconButton size="small" onClick={() => openEdit(row)} disabled={deletingId === row.massPriceBandId}>
                                     <Icon icon={editIcon} fontSize={18} />
                                 </IconButton>
                                 <IconButton
                                     size="small"
                                     onClick={() => handleDelete(row)}
-                                    disabled={row.currency === BASE_CURRENCY || deletingCurrency === row.currency}
-                                    title={row.currency === BASE_CURRENCY ? formatMessage({ id: 'baseCurrencyCannotBeRemoved' }) : undefined}
+                                    disabled={deletingId === row.massPriceBandId}
                                 >
-                                    <Icon icon={trashIcon} fontSize={18} color={row.currency === BASE_CURRENCY ? 'var(--line)' : 'var(--error)'} />
+                                    <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                                 </IconButton>
                             </TableCell>
                         </TableRow>
                     ))}
-                    {settings.length === 0 && (
+                    {bands.length === 0 && (
                         <TableRow><TableCell colSpan={5} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
                     )}
                 </TableBody>
@@ -207,6 +208,6 @@ export default function Settings() {
     );
 }
 
-Settings.getLayout = function getLayout(page: ReactNode) {
+MassPricing.getLayout = function getLayout(page: ReactNode) {
     return withAdminLayout(page);
 };

@@ -156,7 +156,7 @@ export const website = {
   cityModify: 'Modifier une ville',
   deleleParish: 'Supprimer une paroisse',
   deleteParishMsg: 'Etes vous sûre de vouloir supprimer cette paroisse ?',
-  history: 'Historique',
+  details: 'Détails',
   deleteMassMsgWarning: 'Toutes les données liées seront supprimées.',
   date: 'Date',
   downloadAll: 'Télécharger tout',
@@ -321,4 +321,14 @@ export const website = {
     "Ce prix n'est pas disponible dans cette devise pour le moment.",
   platformFeeNotConfiguredForCurrency:
     "Aucun frais de plateforme n'est configuré pour cette devise.",
+  massPricing: 'Tarification des messes',
+  priceBands: 'Tranches de prix',
+  priceBandsHelp:
+    "Une tranche de prix applique le même prix, dans une autre devise, à toute messe dont le prix en XAF se situe dans un intervalle donné — plus besoin de fixer un prix messe par messe. Une messe ayant son propre prix (défini sur la messe elle-même) utilise toujours celui-ci en priorité.",
+  addPriceBand: 'Ajouter une tranche de prix',
+  editPriceBand: 'Modifier la tranche de prix',
+  minPrice: 'Prix minimum (XAF)',
+  maxPrice: 'Prix maximum (XAF)',
+  setMassPrice: 'Définir le prix',
+  ownPriceHint: 'Le prix propre à cette messe, s\'il est défini, prévaut toujours sur une tranche de prix.',
 };

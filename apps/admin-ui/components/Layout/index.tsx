@@ -8,6 +8,7 @@ import cityIcon from '@iconify-icons/material-symbols/location-city';
 import financeIcon from '@iconify-icons/material-symbols/attach-money';
 import libraryIcon from '@iconify-icons/material-symbols/local-library-outline-rounded';
 import taskIcon from '@iconify-icons/material-symbols/task-outline';
+import massPricingIcon from '@iconify-icons/material-symbols/payments-outline';
 import { Icon } from "@iconify/react";
 import { Box } from "@mui/material";
 import { useRouter } from 'next/router';
@@ -60,6 +61,11 @@ export default function AppLayout({ children }: PropsWithChildren) {
                     label: formatMessage({ id: 'cities' }),
                     icon: <Icon icon={cityIcon} fontSize={24} />,
                     link: '/cities'
+                },
+                {
+                    label: formatMessage({ id: 'massPricing' }),
+                    icon: <Icon icon={massPricingIcon} fontSize={24} />,
+                    link: '/mass-pricing'
                 },
             ]
         },
@@ -122,6 +128,10 @@ export default function AppLayout({ children }: PropsWithChildren) {
         {
             title: formatMessage({ id: 'cities' }),
             links: { '/cities': formatMessage({ id: 'cities' }) }
+        },
+        {
+            title: formatMessage({ id: 'massPricing' }),
+            links: { '/mass-pricing': formatMessage({ id: 'massPricing' }) }
         },
         {
             title: formatMessage({ id: 'finances' }),

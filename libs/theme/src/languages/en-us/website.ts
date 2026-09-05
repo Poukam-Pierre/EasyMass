@@ -155,7 +155,7 @@ export const website = {
   cityModify: 'Modify a city',
   deleleParish: 'Delete parish',
   deleteParishMsg: 'Are you sure you want to abolish this parish ?',
-  history: 'History',
+  details: 'Details',
   deleteMassMsgWarning: 'All linked data will be deleted.',
   date: 'Date',
   downloadAll: 'Download All',
@@ -316,4 +316,14 @@ export const website = {
     "This price isn't available in that currency yet.",
   platformFeeNotConfiguredForCurrency:
     'No platform fee is configured for this currency yet.',
+  massPricing: 'Mass Pricing',
+  priceBands: 'Price bands',
+  priceBandsHelp:
+    "A price band gives every mass whose XAF price falls in a range the same price in another currency, so you don't have to set one for each mass individually. A mass with its own price (set on the mass itself) always uses that instead.",
+  addPriceBand: 'Add price band',
+  editPriceBand: 'Edit price band',
+  minPrice: 'Minimum price (XAF)',
+  maxPrice: 'Maximum price (XAF)',
+  setMassPrice: 'Set price',
+  ownPriceHint: "This mass's own price, if set, always overrides any price band for it.",
 };
