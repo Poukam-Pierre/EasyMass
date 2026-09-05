@@ -91,9 +91,8 @@ export class PriestService {
       requestUser.id
     );
     if (priest.homeParishId !== parish.parishId) {
-      throw new ForbiddenException('Forbidden', {
+      throw new ForbiddenException('You may only manage priests on your own roster.', {
         cause: new Error(),
-        description: 'You may only manage priests on your own roster.',
       });
     }
   }

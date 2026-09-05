@@ -39,17 +39,15 @@ export class AuthService {
     const user = await findUserByEmail(this.prismaService, input.email);
 
     if (!user || !allowedRoles.includes(user.role)) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
     }
 
     const flattened = flattenUserRole(user);
     if (!flattened) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
     }
 
@@ -58,11 +56,10 @@ export class AuthService {
 
     if (existingRefreshToken) {
       if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        throw new ConflictException('Conflict', {
-          cause: new Error(),
-          description:
-            'Account already logged in. Logout before from the first one.',
-        });
+        throw new ConflictException(
+          'Account already logged in. Logout before from the first one.',
+          { cause: new Error() }
+        );
       }
       await this.refreshTokenService.remove(existingRefreshToken.id);
     }
@@ -72,9 +69,8 @@ export class AuthService {
       flattened.password
     );
     if (!validPassword) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
     }
 
@@ -122,9 +118,8 @@ export class AuthService {
     // Unreachable in practice — `allowedRoles` already restricted this to
     // ADMIN/PARISH above (PRIEST login is deferred, MVP scope) — but keeps
     // the function's return type honest instead of falling through.
-    throw new UnauthorizedException('Unauthorized', {
+    throw new UnauthorizedException('Wrong email or password.', {
       cause: new Error(),
-      description: 'Wrong email or password.',
     });
   }
 
@@ -153,11 +148,10 @@ export class AuthService {
 
       return { accessToken, refreshToken };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation of accessToken and refreshToken into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing the creation of accessToken and refreshToken into db.',
+        { cause: new Error() }
+      );
     }
   }
 
@@ -172,9 +166,8 @@ export class AuthService {
 
     const existing = await findUserByEmail(this.prismaService, email);
     if (existing) {
-      throw new BadRequestException('Bad Request', {
+      throw new BadRequestException('This account is already in use.', {
         cause: new Error(),
-        description: 'This account is already in use.',
       });
     }
 
@@ -183,11 +176,10 @@ export class AuthService {
       await this.adminService.create(rest, email, hash);
       return { code: 200, message: 'New administrator created successfully' };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user admin into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing hash and create new user admin into db.',
+        { cause: new Error() }
+      );
     }
   }
 
@@ -202,18 +194,16 @@ export class AuthService {
       await this.refreshTokenService.findOneWithUser(refreshTokenValue);
 
     if (!refreshData) {
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('User not authorized to refresh token!', {
         cause: new Error(),
-        description: 'User not authorized to refresh token!',
       });
     }
 
     if (new Date(refreshData.expiredDate) <= new Date()) {
       await this.refreshTokenService.remove(refreshData.id);
 
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('Refresh token expired. Please login!', {
         cause: new Error(),
-        description: 'Refresh token expired. Please login!',
       });
     }
 
@@ -234,20 +224,18 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation accessToken and update refreshToken into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing the creation accessToken and update refreshToken into db.',
+        { cause: new Error() }
+      );
     }
   }
 
   async logout(refreshToken: string) {
     const refreshData = await this.refreshTokenService.findOne(refreshToken);
     if (!refreshData) {
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('User not longer connect!', {
         cause: new Error(),
-        description: 'User not longer connect!',
       });
     }
     try {
@@ -255,10 +243,10 @@ export class AuthService {
 
       return { code: 200, message: 'Disconnect token successfully!' };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description: 'Error appears while processing deconnection.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing deconnection.',
+        { cause: new Error() }
+      );
     }
   }
 

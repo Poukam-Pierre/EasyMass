@@ -149,19 +149,17 @@ export class MassService {
     }
 
     if (parish && parish.parishId !== mass.parishId) {
-      throw new ForbiddenException('Forbidden', {
+      throw new ForbiddenException('You may only manage your own masses.', {
         cause: new Error(),
-        description: 'You may only manage your own masses.',
       });
     }
 
     const changesAnyLockedField = Object.keys(updateMassDto).length > 0;
     if (changesAnyLockedField && mass.status !== 'OPEN') {
-      throw new ConflictException('Conflict', {
-        cause: new Error(),
-        description:
-          'This mass can no longer be edited — ordering has closed.',
-      });
+      throw new ConflictException(
+        'This mass can no longer be edited — ordering has closed.',
+        { cause: new Error() }
+      );
     }
 
     return this.prismaService.$transaction(async (tx) => {

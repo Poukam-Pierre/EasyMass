@@ -38,9 +38,8 @@ export class TransactionsService {
         requestUser.id
       );
       if (parish.parishId !== parishId) {
-        throw new ForbiddenException('Forbidden', {
+        throw new ForbiddenException("You may only view your own parish's transactions.", {
           cause: new Error(),
-          description: "You may only view your own parish's transactions.",
         });
       }
     }

@@ -75,9 +75,8 @@ export class MassOrderService {
         requestUser.id
       );
       if (parish.parishId !== mass.parishId) {
-        throw new ForbiddenException('Forbidden', {
+        throw new ForbiddenException('You may only view orders for your own masses.', {
           cause: new Error(),
-          description: 'You may only view orders for your own masses.',
         });
       }
     }

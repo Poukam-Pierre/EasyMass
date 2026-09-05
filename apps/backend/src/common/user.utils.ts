@@ -82,9 +82,8 @@ export async function resolveParishForUser(
 ) {
   const parish = await prisma.parish.findUnique({ where: { userId } });
   if (!parish) {
-    throw new ForbiddenException('Forbidden', {
+    throw new ForbiddenException('Authenticated user is not a parish.', {
       cause: new Error(),
-      description: 'Authenticated user is not a parish.',
     });
   }
   return parish;
@@ -96,9 +95,8 @@ export async function resolveAdminForUser(
 ) {
   const admin = await prisma.administrator.findUnique({ where: { userId } });
   if (!admin) {
-    throw new ForbiddenException('Forbidden', {
+    throw new ForbiddenException('Authenticated user is not an administrator.', {
       cause: new Error(),
-      description: 'Authenticated user is not an administrator.',
     });
   }
   return admin;
