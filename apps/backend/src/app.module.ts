@@ -13,6 +13,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { MassOrderModule } from './mass-order/mass-order.module';
 import { CityModule } from './city/city.module';
 import { MassPriceModule } from './mass-price/mass-price.module';
+import { MassPriceBandModule } from './mass-price-band/mass-price-band.module';
 import { PlatformSettingsModule } from './platform-settings/platform-settings.module';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { MassSchedulerModule } from './mass-scheduler/mass-scheduler.module';
@@ -31,6 +32,7 @@ import { PriestModule } from './priest/priest.module';
     MassOrderModule,
     CityModule,
     MassPriceModule,
+    MassPriceBandModule,
     PlatformSettingsModule,
     AdminDashboardModule,
     MassSchedulerModule,
