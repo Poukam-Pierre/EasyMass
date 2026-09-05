@@ -34,6 +34,8 @@ export default function Cities() {
   const [editing, setEditing] = useState<CityRow | null>(null);
   const [cityName, setCityName] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [deletingCityId, setDeletingCityId] = useState<string | null>(null);
 
   const loadCities = () => {
     api
@@ -43,7 +45,8 @@ export default function Cities() {
         toast.error(
           apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))
         )
-      );
+      )
+      .finally(() => setIsLoading(false));
   };
 
   useEffect(loadCities, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -82,6 +85,7 @@ export default function Cities() {
 
   const handleDelete = async (city: CityRow) => {
     if (!window.confirm(formatMessage({ id: 'deleteMassMsgWarning' }))) return;
+    setDeletingCityId(city.city_id);
     try {
       await api.delete(`/cities/${city.city_id}`);
       toast.success(formatMessage({ id: 'saved' }));
@@ -90,8 +94,14 @@ export default function Cities() {
       toast.error(
         apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' }))
       );
+    } finally {
+      setDeletingCityId(null);
     }
   };
+
+  if (isLoading) {
+    return <Typography sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>;
+  }
 
   return (
     <Box sx={{ display: 'grid', rowGap: '20px' }}>
@@ -170,10 +180,14 @@ export default function Cities() {
             <TableRow key={city.city_id}>
               <TableCell sx={{ fontWeight: 600 }}>{city.city_name}</TableCell>
               <TableCell align="right">
-                <IconButton size="small" onClick={() => openEdit(city)}>
+                <IconButton size="small" onClick={() => openEdit(city)} disabled={deletingCityId === city.city_id}>
                   <Icon icon={editIcon} fontSize={18} />
                 </IconButton>
-                <IconButton size="small" onClick={() => handleDelete(city)}>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDelete(city)}
+                  disabled={deletingCityId === city.city_id}
+                >
                   <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                 </IconButton>
               </TableCell>

@@ -33,6 +33,9 @@ export default function Parishes() {
     const [search, setSearch] = useState<string>('')
     const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [pendingBlockId, setPendingBlockId] = useState<string | null>(null)
+    const [pendingPayoutId, setPendingPayoutId] = useState<string | null>(null)
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
     const loadParishes = () => {
         setIsLoading(true)
@@ -45,34 +48,43 @@ export default function Parishes() {
     useEffect(loadParishes, [search]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleToggleBlock = async (parish: ParishRow) => {
+        setPendingBlockId(parish.parishId)
         try {
             await api.patch(`/parishes/${parish.parishId}/block`, { isBlocked: !parish.isBlocked });
             toast.success(formatMessage({ id: parish.isBlocked ? 'parishUnblocked' : 'parishBlocked' }));
             loadParishes();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setPendingBlockId(null)
         }
     }
 
     const handleTogglePayoutBlock = async (parish: ParishRow) => {
+        setPendingPayoutId(parish.parishId)
         try {
             await api.patch(`/parishes/${parish.parishId}/payout-block`, { payoutBlocked: !parish.payoutBlocked });
             toast.success(formatMessage({ id: 'saved' }));
             loadParishes();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setPendingPayoutId(null)
         }
     }
 
     const handleDelete = async (parish: ParishRow, event: React.MouseEvent) => {
         event.stopPropagation();
         if (!window.confirm(formatMessage({ id: 'deleteParishMsg' }))) return;
+        setPendingDeleteId(parish.parishId)
         try {
             await api.delete(`/parishes/${parish.parishId}`);
             toast.success(formatMessage({ id: 'saved' }));
             loadParishes();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setPendingDeleteId(null)
         }
     }
 
@@ -120,16 +132,26 @@ export default function Parishes() {
                             <TableCell>{formatDate(parish.createdAt)}</TableCell>
                             <TableCell onClick={(e) => e.stopPropagation()}>
                                 <Tooltip title={formatMessage({ id: parish.isBlocked ? 'parishBlockedTooltip' : 'parishActiveTooltip' })}>
-                                    <Switch checked={!parish.isBlocked} onChange={() => handleToggleBlock(parish)} size="small" />
+                                    <Switch
+                                        checked={!parish.isBlocked}
+                                        onChange={() => handleToggleBlock(parish)}
+                                        size="small"
+                                        disabled={pendingBlockId === parish.parishId}
+                                    />
                                 </Tooltip>
                             </TableCell>
                             <TableCell onClick={(e) => e.stopPropagation()}>
                                 <Tooltip title={formatMessage({ id: 'payoutBlockToggleTooltip' })}>
-                                    <Switch checked={!parish.payoutBlocked} onChange={() => handleTogglePayoutBlock(parish)} size="small" />
+                                    <Switch
+                                        checked={!parish.payoutBlocked}
+                                        onChange={() => handleTogglePayoutBlock(parish)}
+                                        size="small"
+                                        disabled={pendingPayoutId === parish.parishId}
+                                    />
                                 </Tooltip>
                             </TableCell>
                             <TableCell align="right">
-                                <IconButton size="small" onClick={(e) => handleDelete(parish, e)}>
+                                <IconButton size="small" onClick={(e) => handleDelete(parish, e)} disabled={pendingDeleteId === parish.parishId}>
                                     <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                                 </IconButton>
                             </TableCell>

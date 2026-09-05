@@ -21,11 +21,13 @@ export default function MassOrders() {
     const { formatMessage, formatDate, formatNumber } = useIntl()
     const { push } = useRouter()
     const [orders, setOrders] = useState<MassOrderRow[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     useEffect(() => {
         api.get('/mass-order/active')
             .then(({ data }) => setOrders(data.data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -34,6 +36,9 @@ export default function MassOrders() {
             <Typography variant="h2" color="primary" sx={{ paddingBottom: 0 }}>
                 {formatMessage({ id: 'massRequest' })}
             </Typography>
+            {isLoading ? (
+                <Typography variant="body2">{formatMessage({ id: 'loading' })}</Typography>
+            ) : (
             <Table>
                 <TableHead>
                     <TableRow>
@@ -69,6 +74,7 @@ export default function MassOrders() {
                     )}
                 </TableBody>
             </Table>
+            )}
         </Box>
     );
 }

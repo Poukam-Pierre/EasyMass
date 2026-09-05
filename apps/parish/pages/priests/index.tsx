@@ -28,23 +28,29 @@ export default function Priests() {
     const [priests, setPriests] = useState<PriestRow[]>([])
     const [editing, setEditing] = useState<PriestRow | null>(null)
     const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     const loadPriests = () => {
         api.get('/priest')
             .then(({ data }) => setPriests(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(loadPriests, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleDelete = async (priest: PriestRow) => {
         if (!window.confirm(formatMessage({ id: 'deleteMassMsgWarning' }))) return;
+        setDeletingId(priest.priestId)
         try {
             await api.delete(`/priest/${priest.priestId}`);
             toast.success(formatMessage({ id: 'saved' }));
             loadPriests();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setDeletingId(null)
         }
     }
 
@@ -64,6 +70,9 @@ export default function Priests() {
                     + {formatMessage({ id: 'createPriest' })}
                 </Button>
             </Box>
+            {isLoading ? (
+                <Typography variant="body2">{formatMessage({ id: 'loading' })}</Typography>
+            ) : (
             <Table>
                 <TableHead>
                     <TableRow>
@@ -93,7 +102,11 @@ export default function Priests() {
                                 <IconButton size="small" onClick={() => setEditing(priest)}>
                                     <Icon icon={editIcon} fontSize={18} />
                                 </IconButton>
-                                <IconButton size="small" onClick={() => handleDelete(priest)}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleDelete(priest)}
+                                    disabled={deletingId === priest.priestId}
+                                >
                                     <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                                 </IconButton>
                             </TableCell>
@@ -104,6 +117,7 @@ export default function Priests() {
                     )}
                 </TableBody>
             </Table>
+            )}
         </Box>
     );
 }

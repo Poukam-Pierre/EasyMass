@@ -40,6 +40,7 @@ export default function ParishDetail() {
     const [masses, setMasses] = useState<MassRow[] | null>(null)
     const [priests, setPriests] = useState<PriestRow[] | null>(null)
     const [transactions, setTransactions] = useState<TransactionRow[] | null>(null)
+    const [isTabLoading, setIsTabLoading] = useState<boolean>(false)
 
     useEffect(() => {
         if (!parishId) return
@@ -52,19 +53,25 @@ export default function ParishDetail() {
     useEffect(() => {
         if (!parishId) return
         if (tab === 1 && masses === null) {
+            setIsTabLoading(true)
             api.get('/masses', { params: { parishId } })
                 .then(({ data }) => setMasses(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+                .finally(() => setIsTabLoading(false));
         }
         if (tab === 2 && priests === null) {
+            setIsTabLoading(true)
             api.get('/priest', { params: { parishId } })
                 .then(({ data }) => setPriests(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+                .finally(() => setIsTabLoading(false));
         }
         if (tab === 3 && transactions === null) {
+            setIsTabLoading(true)
             api.get('/transactions', { params: { parishId } })
                 .then(({ data }) => setTransactions(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+                .finally(() => setIsTabLoading(false));
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab, parishId])
@@ -103,96 +110,108 @@ export default function ParishDetail() {
             )}
 
             {tab === 1 && (
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            {['dateOfMass', 'massType', 'price', 'status'].map((key) => (
-                                <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
-                                    {formatMessage({ id: key }).toUpperCase()}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {(masses ?? []).map((mass) => (
-                            <TableRow
-                                key={mass.massId}
-                                hover
-                                sx={{ cursor: 'pointer' }}
-                                onClick={() => push(`/masses/${mass.massId}`)}
-                            >
-                                <TableCell>{formatDate(mass.startAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
-                                <TableCell>{mass.massType}</TableCell>
-                                <TableCell>{formatNumber(mass.price, { style: 'currency', currency: 'xaf' })}</TableCell>
-                                <TableCell>{mass.status}</TableCell>
+                isTabLoading ? (
+                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
+                ) : (
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {['dateOfMass', 'massType', 'price', 'status'].map((key) => (
+                                    <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
+                                        {formatMessage({ id: key }).toUpperCase()}
+                                    </TableCell>
+                                ))}
                             </TableRow>
-                        ))}
-                        {masses?.length === 0 && (
-                            <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {(masses ?? []).map((mass) => (
+                                <TableRow
+                                    key={mass.massId}
+                                    hover
+                                    sx={{ cursor: 'pointer' }}
+                                    onClick={() => push(`/masses/${mass.massId}`)}
+                                >
+                                    <TableCell>{formatDate(mass.startAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
+                                    <TableCell>{mass.massType}</TableCell>
+                                    <TableCell>{formatNumber(mass.price, { style: 'currency', currency: 'xaf' })}</TableCell>
+                                    <TableCell>{mass.status}</TableCell>
+                                </TableRow>
+                            ))}
+                            {masses?.length === 0 && (
+                                <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )
             )}
 
             {tab === 2 && (
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            {['name', 'parishPhoneNumber', 'status'].map((key) => (
-                                <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
-                                    {formatMessage({ id: key }).toUpperCase()}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {(priests ?? []).map((priest) => (
-                            <TableRow key={priest.priestId}>
-                                <TableCell>{priest.firstName} {priest.secondName}</TableCell>
-                                <TableCell>{priest.phoneNumber}</TableCell>
-                                <TableCell>
-                                    <Chip
-                                        size="small"
-                                        label={formatMessage({ id: priest.available ? 'priestAvailable' : 'priestUnavailable' })}
-                                        color={priest.available ? 'success' : 'default'}
-                                    />
-                                </TableCell>
+                isTabLoading ? (
+                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
+                ) : (
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {['name', 'parishPhoneNumber', 'status'].map((key) => (
+                                    <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
+                                        {formatMessage({ id: key }).toUpperCase()}
+                                    </TableCell>
+                                ))}
                             </TableRow>
-                        ))}
-                        {priests?.length === 0 && (
-                            <TableRow><TableCell colSpan={3} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {(priests ?? []).map((priest) => (
+                                <TableRow key={priest.priestId}>
+                                    <TableCell>{priest.firstName} {priest.secondName}</TableCell>
+                                    <TableCell>{priest.phoneNumber}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            size="small"
+                                            label={formatMessage({ id: priest.available ? 'priestAvailable' : 'priestUnavailable' })}
+                                            color={priest.available ? 'success' : 'default'}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {priests?.length === 0 && (
+                                <TableRow><TableCell colSpan={3} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )
             )}
 
             {tab === 3 && (
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            {['date', 'action', 'amount', 'cashRegister'].map((key) => (
-                                <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
-                                    {formatMessage({ id: key }).toUpperCase()}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {(transactions ?? []).map((transaction) => (
-                            <TableRow key={transaction.transactionId}>
-                                <TableCell>{formatDate(transaction.createdAt)}</TableCell>
-                                <TableCell>{transaction.transactionType}</TableCell>
-                                <TableCell sx={{ color: transaction.amount < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600 }}>
-                                    {formatNumber(transaction.amount, { style: 'currency', currency: 'xaf' })}
-                                </TableCell>
-                                <TableCell>{formatNumber(transaction.balanceAfter, { style: 'currency', currency: 'xaf' })}</TableCell>
+                isTabLoading ? (
+                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
+                ) : (
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                {['date', 'action', 'amount', 'cashRegister'].map((key) => (
+                                    <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
+                                        {formatMessage({ id: key }).toUpperCase()}
+                                    </TableCell>
+                                ))}
                             </TableRow>
-                        ))}
-                        {transactions?.length === 0 && (
-                            <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {(transactions ?? []).map((transaction) => (
+                                <TableRow key={transaction.transactionId}>
+                                    <TableCell>{formatDate(transaction.createdAt)}</TableCell>
+                                    <TableCell>{transaction.transactionType}</TableCell>
+                                    <TableCell sx={{ color: transaction.amount < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600 }}>
+                                        {formatNumber(transaction.amount, { style: 'currency', currency: 'xaf' })}
+                                    </TableCell>
+                                    <TableCell>{formatNumber(transaction.balanceAfter, { style: 'currency', currency: 'xaf' })}</TableCell>
+                                </TableRow>
+                            ))}
+                            {transactions?.length === 0 && (
+                                <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                )
             )}
         </Box>
     );
@@ -205,6 +224,7 @@ function OverviewTab({ parish, onUpdated }: { parish: ParishDetailData; onUpdate
     const [managerName, setManagerName] = useState(parish.managerName)
     const [payoutNumber, setPayoutNumber] = useState(parish.payoutNumber ?? '')
     const [isSaving, setIsSaving] = useState(false)
+    const [isTogglingPayout, setIsTogglingPayout] = useState(false)
 
     const handleSave = async () => {
         setIsSaving(true)
@@ -223,11 +243,14 @@ function OverviewTab({ parish, onUpdated }: { parish: ParishDetailData; onUpdate
     }
 
     const handleTogglePayoutBlock = async () => {
+        setIsTogglingPayout(true)
         try {
             const { data } = await api.patch(`/parishes/${parish.parishId}/payout-block`, { payoutBlocked: !parish.payoutBlocked });
             onUpdated({ ...parish, payoutBlocked: data.payoutBlocked });
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setIsTogglingPayout(false)
         }
     }
 
@@ -243,7 +266,7 @@ function OverviewTab({ parish, onUpdated }: { parish: ParishDetailData; onUpdate
             <Divider />
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="body2">{formatMessage({ id: 'payoutBlockToggleTooltip' })}</Typography>
-                <Switch checked={!parish.payoutBlocked} onChange={handleTogglePayoutBlock} />
+                <Switch checked={!parish.payoutBlocked} onChange={handleTogglePayoutBlock} disabled={isTogglingPayout} />
             </Box>
         </Box>
     );

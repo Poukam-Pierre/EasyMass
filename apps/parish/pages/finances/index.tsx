@@ -13,12 +13,14 @@ export default function Finances() {
     const { parish } = useAuth()
     const [transactions, setTransactions] = useState<TransactionRow[]>([])
     const [isWithdrawOpen, setIsWithdrawOpen] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     const loadTransactions = () => {
         if (!parish) return
         api.get('/transactions', { params: { parishId: parish.parishId } })
             .then(({ data }) => setTransactions(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(loadTransactions, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -67,7 +69,13 @@ export default function Finances() {
                     >
                         {formatMessage({ id: 'transactionHistory' })}
                     </Typography>
-                    <FinanceTable transactions={transactions} />
+                    {isLoading ? (
+                        <Typography variant="body2" sx={{ padding: '10px 16px' }}>
+                            {formatMessage({ id: 'loading' })}
+                        </Typography>
+                    ) : (
+                        <FinanceTable transactions={transactions} />
+                    )}
                 </Box>
             </Box>
         </>

@@ -23,11 +23,14 @@ export default function Administrators() {
     const { admin: currentAdmin } = useAuth()
     const [administrators, setAdministrators] = useState<AdministratorRow[]>([])
     const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     const loadAdministrators = () => {
         api.get('/administrators')
             .then(({ data }) => setAdministrators(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(loadAdministrators, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -38,13 +41,20 @@ export default function Administrators() {
             return;
         }
         if (!window.confirm(formatMessage({ id: 'deleteMassMsgWarning' }))) return;
+        setDeletingId(administrator.adminId)
         try {
             await api.delete(`/administrators/${administrator.adminId}`);
             toast.success(formatMessage({ id: 'saved' }));
             loadAdministrators();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setDeletingId(null)
         }
+    }
+
+    if (isLoading) {
+        return <Typography sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>;
     }
 
     return (
@@ -81,7 +91,7 @@ export default function Administrators() {
                             <TableCell>{administrator.role}</TableCell>
                             <TableCell>{formatDate(administrator.createdAt)}</TableCell>
                             <TableCell align="right">
-                                <IconButton size="small" onClick={() => handleDelete(administrator)}>
+                                <IconButton size="small" onClick={() => handleDelete(administrator)} disabled={deletingId === administrator.adminId}>
                                     <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                                 </IconButton>
                             </TableCell>

@@ -24,9 +24,11 @@ export default function Masses() {
     const [parish, setParish] = useState<ParishOption | null>(null)
     const [massData, setMassData] = useState<TableMassOwnerData[]>([])
     const [search, setSearch] = useState<string>('')
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const loadMasses = () => {
         if (!parish) return
+        setIsLoading(true)
         api.get('/masses', { params: { parishId: parish.parishId } })
             .then(({ data }: { data: MassApiRow[] }) => {
                 setMassData(data.map((row) => ({
@@ -39,7 +41,8 @@ export default function Masses() {
                     status: row.status.toLowerCase(),
                 })));
             })
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(loadMasses, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -92,7 +95,13 @@ export default function Masses() {
                 </Box>
             </Box>
             {parish ? (
-                <MassOwnerTable massDataTable={filteredMassData} parishId={parish.parishId} onChanged={loadMasses} />
+                isLoading ? (
+                    <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
+                        {formatMessage({ id: 'loading' })}
+                    </Typography>
+                ) : (
+                    <MassOwnerTable massDataTable={filteredMassData} parishId={parish.parishId} onChanged={loadMasses} />
+                )
             ) : (
                 <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
                     {formatMessage({ id: 'selectParishPrompt' })}

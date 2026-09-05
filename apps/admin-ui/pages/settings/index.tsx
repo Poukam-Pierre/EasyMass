@@ -41,6 +41,7 @@ export default function Settings() {
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [editing, setEditing] = useState<PlatformSettingsRow | null>(null)
+    const [deletingCurrency, setDeletingCurrency] = useState<string | null>(null)
 
     const loadSettings = () => {
         api.get('/platform-settings')
@@ -85,6 +86,7 @@ export default function Settings() {
 
     const handleDelete = async (row: PlatformSettingsRow) => {
         if (!window.confirm(formatMessage({ id: 'deleteMassMsgWarning' }))) return;
+        setDeletingCurrency(row.currency)
         try {
             await api.delete('/platform-settings', { params: { currency: row.currency } });
             toast.success(formatMessage({ id: 'saved' }));
@@ -96,6 +98,8 @@ export default function Settings() {
                     ? formatMessage({ id: key })
                     : apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' }))
             );
+        } finally {
+            setDeletingCurrency(null)
         }
     }
 
@@ -184,13 +188,13 @@ export default function Settings() {
                             <TableCell>{row.platformFeeFixedAmount}</TableCell>
                             <TableCell>{formatDate(row.updatedAt)}</TableCell>
                             <TableCell align="right">
-                                <IconButton size="small" onClick={() => openEdit(row)}>
+                                <IconButton size="small" onClick={() => openEdit(row)} disabled={deletingCurrency === row.currency}>
                                     <Icon icon={editIcon} fontSize={18} />
                                 </IconButton>
                                 <IconButton
                                     size="small"
                                     onClick={() => handleDelete(row)}
-                                    disabled={row.currency === BASE_CURRENCY}
+                                    disabled={row.currency === BASE_CURRENCY || deletingCurrency === row.currency}
                                     title={row.currency === BASE_CURRENCY ? formatMessage({ id: 'baseCurrencyCannotBeRemoved' }) : undefined}
                                 >
                                     <Icon icon={trashIcon} fontSize={18} color={row.currency === BASE_CURRENCY ? 'var(--line)' : 'var(--error)'} />

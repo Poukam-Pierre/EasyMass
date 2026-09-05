@@ -17,12 +17,15 @@ export default function MassOffer() {
     const [parish, setParish] = useState<ParishOption | null>(null)
     const [mass, setMass] = useState<MassOption | null>(null)
     const [orders, setOrders] = useState<MassIntentionRow[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     useEffect(() => {
         if (!mass) { setOrders([]); return }
+        setIsLoading(true)
         api.get('/mass-order', { params: { massId: mass.massId } })
             .then(({ data }) => setOrders(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }, [mass, formatMessage])
 
     return (
@@ -49,7 +52,13 @@ export default function MassOffer() {
                 </Box>
             </Box>
             {mass ? (
-                <IntentionMassesTable intentions={orders} />
+                isLoading ? (
+                    <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
+                        {formatMessage({ id: 'loading' })}
+                    </Typography>
+                ) : (
+                    <IntentionMassesTable intentions={orders} />
+                )
             ) : (
                 <Typography variant="body2" sx={{ color: 'var(--body)', textAlign: 'center', padding: '40px' }}>
                     {formatMessage({ id: 'selectMassPrompt' })}

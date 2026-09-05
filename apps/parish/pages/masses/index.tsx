@@ -26,6 +26,7 @@ export default function Masses() {
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
     const [massData, setMassData] = useState<TableMassOwnerData[]>([])
     const [search, setSearch] = useState<string>('')
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     const loadMasses = () => {
         if (!parish) return
@@ -41,7 +42,8 @@ export default function Masses() {
                     status: row.status.toLowerCase(),
                 })));
             })
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(loadMasses, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -107,7 +109,13 @@ export default function Masses() {
                     </Box>
                 </Box>
             </Box>
-            <MassOwnerTable massDataTable={filteredMassData} onChanged={loadMasses} />
+            {isLoading ? (
+                <Typography variant="body2" sx={{ padding: '0 16px' }}>
+                    {formatMessage({ id: 'loading' })}
+                </Typography>
+            ) : (
+                <MassOwnerTable massDataTable={filteredMassData} onChanged={loadMasses} />
+            )}
         </>
     );
 }

@@ -18,17 +18,21 @@ export default function MassDetail() {
     const [intentions, setIntentions] = useState<MassIntentionRow[]>([])
     const [prices, setPrices] = useState<MassPriceRow[]>([])
     const [isDownloading, setIsDownloading] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
     const { formatMessage, formatNumber } = useIntl()
     const { query: { massId } } = useRouter()
 
     useEffect(() => {
         if (typeof massId !== 'string') return
-        api.get(`/masses/${massId}/intentions`)
-            .then(({ data }) => setIntentions(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
-        api.get(`/masses/${massId}/prices`)
-            .then(({ data }) => setPrices(data))
-            .catch(() => undefined);
+        setIsLoading(true)
+        Promise.all([
+            api.get(`/masses/${massId}/intentions`)
+                .then(({ data }) => setIntentions(data))
+                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' })))),
+            api.get(`/masses/${massId}/prices`)
+                .then(({ data }) => setPrices(data))
+                .catch(() => undefined),
+        ]).finally(() => setIsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [massId])
 
@@ -58,30 +62,36 @@ export default function MassDetail() {
                     {formatMessage({ id: isDownloading ? 'processing' : 'downloadAll' })}
                 </Button>
             </Box>
-            <IntentionMassesTable intentions={intentions} />
+            {isLoading ? (
+                <Typography variant="body2">{formatMessage({ id: 'loading' })}</Typography>
+            ) : (
+                <>
+                    <IntentionMassesTable intentions={intentions} />
 
-            {prices.length > 0 && (
-                <Box>
-                    <Typography variant="h4">{formatMessage({ id: 'massPrices' })}</Typography>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{formatMessage({ id: 'currency' })}</TableCell>
-                                <TableCell align="right">{formatMessage({ id: 'amount' })}</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {prices.map((price) => (
-                                <TableRow key={price.massPriceId}>
-                                    <TableCell>{price.currency}</TableCell>
-                                    <TableCell align="right">
-                                        {formatNumber(price.amount, { style: 'currency', currency: price.currency.toLowerCase() })}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Box>
+                    {prices.length > 0 && (
+                        <Box>
+                            <Typography variant="h4">{formatMessage({ id: 'massPrices' })}</Typography>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{formatMessage({ id: 'currency' })}</TableCell>
+                                        <TableCell align="right">{formatMessage({ id: 'amount' })}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {prices.map((price) => (
+                                        <TableRow key={price.massPriceId}>
+                                            <TableCell>{price.currency}</TableCell>
+                                            <TableCell align="right">
+                                                {formatNumber(price.amount, { style: 'currency', currency: price.currency.toLowerCase() })}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    )}
+                </>
             )}
         </Box>
     );
