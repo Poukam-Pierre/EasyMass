@@ -1,6 +1,7 @@
-import { Avatar, Box, Button, TextField, Typography } from "@mui/material";
+import { useDispatchLanguage } from "@easy-messe/libs/theme";
+import { Avatar, Box, Button, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import * as yup from 'yup';
@@ -11,6 +12,23 @@ import api, { apiErrorMessage } from "../../lib/api";
 export default function Profile() {
     const { formatMessage, formatDate } = useIntl()
     const { parish, setParish } = useAuth()
+    const languageDispatch = useDispatchLanguage()
+    const [isSavingLanguage, setIsSavingLanguage] = useState(false)
+
+    const handleLanguageChange = async (language: 'EN' | 'FR') => {
+        if (!parish || language === parish.language) return;
+        setIsSavingLanguage(true)
+        try {
+            await api.patch('/auth/language', { language });
+            setParish({ ...parish, language });
+            languageDispatch({ type: language === 'FR' ? 'USE_FRENCH' : 'USE_ENGLISH' });
+            toast.success(formatMessage({ id: 'saved' }));
+        } catch (error) {
+            toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setIsSavingLanguage(false)
+        }
+    }
 
     const profileForm = useFormik({
         enableReinitialize: true,
@@ -124,6 +142,20 @@ export default function Profile() {
                 >
                     {formatMessage({ id: payoutForm.isSubmitting ? 'processing' : 'save' })}
                 </Button>
+            </Box>
+
+            <Box sx={{ display: 'grid', rowGap: 2 }}>
+                <Typography variant="h4">{formatMessage({ id: 'settings' })}</Typography>
+                <Select
+                    size="small"
+                    value={parish.language}
+                    disabled={isSavingLanguage}
+                    onChange={(e) => handleLanguageChange(e.target.value as 'EN' | 'FR')}
+                    sx={{ justifySelf: 'start', minWidth: '160px' }}
+                >
+                    <MenuItem value="EN">English</MenuItem>
+                    <MenuItem value="FR">Français</MenuItem>
+                </Select>
             </Box>
         </Box>
     );

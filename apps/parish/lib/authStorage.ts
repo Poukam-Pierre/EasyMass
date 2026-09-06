@@ -7,6 +7,7 @@ export interface ParishUser {
     email: string;
     adminId: string;
     createdAt: string;
+    language: 'EN' | 'FR';
     // Not part of the login response (no backend route returns a parish's
     // own full record) — only ever populated client-side from the response
     // of a successful PATCH /parishes/:id/payout-method.
