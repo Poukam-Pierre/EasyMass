@@ -44,6 +44,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
                 email: data.email,
                 phone: data.phone,
                 createdAt: data.createdAt,
+                language: data.language,
             };
             writeStoredAuth({
                 accessToken: data.accessToken,
