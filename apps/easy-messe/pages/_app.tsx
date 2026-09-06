@@ -16,7 +16,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
     const { activeLanguage } = useLanguage()
 
     return (
-        <EasyMassThemeProvider defaultLang="fr">
+        <EasyMassThemeProvider defaultLang="en">
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={activeLanguage}>
                 <Head>
                     <title>{"Order masses remotely - EasyMesse"}</title>
