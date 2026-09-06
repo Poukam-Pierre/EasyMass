@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/client';
+import { Language, UserRole } from '@prisma/client';
 import { createId } from '@paralleldrive/cuid2';
 import * as bcrypt from 'bcryptjs';
 import { AdministratorService } from '../administrator/administrator.service';
@@ -96,6 +96,7 @@ export class AuthService {
         password: flattened.password,
         phone: flattened.phone,
         createdAt: flattened.createdAt,
+        language: flattened.language,
         ...tokens,
       });
     }
@@ -111,6 +112,7 @@ export class AuthService {
         phone: flattened.phone,
         managerName: flattened.managerName,
         createdAt: flattened.createdAt,
+        language: flattened.language,
         ...tokens,
       });
     }
@@ -248,6 +250,19 @@ export class AuthService {
         { cause: new Error() }
       );
     }
+  }
+
+  /** Language lives on User (not Administrator/Parish/Priest) since it's a
+   * property of the account itself, shared across every role — kept as one
+   * generic endpoint here instead of duplicated into each role's own
+   * profile-update route, which would each be touching a different table
+   * than the one this field actually lives on. */
+  async updateLanguage(userId: string, language: Language) {
+    await this.prismaService.user.update({
+      where: { userId },
+      data: { language },
+    });
+    return { code: 200, message: 'Language updated successfully' };
   }
 
   private addOneDay(date: Date): Date {

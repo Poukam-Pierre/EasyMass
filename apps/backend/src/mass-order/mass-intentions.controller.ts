@@ -46,17 +46,22 @@ export class MassIntentionsController {
     );
     const mass = await this.prismaService.mass.findUnique({
       where: { massId },
-      include: { parish: { select: { name: true } } },
+      include: {
+        parish: { select: { name: true, user: { select: { language: true } } } },
+      },
     });
     if (!mass) throw new NotFoundException('Mass not found');
 
+    // The document is for the owning parish, so it renders in the parish's
+    // own language regardless of which role (parish or admin) downloads it.
+    const language = mass.parish.user.language;
     const pdf = await this.pdfService.generateIntentionsPdf(
-      'Mass Intentions',
-      formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name),
+      formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name, language),
       orders.map((o) => ({
         believerName: o.orderByBeliever.fullName,
         intension: o.intension,
-      }))
+      })),
+      language
     );
     res.setHeader(
       'Content-Disposition',

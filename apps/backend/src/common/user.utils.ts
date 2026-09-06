@@ -1,5 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
-import { Administrator, Parish, Priest, User, UserRole } from '@prisma/client';
+import { Administrator, Language, Parish, Priest, User, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type UserWithRoles = User & {
@@ -14,6 +14,7 @@ interface FlattenedCommon {
   email: string;
   password: string;
   userId: string;
+  language: Language;
 }
 
 export type FlattenedUser =
@@ -50,6 +51,7 @@ export function flattenUserRole(user: UserWithRoles): FlattenedUser | null {
     email: user.email,
     password: user.password,
     userId: user.userId,
+    language: user.language,
   };
 
   switch (user.role) {

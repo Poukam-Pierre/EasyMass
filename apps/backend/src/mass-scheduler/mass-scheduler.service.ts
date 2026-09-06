@@ -38,13 +38,14 @@ export class MassSchedulerService {
     ReturnType<MassService['findPendingIntentions']>
   >[number]) {
     try {
+      const language = mass.parish.user.language;
       const pdf = await this.pdfService.generateIntentionsPdf(
-        'Mass Intentions',
-        formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name),
+        formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name, language),
         mass.massOrder.map((o) => ({
           believerName: o.orderByBeliever.fullName,
           intension: o.intension,
-        }))
+        })),
+        language
       );
 
       await this.mailService.sendWithAttachment(
