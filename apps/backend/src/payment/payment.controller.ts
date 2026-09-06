@@ -88,18 +88,25 @@ export class PaymentController {
     return this.paymentService.handlePaypalWebhook(headers, event);
   }
 
-  /** No real checkout frontend is wired up yet (see
-   * apps/easy-messe/components/OfferMass/ModalPayment.tsx — its confirm
-   * button isn't connected to anything), so this redirects only if
-   * FRONTEND_CHECKOUT_RETURN_URL is set; otherwise it falls back to a
-   * plain JSON body so the flow is still testable end-to-end today. */
+  /** Redirects to FRONTEND_CHECKOUT_RETURN_URL with the outcome as query
+   * params — `method=paypal` so the checkout-return page knows the receipt
+   * confirmation is coming by email (vs. `method=mobile_money`'s SMS, see
+   * initiateNotchPayCheckout), and `success` so it only promises that
+   * confirmation when the payment genuinely completed, not on a
+   * cancellation/failure. Falls back to a plain JSON body if
+   * FRONTEND_CHECKOUT_RETURN_URL isn't configured. */
   private respondToPaypalRedirect(
     res: Response,
-    result: { code: number; message: string }
+    result: { code: number; message: string; success?: boolean }
   ) {
     const redirectBase = process.env.FRONTEND_CHECKOUT_RETURN_URL;
     if (redirectBase) {
-      res.redirect(`${redirectBase}?message=${encodeURIComponent(result.message)}`);
+      const params = new URLSearchParams({
+        message: result.message,
+        method: 'paypal',
+        success: String(result.success ?? false),
+      });
+      res.redirect(`${redirectBase}?${params.toString()}`);
       return;
     }
     res.status(result.code).json(result);

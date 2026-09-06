@@ -216,6 +216,10 @@ export const website = {
   estimatedBilling: 'Total estimé',
   checkoutReturnTitle: 'Merci !',
   checkoutReturnDefaultMessage: 'Votre paiement est en cours de traitement.',
+  checkoutReturnReceiptEmail:
+    'Vous recevrez bientôt la confirmation de votre achat ainsi que le lien pour télécharger votre reçu par email.',
+  checkoutReturnReceiptSms:
+    'Vous recevrez bientôt la confirmation de votre achat ainsi que le lien pour télécharger votre reçu par SMS.',
   backToHome: "Retour à l'accueil",
   dashboard: 'Tableau de bord',
   overview: 'Vue d’ensemble',

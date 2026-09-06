@@ -375,7 +375,12 @@ export class PaymentService {
         description: 'Mass offering payment',
         email: 'poukamtech@gmail.com',
         reference,
-        callback: callbackUrl,
+        // Tags which channel the frontend's fallback checkout-return page
+        // should say the confirmation SMS is coming through — NotchPay
+        // redirects the browser straight back here itself (unlike PayPal,
+        // which returns through our own /paypal/return controller first),
+        // so this is the only way to pass that along for this method.
+        callback: `${callbackUrl}?method=mobile_money`,
       }),
     };
 
@@ -584,6 +589,7 @@ export class PaymentService {
       return {
         code: 200,
         message: `PayPal order not completed (status: ${capture.status}).`,
+        success: false,
       };
     }
 
@@ -593,7 +599,7 @@ export class PaymentService {
   /** Customer backed out on PayPal's approval page. */
   async handlePaypalCancel(orderId: string) {
     await this.failPendingPaymentsByReference(orderId);
-    return { code: 200, message: 'Checkout cancelled.' };
+    return { code: 200, message: 'Checkout cancelled.', success: false };
   }
 
   /** Shared by handlePaypalReturn (order not completed) and
@@ -679,7 +685,11 @@ export class PaymentService {
       select: { currency: true },
     });
     if (!sample) {
-      return { code: 200, message: 'Already processed or unknown reference.' };
+      return {
+        code: 200,
+        message: 'Already processed or unknown reference.',
+        success: false,
+      };
     }
     const rateToBaseCurrency =
       await this.currencyConversionService.getRateToBaseCurrency(
@@ -696,7 +706,12 @@ export class PaymentService {
         data: { status: 'COMPLETED', paidAt: new Date() },
       });
       if (count === 0) {
-        return { code: 200, message: 'Already processed.', payments: null };
+        return {
+          code: 200,
+          message: 'Already processed.',
+          success: true,
+          payments: null,
+        };
       }
 
       const payments = await tx.payment.findMany({
@@ -775,7 +790,7 @@ export class PaymentService {
           ));
       }
 
-      return { code: 200, message: 'Bill of masses ordered', payments };
+      return { code: 200, message: 'Bill of masses ordered', success: true, payments };
     });
 
     // Outside the transaction and awaited-but-caught: an SMS/email hiccup
@@ -793,7 +808,7 @@ export class PaymentService {
       }
     }
 
-    return { code: result.code, message: result.message };
+    return { code: result.code, message: result.message, success: result.success };
   }
 
   private buildInvoiceDetails(

@@ -209,6 +209,10 @@ export const website = {
   estimatedBilling: 'Estimated total',
   checkoutReturnTitle: 'Thank you!',
   checkoutReturnDefaultMessage: 'Your payment is being processed.',
+  checkoutReturnReceiptEmail:
+    'You will receive a confirmation of your purchase and the link to download your receipt by email soon.',
+  checkoutReturnReceiptSms:
+    'You will receive a confirmation of your purchase and the link to download your receipt by SMS soon.',
   backToHome: 'Back to home',
   email: 'Email',
   emailWarningMsg: 'Email is required',
