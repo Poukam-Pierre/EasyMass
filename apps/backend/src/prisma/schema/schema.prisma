@@ -17,6 +17,11 @@ model User {
   email                   String             @unique
   password                String
   role                    UserRole           @default(ADMIN)
+  /// UI/document language preference — set via PATCH /auth/language. Only
+  /// affects this app's own static wording (labels, headers, date
+  /// formatting) — never applied to free-text user content like a mass
+  /// intention, which is whatever language the person who wrote it chose.
+  language                Language           @default(EN)
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
   refreshTokens           RefreshToken[]
@@ -261,4 +266,9 @@ enum UserRole {
   PRIEST @map("priest")
   PARISH @map("parish")
   ADMIN  @map("admin")
+}
+
+enum Language {
+  EN @map("en")
+  FR @map("fr")
 }
