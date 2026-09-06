@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MassType } from '@prisma/client';
+import { Language, MassType } from '@prisma/client';
 import { join } from 'path';
 import PDFDocument from 'pdfkit';
 
@@ -23,12 +23,44 @@ export interface InvoiceDetails {
   lines: InvoiceLine[];
 }
 
-const MASS_TYPE_LABELS: Record<MassType, string> = {
-  UNIQUE: 'Unique',
-  TRIDUUM: 'Triduum',
-  SEVEN: 'Seven-Day',
-  NOVENA: 'Novena',
-  THIRTY: 'Thirty-Day',
+/** Mirrors the wording already used in the app's own UI (see
+ * libs/theme/src/languages/{en-us,fr}/website.ts's unique/triduum/seven/
+ * novena/thirty keys) so a mass type reads the same in the PDF as it does
+ * on screen, rather than introducing separate translations here. */
+const MASS_TYPE_LABELS: Record<Language, Record<MassType, string>> = {
+  EN: {
+    UNIQUE: 'Unique',
+    TRIDUUM: 'Triduum',
+    SEVEN: 'Seven-Day',
+    NOVENA: 'Novena',
+    THIRTY: 'Thirty-Day',
+  },
+  FR: {
+    UNIQUE: 'Unique',
+    TRIDUUM: 'Triduum',
+    SEVEN: 'Septaine',
+    NOVENA: 'Neuvaine',
+    THIRTY: 'Trentaine',
+  },
+};
+
+/** Every static label generateIntentionsPdf renders — never applied to the
+ * intention text itself, which is free-form user content that may be in
+ * either language regardless of the parish's own setting. */
+const INTENTIONS_PDF_TEXT: Record<
+  Language,
+  { title: string; noIntentions: string; footer: (count: number) => string }
+> = {
+  EN: {
+    title: 'Mass Intentions',
+    noIntentions: 'No intentions were submitted for this mass.',
+    footer: (count) => `${count} intention${count === 1 ? '' : 's'} — EasyMesse`,
+  },
+  FR: {
+    title: 'Intentions de messe',
+    noIntentions: "Aucune intention n'a été soumise pour cette messe.",
+    footer: (count) => `${count} intention${count === 1 ? '' : 's'} — EasyMesse`,
+  },
 };
 
 /** Copied into src/assets at build time (see webpack.config.js's `assets`
@@ -42,23 +74,31 @@ const TEXT_COLOR = '#1a1a1a';
 const MUTED_COLOR = '#666666';
 const LINE_COLOR = '#dddddd';
 
-/** "Unique Mass — Paroisse Saint-Test — Fri, Aug 28 2026, 7:00 PM" —
- * shared by the on-demand download and the scheduled email attachment so
- * both PDFs identify the mass the same way. */
+/** "Unique Mass — Paroisse Saint-Test — Fri, Aug 28 2026, 7:00 PM" (or its
+ * French equivalent) — shared by the on-demand download and the scheduled
+ * email attachment so both PDFs identify the mass the same way, in the
+ * owning parish's own language. */
 export function formatMassSubtitle(
   massType: MassType,
   startAt: Date,
-  parishName: string
+  parishName: string,
+  language: Language
 ): string {
-  const formattedDate = startAt.toLocaleString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${MASS_TYPE_LABELS[massType]} Mass — ${parishName} — ${formattedDate}`;
+  const formattedDate = startAt.toLocaleString(
+    language === 'FR' ? 'fr-FR' : 'en-US',
+    {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    }
+  );
+  const label = MASS_TYPE_LABELS[language][massType];
+  return language === 'FR'
+    ? `Messe ${label} — ${parishName} — ${formattedDate}`
+    : `${label} Mass — ${parishName} — ${formattedDate}`;
 }
 
 /** "EasyMesse" wordmark + the document's own title/subtitle on the left,
@@ -294,12 +334,17 @@ export class PdfService {
    * Renders the intentions oldest-to-newest as one numbered entry per
    * requester. Caller is responsible for ordering `intentions`
    * (MassOrderService.findMassOrderByMass already returns oldest-first).
+   * `language` only affects this document's own static wording (title,
+   * "no intentions" message, footer) — never the intention text itself,
+   * which is free-form user content that may be in either language
+   * regardless of the parish's own setting.
    */
   async generateIntentionsPdf(
-    title: string,
     subtitle: string,
-    intentions: IntentionRow[]
+    intentions: IntentionRow[],
+    language: Language
   ): Promise<Buffer> {
+    const text = INTENTIONS_PDF_TEXT[language];
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ margin: 50, size: 'A4', bufferPages: true });
       const chunks: Buffer[] = [];
@@ -308,7 +353,7 @@ export class PdfService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      renderHeader(doc, title, subtitle);
+      renderHeader(doc, text.title, subtitle);
 
       const margin = doc.page.margins.left;
       const contentWidth = doc.page.width - margin - doc.page.margins.right;
@@ -318,7 +363,7 @@ export class PdfService {
           .font('Helvetica')
           .fontSize(12)
           .fillColor(MUTED_COLOR)
-          .text('No intentions were submitted for this mass.');
+          .text(text.noIntentions);
         doc.fillColor('#000000');
       } else {
         intentions.forEach((row, index) => {
@@ -338,10 +383,7 @@ export class PdfService {
         });
       }
 
-      renderFooter(
-        doc,
-        `${intentions.length} intention${intentions.length === 1 ? '' : 's'} — EasyMesse`
-      );
+      renderFooter(doc, text.footer(intentions.length));
 
       doc.end();
     });
