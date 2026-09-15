@@ -335,4 +335,9 @@ export const website = {
   maxPrice: 'Prix maximum (XAF)',
   setMassPrice: 'Définir le prix',
   ownPriceHint: 'Le prix propre à cette messe, s\'il est défini, prévaut toujours sur une tranche de prix.',
+  transactionType: 'Type',
+  allTypes: 'Tous les types',
+  filterFrom: 'Du',
+  filterTo: 'Au',
+  clearFilters: 'Effacer',
 };

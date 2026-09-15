@@ -330,4 +330,9 @@ export const website = {
   maxPrice: 'Maximum price (XAF)',
   setMassPrice: 'Set price',
   ownPriceHint: "This mass's own price, if set, always overrides any price band for it.",
+  transactionType: 'Type',
+  allTypes: 'All types',
+  filterFrom: 'From',
+  filterTo: 'To',
+  clearFilters: 'Clear',
 };
