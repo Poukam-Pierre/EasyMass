@@ -58,28 +58,6 @@ export class TransactionsService {
     },
   } as const;
 
-  /** Unbounded — kept exactly as-is for existing callers (admin-ui's
-   * Finances page and its parish-detail Transactions tab) that read the
-   * whole list at once and take transactions[0].balanceAfter as the
-   * current running balance. New callers that need pagination/filtering
-   * should use findAllTransactionByParishPaginated instead, which computes
-   * the balance independently so it stays correct under a filter. */
-  async findAllTransactionByParish(
-    parishId: string,
-    requestUser: { id: string; role: UserRole }
-  ) {
-    await this.assertCanViewParishTransactions(parishId, requestUser);
-
-    return this.prismaService.transaction.findMany({
-      where: {
-        ownerId: parishId,
-        ownerType: 'PARISH',
-      },
-      orderBy: { createdAt: 'desc' },
-      select: TransactionsService.TRANSACTION_ROW_SELECT,
-    });
-  }
-
   /**
    * Paginated, optionally filtered (type, createdAt range) — plus the
    * parish's *current* balance, computed independently of whatever page/

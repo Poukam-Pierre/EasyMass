@@ -17,13 +17,4 @@ export class MassOrderController {
   ) {
     return this.massOrderService.findAllUnprocessMass(query, request.user);
   }
-
-  @Get()
-  @Roles(UserRole.PARISH, UserRole.ADMIN)
-  findMassOrderByMass(
-    @Query('massId') massId: string,
-    @Request() request: AuthenticatedRequest
-  ) {
-    return this.massOrderService.findMassOrderByMass(massId, request.user);
-  }
 }

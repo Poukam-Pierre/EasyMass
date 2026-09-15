@@ -25,18 +25,11 @@ export class MassIntentionsController {
     private readonly prismaService: PrismaService
   ) {}
 
-  @Get()
-  @Roles(UserRole.PARISH, UserRole.ADMIN)
-  async list(
-    @Param('massId') massId: string,
-    @Request() request: AuthenticatedRequest
-  ) {
-    return this.massOrderService.findMassOrderByMass(massId, request.user);
-  }
-
-  /** Paginated/filterable counterpart to the route above — additive, so the
-   * unbounded route (relied on by admin-ui's mass detail page and the PDF
-   * download below) keeps its existing contract. */
+  /** Paginated/filterable — backs both admin-ui's and parish's mass detail
+   * pages, and admin-ui's massOffer page (browse-by-parish entry point into
+   * the same data). The unpaginated findMassOrderByMass this delegates to
+   * is still used directly (not through a route) by the PDF download
+   * below, which needs every intention at once, not one page of them. */
   @Get('/paginated')
   @Roles(UserRole.PARISH, UserRole.ADMIN)
   async listPaginated(

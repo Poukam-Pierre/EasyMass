@@ -10,20 +10,8 @@ import { TransactionsService } from './transactions.service';
 export class TransactionsController {
   constructor(private readonly transactionService: TransactionsService) {}
 
-  @Get()
-  @Roles(UserRole.PARISH, UserRole.ADMIN)
-  findTransactionByParish(
-    @Query('parishId') parishId: string,
-    @Request() request: AuthenticatedRequest
-  ) {
-    return this.transactionService.findAllTransactionByParish(
-      parishId,
-      request.user
-    );
-  }
-
-  /** Paginated/filterable counterpart to the route above — additive, so the
-   * unbounded route (relied on by admin-ui) keeps its existing contract. */
+  /** Paginated/filterable — backs the finance tables in both admin-ui and
+   * parish, plus admin-ui's parish-detail transactions tab. */
   @Get('/paginated')
   @Roles(UserRole.PARISH, UserRole.ADMIN)
   findTransactionByParishPaginated(

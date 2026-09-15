@@ -96,10 +96,10 @@ export class MassOrderService {
   }
 
   /** Oldest to newest, per the intentions-gathering requirement — every
-   * completed order for the mass, unbounded. Kept exactly as-is for
-   * existing callers (the printed/emailed intentions PDF, which needs the
-   * whole list at once; admin-ui's massOffer page) — new callers that need
-   * pagination/filtering should use findPaginatedMassOrderByMass instead. */
+   * completed order for the mass, unbounded. Only called directly (not
+   * through a route) by the printed/emailed intentions PDF, which needs
+   * the whole list at once, not one page of it. Every HTTP caller uses
+   * findPaginatedMassOrderByMass instead. */
   async findMassOrderByMass(
     massId: string,
     requestUser: { id: string; role: UserRole }
@@ -123,10 +123,12 @@ export class MassOrderService {
     return maskAnonymousOrders(orders);
   }
 
-  /** Paginated + optional createdAt-range filter — backs the parish-facing
-   * intentions table. Additive alongside findMassOrderByMass so that
-   * method's existing callers (PDF generation, admin-ui) keep their
-   * current unbounded-array contract. */
+  /** Paginated + optional createdAt-range filter — backs every intentions
+   * table in both admin-ui and parish. Kept separate from
+   * findMassOrderByMass (rather than making pagination params optional on
+   * one method) so that method's one remaining caller — PDF generation,
+   * which needs the whole list — can't accidentally be handed a partial
+   * page instead. */
   async findPaginatedMassOrderByMass(
     massId: string,
     query: DateRangeQueryDto,
