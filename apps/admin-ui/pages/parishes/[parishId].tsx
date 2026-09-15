@@ -1,8 +1,10 @@
 import { theme } from "@easy-messe/libs/theme";
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from "@easy-messe/shared-ui";
 import {
     Box, Button, Chip, Divider, Switch, Tab, Table, TableBody, TableCell,
-    TableHead, TableRow, Tabs, TextField, Typography
+    TableHead, TablePagination, TableRow, Tabs, TextField, Typography
 } from "@mui/material";
+import { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
@@ -37,10 +39,23 @@ export default function ParishDetail() {
     const [tab, setTab] = useState<number>(0)
     const [parish, setParish] = useState<ParishDetailData | null>(null)
     const [cities, setCities] = useState<City[]>([])
-    const [masses, setMasses] = useState<MassRow[] | null>(null)
+
+    const [masses, setMasses] = useState<MassRow[]>([])
+    const [massesTotal, setMassesTotal] = useState<number>(0)
+    const [massesPage, setMassesPage] = useState<number>(0)
+    const [massesDateFrom, setMassesDateFrom] = useState<Dayjs | null>(null)
+    const [massesDateTo, setMassesDateTo] = useState<Dayjs | null>(null)
+    const [isMassesLoading, setIsMassesLoading] = useState<boolean>(false)
+
     const [priests, setPriests] = useState<PriestRow[] | null>(null)
-    const [transactions, setTransactions] = useState<TransactionRow[] | null>(null)
-    const [isTabLoading, setIsTabLoading] = useState<boolean>(false)
+    const [isPriestsLoading, setIsPriestsLoading] = useState<boolean>(false)
+
+    const [transactions, setTransactions] = useState<TransactionRow[]>([])
+    const [transactionsTotal, setTransactionsTotal] = useState<number>(0)
+    const [transactionsPage, setTransactionsPage] = useState<number>(0)
+    const [transactionsDateFrom, setTransactionsDateFrom] = useState<Dayjs | null>(null)
+    const [transactionsDateTo, setTransactionsDateTo] = useState<Dayjs | null>(null)
+    const [isTransactionsLoading, setIsTransactionsLoading] = useState<boolean>(false)
 
     useEffect(() => {
         if (!parishId) return
@@ -51,30 +66,48 @@ export default function ParishDetail() {
     }, [parishId, formatMessage])
 
     useEffect(() => {
-        if (!parishId) return
-        if (tab === 1 && masses === null) {
-            setIsTabLoading(true)
-            api.get('/masses', { params: { parishId } })
-                .then(({ data }) => setMasses(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
-                .finally(() => setIsTabLoading(false));
-        }
-        if (tab === 2 && priests === null) {
-            setIsTabLoading(true)
-            api.get('/priest', { params: { parishId } })
-                .then(({ data }) => setPriests(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
-                .finally(() => setIsTabLoading(false));
-        }
-        if (tab === 3 && transactions === null) {
-            setIsTabLoading(true)
-            api.get('/transactions', { params: { parishId } })
-                .then(({ data }) => setTransactions(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
-                .finally(() => setIsTabLoading(false));
-        }
+        if (!parishId || tab !== 1) return
+        setIsMassesLoading(true)
+        api.get('/masses/paginated', {
+            params: {
+                parishId,
+                page: massesPage + 1,
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(massesDateFrom, massesDateTo),
+            }
+        })
+            .then(({ data }) => { setMasses(data.data); setMassesTotal(data.total) })
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsMassesLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab, parishId, massesPage, massesDateFrom, massesDateTo])
+
+    useEffect(() => {
+        if (!parishId || tab !== 2 || priests !== null) return
+        setIsPriestsLoading(true)
+        api.get('/priest', { params: { parishId } })
+            .then(({ data }) => setPriests(data))
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsPriestsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab, parishId])
+
+    useEffect(() => {
+        if (!parishId || tab !== 3) return
+        setIsTransactionsLoading(true)
+        api.get('/transactions/paginated', {
+            params: {
+                parishId,
+                page: transactionsPage + 1,
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(transactionsDateFrom, transactionsDateTo),
+            }
+        })
+            .then(({ data }) => { setTransactions(data.data); setTransactionsTotal(data.total) })
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsTransactionsLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab, parishId, transactionsPage, transactionsDateFrom, transactionsDateTo])
 
     const cityName = cities.find((c) => c.city_id === parish?.city_id)?.city_name ?? '-'
 
@@ -110,43 +143,62 @@ export default function ParishDetail() {
             )}
 
             {tab === 1 && (
-                isTabLoading ? (
-                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
-                ) : (
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                {['dateOfMass', 'massType', 'price', 'status'].map((key) => (
-                                    <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
-                                        {formatMessage({ id: key }).toUpperCase()}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {(masses ?? []).map((mass) => (
-                                <TableRow
-                                    key={mass.massId}
-                                    hover
-                                    sx={{ cursor: 'pointer' }}
-                                    onClick={() => push(`/masses/${mass.massId}`)}
-                                >
-                                    <TableCell>{formatDate(mass.startAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
-                                    <TableCell>{mass.massType}</TableCell>
-                                    <TableCell>{formatNumber(mass.price, { style: 'currency', currency: 'xaf' })}</TableCell>
-                                    <TableCell>{mass.status}</TableCell>
-                                </TableRow>
-                            ))}
-                            {masses?.length === 0 && (
-                                <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                )
+                <Box sx={{ display: 'grid', rowGap: 2 }}>
+                    <DateRangeFilter
+                        from={massesDateFrom}
+                        to={massesDateTo}
+                        onFromChange={(value) => { setMassesPage(0); setMassesDateFrom(value) }}
+                        onToChange={(value) => { setMassesPage(0); setMassesDateTo(value) }}
+                        onClear={() => { setMassesPage(0); setMassesDateFrom(null); setMassesDateTo(null) }}
+                    />
+                    {isMassesLoading ? (
+                        <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
+                    ) : (
+                        <>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        {['dateOfMass', 'massType', 'price', 'status'].map((key) => (
+                                            <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
+                                                {formatMessage({ id: key }).toUpperCase()}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {masses.map((mass) => (
+                                        <TableRow
+                                            key={mass.massId}
+                                            hover
+                                            sx={{ cursor: 'pointer' }}
+                                            onClick={() => push(`/masses/${mass.massId}`)}
+                                        >
+                                            <TableCell>{formatDate(mass.startAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
+                                            <TableCell>{mass.massType}</TableCell>
+                                            <TableCell>{formatNumber(mass.price, { style: 'currency', currency: 'xaf' })}</TableCell>
+                                            <TableCell>{mass.status}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {masses.length === 0 && (
+                                        <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            <TablePagination
+                                component="div"
+                                count={massesTotal}
+                                page={massesPage}
+                                onPageChange={(_, newPage) => setMassesPage(newPage)}
+                                rowsPerPage={DEFAULT_PAGE_SIZE}
+                                rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
+                            />
+                        </>
+                    )}
+                </Box>
             )}
 
             {tab === 2 && (
-                isTabLoading ? (
+                isPriestsLoading ? (
                     <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
                 ) : (
                     <Table size="small">
@@ -182,36 +234,55 @@ export default function ParishDetail() {
             )}
 
             {tab === 3 && (
-                isTabLoading ? (
-                    <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
-                ) : (
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                {['date', 'action', 'amount', 'cashRegister'].map((key) => (
-                                    <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
-                                        {formatMessage({ id: key }).toUpperCase()}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {(transactions ?? []).map((transaction) => (
-                                <TableRow key={transaction.transactionId}>
-                                    <TableCell>{formatDate(transaction.createdAt)}</TableCell>
-                                    <TableCell>{transaction.transactionType}</TableCell>
-                                    <TableCell sx={{ color: transaction.amount < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600 }}>
-                                        {formatNumber(transaction.amount, { style: 'currency', currency: 'xaf' })}
-                                    </TableCell>
-                                    <TableCell>{formatNumber(transaction.balanceAfter, { style: 'currency', currency: 'xaf' })}</TableCell>
-                                </TableRow>
-                            ))}
-                            {transactions?.length === 0 && (
-                                <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                )
+                <Box sx={{ display: 'grid', rowGap: 2 }}>
+                    <DateRangeFilter
+                        from={transactionsDateFrom}
+                        to={transactionsDateTo}
+                        onFromChange={(value) => { setTransactionsPage(0); setTransactionsDateFrom(value) }}
+                        onToChange={(value) => { setTransactionsPage(0); setTransactionsDateTo(value) }}
+                        onClear={() => { setTransactionsPage(0); setTransactionsDateFrom(null); setTransactionsDateTo(null) }}
+                    />
+                    {isTransactionsLoading ? (
+                        <Typography variant="body2" sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'loading' })}</Typography>
+                    ) : (
+                        <>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        {['date', 'action', 'amount', 'cashRegister'].map((key) => (
+                                            <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
+                                                {formatMessage({ id: key }).toUpperCase()}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {transactions.map((transaction) => (
+                                        <TableRow key={transaction.transactionId}>
+                                            <TableCell>{formatDate(transaction.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
+                                            <TableCell>{transaction.transactionType}</TableCell>
+                                            <TableCell sx={{ color: transaction.amount < 0 ? 'var(--error)' : 'var(--success)', fontWeight: 600 }}>
+                                                {formatNumber(transaction.amount, { style: 'currency', currency: 'xaf' })}
+                                            </TableCell>
+                                            <TableCell>{formatNumber(transaction.balanceAfter, { style: 'currency', currency: 'xaf' })}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {transactions.length === 0 && (
+                                        <TableRow><TableCell colSpan={4} sx={{ color: 'var(--body)' }}>{formatMessage({ id: 'noDataYet' })}</TableCell></TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            <TablePagination
+                                component="div"
+                                count={transactionsTotal}
+                                page={transactionsPage}
+                                onPageChange={(_, newPage) => setTransactionsPage(newPage)}
+                                rowsPerPage={DEFAULT_PAGE_SIZE}
+                                rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
+                            />
+                        </>
+                    )}
+                </Box>
             )}
         </Box>
     );

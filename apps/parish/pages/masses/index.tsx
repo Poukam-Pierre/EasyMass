@@ -1,16 +1,14 @@
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from "@easy-messe/shared-ui";
 import { Box, Button, TablePagination, Typography } from "@mui/material";
 import dayjs, { Dayjs } from 'dayjs';
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
-import DateRangeFilter from "../../components/DateRangeFilter";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
 import { withParishLayout } from "../../components/withParishLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import api, { apiErrorMessage } from "../../lib/api";
-
-const ROWS_PER_PAGE = 25;
 
 interface MassApiRow {
     massId: string;
@@ -39,9 +37,8 @@ export default function Masses() {
             params: {
                 parishId: parish.parishId,
                 page: page + 1,
-                limit: ROWS_PER_PAGE,
-                ...(dateFrom ? { from: dateFrom.startOf('day').toISOString() } : {}),
-                ...(dateTo ? { to: dateTo.endOf('day').toISOString() } : {}),
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(dateFrom, dateTo),
             }
         })
             .then(({ data }: { data: { data: MassApiRow[]; total: number } }) => {
@@ -130,8 +127,8 @@ export default function Masses() {
                         count={total}
                         page={page}
                         onPageChange={(_, newPage) => setPage(newPage)}
-                        rowsPerPage={ROWS_PER_PAGE}
-                        rowsPerPageOptions={[ROWS_PER_PAGE]}
+                        rowsPerPage={DEFAULT_PAGE_SIZE}
+                        rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
                     />
                 </>
             )}

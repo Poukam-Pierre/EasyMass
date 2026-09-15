@@ -1,10 +1,12 @@
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
 import { Icon } from "@iconify/react";
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from "@easy-messe/shared-ui";
 import {
     Autocomplete, Box, Button, Dialog, IconButton, Table, TableBody, TableCell,
-    TableHead, TableRow, TextField, Typography
+    TableHead, TablePagination, TableRow, TextField, Typography
 } from "@mui/material";
+import { Dayjs } from "dayjs";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
@@ -25,6 +27,10 @@ interface MassPriceRow {
 
 export default function Historics() {
     const [intentions, setIntentions] = useState<MassIntentionRow[]>([])
+    const [total, setTotal] = useState<number>(0)
+    const [page, setPage] = useState<number>(0)
+    const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
+    const [dateTo, setDateTo] = useState<Dayjs | null>(null)
     const [prices, setPrices] = useState<MassPriceRow[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isDownloading, setIsDownloading] = useState<boolean>(false)
@@ -41,19 +47,29 @@ export default function Historics() {
             .catch(() => undefined);
     }
 
+    useEffect(loadPrices, [massesId]) // eslint-disable-line react-hooks/exhaustive-deps
+
     useEffect(() => {
         if (typeof massesId !== 'string') return
         setIsLoading(true)
-        Promise.all([
-            api.get(`/masses/${massesId}/intentions`)
-                .then(({ data }) => setIntentions(data))
-                .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' })))),
-            api.get(`/masses/${massesId}/prices`)
-                .then(({ data }) => setPrices(data))
-                .catch(() => undefined),
-        ]).finally(() => setIsLoading(false));
+        api.get(`/masses/${massesId}/intentions/paginated`, {
+            params: {
+                page: page + 1,
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(dateFrom, dateTo),
+            }
+        })
+            .then(({ data }) => { setIntentions(data.data); setTotal(data.total) })
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [massesId])
+    }, [massesId, page, dateFrom, dateTo])
+
+    const handleClearFilters = () => {
+        setPage(0)
+        setDateFrom(null)
+        setDateTo(null)
+    }
 
     const handleDownloadAll = async () => {
         if (typeof massesId !== 'string') return
@@ -162,6 +178,8 @@ export default function Historics() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    rowGap: 2
                 }}>
                     <Typography
                         variant="h3"
@@ -172,13 +190,22 @@ export default function Historics() {
                     >
                         {formatMessage({ id: 'massIntention' })}
                     </Typography>
-                    <Button
-                        variant="contained"
-                        onClick={handleDownloadAll}
-                        disabled={isDownloading || intentions.length === 0}
-                    >
-                        {formatMessage({ id: isDownloading ? 'processing' : 'downloadAll' })}
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 2, flexWrap: 'wrap' }}>
+                        <DateRangeFilter
+                            from={dateFrom}
+                            to={dateTo}
+                            onFromChange={(value) => { setPage(0); setDateFrom(value) }}
+                            onToChange={(value) => { setPage(0); setDateTo(value) }}
+                            onClear={handleClearFilters}
+                        />
+                        <Button
+                            variant="contained"
+                            onClick={handleDownloadAll}
+                            disabled={isDownloading || total === 0}
+                        >
+                            {formatMessage({ id: isDownloading ? 'processing' : 'downloadAll' })}
+                        </Button>
+                    </Box>
                 </Box>
             </Box>
             {isLoading ? (
@@ -187,6 +214,14 @@ export default function Historics() {
                 <>
                     <IntentionMassesTable
                         intentions={intentions}
+                    />
+                    <TablePagination
+                        component="div"
+                        count={total}
+                        page={page}
+                        onPageChange={(_, newPage) => setPage(newPage)}
+                        rowsPerPage={DEFAULT_PAGE_SIZE}
+                        rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
                     />
 
                     <Box sx={{ marginTop: 5 }}>

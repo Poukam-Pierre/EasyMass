@@ -47,7 +47,7 @@ export default function IntentionMassesTable({
                             <TableCell sx={{ fontWeight: 600 }}>{orderByBeliever.fullName}</TableCell>
                             <TableCell>{intension}</TableCell>
                             <TableCell>{formatNumber(price, { style: 'currency', currency: currency.toLowerCase() })}</TableCell>
-                            <TableCell>{formatDate(createdAt)}</TableCell>
+                            <TableCell>{formatDate(createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

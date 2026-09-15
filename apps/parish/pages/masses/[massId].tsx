@@ -1,16 +1,14 @@
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from "@easy-messe/shared-ui";
 import { Box, Button, TablePagination, Typography } from "@mui/material";
 import { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
-import DateRangeFilter from "../../components/DateRangeFilter";
 import IntentionMassesTable, { MassIntentionRow } from "../../components/Masses/IntentionMassesTable";
 import { withParishLayout } from "../../components/withParishLayout";
 import api, { apiErrorMessage } from "../../lib/api";
 import { downloadFile } from "../../lib/downloadFile";
-
-const ROWS_PER_PAGE = 25;
 
 export default function MassDetail() {
     const [intentions, setIntentions] = useState<MassIntentionRow[]>([])
@@ -29,9 +27,8 @@ export default function MassDetail() {
         api.get(`/masses/${massId}/intentions/paginated`, {
             params: {
                 page: page + 1,
-                limit: ROWS_PER_PAGE,
-                ...(dateFrom ? { from: dateFrom.startOf('day').toISOString() } : {}),
-                ...(dateTo ? { to: dateTo.endOf('day').toISOString() } : {}),
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(dateFrom, dateTo),
             }
         })
             .then(({ data }) => { setIntentions(data.data); setTotal(data.total) })
@@ -91,8 +88,8 @@ export default function MassDetail() {
                         count={total}
                         page={page}
                         onPageChange={(_, newPage) => setPage(newPage)}
-                        rowsPerPage={ROWS_PER_PAGE}
-                        rowsPerPageOptions={[ROWS_PER_PAGE]}
+                        rowsPerPage={DEFAULT_PAGE_SIZE}
+                        rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
                     />
                 </>
             )}

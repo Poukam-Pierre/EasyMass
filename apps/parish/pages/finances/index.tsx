@@ -8,11 +8,11 @@ import {
   TablePagination,
   Typography,
 } from '@mui/material';
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from '@easy-messe/shared-ui';
 import { Dayjs } from 'dayjs';
 import { ReactNode, useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { toast } from 'react-toastify';
-import DateRangeFilter from '../../components/DateRangeFilter';
 import WithdrawDialog from '../../components/Finances/WithdrawDialog';
 import FinanceTable, {
   TransactionRow,
@@ -21,7 +21,6 @@ import { withParishLayout } from '../../components/withParishLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import api, { apiErrorMessage } from '../../lib/api';
 
-const ROWS_PER_PAGE = 25;
 const TRANSACTION_TYPES = ['INCOME', 'INCOME_REVERSAL', 'WITHDRAWAL'] as const;
 
 export default function Finances() {
@@ -45,10 +44,9 @@ export default function Finances() {
         params: {
           parishId: parish.parishId,
           page: page + 1,
-          limit: ROWS_PER_PAGE,
+          limit: DEFAULT_PAGE_SIZE,
           ...(transactionType ? { transactionType } : {}),
-          ...(dateFrom ? { from: dateFrom.startOf('day').toISOString() } : {}),
-          ...(dateTo ? { to: dateTo.endOf('day').toISOString() } : {}),
+          ...dateRangeParams(dateFrom, dateTo),
         },
       })
       .then(({ data }) => {
@@ -64,13 +62,7 @@ export default function Finances() {
       .finally(() => setIsLoading(false));
   };
 
-  useEffect(loadTransactions, [
-    parish,
-    page,
-    transactionType,
-    dateFrom,
-    dateTo,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(loadTransactions, [parish, page, transactionType, dateFrom, dateTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClearFilters = () => {
     setPage(0);
@@ -192,8 +184,8 @@ export default function Finances() {
                 count={total}
                 page={page}
                 onPageChange={(_, newPage) => setPage(newPage)}
-                rowsPerPage={ROWS_PER_PAGE}
-                rowsPerPageOptions={[ROWS_PER_PAGE]}
+                rowsPerPage={DEFAULT_PAGE_SIZE}
+                rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
               />
             </>
           )}

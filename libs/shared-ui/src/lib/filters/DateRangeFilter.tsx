@@ -11,7 +11,10 @@ interface DateRangeFilterProps {
     onClear: () => void;
 }
 
-export default function DateRangeFilter({ from, to, onFromChange, onToChange, onClear }: DateRangeFilterProps) {
+/** Shared by every paginated table (admin-ui and parish) that filters by a
+ * createdAt-style date range, so the picker pair/clear-button UI exists
+ * exactly once instead of once per app. */
+export function DateRangeFilter({ from, to, onFromChange, onToChange, onClear }: DateRangeFilterProps) {
     const { formatMessage } = useIntl()
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 2, flexWrap: 'wrap' }}>
