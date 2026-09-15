@@ -343,4 +343,6 @@ export const website = {
   threeMonths: '3 months',
   sixMonths: '6 months',
   oneYear: '1 year',
+  passwordWarningMsg: 'Password is required',
+  correctionPasswordHelp: 'Confirm your password to apply this correction.',
 };

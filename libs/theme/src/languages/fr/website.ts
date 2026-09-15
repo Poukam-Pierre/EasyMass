@@ -348,4 +348,6 @@ export const website = {
   threeMonths: '3 mois',
   sixMonths: '6 mois',
   oneYear: '1 an',
+  passwordWarningMsg: 'Le mot de passe est obligatoire',
+  correctionPasswordHelp: 'Confirmez votre mot de passe pour appliquer cette correction.',
 };

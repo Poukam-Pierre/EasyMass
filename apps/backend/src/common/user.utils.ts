@@ -1,5 +1,6 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Administrator, Language, Parish, Priest, User, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 type UserWithRoles = User & {
@@ -89,6 +90,28 @@ export async function resolveParishForUser(
     });
   }
   return parish;
+}
+
+/**
+ * Step-up re-authentication for a dangerous action the caller's existing
+ * JWT alone shouldn't be sufficient for (e.g. a ledger correction) — the
+ * same bcrypt check login uses, just against the already-authenticated
+ * caller's own stored hash instead of a submitted email. Throws
+ * UnauthorizedException (never reveals *why* — wrong password vs. no such
+ * user — both look identical) if it doesn't match.
+ */
+export async function verifyCurrentPassword(
+  prisma: PrismaService,
+  userId: string,
+  password: string
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { userId } });
+  const valid = user ? await bcrypt.compare(password, user.password) : false;
+  if (!valid) {
+    throw new UnauthorizedException('Incorrect password.', {
+      cause: new Error(),
+    });
+  }
 }
 
 export async function resolveAdminForUser(

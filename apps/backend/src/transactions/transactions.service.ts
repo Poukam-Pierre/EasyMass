@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { OwnerType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { resolveParishForUser } from '../common/user.utils';
+import { resolveParishForUser, verifyCurrentPassword } from '../common/user.utils';
 import { PaginatedResult, dateRangeFilter, toSkipTake } from '../common/pagination.utils';
 import { FindTransactionsQueryDto } from './dto/find-transactions-query.dto';
 
@@ -163,14 +163,21 @@ export class TransactionsService {
 
   /** Admin-only manual ledger fix — an ADMIN_CORRECTION row, never an edit
    * to an existing row. Serializable so it can't race a concurrent
-   * payment/withdrawal/refund for the same owner into a lost update. */
+   * payment/withdrawal/refund for the same owner into a lost update.
+   * Requires re-proving the caller's password before touching the ledger —
+   * @Roles(ADMIN)/the JWT alone isn't enough for an action that can
+   * fabricate balance, since a hijacked session or an unattended admin
+   * screen would otherwise be enough on its own. */
   async createCorrection(
     ownerId: string,
     ownerType: OwnerType,
     amount: number,
     note: string,
+    password: string,
     createdByUserId: string
   ) {
+    await verifyCurrentPassword(this.prismaService, createdByUserId, password);
+
     return this.prismaService.runSerializableTransaction((tx) =>
       this.createWithBalance(tx, {
         transactionType: 'ADMIN_CORRECTION',

@@ -36,6 +36,7 @@ export class TransactionsController {
       dto.ownerType,
       dto.amount,
       dto.note,
+      dto.password,
       request.user.id
     );
   }
