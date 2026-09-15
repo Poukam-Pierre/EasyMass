@@ -7,7 +7,7 @@ import {
 import { MassStatus, MassType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
-import { CreateMassDto } from './dto/create-mass.dto';
+import { CreateMassDto, RecurrenceInterval } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
 import { maskAnonymousOrders } from '../mass-order/anonymous-believer.util';
 import { PaginatedResult, toSkipTake } from '../common/pagination.utils';
@@ -24,10 +24,10 @@ export class MassService {
   constructor(private readonly prismaService: PrismaService) {}
 
   /**
-   * Creates masses for the authenticated parish. If replicate=true, creates
-   * one mass every 7 days at the same time-of-day from startAt until the end
-   * of the current year (skipping any that already exist); otherwise creates
-   * a single mass, rejecting an exact-timestamp duplicate.
+   * Creates masses for the authenticated parish. If `recurrence` is given,
+   * creates one mass per occurrence between startAt and recurrence.until,
+   * at the same time-of-day (skipping any that already exist); otherwise
+   * creates a single mass, rejecting an exact-timestamp duplicate.
    */
   async createMasses(
     input: CreateMassDto,
@@ -38,13 +38,17 @@ export class MassService {
       requestUser.id
     );
     const parishId = parish.parishId;
-    const { replicate, startAt, estimatedDurationMinutes, price, massType } =
+    const { recurrence, startAt, estimatedDurationMinutes, price, massType } =
       input;
 
     const existingMass = await this.findAllByParish(parishId);
 
-    if (replicate) {
-      const allDates = this.getDatesEvery7DaysUntilEndOfYear(startAt);
+    if (recurrence) {
+      const allDates = this.generateRecurrenceDates(
+        startAt,
+        recurrence.interval,
+        recurrence.until
+      );
 
       const uniqueDates = this.getUniqueDate(
         allDates,
@@ -395,18 +399,76 @@ export class MassService {
     });
   }
 
-  private getDatesEvery7DaysUntilEndOfYear(startDate: string): string[] {
+  /** Every occurrence of the recurrence rule from startDate through the
+   * inclusive `until` bound, at the same time-of-day as startDate. WEEKLY
+   * steps by 7 days (so the weekday never drifts, by construction).
+   * MONTHLY preserves the "Nth weekday of the month" position of startDate
+   * (e.g. startDate on the 2nd Monday of January → every month's own 2nd
+   * Monday) — a month with no such occurrence (e.g. no 5th Monday) is
+   * skipped rather than snapped to the nearest one, matching how
+   * Google/Outlook handle "monthly on the 5th weekday". */
+  private generateRecurrenceDates(
+    startDate: string,
+    interval: RecurrenceInterval,
+    until: string
+  ): string[] {
+    const start = new Date(startDate);
+    const end = new Date(until);
+    end.setHours(23, 59, 59, 999); // `until` is a date the parish picked, not a timestamp — make it inclusive of that whole day regardless of startAt's time-of-day.
     const dates: string[] = [];
-    const currentYear = new Date().getFullYear();
-    const endDate = new Date(currentYear, 11, 31);
 
-    const currentDate = new Date(startDate);
+    if (interval === RecurrenceInterval.WEEKLY) {
+      const current = new Date(start);
+      while (current <= end) {
+        dates.push(new Date(current).toISOString());
+        current.setDate(current.getDate() + 7);
+      }
+      return dates;
+    }
 
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate).toISOString());
-      currentDate.setDate(currentDate.getDate() + 7);
+    const weekday = start.getDay();
+    const occurrence = Math.floor((start.getDate() - 1) / 7); // 0 = 1st, 1 = 2nd, ...
+
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (cursor <= end) {
+      const candidate = this.nthWeekdayOfMonth(
+        cursor.getFullYear(),
+        cursor.getMonth(),
+        weekday,
+        occurrence,
+        start
+      );
+      if (candidate && candidate >= start && candidate <= end) {
+        dates.push(candidate.toISOString());
+      }
+      cursor.setMonth(cursor.getMonth() + 1);
     }
     return dates;
+  }
+
+  /** The `occurrence`-th (0-indexed) `weekday` of the given year/month, at
+   * `timeSource`'s time-of-day — or null if that occurrence doesn't exist
+   * in this month (e.g. a "5th Monday" in a month that only has 4). */
+  private nthWeekdayOfMonth(
+    year: number,
+    month: number,
+    weekday: number,
+    occurrence: number,
+    timeSource: Date
+  ): Date | null {
+    const firstOfMonth = new Date(year, month, 1);
+    const firstMatchOffset = (weekday - firstOfMonth.getDay() + 7) % 7;
+    const day = 1 + firstMatchOffset + occurrence * 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    if (day > daysInMonth) return null;
+    return new Date(
+      year,
+      month,
+      day,
+      timeSource.getHours(),
+      timeSource.getMinutes(),
+      timeSource.getSeconds()
+    );
   }
 
   private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
