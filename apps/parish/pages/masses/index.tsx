@@ -1,15 +1,16 @@
-import searchIcon from '@iconify-icons/fluent/search-24-regular';
-import { Icon } from "@iconify/react";
-import { Box, Button, InputBase, Typography } from "@mui/material";
-import dayjs from 'dayjs';
+import { Box, Button, TablePagination, Typography } from "@mui/material";
+import dayjs, { Dayjs } from 'dayjs';
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
+import DateRangeFilter from "../../components/DateRangeFilter";
 import MassesDialog from "../../components/Masses/Dialogs/Masses";
 import MassOwnerTable, { TableMassOwnerData } from "../../components/Masses/tableMassOwnerData";
 import { withParishLayout } from "../../components/withParishLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import api, { apiErrorMessage } from "../../lib/api";
+
+const ROWS_PER_PAGE = 25;
 
 interface MassApiRow {
     massId: string;
@@ -25,14 +26,26 @@ export default function Masses() {
     const { parish } = useAuth()
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
     const [massData, setMassData] = useState<TableMassOwnerData[]>([])
-    const [search, setSearch] = useState<string>('')
+    const [total, setTotal] = useState<number>(0)
+    const [page, setPage] = useState<number>(0)
+    const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
+    const [dateTo, setDateTo] = useState<Dayjs | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
     const loadMasses = () => {
         if (!parish) return
-        api.get('/masses', { params: { parishId: parish.parishId } })
-            .then(({ data }: { data: MassApiRow[] }) => {
-                setMassData(data.map((row) => ({
+        setIsLoading(true)
+        api.get('/masses/paginated', {
+            params: {
+                parishId: parish.parishId,
+                page: page + 1,
+                limit: ROWS_PER_PAGE,
+                ...(dateFrom ? { from: dateFrom.startOf('day').toISOString() } : {}),
+                ...(dateTo ? { to: dateTo.endOf('day').toISOString() } : {}),
+            }
+        })
+            .then(({ data }: { data: { data: MassApiRow[]; total: number } }) => {
+                setMassData(data.data.map((row) => ({
                     id: row.massId,
                     dayOfMass: dayjs(row.startAt),
                     massTime: dayjs(row.startAt),
@@ -41,16 +54,19 @@ export default function Masses() {
                     estimatedDurationMinutes: row.estimatedDurationMinutes,
                     status: row.status.toLowerCase(),
                 })));
+                setTotal(data.total)
             })
             .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
             .finally(() => setIsLoading(false));
     }
 
-    useEffect(loadMasses, [parish]) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(loadMasses, [parish, page, dateFrom, dateTo]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const filteredMassData = search
-        ? massData.filter((mass) => mass.massType.toLowerCase().includes(search.toLowerCase()))
-        : massData
+    const handleClearFilters = () => {
+        setPage(0)
+        setDateFrom(null)
+        setDateTo(null)
+    }
 
     return (
         <>
@@ -69,6 +85,8 @@ export default function Masses() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    rowGap: 2
                 }}>
                     <Typography
                         variant="h3"
@@ -87,26 +105,17 @@ export default function Masses() {
                     </Button>
                 </Box>
                 <Box sx={{
-                    display: 'grid',
-                    gridAutoFlow: 'column',
-                    width: 'fit-content',
-                    columnGap: 3,
+                    display: 'flex',
                     alignItems: 'center',
                     paddingTop: '16px'
                 }}>
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'auto 1fr',
-                        alignItems: 'center',
-                        columnGap: 1
-                    }}>
-                        <Icon icon={searchIcon} fontSize={20} />
-                        <InputBase
-                            placeholder={formatMessage({ id: 'search' })}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </Box>
+                    <DateRangeFilter
+                        from={dateFrom}
+                        to={dateTo}
+                        onFromChange={(value) => { setPage(0); setDateFrom(value) }}
+                        onToChange={(value) => { setPage(0); setDateTo(value) }}
+                        onClear={handleClearFilters}
+                    />
                 </Box>
             </Box>
             {isLoading ? (
@@ -114,7 +123,17 @@ export default function Masses() {
                     {formatMessage({ id: 'loading' })}
                 </Typography>
             ) : (
-                <MassOwnerTable massDataTable={filteredMassData} onChanged={loadMasses} />
+                <>
+                    <MassOwnerTable massDataTable={massData} onChanged={loadMasses} />
+                    <TablePagination
+                        component="div"
+                        count={total}
+                        page={page}
+                        onPageChange={(_, newPage) => setPage(newPage)}
+                        rowsPerPage={ROWS_PER_PAGE}
+                        rowsPerPageOptions={[ROWS_PER_PAGE]}
+                    />
+                </>
             )}
         </>
     );
