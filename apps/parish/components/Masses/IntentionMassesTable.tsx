@@ -7,8 +7,6 @@ import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 export interface MassIntentionRow {
     massOrderId: string;
     intension: string;
-    price: number;
-    currency: string;
     createdAt: string;
     orderByBeliever: { fullName: string };
 }
@@ -46,7 +44,7 @@ export default function IntentionMassesTable({
                             <TableCell>{index + 1}</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>{orderByBeliever.fullName}</TableCell>
                             <TableCell>{intension}</TableCell>
-                            <TableCell>{formatDate(createdAt)}</TableCell>
+                            <TableCell>{formatDate(createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

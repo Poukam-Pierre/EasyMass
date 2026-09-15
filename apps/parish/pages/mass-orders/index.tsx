@@ -10,8 +10,6 @@ import api, { apiErrorMessage } from "../../lib/api";
 interface MassOrderRow {
     massOrderId: string;
     intension: string;
-    price: number;
-    currency: string;
     createdAt: string;
     mass: { massId: string; startAt: string; massType: string };
     orderByBeliever: { fullName: string; phone: string | null };
@@ -61,7 +59,7 @@ export default function MassOrders() {
                             <TableCell>{order.intension}</TableCell>
                             <TableCell>{formatDate(order.mass.startAt)}</TableCell>
                             <TableCell>{order.mass.massType}</TableCell>
-                            <TableCell>{formatDate(order.createdAt)}</TableCell>
+                            <TableCell>{formatDate(order.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
                         </TableRow>
                     ))}
                     {orders.length === 0 && (
