@@ -18,8 +18,8 @@ export default function IntentionMassesTable({
 }: {
     intentions: MassIntentionRow[]
 }) {
-    const { formatMessage, formatDate, formatNumber } = useIntl()
-    const titles: string[] = ['applicant', 'massIntention', 'amount', 'date']
+    const { formatMessage, formatDate } = useIntl()
+    const titles: string[] = ['applicant', 'massIntention', 'date']
 
     return (
         <>
@@ -41,12 +41,11 @@ export default function IntentionMassesTable({
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {intentions.map(({ massOrderId, intension, price, currency, createdAt, orderByBeliever }, index) => (
+                    {intentions.map(({ massOrderId, intension, createdAt, orderByBeliever }, index) => (
                         <TableRow key={massOrderId} sx={{ color: 'var(--label)' }}>
                             <TableCell>{index + 1}</TableCell>
                             <TableCell sx={{ fontWeight: 600 }}>{orderByBeliever.fullName}</TableCell>
                             <TableCell>{intension}</TableCell>
-                            <TableCell>{formatNumber(price, { style: 'currency', currency: currency.toLowerCase() })}</TableCell>
                             <TableCell>{formatDate(createdAt)}</TableCell>
                         </TableRow>
                     ))}

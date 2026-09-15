@@ -18,7 +18,7 @@ interface MassOrderRow {
 }
 
 export default function MassOrders() {
-    const { formatMessage, formatDate, formatNumber } = useIntl()
+    const { formatMessage, formatDate } = useIntl()
     const { push } = useRouter()
     const [orders, setOrders] = useState<MassOrderRow[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -42,7 +42,7 @@ export default function MassOrders() {
             <Table>
                 <TableHead>
                     <TableRow>
-                        {['applicant', 'massIntention', 'amount', 'dateOfMass', 'massType', 'date'].map((key) => (
+                        {['applicant', 'massIntention', 'dateOfMass', 'massType', 'date'].map((key) => (
                             <TableCell key={key} sx={{ bgcolor: theme.palette.secondary.main, fontWeight: 600 }}>
                                 {formatMessage({ id: key }).toUpperCase()}
                             </TableCell>
@@ -59,7 +59,6 @@ export default function MassOrders() {
                         >
                             <TableCell sx={{ fontWeight: 600 }}>{order.orderByBeliever.fullName}</TableCell>
                             <TableCell>{order.intension}</TableCell>
-                            <TableCell>{formatNumber(order.price, { style: 'currency', currency: order.currency.toLowerCase() })}</TableCell>
                             <TableCell>{formatDate(order.mass.startAt)}</TableCell>
                             <TableCell>{order.mass.massType}</TableCell>
                             <TableCell>{formatDate(order.createdAt)}</TableCell>
@@ -67,7 +66,7 @@ export default function MassOrders() {
                     ))}
                     {orders.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={6} sx={{ color: 'var(--body)' }}>
+                            <TableCell colSpan={5} sx={{ color: 'var(--body)' }}>
                                 {formatMessage({ id: 'noProcessMass' })}
                             </TableCell>
                         </TableRow>
