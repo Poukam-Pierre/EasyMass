@@ -10,6 +10,7 @@ import { resolveParishForUser } from '../common/user.utils';
 import { CreateMassDto } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
 import { maskAnonymousOrders } from '../mass-order/anonymous-believer.util';
+import { PaginatedResult, toSkipTake } from '../common/pagination.utils';
 
 export interface MassFilters {
   status?: MassStatus;
@@ -205,31 +206,68 @@ export class MassService {
     });
   }
 
+  private buildParishMassWhere(
+    parishId: string,
+    filters?: MassFilters
+  ): Prisma.MassWhereInput {
+    return {
+      parishId,
+      status: filters?.status,
+      massType: filters?.massType,
+      startAt:
+        filters?.from || filters?.to
+          ? {
+              gte: filters?.from ? new Date(filters.from) : undefined,
+              lte: filters?.to ? new Date(filters.to) : undefined,
+            }
+          : undefined,
+    };
+  }
+
+  private static readonly MASS_ROW_SELECT = {
+    massId: true,
+    price: true,
+    startAt: true,
+    estimatedDurationMinutes: true,
+    status: true,
+    createdAt: true,
+    massType: true,
+  } as const;
+
+  /** Unbounded — kept exactly as-is for existing callers (admin-ui's masses
+   * page/parish-detail tab/mass selector, and this service's own
+   * createMasses "replicate" logic, which needs every existing date to
+   * avoid creating duplicates, not just one page of them). New callers
+   * that need pagination/filtering should use findAllByParishPaginated. */
   async findAllByParish(parishId: string, filters?: MassFilters) {
     return this.prismaService.mass.findMany({
-      where: {
-        parishId,
-        status: filters?.status,
-        massType: filters?.massType,
-        startAt:
-          filters?.from || filters?.to
-            ? {
-                gte: filters?.from ? new Date(filters.from) : undefined,
-                lte: filters?.to ? new Date(filters.to) : undefined,
-              }
-            : undefined,
-      },
-      select: {
-        massId: true,
-        price: true,
-        startAt: true,
-        estimatedDurationMinutes: true,
-        status: true,
-        createdAt: true,
-        massType: true,
-      },
+      where: this.buildParishMassWhere(parishId, filters),
+      select: MassService.MASS_ROW_SELECT,
       orderBy: { startAt: 'asc' },
     });
+  }
+
+  /** Paginated counterpart to findAllByParish, sharing the same filters —
+   * additive, so the unbounded method/route above keeps its existing
+   * contract for callers that rely on it. */
+  async findAllByParishPaginated(
+    parishId: string,
+    filters: MassFilters & { page?: number | string; limit?: number | string }
+  ): Promise<PaginatedResult<unknown>> {
+    const { skip, take, page, limit } = toSkipTake(filters.page, filters.limit);
+    const where = this.buildParishMassWhere(parishId, filters);
+
+    const [data, total] = await Promise.all([
+      this.prismaService.mass.findMany({
+        where,
+        select: MassService.MASS_ROW_SELECT,
+        orderBy: { startAt: 'asc' },
+        skip,
+        take,
+      }),
+      this.prismaService.mass.count({ where }),
+    ]);
+    return { data, total, page, limit };
   }
 
   /** massOrder is scoped to orders with at least one COMPLETED payment —

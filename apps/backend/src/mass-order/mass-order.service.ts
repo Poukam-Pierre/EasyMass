@@ -9,6 +9,8 @@ import { Prisma, UserRole } from '@prisma/client';
 import { MassService } from '../mass/mass.service';
 import { resolveParishForUser } from '../common/user.utils';
 import { maskAnonymousOrders } from './anonymous-believer.util';
+import { PaginatedResult, dateRangeFilter, toSkipTake } from '../common/pagination.utils';
+import { DateRangeQueryDto } from '../common/dto/date-range-query.dto';
 
 @Injectable()
 export class MassOrderService {
@@ -24,62 +26,85 @@ export class MassOrderService {
   }
 
   /**
-   * Masses belonging to the authenticated parish whose start time hasn't
-   * passed yet and that have at least one order, with their mass orders.
+   * Paginated, optionally createdAt-range-filtered — masses belonging to
+   * the authenticated parish whose start time hasn't passed yet, with
+   * their mass orders. Parish-only route (@Roles), so no other caller
+   * depends on this shape — safe to change in place, unlike
+   * findMassOrderByMass below. The date filter and the "hasn't started
+   * yet" cutoff both live in the MassOrder query itself now (via the
+   * `mass` relation) rather than pre-fetching every mass and filtering in
+   * JS, so this scales with the number of matching orders, not with the
+   * parish's total mass history.
    */
-  async findAllUnprocessMass(requestUser: { id: string; role: UserRole }) {
+  async findAllUnprocessMass(
+    query: DateRangeQueryDto,
+    requestUser: { id: string; role: UserRole }
+  ): Promise<PaginatedResult<unknown> & { code: number; message: string }> {
     const parish = await resolveParishForUser(
       this.prismaService,
       requestUser.id
     );
 
+    const { skip, take, page, limit } = toSkipTake(query.page, query.limit);
+    const range = dateRangeFilter(query.from, query.to);
+    const where: Prisma.MassOrderWhereInput = {
+      mass: { parishId: parish.parishId, startAt: { gte: new Date() } },
+      payments: { some: { status: 'COMPLETED' } },
+      ...(range ? { createdAt: range } : {}),
+    };
+
     try {
-      const masses = await this.massService.findAll(parish.parishId);
-      const allUnprocessMass = masses.filter(
-        (mass) => mass.startAt >= new Date() && mass.massOrder.length !== 0
-      );
-
-      const massIds = allUnprocessMass.map((mass) => mass.massId);
-
-      const allUnprocessMasses = await this.prismaService.massOrder.findMany({
-        where: {
-          massId: { in: massIds },
-          payments: { some: { status: 'COMPLETED' } },
-        },
-        include: {
-          mass: true,
-          orderByBeliever: true,
-        },
-      });
+      const [data, total] = await Promise.all([
+        this.prismaService.massOrder.findMany({
+          where,
+          include: { mass: true, orderByBeliever: true },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take,
+        }),
+        this.prismaService.massOrder.count({ where }),
+      ]);
       return {
         code: 200,
-        data: maskAnonymousOrders(allUnprocessMasses),
+        data: maskAnonymousOrders(data),
         message: 'Successfull request',
+        total,
+        page,
+        limit,
       };
     } catch (error) {
       throw new InternalServerErrorException();
     }
   }
 
-  /** Oldest to newest, per the intentions-gathering requirement. Scoped to
-   * the calling parish unless the caller is an admin. */
+  private async assertCanViewMassOrders(
+    massId: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    if (requestUser.role === UserRole.ADMIN) return;
+    const mass = await this.massService.findOne(massId);
+    if (!mass) throw new NotFoundException('Mass not found');
+    const parish = await resolveParishForUser(
+      this.prismaService,
+      requestUser.id
+    );
+    if (parish.parishId !== mass.parishId) {
+      throw new ForbiddenException('You may only view orders for your own masses.', {
+        cause: new Error(),
+      });
+    }
+  }
+
+  /** Oldest to newest, per the intentions-gathering requirement — every
+   * completed order for the mass, unbounded. Kept exactly as-is for
+   * existing callers (the printed/emailed intentions PDF, which needs the
+   * whole list at once; admin-ui's massOffer page) — new callers that need
+   * pagination/filtering should use findPaginatedMassOrderByMass instead. */
   async findMassOrderByMass(
     massId: string,
     requestUser: { id: string; role: UserRole }
   ) {
-    if (requestUser.role !== UserRole.ADMIN) {
-      const mass = await this.massService.findOne(massId);
-      if (!mass) throw new NotFoundException('Mass not found');
-      const parish = await resolveParishForUser(
-        this.prismaService,
-        requestUser.id
-      );
-      if (parish.parishId !== mass.parishId) {
-        throw new ForbiddenException('You may only view orders for your own masses.', {
-          cause: new Error(),
-        });
-      }
-    }
+    await this.assertCanViewMassOrders(massId, requestUser);
 
     // Scoped to orders with at least one COMPLETED payment — MassOrder
     // rows now exist from checkout initiation (see
@@ -96,6 +121,38 @@ export class MassOrderService {
       orderBy: { createdAt: 'asc' },
     });
     return maskAnonymousOrders(orders);
+  }
+
+  /** Paginated + optional createdAt-range filter — backs the parish-facing
+   * intentions table. Additive alongside findMassOrderByMass so that
+   * method's existing callers (PDF generation, admin-ui) keep their
+   * current unbounded-array contract. */
+  async findPaginatedMassOrderByMass(
+    massId: string,
+    query: DateRangeQueryDto,
+    requestUser: { id: string; role: UserRole }
+  ): Promise<PaginatedResult<unknown>> {
+    await this.assertCanViewMassOrders(massId, requestUser);
+
+    const { skip, take, page, limit } = toSkipTake(query.page, query.limit);
+    const range = dateRangeFilter(query.from, query.to);
+    const where: Prisma.MassOrderWhereInput = {
+      massId,
+      payments: { some: { status: 'COMPLETED' } },
+      ...(range ? { createdAt: range } : {}),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prismaService.massOrder.findMany({
+        where,
+        include: { orderByBeliever: true },
+        orderBy: { createdAt: 'asc' },
+        skip,
+        take,
+      }),
+      this.prismaService.massOrder.count({ where }),
+    ]);
+    return { data: maskAnonymousOrders(data), total, page, limit };
   }
 
   async findAll() {

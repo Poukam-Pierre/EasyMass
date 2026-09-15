@@ -4,6 +4,7 @@ import {
   Header,
   NotFoundException,
   Param,
+  Query,
   Request,
   Res,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { UserRole } from '@prisma/client';
 import { Response } from 'express';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
+import { DateRangeQueryDto } from '../common/dto/date-range-query.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { formatMassSubtitle, PdfService } from '../pdf/pdf.service';
 import { MassOrderService } from './mass-order.service';
@@ -30,6 +32,23 @@ export class MassIntentionsController {
     @Request() request: AuthenticatedRequest
   ) {
     return this.massOrderService.findMassOrderByMass(massId, request.user);
+  }
+
+  /** Paginated/filterable counterpart to the route above — additive, so the
+   * unbounded route (relied on by admin-ui's mass detail page and the PDF
+   * download below) keeps its existing contract. */
+  @Get('/paginated')
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  async listPaginated(
+    @Param('massId') massId: string,
+    @Query() query: DateRangeQueryDto,
+    @Request() request: AuthenticatedRequest
+  ) {
+    return this.massOrderService.findPaginatedMassOrderByMass(
+      massId,
+      query,
+      request.user
+    );
   }
 
   @Get('/download')

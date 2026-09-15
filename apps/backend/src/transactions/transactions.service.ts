@@ -2,6 +2,8 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { OwnerType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
+import { PaginatedResult, dateRangeFilter, toSkipTake } from '../common/pagination.utils';
+import { FindTransactionsQueryDto } from './dto/find-transactions-query.dto';
 
 /** Either the top-level PrismaService or an interactive-transaction client
  * (`tx` inside `prisma.$transaction(async (tx) => ...)`) — both expose the
@@ -28,47 +30,91 @@ export class TransactionsService {
     });
   }
 
+  private async assertCanViewParishTransactions(
+    parishId: string,
+    requestUser: { id: string; role: UserRole }
+  ) {
+    if (requestUser.role === UserRole.ADMIN) return;
+    const parish = await resolveParishForUser(this.prismaService, requestUser.id);
+    if (parish.parishId !== parishId) {
+      throw new ForbiddenException("You may only view your own parish's transactions.", {
+        cause: new Error(),
+      });
+    }
+  }
+
+  private static readonly TRANSACTION_ROW_SELECT = {
+    transactionId: true,
+    createdAt: true,
+    amount: true,
+    transactionType: true,
+    balanceAfter: true,
+    payment: {
+      select: {
+        paymentMethod: true,
+        status: true,
+        currency: true,
+      },
+    },
+  } as const;
+
+  /** Unbounded — kept exactly as-is for existing callers (admin-ui's
+   * Finances page and its parish-detail Transactions tab) that read the
+   * whole list at once and take transactions[0].balanceAfter as the
+   * current running balance. New callers that need pagination/filtering
+   * should use findAllTransactionByParishPaginated instead, which computes
+   * the balance independently so it stays correct under a filter. */
   async findAllTransactionByParish(
     parishId: string,
     requestUser: { id: string; role: UserRole }
   ) {
-    if (requestUser.role !== UserRole.ADMIN) {
-      const parish = await resolveParishForUser(
-        this.prismaService,
-        requestUser.id
-      );
-      if (parish.parishId !== parishId) {
-        throw new ForbiddenException("You may only view your own parish's transactions.", {
-          cause: new Error(),
-        });
-      }
-    }
+    await this.assertCanViewParishTransactions(parishId, requestUser);
 
     return this.prismaService.transaction.findMany({
       where: {
         ownerId: parishId,
         ownerType: 'PARISH',
       },
-      // Callers (parish-ui, admin-ui) read transactions[0].balanceAfter as
-      // the current running balance, same assumption getCurrentBalance
-      // makes below — findMany has no default order, so this must be
-      // explicit or that balance is whatever Postgres happens to return first.
       orderBy: { createdAt: 'desc' },
-      select: {
-        transactionId: true,
-        createdAt: true,
-        amount: true,
-        transactionType: true,
-        balanceAfter: true,
-        payment: {
-          select: {
-            paymentMethod: true,
-            status: true,
-            currency: true,
-          },
-        },
-      },
+      select: TransactionsService.TRANSACTION_ROW_SELECT,
     });
+  }
+
+  /**
+   * Paginated, optionally filtered (type, createdAt range) — plus the
+   * parish's *current* balance, computed independently of whatever page/
+   * filter is active (never transactions[0].balanceAfter, which only means
+   * "current balance" on an unfiltered, first page).
+   */
+  async findAllTransactionByParishPaginated(
+    parishId: string,
+    query: FindTransactionsQueryDto,
+    requestUser: { id: string; role: UserRole }
+  ): Promise<PaginatedResult<unknown> & { currentBalance: number }> {
+    await this.assertCanViewParishTransactions(parishId, requestUser);
+
+    const { skip, take, page, limit } = toSkipTake(query.page, query.limit);
+    const range = dateRangeFilter(query.from, query.to);
+    const where: Prisma.TransactionWhereInput = {
+      ownerId: parishId,
+      ownerType: 'PARISH',
+      ...(query.transactionType ? { transactionType: query.transactionType } : {}),
+      ...(range ? { createdAt: range } : {}),
+    };
+
+    const [data, total, currentBalance] = await Promise.all([
+      this.prismaService.transaction.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        select: TransactionsService.TRANSACTION_ROW_SELECT,
+      }),
+      this.prismaService.transaction.count({ where }),
+      this.getCurrentBalance(this.prismaService, parishId, 'PARISH'),
+    ]);
+
+    return { data, total, page, limit, currentBalance };
   }
 
   async findOne(transactionId: string) {

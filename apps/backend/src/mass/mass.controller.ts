@@ -58,4 +58,27 @@ export class MassController {
       to,
     });
   }
+
+  /** Paginated/filterable counterpart to the route above — additive, so the
+   * unbounded route (relied on by admin-ui) keeps its existing contract. */
+  @Get('/paginated')
+  @Roles(UserRole.PARISH, UserRole.ADMIN)
+  findAllPaginated(
+    @Query('parishId') parishId: string,
+    @Query('status') status?: MassStatus,
+    @Query('massType') massType?: MassType,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ) {
+    return this.massService.findAllByParishPaginated(parishId, {
+      status,
+      massType,
+      from,
+      to,
+      page,
+      limit,
+    });
+  }
 }
