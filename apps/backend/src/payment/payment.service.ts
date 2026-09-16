@@ -28,7 +28,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
 import { MassPriceService } from '../mass-price/mass-price.service';
 import { CurrencyConversionService } from '../currency-conversion/currency-conversion.service';
-import { resolveParishForUser } from '../common/user.utils';
+import {
+  resolveParishForUser,
+  verifyCurrentPassword,
+} from '../common/user.utils';
 import { PLATFORM_OWNER_ID } from '../common/constants';
 import { PaypalService } from './paypal.service';
 import { SmsService } from '../sms/sms.service';
@@ -902,8 +905,11 @@ export class PaymentService {
    * supplied number on every call. */
   async withdrawMoney(
     requestUser: { id: string; role: UserRole },
-    amount: number
+    amount: number,
+    password: string
   ) {
+    await verifyCurrentPassword(this.prismaService, requestUser.id, password);
+
     const parish = await resolveParishForUser(
       this.prismaService,
       requestUser.id

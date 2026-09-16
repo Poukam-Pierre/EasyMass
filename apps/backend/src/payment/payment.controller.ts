@@ -140,7 +140,11 @@ export class PaymentController {
     @Request() request: AuthenticatedRequest,
     @Body() dto: WithdrawMoneyDto
   ) {
-    return this.paymentService.withdrawMoney(request.user, dto.amount);
+    return this.paymentService.withdrawMoney(
+      request.user,
+      dto.amount,
+      dto.password
+    );
   }
 
   @Post('/:paymentId/refund')
