@@ -317,6 +317,7 @@ export const website = {
     "Le retrait n'a pas été accepté par le prestataire de paiement. Veuillez réessayer.",
   withdrawalFailed:
     "Une erreur s'est produite lors du retrait. Veuillez réessayer.",
+  withdrawalPasswordHelp: 'Confirmez votre mot de passe pour effectuer ce retrait.',
   addCurrencyFee: 'Ajouter une devise',
   currencyWarningMsg: 'La devise est obligatoire',
   baseCurrencyCannotBeRemoved:

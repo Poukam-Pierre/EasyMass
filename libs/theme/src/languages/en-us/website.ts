@@ -312,6 +312,7 @@ export const website = {
     'The withdrawal was not accepted by the payment provider. Please try again.',
   withdrawalFailed:
     'Something went wrong with the withdrawal. Please try again.',
+  withdrawalPasswordHelp: 'Confirm your password to proceed with this withdrawal.',
   addCurrencyFee: 'Add a currency',
   currencyWarningMsg: 'Currency is required',
   baseCurrencyCannotBeRemoved:

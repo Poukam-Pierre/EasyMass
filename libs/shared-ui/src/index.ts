@@ -7,5 +7,6 @@ export * from './lib/adminLayout/Footer';
 export * from './lib/authentication/Login';
 export * from './lib/authentication/getMailVerification';
 export * from './lib/authentication/getNewPassword';
+export * from './lib/authentication/PasswordConfirmField';
 export * from './lib/filters/DateRangeFilter';
 export * from './lib/filters/pagination';

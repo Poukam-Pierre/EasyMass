@@ -1,4 +1,5 @@
 import { Box, Button, Dialog, TextField, Typography } from "@mui/material";
+import { PasswordConfirmField } from "@easy-messe/shared-ui";
 import { useFormik } from "formik";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
@@ -62,13 +63,10 @@ export default function CorrectionDialog({ isOpen, handleClose, parishId, onSave
                     value={values.note} onChange={handleChange}
                     error={!!(errors.note && touched.note)} helperText={touched.note && errors.note}
                 />
-                <Typography variant="body2" sx={{ color: 'var(--body)' }}>
-                    {formatMessage({ id: 'correctionPasswordHelp' })}
-                </Typography>
-                <TextField
-                    name="password" type="password" placeholder={formatMessage({ id: 'password' })} size="small"
+                <PasswordConfirmField
                     value={values.password} onChange={handleChange}
-                    error={!!(errors.password && touched.password)} helperText={touched.password && errors.password}
+                    error={errors.password} touched={touched.password}
+                    helpTextId="correctionPasswordHelp"
                 />
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px', marginTop: '10px' }}>
                     <Button variant="outlined" type="button" onClick={() => { resetForm(); handleClose(); }}>{formatMessage({ id: 'cancel' })}</Button>
