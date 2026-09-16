@@ -345,4 +345,8 @@ export const website = {
   oneYear: '1 year',
   passwordWarningMsg: 'Password is required',
   correctionPasswordHelp: 'Confirm your password to apply this correction.',
+  cartSingleParishOnly: 'Your cart already has a mass from',
+  cartClearToSwitch: 'Clear your cart first if you want to order from a different parish.',
+  notEnoughOpenMasses: "This parish doesn't have enough open masses left after that date for this option. Pick an earlier date, or choose a different option.",
+  massesAddedToCart: 'masses added to your cart.',
 };

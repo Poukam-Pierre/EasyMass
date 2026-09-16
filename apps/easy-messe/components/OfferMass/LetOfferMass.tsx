@@ -8,16 +8,18 @@ import textFieldIcon from '@iconify-icons/material-symbols/text-fields';
 import churchIcon from '@iconify-icons/ph/church-light';
 import { Icon } from '@iconify/react';
 import { Autocomplete, Box, Button, Divider, FormControlLabel, Switch, TextField, Typography } from "@mui/material";
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
+import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import DateTimeMassPicker from "./DateTimeMass/DateTimeMass";
 
 
 
 enum MassTypeEnum {
+    Unique = 'unique',
     Triduum = 'triduum',
     Seven = 'seven',
     Novena = 'novena',
@@ -25,6 +27,9 @@ enum MassTypeEnum {
 }
 interface MassGroupCategory {
     label: MassTypeEnum;
+    /** How many consecutive open masses this type represents — 1 for
+     * Unique, matching the "defaulted to unique" behavior of a single
+     * order. */
     valueOrder: number
 }
 
@@ -50,8 +55,24 @@ export interface UseformikProps {
     dateTime: Dayjs | null,
     intention: string,
     price: number | null,
-    massId: string | null
+    massId: string | null,
+    massType: MassTypeEnum
 
+}
+
+/** Sorts a parish's open masses chronologically and returns the `count`
+ * consecutive ones starting at `startMassId` — "consecutive" meaning
+ * consecutive *available open slots* at that parish, not consecutive
+ * calendar days (a parish without daily Mass could never fulfill a
+ * Novena otherwise). Returns null if fewer than `count` remain from that
+ * starting point, so the caller can reject with a clear message instead
+ * of silently handing back a short, incomplete list. */
+function resolveConsecutiveMasses(massData: Mass[], startMassId: string, count: number): Mass[] | null {
+    const sorted = [...massData].sort((a, b) => dayjs(a.dateTime).valueOf() - dayjs(b.dateTime).valueOf());
+    const startIndex = sorted.findIndex((mass) => mass.massId === startMassId);
+    if (startIndex === -1) return null;
+    const consecutive = sorted.slice(startIndex, startIndex + count);
+    return consecutive.length === count ? consecutive : null;
 }
 
 interface LetOfferMassProps {
@@ -67,6 +88,10 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
 
 
     const massOrderCategory: MassGroupCategory[] = [
+        {
+            label: MassTypeEnum.Unique,
+            valueOrder: 1
+        },
         {
             label: MassTypeEnum.Triduum,
             valueOrder: 3
@@ -98,6 +123,7 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
     }, [])
 
     const selectedCityParishes = parishData.filter((parish) => parish.city === selectedCity)
+    const selectedParishData = parishData.find((parish) => parish.name === selectedParish && parish.city === selectedCity)
 
     const { handleChange, handleSubmit, setFieldValue, resetForm, errors, touched, values } = useFormik<UseformikProps>({
         initialValues: {
@@ -109,13 +135,67 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
             dateTime: null,
             intention: '',
             price: null,
-            massId: null
+            massId: null,
+            massType: MassTypeEnum.Unique
         },
         onSubmit: ({
             name, phone, anonymous,
             city, parish, dateTime,
-            intention, price, massId
+            intention, price, massId, massType
         }) => {
+            // A checkout can only ever span one parish (enforced server-side
+            // too, at both preview and real checkout) — caught here, at the
+            // moment of adding to the cart, instead of opaquely inside the
+            // payment modal. The user clears their cart themselves to
+            // switch parishes; nothing gets silently wiped for them.
+            const existingOrder = massRequested[0];
+            if (existingOrder && (existingOrder.massInfos.city !== city || existingOrder.massInfos.parish !== parish)) {
+                toast.error(
+                    `${formatMessage({ id: 'cartSingleParishOnly' })} ${existingOrder.massInfos.parish}. ${formatMessage({ id: 'cartClearToSwitch' })}`
+                );
+                return;
+            }
+
+            const category = massOrderCategory.find((c) => c.label === massType);
+            const requiredCount = category?.valueOrder ?? 1;
+
+            if (requiredCount > 1) {
+                // Triduum/Seven/Novena/Thirty — same intention/believer info
+                // offered at `requiredCount` consecutive open masses at this
+                // one parish, rather than a single mass.
+                const consecutiveMasses = selectedParishData && massId
+                    ? resolveConsecutiveMasses(selectedParishData.massData, massId, requiredCount)
+                    : null;
+
+                if (!consecutiveMasses) {
+                    toast.error(formatMessage({ id: 'notEnoughOpenMasses' }));
+                    return;
+                }
+
+                massRequestDispatch([
+                    ...massRequested,
+                    ...consecutiveMasses.map((mass) => ({
+                        faithInfos: anonymous ?
+                            undefined : { name, phone },
+                        massInfos: {
+                            massId: mass.massId,
+                            city,
+                            parish,
+                            dateTime: dayjs(mass.dateTime),
+                            intention,
+                            price: mass.price,
+                            anonymous
+                        }
+                    }))
+                ]);
+                toast.success(`${consecutiveMasses.length} ${formatMessage({ id: 'massesAddedToCart' })}`);
+                resetForm();
+                setSelectedCity('');
+                setSelectedParish('');
+                if (handleIndexTab) handleIndexTab(0)
+                return;
+            }
+
             massRequestDispatch(
                 [
                     ...massRequested,
@@ -172,6 +252,16 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
         setSelectedParish(parish)
 
     }
+
+    // Soft, early hint only — a parish with fewer open masses in total than
+    // a type requires clearly can't fulfill it, so there's no point letting
+    // it be picked. This doesn't guarantee success once a specific start
+    // date is chosen (that needs enough *consecutive* slots from that exact
+    // point on, not just enough in total) — resolveConsecutiveMasses at
+    // submit time is the real, authoritative check either way.
+    const isCategoryDisabled = (valueOrder: number) =>
+        !!selectedParishData && selectedParishData.massData.length < valueOrder
+
     return (
         <Box sx={{
             padding: '21px',
@@ -186,11 +276,13 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                 columnGap: 2,
                 width: 'fit-content'
             }}>
-                {massOrderCategory.map(({ label }, index) => (
+                {massOrderCategory.map(({ label, valueOrder }, index) => (
                     <Button
                         key={index}
-                        variant="outlined"
-                        disabled
+                        variant={values.massType === label ? 'contained' : 'outlined'}
+                        disabled={isCategoryDisabled(valueOrder)}
+                        onClick={() => setFieldValue('massType', label)}
+                        type="button"
                     >
                         {formatMessage({ id: label })}
                     </Button>
@@ -203,14 +295,16 @@ export default function LetOfferMass({ handleIndexTab }: LetOfferMassProps) {
                 rowGap: '10px',
                 paddingBottom: '20px'
             }}>
-                {massOrderCategory.map(({ label }, index) => (
+                {massOrderCategory.map(({ label, valueOrder }, index) => (
                     <Button
                         key={index}
-                        variant="outlined"
+                        variant={values.massType === label ? 'contained' : 'outlined'}
                         sx={{
                             minWidth: { laptop: 'initial', mobile: '145px' }
                         }}
-                        disabled
+                        disabled={isCategoryDisabled(valueOrder)}
+                        onClick={() => setFieldValue('massType', label)}
+                        type="button"
                     >
                         {formatMessage({ id: label })}
                     </Button>

@@ -350,4 +350,8 @@ export const website = {
   oneYear: '1 an',
   passwordWarningMsg: 'Le mot de passe est obligatoire',
   correctionPasswordHelp: 'Confirmez votre mot de passe pour appliquer cette correction.',
+  cartSingleParishOnly: 'Votre panier contient déjà une messe de',
+  cartClearToSwitch: 'Videz votre panier si vous souhaitez commander auprès d\'une autre paroisse.',
+  notEnoughOpenMasses: "Cette paroisse n'a pas assez de messes ouvertes après cette date pour cette option. Choisissez une date plus proche ou une autre option.",
+  massesAddedToCart: 'messes ajoutées à votre panier.',
 };
