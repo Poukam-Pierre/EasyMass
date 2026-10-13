@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -51,19 +50,6 @@ export class AuthService {
       });
     }
 
-    const existingRefreshToken =
-      await this.refreshTokenService.findFirstByUser(user.userId);
-
-    if (existingRefreshToken) {
-      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        throw new ConflictException(
-          'Account already logged in. Logout before from the first one.',
-          { cause: new Error() }
-        );
-      }
-      await this.refreshTokenService.remove(existingRefreshToken.id);
-    }
-
     const validPassword = await bcrypt.compare(
       input.password,
       flattened.password
@@ -72,6 +58,17 @@ export class AuthService {
       throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
       });
+    }
+
+    // The password just proved this is the account owner, so a new login
+    // always wins and silently replaces any still-active session instead
+    // of locking the owner out until the stale session's 24h expiry —
+    // there's no other self-service way to end a session that never got
+    // to call /logout (crashed tab, killed server, lost connectivity).
+    const existingRefreshToken =
+      await this.refreshTokenService.findFirstByUser(user.userId);
+    if (existingRefreshToken) {
+      await this.refreshTokenService.remove(existingRefreshToken.id);
     }
 
     const tokens = await this.issueTokens(
