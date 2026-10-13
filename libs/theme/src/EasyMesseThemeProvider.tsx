@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { IntlProvider } from 'react-intl';
 import { Flip, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import LanguageContextProvider, {
     useLanguage,
 } from './contexts/language/languageContextProvider';
@@ -15,6 +14,7 @@ import AppThemeContextProvider, {
 import enMessages from './languages/en-us';
 import frMessages from './languages/fr';
 import { theme } from './theme';
+import OfferMassContextProvider from './offerMasses/OfferMassProvider';
 
 const App = ({
     children,
@@ -81,9 +81,11 @@ export function EasyMassThemeProvider({
     return (
         <LanguageContextProvider defaultLang={defaultLang}>
             <QueryClientProvider client={queryClient}>
-                <AppThemeContextProvider>
-                    <App newTheme={theme}>{children}</App>
-                </AppThemeContextProvider>
+                <OfferMassContextProvider>
+                    <AppThemeContextProvider>
+                        <App newTheme={theme}>{children}</App>
+                    </AppThemeContextProvider>
+                </OfferMassContextProvider>
             </QueryClientProvider>
         </LanguageContextProvider>
     );

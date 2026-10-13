@@ -30,7 +30,7 @@ function LanguageContextProvider({
   defaultLang?: LanguageType;
 }): JSX.Element {
   const initialState: Language = {
-    activeLanguage: defaultLang ?? 'fr',
+    activeLanguage: defaultLang ?? 'en',
     languageDispatch: () => null,
   };
 

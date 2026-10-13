@@ -1,0 +1,20 @@
+import { Controller, Get, Query, Request } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../auth/decorator/roles.decorator';
+import { AuthenticatedRequest } from '../common/authenticated-request';
+import { DateRangeQueryDto } from '../common/dto/date-range-query.dto';
+import { MassOrderService } from './mass-order.service';
+
+@Controller('/mass-order')
+export class MassOrderController {
+  constructor(private readonly massOrderService: MassOrderService) {}
+
+  @Get('/active')
+  @Roles(UserRole.PARISH)
+  findAllActive(
+    @Query() query: DateRangeQueryDto,
+    @Request() request: AuthenticatedRequest
+  ) {
+    return this.massOrderService.findAllUnprocessMass(query, request.user);
+  }
+}

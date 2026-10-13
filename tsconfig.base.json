@@ -19,6 +19,7 @@
       "@easy-messe/libs/theme/server": ["libs/theme/src/server.ts"],
       "@easy-messe/libs/utils": ["libs/utils/src/index.ts"],
       "@easy-messe/libs/utils/server": ["libs/utils/src/server.ts"],
+      "@easy-messe/shared-ui": ["libs/shared-ui/src/index.ts"],
       "@easyMesse/theme": ["theme/src/index.ts"],
       "@easyMesse/theme/server": ["theme/src/server.ts"],
       "@easyMesseLibs/theme": ["libs/src/index.ts"],

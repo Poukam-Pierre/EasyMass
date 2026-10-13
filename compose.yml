@@ -1,0 +1,114 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: easymesse-db
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - easymesse-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: easymesse-backend
+    restart: unless-stopped
+    ports:
+      - '${PORT:-5000}:5000'
+    env_file:
+      - .env
+    environment:
+      # Overrides .env's DATABASE_URL, which points at `localhost` for
+      # host-based tooling (nx serve, prisma CLI/seed). Inside this
+      # container, Docker's DNS only resolves the `postgres` service name.
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - easymesse-network
+
+  easy-messe:
+    build:
+      context: .
+      dockerfile: apps/easy-messe/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    container_name: easymesse-easy-messe
+    restart: unless-stopped
+    ports:
+      - '4200:4200'
+    depends_on:
+      - backend
+    networks:
+      - easymesse-network
+
+  parish:
+    build:
+      context: .
+      dockerfile: apps/parish/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    container_name: easymesse-parish
+    restart: unless-stopped
+    ports:
+      - '4400:4400'
+    depends_on:
+      - backend
+    networks:
+      - easymesse-network
+
+  admin-ui:
+    build:
+      context: .
+      dockerfile: apps/admin-ui/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000/api}
+    container_name: easymesse-admin-ui
+    restart: unless-stopped
+    ports:
+      - '4300:4300'
+    depends_on:
+      - backend
+    networks:
+      - easymesse-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: easymesse-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - easy-messe
+      - parish
+      - admin-ui
+    networks:
+      - easymesse-network
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  easymesse-network:
+    driver: bridge
