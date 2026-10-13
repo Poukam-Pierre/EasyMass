@@ -8,6 +8,7 @@ EasyMesse is a platform that connects believers to Catholic parishes for offerin
 - [Project Structure](#-project-structure) — apps, libraries, and where things live
 - [Payments & Notifications](#-payments--notifications) — checkout flow, invoice delivery, reconciliation
 - [Common Nx Tasks](#-common-nx-tasks) — build, test, lint, and explore the project graph
+- [Docker & Deployment](#-docker--deployment) — running the full stack in containers, production setup
 - [Contributing](#-contributing) — branching model and PR workflow
 
 There is no separate `docs/` directory yet — this README is the single source of truth for setup and workflow. If that changes, update the links above accordingly.
@@ -21,6 +22,8 @@ There is no separate `docs/` directory yet — this README is the single source 
 │   ├── admin-ui/          # Platform admin dashboard — parishes, masses,
 │   │                      #   priests, cities, administrators, finances,
 │   │                      #   platform settings (Next.js, JWT-authenticated)
+│   ├── parish/            # Parish-facing dashboard — masses, mass orders,
+│   │                      #   priests, finances/withdrawals (Next.js, JWT-authenticated)
 │   ├── diocese-ui/        # Read-only diocese view over its parishes' masses (Next.js)
 │   ├── backend/           # API: auth, parishes, priests, masses, mass orders,
 │   │                      #   payments (NotchPay/PayPal), invoicing (SMS/email),
@@ -31,6 +34,10 @@ There is no separate `docs/` directory yet — this README is the single source 
 │   ├── shared-ui/         # Shared React components (admin layout, auth forms, etc.)
 │   ├── theme/             # Theming, language/i18n, and shared contexts
 │   └── utils/             # Shared utilities
+├── compose.yml            # Docker Compose: postgres, backend, easy-messe, parish,
+│                          #   admin-ui, and a Caddy reverse proxy
+├── Caddyfile              # Reverse proxy / automatic HTTPS routing for production domains
+├── apps/*/Dockerfile      # Production multi-stage build per app
 └── prisma.config.ts       # Prisma CLI config (schema/migrations/seed location)
 ```
 
@@ -70,11 +77,15 @@ cp .env.example .env
 
 | Variable(s)                                                                       | Used for                                                                                   |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`                                                                    | Postgres connection (Prisma)                                                               |
+| `DATABASE_URL`                                                                    | Postgres connection (Prisma). Host-side value (`localhost`) is used by local tooling — the `backend` container overrides it to reach the `postgres` service instead; see [Docker & Deployment](#-docker--deployment) |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB`                             | Credentials for the `postgres` container (docker compose only — not read by the app directly) |
 | `JWT_SECRET_KEY`                                                                  | Signing access tokens                                                                      |
+| `CORS_ORIGINS`                                                                    | Comma-separated allowed origins for the backend's CORS policy. Falls back to the dev ports of easy-messe/admin-ui/parish when unset — set this explicitly in production |
+| `NEXT_PUBLIC_API_URL`                                                             | Backend base URL (including the `/api` prefix) the frontends call — baked into each Next.js build at **build time** |
 | `NOTCH_PUBLIC_KEY`                                                                | NotchPay mobile-money checkout                                                             |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_MODE` / `PAYPAL_WEBHOOK_ID` | PayPal checkout + webhook verification                                                     |
 | `FRONTEND_CHECKOUT_RETURN_URL`                                                    | Where a payer lands after checkout — **required**, mobile-money checkout throws without it |
+| `APP_PUBLIC_URL`                                                                  | Public base URL of the backend itself — used to build absolute links (e.g. outbound SMS/email receipts) |
 | `ORANGE_CLIENT_ID` / `ORANGE_CLIENT_SECRET` / `COUNTRY_SENDER_NUMBER`             | Orange SMS — invoice delivery for mobile-money payers (Cameroon-only)                      |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`               | Email — invoice delivery for PayPal payers                                                 |
 
@@ -97,7 +108,7 @@ npx prisma studio           # browse the database
 
 ### Run the apps
 
-This is an Nx monorepo with one backend API and three separate Next.js frontends. Run each one in its own terminal (remember to `nvm use` first in each):
+This is an Nx monorepo with one backend API and four separate Next.js frontends. Run each one in its own terminal (remember to `nvm use` first in each):
 
 ```bash
 # Backend (NestJS API) — reads PORT from .env, defaults to http://localhost:5000/api
@@ -109,11 +120,14 @@ npx nx serve easy-messe --port=4200
 # Admin dashboard — already pinned to 4300 in project.json, no --port needed
 npx nx serve admin-ui
 
+# Parish dashboard — already pinned to 4400 in project.json, no --port needed
+npx nx serve parish
+
 # Diocese-facing frontend
 npx nx serve diocese-ui --port=4202
 ```
 
-`easy-messe` and `diocese-ui` both default to Next's port 4200 if you don't pass `--port` — required when running more than one at once, or only the first will bind successfully. `admin-ui` is the exception: its port is fixed to `4300` in `apps/admin-ui/project.json` since the backend's CORS config (`apps/backend/src/main.ts`) allowlists that origin explicitly. If you add a fixed port for another frontend, remember to add its origin to that same CORS list.
+`easy-messe` and `diocese-ui` both default to Next's port 4200 if you don't pass `--port` — required when running more than one at once, or only the first will bind successfully. `admin-ui` and `parish` are the exception: their ports are fixed (`4300`/`4400`) in their respective `project.json`, matching the backend's default CORS allowlist (`apps/backend/src/main.ts`) for `http://localhost:4200/4300/4400`. That allowlist is overridable via the `CORS_ORIGINS` env var — see the table above and [Docker & Deployment](#-docker--deployment). If you add a fixed port for another frontend locally, remember to add its origin too (either to the code default or via `CORS_ORIGINS` in your `.env`).
 
 ### Build for production
 
@@ -144,6 +158,41 @@ npx nx graph                                 # visualize the project graph
 ```
 
 Targets are defined per-project in each `apps/*/project.json`. See the [Nx docs](https://nx.dev/features/run-tasks) for more.
+
+## 🐳 Docker & Deployment
+
+The whole stack — `postgres`, `backend`, `easy-messe`, `parish`, `admin-ui`, and a `caddy` reverse proxy — runs via [`compose.yml`](compose.yml). Each app has its own production multi-stage [`Dockerfile`](apps) (Next.js apps build with `output: 'standalone'`; the backend runs `prisma generate` + `nx build` then ships only the compiled output and production `node_modules`).
+
+### Running it locally
+
+```bash
+docker compose build --no-cache   # first run, or after dependency/Dockerfile changes
+docker compose up -d
+docker ps                         # all 6 containers should be Up
+```
+
+This uses the same `.env` as local non-Docker development, with one exception: the `backend` container always connects to Postgres via the `postgres` service name (Docker's internal DNS), overriding whatever `DATABASE_URL` host is in `.env` — see the `environment:` block on the `backend` service in `compose.yml`. Your `.env`'s `DATABASE_URL` should keep `localhost` as the host, since that's what host-side tooling (`nx serve`, `npx prisma ...`) needs.
+
+`NEXT_PUBLIC_API_URL` is baked into each frontend's client bundle **at build time** (standard Next.js behavior for `NEXT_PUBLIC_*` vars) — changing it in `.env` has no effect on an already-built image; it requires `docker compose build` to retake effect.
+
+Migrations and the seed script don't run automatically — the production image intentionally has no Prisma CLI or schema files baked in (smaller, more locked-down runtime). Run them from the host instead, against the same Postgres (its port is published to the host):
+
+```bash
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+### Production deployment
+
+Live domains: `easymesse.com` (easy-messe), `api.easymesse.com` (backend), `parish.easymesse.com` (parish), `admin.easymesse.com` (admin-ui) — routed by [`Caddyfile`](Caddyfile), which also handles automatic HTTPS (Let's Encrypt) with no manual cert management.
+
+On the VPS:
+1. DNS: point all four domains' A records at the VPS's IP *before* starting containers (cert issuance needs them resolving).
+2. `ufw allow 22,80,443/tcp && ufw enable` — only these need to be reachable from the internet.
+3. `.env` on the VPS needs production values for `CORS_ORIGINS`, `NEXT_PUBLIC_API_URL`, `FRONTEND_CHECKOUT_RETURN_URL`, and `APP_PUBLIC_URL` (see the table above for what each controls), using the live domains instead of `localhost`.
+4. `docker compose build --no-cache && docker compose up -d`, then `npx prisma migrate deploy && npx prisma db seed` as above.
+
+To deploy an update later: `git pull && docker compose build --no-cache && docker compose up -d`.
 
 ## 🤝 Contributing
 
