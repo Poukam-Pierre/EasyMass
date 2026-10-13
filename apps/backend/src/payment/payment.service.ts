@@ -28,7 +28,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
 import { MassPriceService } from '../mass-price/mass-price.service';
 import { CurrencyConversionService } from '../currency-conversion/currency-conversion.service';
-import { resolveParishForUser } from '../common/user.utils';
+import {
+  resolveParishForUser,
+  verifyCurrentPassword,
+} from '../common/user.utils';
 import { PLATFORM_OWNER_ID } from '../common/constants';
 import { PaypalService } from './paypal.service';
 import { SmsService } from '../sms/sms.service';
@@ -148,9 +151,21 @@ export class PaymentService {
     // (see initiatePaypalCheckout).
     const reference = createId();
 
+    // Explicit timeout — Prisma's default interactive-transaction ceiling is
+    // 5000ms, and the loop below does two sequential round trips per mass in
+    // the checkout (MassOrder + Payment), which a multi-mass cart on a
+    // cold/remote connection (e.g. Neon scaling up from idle) can exceed,
+    // aborting an otherwise-successful checkout. 15000ms matches the default
+    // already used by runSerializableTransaction elsewhere in this file.
+    // SERIALIZABLE isolation isn't needed here — this is pure inserts, not a
+    // read-then-write-based-on-a-shared-value pattern.
     const paymentIds = await this.prismaService.$transaction(async (tx) => {
       const believer = await tx.believer.create({
-        data: { fullName: believerInfo.name, phone: believerInfo.phone },
+        data: {
+          fullName: believerInfo.name,
+          phone: believerInfo.phone,
+          email: believerInfo.email,
+        },
       });
 
       const ids: string[] = [];
@@ -160,6 +175,7 @@ export class PaymentService {
             intension: massInfo.intension,
             price: total,
             currency: paymentInfo.currency,
+            anonymous: massInfo.anonymous ?? false,
             orderByBeliever: { connect: { believerId: believer.believerId } },
             mass: { connect: { massId: massInfo.id } },
           },
@@ -187,7 +203,7 @@ export class PaymentService {
       );
 
       return ids;
-    });
+    }, { timeout: 15000 });
 
     try {
       let checkoutUrl: string;
@@ -362,7 +378,12 @@ export class PaymentService {
         description: 'Mass offering payment',
         email: 'poukamtech@gmail.com',
         reference,
-        callback: callbackUrl,
+        // Tags which channel the frontend's fallback checkout-return page
+        // should say the confirmation SMS is coming through — NotchPay
+        // redirects the browser straight back here itself (unlike PayPal,
+        // which returns through our own /paypal/return controller first),
+        // so this is the only way to pass that along for this method.
+        callback: `${callbackUrl}?method=mobile_money`,
       }),
     };
 
@@ -499,11 +520,54 @@ export class PaymentService {
     return this.finalizeCheckout(reference);
   }
 
-  /** referenceId of every mobile-money Payment still awaiting a terminal
-   * status — the working set for PaymentSchedulerService's cron sweep. */
-  async findPendingMobileMoneyReferences(): Promise<string[]> {
+  /**
+   * Re-checks one PayPal order's current status and, only if it's reached a
+   * terminal state since we last recorded it, resolves it — the PayPal
+   * counterpart to reconcileNotchPayPayment, filling the same durability gap
+   * mobile money already had a cron backstop for (see
+   * PaymentSchedulerService): a customer who closed the tab before the
+   * return redirect completed, whose webhook was also missed or never
+   * configured, otherwise leaves that Payment stuck PENDING forever even
+   * though PayPal already captured the charge.
+   *
+   * PayPal orders have no 'pending'/'processing' distinct from "not yet
+   * approved" — CREATED/SAVED/PAYER_ACTION_REQUIRED all just mean the
+   * customer hasn't finished approving on PayPal's side yet, so those are
+   * left untouched. APPROVED/COMPLETED delegate to handlePaypalReturn, which
+   * already does the capture-then-finalize dance (capture is idempotent, so
+   * this is safe even if the return/webhook handler is racing this same
+   * call). VOIDED is the one terminal-negative status, handled the same way
+   * failPendingPaymentsByReference already handles a cancelled checkout.
+   */
+  async reconcilePaypalPayment(orderId: string) {
+    const order = await this.paypalService.getOrderStatus(orderId);
+    const status = order?.status;
+
+    if (status === 'VOIDED') {
+      await this.failPendingPaymentsByReference(orderId);
+      return {
+        code: 200,
+        message: `PayPal order not completed (status: ${status}).`,
+      };
+    }
+
+    if (status !== 'APPROVED' && status !== 'COMPLETED') {
+      return {
+        code: 200,
+        message: `PayPal order not yet approved (status: ${status}); ignoring.`,
+      };
+    }
+
+    return this.handlePaypalReturn(orderId);
+  }
+
+  /** referenceId of every Payment of the given method still awaiting a
+   * terminal status — the working set for PaymentSchedulerService's cron
+   * sweep, shared by both the mobile-money (NotchPay reference) and PayPal
+   * (order id) reconciliation passes. */
+  async findPendingReferences(paymentMethod: PaymentMethod): Promise<string[]> {
     const pending = await this.prismaService.payment.findMany({
-      where: { status: 'PENDING', paymentMethod: PaymentMethod.MOBILE_MONEY },
+      where: { status: 'PENDING', paymentMethod },
       select: { referenceId: true },
     });
     return pending
@@ -528,6 +592,7 @@ export class PaymentService {
       return {
         code: 200,
         message: `PayPal order not completed (status: ${capture.status}).`,
+        success: false,
       };
     }
 
@@ -537,7 +602,7 @@ export class PaymentService {
   /** Customer backed out on PayPal's approval page. */
   async handlePaypalCancel(orderId: string) {
     await this.failPendingPaymentsByReference(orderId);
-    return { code: 200, message: 'Checkout cancelled.' };
+    return { code: 200, message: 'Checkout cancelled.', success: false };
   }
 
   /** Shared by handlePaypalReturn (order not completed) and
@@ -623,7 +688,11 @@ export class PaymentService {
       select: { currency: true },
     });
     if (!sample) {
-      return { code: 200, message: 'Already processed or unknown reference.' };
+      return {
+        code: 200,
+        message: 'Already processed or unknown reference.',
+        success: false,
+      };
     }
     const rateToBaseCurrency =
       await this.currencyConversionService.getRateToBaseCurrency(
@@ -640,7 +709,12 @@ export class PaymentService {
         data: { status: 'COMPLETED', paidAt: new Date() },
       });
       if (count === 0) {
-        return { code: 200, message: 'Already processed.', payments: null };
+        return {
+          code: 200,
+          message: 'Already processed.',
+          success: true,
+          payments: null,
+        };
       }
 
       const payments = await tx.payment.findMany({
@@ -719,7 +793,7 @@ export class PaymentService {
           ));
       }
 
-      return { code: 200, message: 'Bill of masses ordered', payments };
+      return { code: 200, message: 'Bill of masses ordered', success: true, payments };
     });
 
     // Outside the transaction and awaited-but-caught: an SMS/email hiccup
@@ -737,7 +811,7 @@ export class PaymentService {
       }
     }
 
-    return { code: result.code, message: result.message };
+    return { code: result.code, message: result.message, success: result.success };
   }
 
   private buildInvoiceDetails(
@@ -831,8 +905,11 @@ export class PaymentService {
    * supplied number on every call. */
   async withdrawMoney(
     requestUser: { id: string; role: UserRole },
-    amount: number
+    amount: number,
+    password: string
   ) {
+    await verifyCurrentPassword(this.prismaService, requestUser.id, password);
+
     const parish = await resolveParishForUser(
       this.prismaService,
       requestUser.id

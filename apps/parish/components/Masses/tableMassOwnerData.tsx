@@ -18,7 +18,7 @@ import MassesDialog, { MassTypeEnum } from "./Dialogs/Masses";
 import CancelMassDialog from "./Dialogs/CanceMass";
 import trashIcon from '@iconify-icons/ph/trash-light';
 import editIcon from '@iconify-icons/fluent/edit-28-regular';
-import historyIcon from '@iconify-icons/fluent/history-28-regular';
+import detailsIcon from '@iconify-icons/fluent/document-text-24-regular';
 import warningIcon from '@iconify-icons/fluent/warning-24-regular';
 import { Dayjs } from "dayjs";
 
@@ -92,8 +92,8 @@ export default function MassOwnerTable({
             icon: editIcon
         },
         {
-            title: formatMessage({ id: 'history' }),
-            icon: historyIcon
+            title: formatMessage({ id: 'details' }),
+            icon: detailsIcon
         },
         {
             title: formatMessage({ id: 'delete' }),

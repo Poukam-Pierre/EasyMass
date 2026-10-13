@@ -7,8 +7,10 @@ import {
 import { MassStatus, MassType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
-import { CreateMassDto } from './dto/create-mass.dto';
+import { CreateMassDto, RecurrenceInterval } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
+import { maskAnonymousOrders } from '../mass-order/anonymous-believer.util';
+import { PaginatedResult, toSkipTake } from '../common/pagination.utils';
 
 export interface MassFilters {
   status?: MassStatus;
@@ -22,10 +24,10 @@ export class MassService {
   constructor(private readonly prismaService: PrismaService) {}
 
   /**
-   * Creates masses for the authenticated parish. If replicate=true, creates
-   * one mass every 7 days at the same time-of-day from startAt until the end
-   * of the current year (skipping any that already exist); otherwise creates
-   * a single mass, rejecting an exact-timestamp duplicate.
+   * Creates masses for the authenticated parish. If `recurrence` is given,
+   * creates one mass per occurrence between startAt and recurrence.until,
+   * at the same time-of-day (skipping any that already exist); otherwise
+   * creates a single mass, rejecting an exact-timestamp duplicate.
    */
   async createMasses(
     input: CreateMassDto,
@@ -36,13 +38,17 @@ export class MassService {
       requestUser.id
     );
     const parishId = parish.parishId;
-    const { replicate, startAt, estimatedDurationMinutes, price, massType } =
+    const { recurrence, startAt, estimatedDurationMinutes, price, massType } =
       input;
 
     const existingMass = await this.findAllByParish(parishId);
 
-    if (replicate) {
-      const allDates = this.getDatesEvery7DaysUntilEndOfYear(startAt);
+    if (recurrence) {
+      const allDates = this.generateRecurrenceDates(
+        startAt,
+        recurrence.interval,
+        recurrence.until
+      );
 
       const uniqueDates = this.getUniqueDate(
         allDates,
@@ -148,19 +154,17 @@ export class MassService {
     }
 
     if (parish && parish.parishId !== mass.parishId) {
-      throw new ForbiddenException('Forbidden', {
+      throw new ForbiddenException('You may only manage your own masses.', {
         cause: new Error(),
-        description: 'You may only manage your own masses.',
       });
     }
 
     const changesAnyLockedField = Object.keys(updateMassDto).length > 0;
     if (changesAnyLockedField && mass.status !== 'OPEN') {
-      throw new ConflictException('Conflict', {
-        cause: new Error(),
-        description:
-          'This mass can no longer be edited — ordering has closed.',
-      });
+      throw new ConflictException(
+        'This mass can no longer be edited — ordering has closed.',
+        { cause: new Error() }
+      );
     }
 
     return this.prismaService.$transaction(async (tx) => {
@@ -206,31 +210,68 @@ export class MassService {
     });
   }
 
+  private buildParishMassWhere(
+    parishId: string,
+    filters?: MassFilters
+  ): Prisma.MassWhereInput {
+    return {
+      parishId,
+      status: filters?.status,
+      massType: filters?.massType,
+      startAt:
+        filters?.from || filters?.to
+          ? {
+              gte: filters?.from ? new Date(filters.from) : undefined,
+              lte: filters?.to ? new Date(filters.to) : undefined,
+            }
+          : undefined,
+    };
+  }
+
+  private static readonly MASS_ROW_SELECT = {
+    massId: true,
+    price: true,
+    startAt: true,
+    estimatedDurationMinutes: true,
+    status: true,
+    createdAt: true,
+    massType: true,
+  } as const;
+
+  /** Unbounded — kept exactly as-is for existing callers (admin-ui's masses
+   * page/parish-detail tab/mass selector, and this service's own
+   * createMasses "replicate" logic, which needs every existing date to
+   * avoid creating duplicates, not just one page of them). New callers
+   * that need pagination/filtering should use findAllByParishPaginated. */
   async findAllByParish(parishId: string, filters?: MassFilters) {
     return this.prismaService.mass.findMany({
-      where: {
-        parishId,
-        status: filters?.status,
-        massType: filters?.massType,
-        startAt:
-          filters?.from || filters?.to
-            ? {
-                gte: filters?.from ? new Date(filters.from) : undefined,
-                lte: filters?.to ? new Date(filters.to) : undefined,
-              }
-            : undefined,
-      },
-      select: {
-        massId: true,
-        price: true,
-        startAt: true,
-        estimatedDurationMinutes: true,
-        status: true,
-        createdAt: true,
-        massType: true,
-      },
+      where: this.buildParishMassWhere(parishId, filters),
+      select: MassService.MASS_ROW_SELECT,
       orderBy: { startAt: 'asc' },
     });
+  }
+
+  /** Paginated counterpart to findAllByParish, sharing the same filters —
+   * additive, so the unbounded method/route above keeps its existing
+   * contract for callers that rely on it. */
+  async findAllByParishPaginated(
+    parishId: string,
+    filters: MassFilters & { page?: number | string; limit?: number | string }
+  ): Promise<PaginatedResult<unknown>> {
+    const { skip, take, page, limit } = toSkipTake(filters.page, filters.limit);
+    const where = this.buildParishMassWhere(parishId, filters);
+
+    const [data, total] = await Promise.all([
+      this.prismaService.mass.findMany({
+        where,
+        select: MassService.MASS_ROW_SELECT,
+        orderBy: { startAt: 'asc' },
+        skip,
+        take,
+      }),
+      this.prismaService.mass.count({ where }),
+    ]);
+    return { data, total, page, limit };
   }
 
   /** massOrder is scoped to orders with at least one COMPLETED payment —
@@ -327,7 +368,7 @@ export class MassService {
    * independent of status transitions so a mail failure can be retried
    * every tick without blocking the ordering-cutoff deadline. */
   async findPendingIntentions() {
-    return this.prismaService.mass.findMany({
+    const masses = await this.prismaService.mass.findMany({
       where: {
         status: { in: ['CLOSED', 'PROCESSING', 'COMPLETED'] },
         intentionsSentAt: null,
@@ -345,6 +386,10 @@ export class MassService {
         },
       },
     });
+    return masses.map((mass) => ({
+      ...mass,
+      massOrder: maskAnonymousOrders(mass.massOrder),
+    }));
   }
 
   async markIntentionsSent(massId: string) {
@@ -354,18 +399,76 @@ export class MassService {
     });
   }
 
-  private getDatesEvery7DaysUntilEndOfYear(startDate: string): string[] {
+  /** Every occurrence of the recurrence rule from startDate through the
+   * inclusive `until` bound, at the same time-of-day as startDate. WEEKLY
+   * steps by 7 days (so the weekday never drifts, by construction).
+   * MONTHLY preserves the "Nth weekday of the month" position of startDate
+   * (e.g. startDate on the 2nd Monday of January → every month's own 2nd
+   * Monday) — a month with no such occurrence (e.g. no 5th Monday) is
+   * skipped rather than snapped to the nearest one, matching how
+   * Google/Outlook handle "monthly on the 5th weekday". */
+  private generateRecurrenceDates(
+    startDate: string,
+    interval: RecurrenceInterval,
+    until: string
+  ): string[] {
+    const start = new Date(startDate);
+    const end = new Date(until);
+    end.setHours(23, 59, 59, 999); // `until` is a date the parish picked, not a timestamp — make it inclusive of that whole day regardless of startAt's time-of-day.
     const dates: string[] = [];
-    const currentYear = new Date().getFullYear();
-    const endDate = new Date(currentYear, 11, 31);
 
-    const currentDate = new Date(startDate);
+    if (interval === RecurrenceInterval.WEEKLY) {
+      const current = new Date(start);
+      while (current <= end) {
+        dates.push(new Date(current).toISOString());
+        current.setDate(current.getDate() + 7);
+      }
+      return dates;
+    }
 
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate).toISOString());
-      currentDate.setDate(currentDate.getDate() + 7);
+    const weekday = start.getDay();
+    const occurrence = Math.floor((start.getDate() - 1) / 7); // 0 = 1st, 1 = 2nd, ...
+
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (cursor <= end) {
+      const candidate = this.nthWeekdayOfMonth(
+        cursor.getFullYear(),
+        cursor.getMonth(),
+        weekday,
+        occurrence,
+        start
+      );
+      if (candidate && candidate >= start && candidate <= end) {
+        dates.push(candidate.toISOString());
+      }
+      cursor.setMonth(cursor.getMonth() + 1);
     }
     return dates;
+  }
+
+  /** The `occurrence`-th (0-indexed) `weekday` of the given year/month, at
+   * `timeSource`'s time-of-day — or null if that occurrence doesn't exist
+   * in this month (e.g. a "5th Monday" in a month that only has 4). */
+  private nthWeekdayOfMonth(
+    year: number,
+    month: number,
+    weekday: number,
+    occurrence: number,
+    timeSource: Date
+  ): Date | null {
+    const firstOfMonth = new Date(year, month, 1);
+    const firstMatchOffset = (weekday - firstOfMonth.getDay() + 7) % 7;
+    const day = 1 + firstMatchOffset + occurrence * 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    if (day > daysInMonth) return null;
+    return new Date(
+      year,
+      month,
+      day,
+      timeSource.getHours(),
+      timeSource.getMinutes(),
+      timeSource.getSeconds()
+    );
   }
 
   private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {

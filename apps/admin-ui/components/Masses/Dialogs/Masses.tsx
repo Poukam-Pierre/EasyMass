@@ -73,7 +73,7 @@ export default function MassesDialog({
 
     const { handleChange, handleSubmit,
         errors, touched, setFieldValue,
-        values
+        values, isSubmitting
     } = useFormik<FormikProps>({
         initialValues: {
             massType: massData?.massType,
@@ -288,8 +288,9 @@ export default function MassesDialog({
                         <Button
                             variant='contained'
                             type='submit'
+                            disabled={isSubmitting}
                         >
-                            {labelBtn}
+                            {isSubmitting ? formatMessage({ id: 'processing' }) : labelBtn}
                         </Button>
                     </Box>
                 </Box>

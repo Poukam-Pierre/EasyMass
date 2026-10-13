@@ -1,12 +1,11 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/client';
+import { Language, UserRole } from '@prisma/client';
 import { createId } from '@paralleldrive/cuid2';
 import * as bcrypt from 'bcryptjs';
 import { AdministratorService } from '../administrator/administrator.service';
@@ -39,32 +38,16 @@ export class AuthService {
     const user = await findUserByEmail(this.prismaService, input.email);
 
     if (!user || !allowedRoles.includes(user.role)) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
     }
 
     const flattened = flattenUserRole(user);
     if (!flattened) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
-    }
-
-    const existingRefreshToken =
-      await this.refreshTokenService.findFirstByUser(user.userId);
-
-    if (existingRefreshToken) {
-      if (new Date() <= new Date(existingRefreshToken.expiredDate)) {
-        throw new ConflictException('Conflict', {
-          cause: new Error(),
-          description:
-            'Account already logged in. Logout before from the first one.',
-        });
-      }
-      await this.refreshTokenService.remove(existingRefreshToken.id);
     }
 
     const validPassword = await bcrypt.compare(
@@ -72,10 +55,20 @@ export class AuthService {
       flattened.password
     );
     if (!validPassword) {
-      throw new UnauthorizedException('Unauthorized', {
+      throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
-        description: 'Wrong email or password.',
       });
+    }
+
+    // The password just proved this is the account owner, so a new login
+    // always wins and silently replaces any still-active session instead
+    // of locking the owner out until the stale session's 24h expiry —
+    // there's no other self-service way to end a session that never got
+    // to call /logout (crashed tab, killed server, lost connectivity).
+    const existingRefreshToken =
+      await this.refreshTokenService.findFirstByUser(user.userId);
+    if (existingRefreshToken) {
+      await this.refreshTokenService.remove(existingRefreshToken.id);
     }
 
     const tokens = await this.issueTokens(
@@ -100,6 +93,7 @@ export class AuthService {
         password: flattened.password,
         phone: flattened.phone,
         createdAt: flattened.createdAt,
+        language: flattened.language,
         ...tokens,
       });
     }
@@ -115,6 +109,7 @@ export class AuthService {
         phone: flattened.phone,
         managerName: flattened.managerName,
         createdAt: flattened.createdAt,
+        language: flattened.language,
         ...tokens,
       });
     }
@@ -122,9 +117,8 @@ export class AuthService {
     // Unreachable in practice — `allowedRoles` already restricted this to
     // ADMIN/PARISH above (PRIEST login is deferred, MVP scope) — but keeps
     // the function's return type honest instead of falling through.
-    throw new UnauthorizedException('Unauthorized', {
+    throw new UnauthorizedException('Wrong email or password.', {
       cause: new Error(),
-      description: 'Wrong email or password.',
     });
   }
 
@@ -153,11 +147,10 @@ export class AuthService {
 
       return { accessToken, refreshToken };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation of accessToken and refreshToken into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing the creation of accessToken and refreshToken into db.',
+        { cause: new Error() }
+      );
     }
   }
 
@@ -172,9 +165,8 @@ export class AuthService {
 
     const existing = await findUserByEmail(this.prismaService, email);
     if (existing) {
-      throw new BadRequestException('Bad Request', {
+      throw new BadRequestException('This account is already in use.', {
         cause: new Error(),
-        description: 'This account is already in use.',
       });
     }
 
@@ -183,11 +175,10 @@ export class AuthService {
       await this.adminService.create(rest, email, hash);
       return { code: 200, message: 'New administrator created successfully' };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user admin into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing hash and create new user admin into db.',
+        { cause: new Error() }
+      );
     }
   }
 
@@ -202,18 +193,16 @@ export class AuthService {
       await this.refreshTokenService.findOneWithUser(refreshTokenValue);
 
     if (!refreshData) {
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('User not authorized to refresh token!', {
         cause: new Error(),
-        description: 'User not authorized to refresh token!',
       });
     }
 
     if (new Date(refreshData.expiredDate) <= new Date()) {
       await this.refreshTokenService.remove(refreshData.id);
 
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('Refresh token expired. Please login!', {
         cause: new Error(),
-        description: 'Refresh token expired. Please login!',
       });
     }
 
@@ -234,20 +223,18 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing the creation accessToken and update refreshToken into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing the creation accessToken and update refreshToken into db.',
+        { cause: new Error() }
+      );
     }
   }
 
   async logout(refreshToken: string) {
     const refreshData = await this.refreshTokenService.findOne(refreshToken);
     if (!refreshData) {
-      throw new UnauthorizedException('Unauthorized refresh token', {
+      throw new UnauthorizedException('User not longer connect!', {
         cause: new Error(),
-        description: 'User not longer connect!',
       });
     }
     try {
@@ -255,11 +242,24 @@ export class AuthService {
 
       return { code: 200, message: 'Disconnect token successfully!' };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description: 'Error appears while processing deconnection.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing deconnection.',
+        { cause: new Error() }
+      );
     }
+  }
+
+  /** Language lives on User (not Administrator/Parish/Priest) since it's a
+   * property of the account itself, shared across every role — kept as one
+   * generic endpoint here instead of duplicated into each role's own
+   * profile-update route, which would each be touching a different table
+   * than the one this field actually lives on. */
+  async updateLanguage(userId: string, language: Language) {
+    await this.prismaService.user.update({
+      where: { userId },
+      data: { language },
+    });
+    return { code: 200, message: 'Language updated successfully' };
   }
 
   private addOneDay(date: Date): Date {

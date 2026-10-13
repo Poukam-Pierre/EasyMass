@@ -1,4 +1,6 @@
-import { Box, Button, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { DateRangeFilter, DEFAULT_PAGE_SIZE, dateRangeParams } from "@easy-messe/shared-ui";
+import { Box, Button, TablePagination, Typography } from "@mui/material";
+import { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { useIntl } from "react-intl";
@@ -8,29 +10,38 @@ import { withParishLayout } from "../../components/withParishLayout";
 import api, { apiErrorMessage } from "../../lib/api";
 import { downloadFile } from "../../lib/downloadFile";
 
-interface MassPriceRow {
-    massPriceId: string;
-    currency: string;
-    amount: number;
-}
-
 export default function MassDetail() {
     const [intentions, setIntentions] = useState<MassIntentionRow[]>([])
-    const [prices, setPrices] = useState<MassPriceRow[]>([])
+    const [total, setTotal] = useState<number>(0)
+    const [page, setPage] = useState<number>(0)
+    const [dateFrom, setDateFrom] = useState<Dayjs | null>(null)
+    const [dateTo, setDateTo] = useState<Dayjs | null>(null)
     const [isDownloading, setIsDownloading] = useState<boolean>(false)
-    const { formatMessage, formatNumber } = useIntl()
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const { formatMessage } = useIntl()
     const { query: { massId } } = useRouter()
 
     useEffect(() => {
         if (typeof massId !== 'string') return
-        api.get(`/masses/${massId}/intentions`)
-            .then(({ data }) => setIntentions(data))
-            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))));
-        api.get(`/masses/${massId}/prices`)
-            .then(({ data }) => setPrices(data))
-            .catch(() => undefined);
+        setIsLoading(true)
+        api.get(`/masses/${massId}/intentions/paginated`, {
+            params: {
+                page: page + 1,
+                limit: DEFAULT_PAGE_SIZE,
+                ...dateRangeParams(dateFrom, dateTo),
+            }
+        })
+            .then(({ data }) => { setIntentions(data.data); setTotal(data.total) })
+            .catch((error) => toast.error(apiErrorMessage(error, formatMessage({ id: 'loadErrorGeneric' }))))
+            .finally(() => setIsLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [massId])
+    }, [massId, page, dateFrom, dateTo])
+
+    const handleClearFilters = () => {
+        setPage(0)
+        setDateFrom(null)
+        setDateTo(null)
+    }
 
     const handleDownloadAll = async () => {
         if (typeof massId !== 'string') return
@@ -46,42 +57,41 @@ export default function MassDetail() {
 
     return (
         <Box sx={{ display: 'grid', rowGap: 5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', rowGap: 2 }}>
                 <Typography variant="h3" color="primary" sx={{ paddingBottom: 0 }}>
                     {formatMessage({ id: 'listOfMassSupply' })}
                 </Typography>
-                <Button
-                    variant="contained"
-                    onClick={handleDownloadAll}
-                    disabled={isDownloading || intentions.length === 0}
-                >
-                    {formatMessage({ id: isDownloading ? 'processing' : 'downloadAll' })}
-                </Button>
-            </Box>
-            <IntentionMassesTable intentions={intentions} />
-
-            {prices.length > 0 && (
-                <Box>
-                    <Typography variant="h4">{formatMessage({ id: 'massPrices' })}</Typography>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{formatMessage({ id: 'currency' })}</TableCell>
-                                <TableCell align="right">{formatMessage({ id: 'amount' })}</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {prices.map((price) => (
-                                <TableRow key={price.massPriceId}>
-                                    <TableCell>{price.currency}</TableCell>
-                                    <TableCell align="right">
-                                        {formatNumber(price.amount, { style: 'currency', currency: price.currency.toLowerCase() })}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 2, flexWrap: 'wrap' }}>
+                    <DateRangeFilter
+                        from={dateFrom}
+                        to={dateTo}
+                        onFromChange={(value) => { setPage(0); setDateFrom(value) }}
+                        onToChange={(value) => { setPage(0); setDateTo(value) }}
+                        onClear={handleClearFilters}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={handleDownloadAll}
+                        disabled={isDownloading || total === 0}
+                    >
+                        {formatMessage({ id: isDownloading ? 'processing' : 'downloadAll' })}
+                    </Button>
                 </Box>
+            </Box>
+            {isLoading ? (
+                <Typography variant="body2">{formatMessage({ id: 'loading' })}</Typography>
+            ) : (
+                <>
+                    <IntentionMassesTable intentions={intentions} />
+                    <TablePagination
+                        component="div"
+                        count={total}
+                        page={page}
+                        onPageChange={(_, newPage) => setPage(newPage)}
+                        rowsPerPage={DEFAULT_PAGE_SIZE}
+                        rowsPerPageOptions={[DEFAULT_PAGE_SIZE]}
+                    />
+                </>
             )}
         </Box>
     );

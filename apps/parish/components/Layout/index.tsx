@@ -1,4 +1,5 @@
 import { BreadcrumbsNameMaps, Header, SideBar, SideBarSection } from '@easy-messe/shared-ui';
+import { useDispatchLanguage } from "@easy-messe/libs/theme";
 import userCircleIcon from '@iconify-icons/ph/user-circle';
 import dashboardIcon from '@iconify-icons/material-symbols/space-dashboard-outline';
 import financeIcon from '@iconify-icons/material-symbols/attach-money';
@@ -7,13 +8,23 @@ import taskIcon from '@iconify-icons/material-symbols/task-outline';
 import { Icon } from "@iconify/react";
 import { Box } from "@mui/material";
 import { useRouter } from 'next/router';
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import { useIntl } from "react-intl";
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AppLayout({ children }: PropsWithChildren) {
     const { formatMessage } = useIntl()
     const { parish, logout } = useAuth()
+    const languageDispatch = useDispatchLanguage()
+
+    // Restores the parish's own saved language preference (persisted via
+    // Profile → Settings) once their account is loaded — otherwise the app
+    // always falls back to defaultLang regardless of what they last chose,
+    // since that preference lives in the DB, not in this browser's storage.
+    useEffect(() => {
+        if (!parish) return
+        languageDispatch({ type: parish.language === 'FR' ? 'USE_FRENCH' : 'USE_ENGLISH' })
+    }, [parish, languageDispatch])
 
     const router = useRouter()
     const { query: { rubrics } } = router

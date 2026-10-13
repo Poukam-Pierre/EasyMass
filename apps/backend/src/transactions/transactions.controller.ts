@@ -3,20 +3,24 @@ import { UserRole } from '@prisma/client';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { AuthenticatedRequest } from '../common/authenticated-request';
 import { CreateCorrectionDto } from './dto/create-correction.dto';
+import { FindTransactionsQueryDto } from './dto/find-transactions-query.dto';
 import { TransactionsService } from './transactions.service';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionService: TransactionsService) {}
 
-  @Get()
+  /** Paginated/filterable — backs the finance tables in both admin-ui and
+   * parish, plus admin-ui's parish-detail transactions tab. */
+  @Get('/paginated')
   @Roles(UserRole.PARISH, UserRole.ADMIN)
-  findTransactionByParish(
-    @Query('parishId') parishId: string,
+  findTransactionByParishPaginated(
+    @Query() query: FindTransactionsQueryDto,
     @Request() request: AuthenticatedRequest
   ) {
-    return this.transactionService.findAllTransactionByParish(
-      parishId,
+    return this.transactionService.findAllTransactionByParishPaginated(
+      query.parishId,
+      query,
       request.user
     );
   }
@@ -32,6 +36,7 @@ export class TransactionsController {
       dto.ownerType,
       dto.amount,
       dto.note,
+      dto.password,
       request.user.id
     );
   }

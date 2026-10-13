@@ -8,7 +8,9 @@ import {
   Query,
   Request,
   Res,
+  UseGuards,
 } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { UserRole } from '@prisma/client';
 import { Response } from 'express';
 import { PaymentService } from './payment.service';
@@ -86,18 +88,25 @@ export class PaymentController {
     return this.paymentService.handlePaypalWebhook(headers, event);
   }
 
-  /** No real checkout frontend is wired up yet (see
-   * apps/easy-messe/components/OfferMass/ModalPayment.tsx — its confirm
-   * button isn't connected to anything), so this redirects only if
-   * FRONTEND_CHECKOUT_RETURN_URL is set; otherwise it falls back to a
-   * plain JSON body so the flow is still testable end-to-end today. */
+  /** Redirects to FRONTEND_CHECKOUT_RETURN_URL with the outcome as query
+   * params — `method=paypal` so the checkout-return page knows the receipt
+   * confirmation is coming by email (vs. `method=mobile_money`'s SMS, see
+   * initiateNotchPayCheckout), and `success` so it only promises that
+   * confirmation when the payment genuinely completed, not on a
+   * cancellation/failure. Falls back to a plain JSON body if
+   * FRONTEND_CHECKOUT_RETURN_URL isn't configured. */
   private respondToPaypalRedirect(
     res: Response,
-    result: { code: number; message: string }
+    result: { code: number; message: string; success?: boolean }
   ) {
     const redirectBase = process.env.FRONTEND_CHECKOUT_RETURN_URL;
     if (redirectBase) {
-      res.redirect(`${redirectBase}?message=${encodeURIComponent(result.message)}`);
+      const params = new URLSearchParams({
+        message: result.message,
+        method: 'paypal',
+        success: String(result.success ?? false),
+      });
+      res.redirect(`${redirectBase}?${params.toString()}`);
       return;
     }
     res.status(result.code).json(result);
@@ -107,8 +116,11 @@ export class PaymentController {
   // PaymentService.sendInvoice) — no session to attach a JWT to, since it's
   // opened directly from an SMS. Security relies on `reference` being an
   // unguessable token (NotchPay's own reference / PayPal's order id), the
-  // same model Stripe/PayPal use for their own checkout confirmation pages.
+  // same model Stripe/PayPal use for their own checkout confirmation pages —
+  // rate-limited (see PaymentModule's ThrottlerModule) so that reliance on
+  // "unguessable" can't be defeated by a script with no lockout.
   @Public()
+  @UseGuards(ThrottlerGuard)
   @Get('/:reference/invoice')
   async downloadInvoice(
     @Param('reference') reference: string,
@@ -128,7 +140,11 @@ export class PaymentController {
     @Request() request: AuthenticatedRequest,
     @Body() dto: WithdrawMoneyDto
   ) {
-    return this.paymentService.withdrawMoney(request.user, dto.amount);
+    return this.paymentService.withdrawMoney(
+      request.user,
+      dto.amount,
+      dto.password
+    );
   }
 
   @Post('/:paymentId/refund')
