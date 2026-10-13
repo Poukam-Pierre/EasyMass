@@ -1,0 +1,15 @@
+easymesse.com {
+    reverse_proxy easy-messe:4200
+}
+
+api.easymesse.com {
+    reverse_proxy backend:5000
+}
+
+parish.easymesse.com {
+    reverse_proxy parish:4400
+}
+
+admin.easymesse.com {
+    reverse_proxy admin-ui:4300
+}

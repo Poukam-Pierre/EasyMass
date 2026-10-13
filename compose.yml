@@ -85,8 +85,29 @@ services:
     networks:
       - easymesse-network
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: easymesse-caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - easy-messe
+      - parish
+      - admin-ui
+    networks:
+      - easymesse-network
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   easymesse-network:
