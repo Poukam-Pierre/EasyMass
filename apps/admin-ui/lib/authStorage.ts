@@ -6,6 +6,7 @@ export interface AdminUser {
     email: string;
     phone: string;
     createdAt: string;
+    language: 'EN' | 'FR';
 }
 
 export interface StoredAuth {

@@ -1,4 +1,5 @@
 import { Box, Button, Dialog, Typography } from "@mui/material";
+import { useState } from "react";
 import { useIntl } from "react-intl";
 import { toast } from "react-toastify";
 import api, { apiErrorMessage } from "../../../lib/api";
@@ -17,8 +18,10 @@ export default function CancelMassDialog({
     onDeleted
 }: CancelMassDialogProps) {
     const { formatMessage } = useIntl()
+    const [isDeleting, setIsDeleting] = useState(false)
     const handleDeleteMass = async () => {
         if (!idSelected) return
+        setIsDeleting(true)
         try {
             await api.delete(`/masses/${idSelected}`);
             toast.success(formatMessage({ id: 'saved' }));
@@ -26,6 +29,8 @@ export default function CancelMassDialog({
             handleClose();
         } catch (error) {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -90,8 +95,9 @@ export default function CancelMassDialog({
                         variant='contained'
                         color="error"
                         onClick={handleDeleteMass}
+                        disabled={isDeleting}
                     >
-                        {formatMessage({ id: 'delete' })}
+                        {formatMessage({ id: isDeleting ? 'processing' : 'delete' })}
                     </Button>
                 </Box>
             </Box>

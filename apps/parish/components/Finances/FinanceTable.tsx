@@ -80,7 +80,7 @@ export default function FinanceTable({ transactions }: { transactions: Transacti
                             color: amount < 0 ? 'var(--error)' : 'var(--success)'
                         }}>{formatNumber(amount, { style: 'currency', currency: 'xaf' })}</TableCell>
                         <TableCell>{payment?.paymentMethod ?? '-'}</TableCell>
-                        <TableCell>{formatDate(createdAt)}</TableCell>
+                        <TableCell>{formatDate(createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</TableCell>
                         <TableCell>{formatNumber(balanceAfter, { style: 'currency', currency: 'xaf' })}</TableCell>
                     </TableRow>
                 ))}

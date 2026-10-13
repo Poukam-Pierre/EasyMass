@@ -34,11 +34,11 @@ export default function MassOwnerTableMenu({
             case formatMessage({ id: 'delete' }):
                 handleCancel()
                 break;
-            case formatMessage({ id: 'history' }):
+            case formatMessage({ id: 'details' }):
                 push({
                     pathname: `/masses/${idSelected}`,
                     query: {
-                        rubrics: 'History'
+                        rubrics: formatMessage({ id: 'details' })
                     }
                 })
                 break;

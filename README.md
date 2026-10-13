@@ -68,15 +68,15 @@ cp .env.example .env
 
 `.env.example` is the source of truth for every variable the backend reads — keep it in sync when you add a new one. A few of them are third-party integrations, each optional in the sense that the app still boots without them, but the feature they back will silently fail (usually just logged, not thrown) until configured:
 
-| Variable(s) | Used for |
-|---|---|
-| `DATABASE_URL` | Postgres connection (Prisma) |
-| `JWT_SECRET_KEY` | Signing access tokens |
-| `NOTCH_PUBLIC_KEY` | NotchPay mobile-money checkout |
-| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_MODE` / `PAYPAL_WEBHOOK_ID` | PayPal checkout + webhook verification |
-| `FRONTEND_CHECKOUT_RETURN_URL` | Where a payer lands after checkout — **required**, mobile-money checkout throws without it |
-| `ORANGE_CLIENT_ID` / `ORANGE_CLIENT_SECRET` / `ORANGE_SENDER_NUMBER` | Orange SMS — invoice delivery for mobile-money payers (Cameroon-only) |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | Email — invoice delivery for PayPal payers |
+| Variable(s)                                                                       | Used for                                                                                   |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`                                                                    | Postgres connection (Prisma)                                                               |
+| `JWT_SECRET_KEY`                                                                  | Signing access tokens                                                                      |
+| `NOTCH_PUBLIC_KEY`                                                                | NotchPay mobile-money checkout                                                             |
+| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_MODE` / `PAYPAL_WEBHOOK_ID` | PayPal checkout + webhook verification                                                     |
+| `FRONTEND_CHECKOUT_RETURN_URL`                                                    | Where a payer lands after checkout — **required**, mobile-money checkout throws without it |
+| `ORANGE_CLIENT_ID` / `ORANGE_CLIENT_SECRET` / `COUNTRY_SENDER_NUMBER`             | Orange SMS — invoice delivery for mobile-money payers (Cameroon-only)                      |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM`               | Email — invoice delivery for PayPal payers                                                 |
 
 See [Payments & Notifications](#-payments--notifications) below for how these fit together.
 

@@ -13,9 +13,13 @@ async function bootstrap() {
   // Strips @Exclude()-marked fields (e.g. password) from every response
   // whose payload is an instance of a DTO class using that decorator.
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  // CORS_ORIGINS is a comma-separated list (e.g. production domains); falls
+  // back to the local dev ports for easy-messe/admin-ui/parish when unset.
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+    : ['http://localhost:4200', 'http://localhost:4300', 'http://localhost:4400'];
   app.enableCors({
-    // remote url server should be added here to avoid CORS issue
-    origin: ['http://localhost:4200', 'http://localhost:4300', 'http://localhost:4400'], // easy-messe, admin-ui, parish
+    origin: corsOrigins,
     methods: 'GET, POST, PATCH, DELETE',
     credentials: true,
   });

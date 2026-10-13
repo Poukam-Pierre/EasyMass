@@ -5,7 +5,7 @@ import RequireAuth from "./RequireAuth";
 
 export function withParishLayout(page: ReactNode) {
     return (
-        <EasyMassAdminLayout defaultLang="fr">
+        <EasyMassAdminLayout defaultLang="en">
             <RequireAuth>
                 <AppLayout>{page}</AppLayout>
             </RequireAuth>

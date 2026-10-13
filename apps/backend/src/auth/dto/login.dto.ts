@@ -1,3 +1,4 @@
+import { Language } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
@@ -31,6 +32,7 @@ export class ParishDataDto {
   phone: string;
   managerName: string;
   createdAt: Date;
+  language: Language;
   accessToken?: string;
   refreshToken?: string;
 
@@ -55,6 +57,7 @@ export class AdminDataDto {
 
   phone: string;
   createdAt: Date;
+  language: Language;
   accessToken?: string;
   refreshToken?: string;
 

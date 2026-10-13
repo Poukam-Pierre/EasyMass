@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { ParishModule } from '../parish/parish.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { PaymentController } from './payment.controller';
@@ -27,6 +28,13 @@ import { PdfModule } from '../pdf/pdf.module';
     SmsModule,
     MailModule,
     PdfModule,
+    // Only wired up for downloadInvoice (see PaymentController) — that route
+    // is public and keyed on an unguessable reference/order-id string, so a
+    // rate limit is what keeps "unguessable" from becoming "brute-forceable
+    // by a script with no lockout." Not applied anywhere else in this
+    // module; every other route is either authenticated or has its own
+    // integrity check (e.g. re-fetching status from the gateway).
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 5 }]),
   ],
   providers: [PaymentService, PaypalService],
   exports: [PaymentService],

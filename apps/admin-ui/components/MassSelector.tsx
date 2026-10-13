@@ -19,15 +19,21 @@ interface MassSelectorProps {
 export default function MassSelector({ parishId, value, onChange }: MassSelectorProps) {
     const { formatMessage } = useIntl()
     const [masses, setMasses] = useState<MassOption[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     useEffect(() => {
         if (!parishId) { setMasses([]); return }
-        api.get('/masses', { params: { parishId } }).then(({ data }) => setMasses(data)).catch(() => undefined);
+        setIsLoading(true)
+        api.get('/masses', { params: { parishId } })
+            .then(({ data }) => setMasses(data))
+            .catch(() => undefined)
+            .finally(() => setIsLoading(false));
     }, [parishId])
 
     return (
         <Autocomplete
             options={masses}
+            loading={isLoading}
             disabled={!parishId}
             getOptionLabel={(mass) => `${mass.massType} — ${dayjs(mass.startAt).format('LLL')}`}
             value={value}

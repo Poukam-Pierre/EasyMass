@@ -1,5 +1,6 @@
-import { ForbiddenException } from '@nestjs/common';
-import { Administrator, Parish, Priest, User, UserRole } from '@prisma/client';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { Administrator, Language, Parish, Priest, User, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 type UserWithRoles = User & {
@@ -14,6 +15,7 @@ interface FlattenedCommon {
   email: string;
   password: string;
   userId: string;
+  language: Language;
 }
 
 export type FlattenedUser =
@@ -50,6 +52,7 @@ export function flattenUserRole(user: UserWithRoles): FlattenedUser | null {
     email: user.email,
     password: user.password,
     userId: user.userId,
+    language: user.language,
   };
 
   switch (user.role) {
@@ -82,12 +85,33 @@ export async function resolveParishForUser(
 ) {
   const parish = await prisma.parish.findUnique({ where: { userId } });
   if (!parish) {
-    throw new ForbiddenException('Forbidden', {
+    throw new ForbiddenException('Authenticated user is not a parish.', {
       cause: new Error(),
-      description: 'Authenticated user is not a parish.',
     });
   }
   return parish;
+}
+
+/**
+ * Step-up re-authentication for a dangerous action the caller's existing
+ * JWT alone shouldn't be sufficient for (e.g. a ledger correction) — the
+ * same bcrypt check login uses, just against the already-authenticated
+ * caller's own stored hash instead of a submitted email. Throws
+ * UnauthorizedException (never reveals *why* — wrong password vs. no such
+ * user — both look identical) if it doesn't match.
+ */
+export async function verifyCurrentPassword(
+  prisma: PrismaService,
+  userId: string,
+  password: string
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { userId } });
+  const valid = user ? await bcrypt.compare(password, user.password) : false;
+  if (!valid) {
+    throw new UnauthorizedException('Incorrect password.', {
+      cause: new Error(),
+    });
+  }
 }
 
 export async function resolveAdminForUser(
@@ -96,9 +120,8 @@ export async function resolveAdminForUser(
 ) {
   const admin = await prisma.administrator.findUnique({ where: { userId } });
   if (!admin) {
-    throw new ForbiddenException('Forbidden', {
+    throw new ForbiddenException('Authenticated user is not an administrator.', {
       cause: new Error(),
-      description: 'Authenticated user is not an administrator.',
     });
   }
   return admin;

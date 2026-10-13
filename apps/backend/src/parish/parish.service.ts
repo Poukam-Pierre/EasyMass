@@ -162,9 +162,8 @@ export class ParishService {
       requestUser.id
     );
     if (parish.parishId !== parishId) {
-      throw new ForbiddenException('Forbidden', {
+      throw new ForbiddenException('You may only manage your own parish.', {
         cause: new Error(),
-        description: 'You may only manage your own parish.',
       });
     }
   }
@@ -184,9 +183,8 @@ export class ParishService {
     const user = await this.credentialsParishValidation(input, requestUser);
 
     if (!user) {
-      throw new BadRequestException('Bad Request', {
+      throw new BadRequestException('This account is already in use.', {
         cause: new Error(),
-        description: 'This account is already in use.',
       });
     }
 
@@ -226,11 +224,10 @@ export class ParishService {
         message: 'Parish created successfully',
       };
     } catch (error) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: new Error(),
-        description:
-          'Error appears while processing hash and create new user parish into db.',
-      });
+      throw new InternalServerErrorException(
+        'Error appears while processing hash and create new user parish into db.',
+        { cause: new Error() }
+      );
     }
   }
 

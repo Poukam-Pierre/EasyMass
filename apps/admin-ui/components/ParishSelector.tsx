@@ -19,14 +19,19 @@ interface ParishSelectorProps {
 export default function ParishSelector({ value, onChange }: ParishSelectorProps) {
     const { formatMessage } = useIntl()
     const [parishes, setParishes] = useState<ParishOption[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     useEffect(() => {
-        api.get('/parishes').then(({ data }) => setParishes(data)).catch(() => undefined);
+        api.get('/parishes')
+            .then(({ data }) => setParishes(data))
+            .catch(() => undefined)
+            .finally(() => setIsLoading(false));
     }, [])
 
     return (
         <Autocomplete
             options={parishes}
+            loading={isLoading}
             getOptionLabel={(parish) => parish.name}
             value={value}
             onChange={(_, parish) => onChange(parish)}
