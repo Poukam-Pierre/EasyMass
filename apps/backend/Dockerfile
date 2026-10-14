@@ -6,6 +6,13 @@ LABEL maintainer="Ngamaleu Poukam <ngamaleu2011@gmail.com>"
 LABEL org.opencontainers.decription="NestJs backend for the Easy-messe project"
 
 WORKDIR /app
+# Needed for Prisma to correctly detect the OpenSSL version at both
+# `generate` time (build stage) and runtime (runner stage) — without it,
+# Prisma can't confirm the version and silently defaults to a guess that
+# may not match any binaryTarget in schema.prisma, causing "engine not
+# found" failures.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
@@ -30,8 +37,6 @@ COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN apt-get update && apt-get install -y --no-install-recommends openssl \
-  && rm -rf /var/lib/apt/lists/*
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/backend ./dist/apps/backend
 
