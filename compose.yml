@@ -40,6 +40,29 @@ services:
     networks:
       - easymesse-network
 
+  # One-off tooling container for `prisma migrate`/`db seed` — the `backend`
+  # service's final image strips devDependencies (incl. the `prisma` CLI)
+  # and the schema/seed source files to stay minimal. This targets the
+  # Dockerfile's `build` stage instead, which still has both. Not started
+  # by `docker compose up` (profile-gated) — invoke explicitly, e.g.:
+  #   docker compose run --rm backend-migrate npx prisma migrate deploy
+  #   docker compose run --rm backend-migrate node apps/backend/src/prisma/seed.js
+  backend-migrate:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: build
+    profiles: ['tools']
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - easymesse-network
+
   easy-messe:
     build:
       context: .
