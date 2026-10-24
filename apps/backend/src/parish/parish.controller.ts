@@ -81,6 +81,12 @@ export class ParishController {
     return this.parishService.createParish(input, request.user);
   }
 
+  @Post(':id/resend-setup')
+  @Roles(UserRole.ADMIN)
+  resendSetup(@Param('id') id: string) {
+    return this.parishService.resendSetupLink(id);
+  }
+
   @Patch(':id/block')
   @Roles(UserRole.ADMIN)
   block(@Param('id') id: string, @Body('isBlocked') isBlocked: boolean) {

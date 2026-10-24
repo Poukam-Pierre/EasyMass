@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -47,6 +48,17 @@ export class AuthService {
     if (!flattened) {
       throw new UnauthorizedException('Wrong email or password.', {
         cause: new Error(),
+      });
+    }
+
+    // Checked before the password: an account that hasn't completed setup
+    // has no password its owner knows (see AccountSetupService), so a
+    // generic "wrong password" would leave them with no idea why.
+    if (!user.emailVerifiedAt) {
+      throw new ForbiddenException('emailNotVerified', {
+        cause: new Error(),
+        description:
+          'Finish setting up your account with the link sent to your email before logging in.',
       });
     }
 

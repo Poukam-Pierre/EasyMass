@@ -20,6 +20,7 @@ import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { MassSchedulerModule } from './mass-scheduler/mass-scheduler.module';
 import { PaymentSchedulerModule } from './payment-scheduler/payment-scheduler.module';
 import { PriestModule } from './priest/priest.module';
+import { AccountSetupModule } from './account-setup/account-setup.module';
 
 
 @Module({
@@ -47,6 +48,7 @@ import { PriestModule } from './priest/priest.module';
     MassSchedulerModule,
     PaymentSchedulerModule,
     PriestModule,
+    AccountSetupModule,
   ],
   controllers: [AppController],
   providers: [
