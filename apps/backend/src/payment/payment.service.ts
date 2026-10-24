@@ -1011,7 +1011,7 @@ export class PaymentService {
       status?: string;
       message?: string;
       errors?: Record<string, string[]>;
-      transfer?: { reference?: string };
+      transfer?: { reference?: string; amounts?: { fee?: number | string } };
     };
     try {
       withdrawalData = await fetch(
@@ -1027,35 +1027,47 @@ export class PaymentService {
 
     if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
       const payoutReference = withdrawalData.transfer?.reference;
+      // What NotchPay charges the platform for this payout (0 in sandbox).
+      // Read per transfer, never assumed — their pricing can change.
+      const payoutFee = Number(withdrawalData.transfer?.amounts?.fee) || 0;
       this.logger.log(
         `NotchPay transfer accepted for parish ${
           parish.parishId
         }: ${JSON.stringify(withdrawalData)}`
       );
 
-      // The ledger is debited the amount the parish asked for — the one
-      // the balance check above validated, and always known. NotchPay's
-      // response doesn't reliably carry a total (it had no amount_total,
-      // which turned this debit into NaN and left the payout unrecorded).
+      // The parish is debited exactly the amount it asked for (the one the
+      // balance check above validated); NotchPay's fee is a platform cost,
+      // recorded against the platform's own ledger in the same transaction.
       try {
         // Serializable so a withdrawal racing with a concurrent payment/
-        // refund for the same parish can't produce a lost update on the
+        // refund for the same owner can't produce a lost update on the
         // running balance (see PrismaService.runSerializableTransaction).
-        await this.prismaService.runSerializableTransaction((tx) =>
-          this.transactionsService.createWithBalance(tx, {
+        await this.prismaService.runSerializableTransaction(async (tx) => {
+          await this.transactionsService.createWithBalance(tx, {
             transactionType: 'WITHDRAWAL',
             ownerId: parish.parishId,
             ownerType: 'PARISH',
             amount: -Math.abs(amount),
             externalPayoutId: payoutReference,
             createdByUser: { connect: { userId: requestUser.id } },
-          })
-        );
+          });
+          if (payoutFee > 0) {
+            await this.transactionsService.createWithBalance(tx, {
+              transactionType: 'PAYOUT_FEE',
+              ownerId: PLATFORM_OWNER_ID,
+              ownerType: 'ADMIN',
+              amount: -Math.abs(payoutFee),
+              externalPayoutId: payoutReference,
+              createdByUser: { connect: { userId: requestUser.id } },
+            });
+          }
+        });
       } catch (error) {
         // Money already left NotchPay at this point — make the gap
         // findable for manual reconciliation instead of a bare 500.
         this.logger.error(
-          `Payout ${payoutReference} of ${amount} XAF for parish ${
+          `Payout ${payoutReference} of ${amount} XAF (fee ${payoutFee} XAF) for parish ${
             parish.parishId
           } was SENT but NOT recorded in the ledger: ${error?.message ?? error}`
         );

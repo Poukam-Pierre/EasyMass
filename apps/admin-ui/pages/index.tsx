@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 interface MoneyOverview {
     totalParishIncome: number;
     totalPlatformFeeRevenue: number;
+    totalPayoutFees: number;
     totalWithdrawn: number;
     revenueByMonth: { month: string; amount: number }[];
 }
@@ -72,6 +73,7 @@ export default function Dashboard() {
                         <StatTile
                             label={formatMessage({ id: 'platformFeeRevenue' })}
                             value={formatNumber(money?.totalPlatformFeeRevenue ?? 0, { style: 'currency', currency: 'xaf' })}
+                            caption={`${formatMessage({ id: 'payoutFeesPaid' })}: ${formatNumber(money?.totalPayoutFees ?? 0, { style: 'currency', currency: 'xaf' })}`}
                             icon={percentIcon}
                             accentColor="#5CB360"
                         />

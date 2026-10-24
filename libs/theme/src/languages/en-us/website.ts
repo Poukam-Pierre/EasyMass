@@ -284,6 +284,7 @@ export const website = {
   pendingSetup: 'Pending setup',
   totalParishIncome: 'Total parish income',
   platformFeeRevenue: 'Platform fee revenue',
+  payoutFeesPaid: 'Payout fees paid',
   totalWithdrawn: 'Total withdrawn',
   totalParishes: 'Total parishes',
   activeParishes: 'Active parishes',

@@ -289,6 +289,7 @@ export const website = {
   pendingSetup: 'Activation en attente',
   totalParishIncome: 'Revenus total des paroisses',
   platformFeeRevenue: 'Revenus de la plateforme',
+  payoutFeesPaid: 'Frais de retrait payés',
   totalWithdrawn: 'Total retiré',
   totalParishes: 'Total paroisses',
   activeParishes: 'Paroisses actives',
