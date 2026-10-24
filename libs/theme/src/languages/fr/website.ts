@@ -272,6 +272,8 @@ export const website = {
   recoveryUnavailableMessage:
     "La récupération de mot de passe en libre-service n'est pas encore disponible. Veuillez contacter un administrateur de la plateforme.",
   backToLogin: 'Retour à la connexion',
+  accountPasswordRule: 'Au moins 10 caractères, dont 1 majuscule, 1 minuscule, 1 chiffre et 1 symbole.',
+  tooManyAttempts: 'Trop de tentatives. Veuillez patienter une minute et réessayer.',
   totalParishIncome: 'Revenus total des paroisses',
   platformFeeRevenue: 'Revenus de la plateforme',
   totalWithdrawn: 'Total retiré',

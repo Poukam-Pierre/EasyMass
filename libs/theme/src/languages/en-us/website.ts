@@ -267,6 +267,8 @@ export const website = {
   recoveryUnavailableMessage:
     'Self-service password recovery is not available yet. Please contact a platform administrator.',
   backToLogin: 'Back to login',
+  accountPasswordRule: 'At least 10 characters, with 1 uppercase, 1 lowercase, 1 digit and 1 symbol.',
+  tooManyAttempts: 'Too many attempts. Please wait a minute and try again.',
   totalParishIncome: 'Total parish income',
   platformFeeRevenue: 'Platform fee revenue',
   totalWithdrawn: 'Total withdrawn',
