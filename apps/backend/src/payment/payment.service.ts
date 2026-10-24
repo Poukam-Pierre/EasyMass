@@ -878,12 +878,12 @@ export class PaymentService {
       const pdf = await this.pdfService.generateInvoicePdf(
         this.buildInvoiceDetails(reference, payments)
       );
-      await this.mailService.sendWithAttachment(
-        believer.email,
-        'Your EasyMesse payment receipt',
-        `Thank you for your payment. Your receipt for ${payments.length} mass(es) is attached.`,
-        { filename: `invoice-${reference}.pdf`, content: pdf }
-      );
+      await this.mailService.send({
+        to: believer.email,
+        subject: 'Your EasyMesse payment receipt',
+        text: `Thank you for your payment. Your receipt for ${payments.length} mass(es) is attached.`,
+        attachments: [{ filename: `invoice-${reference}.pdf`, content: pdf }],
+      });
     }
   }
 

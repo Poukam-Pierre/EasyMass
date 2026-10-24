@@ -56,14 +56,15 @@ export class MassSchedulerService {
         language
       );
 
-      await this.mailService.sendWithAttachment(
-        mass.parish.user.email,
-        language === 'FR' ? 'Intentions de messe' : 'Mass intentions',
-        language === 'FR'
-          ? `Veuillez trouver ci-joint les intentions recueillies pour : ${subtitle}.`
-          : `Attached are the gathered intentions for: ${subtitle}.`,
-        { filename: `intentions-${mass.massId}.pdf`, content: pdf }
-      );
+      await this.mailService.send({
+        to: mass.parish.user.email,
+        subject: language === 'FR' ? 'Intentions de messe' : 'Mass intentions',
+        text:
+          language === 'FR'
+            ? `Veuillez trouver ci-joint les intentions recueillies pour : ${subtitle}.`
+            : `Attached are the gathered intentions for: ${subtitle}.`,
+        attachments: [{ filename: `intentions-${mass.massId}.pdf`, content: pdf }],
+      });
 
       await this.massService.markIntentionsSent(mass.massId, readAt);
     } catch (error) {
