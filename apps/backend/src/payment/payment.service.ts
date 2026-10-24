@@ -273,8 +273,16 @@ export class PaymentService {
         PaymentAudiAction.UPDATED
       );
 
+      this.logger.log(
+        `Checkout ${reference} started: ${paymentInfo.paymentMethod}, ${items.length} mass(es), ${grandTotal} ${paymentInfo.currency}`
+      );
       return checkoutUrl;
     } catch (error) {
+      this.logger.warn(
+        `Checkout ${reference} failed to start (${
+          paymentInfo.paymentMethod
+        }): ${error?.message ?? error}`
+      );
       // The gateway rejected the checkout outright (or we refused to even
       // ask, e.g. unsupported method) — mark FAILED rather than leaving
       // these rows stuck INITIATED for a reconciliation job to eventually
@@ -433,9 +441,16 @@ export class PaymentService {
           where: { paymentId: { in: paymentIds } },
           data: { referenceId: paymentInit.transaction.reference },
         });
+        // From here on the payment is tracked by NotchPay's reference.
+        this.logger.log(
+          `Checkout ${reference} is NotchPay payment ${paymentInit.transaction.reference}`
+        );
         return paymentInit.authorization_url;
       }
 
+      this.logger.warn(
+        `NotchPay refused checkout ${reference}: ${JSON.stringify(paymentInit)}`
+      );
       throw new UnprocessableEntityException(
         'Payment initialization was not accepted.'
       );
@@ -473,6 +488,10 @@ export class PaymentService {
       where: { paymentId: { in: paymentIds } },
       data: { referenceId: orderId },
     });
+    // From here on the payment is tracked by PayPal's order id.
+    this.logger.log(
+      `PayPal order ${orderId} created for ${paymentIds.length} payment(s)`
+    );
 
     return approveUrl;
   }
@@ -486,6 +505,7 @@ export class PaymentService {
       data: { reference },
     } = paymentResult;
 
+    this.logger.log(`NotchPay webhook received for payment ${reference}`);
     return this.reconcileNotchPayPayment(reference);
   }
 
@@ -525,6 +545,9 @@ export class PaymentService {
           data: { status: 'FAILED' },
         });
         if (count > 0) {
+          this.logger.warn(
+            `Payment ${reference} FAILED (NotchPay status: ${gatewayStatus}), ${count} payment(s)`
+          );
           const paymentIds = await this.findPaymentIdsByReference(
             reference,
             PaymentStatus.FAILED
@@ -640,6 +663,7 @@ export class PaymentService {
       data: { status: 'FAILED' },
     });
     if (count === 0) return;
+    this.logger.warn(`Payment ${referenceId} FAILED, ${count} payment(s)`);
 
     const paymentIds = await this.findPaymentIdsByReference(
       referenceId,
@@ -671,6 +695,10 @@ export class PaymentService {
         'Invalid PayPal webhook signature.'
       );
     }
+
+    this.logger.log(
+      `PayPal webhook received: ${event.event_type} for order ${event.resource?.id}`
+    );
 
     // Fires as soon as the customer approves, before capture — resource IS
     // the order object, so resource.id is the order id finalizeCheckout
@@ -841,6 +869,10 @@ export class PaymentService {
     // and the cron sweep (never a waiting browser request), so there's no
     // reason to leave it as an un-awaited orphaned promise either.
     if (result.payments) {
+      const total = result.payments.reduce((sum, p) => sum + p.amount, 0);
+      this.logger.log(
+        `Payment ${reference} SETTLED: ${result.payments.length} payment(s), ${total} ${result.payments[0].currency}, parish ${result.payments[0].massOrder.mass.parishId}`
+      );
       try {
         await this.sendInvoice(reference, result.payments);
       } catch (error) {
@@ -981,6 +1013,10 @@ export class PaymentService {
         description: `Withdrawal amount (${amount}) exceeds available balance (${currentBalance}).`,
       });
     }
+
+    this.logger.log(
+      `Withdrawal requested: parish ${parish.parishId}, ${amount} XAF`
+    );
 
     // Resolved before any NotchPay call, so a number that isn't MTN/Orange
     // is refused up front rather than after a recipient was created.
@@ -1138,6 +1174,11 @@ export class PaymentService {
         optionCreateRecipient
       ).then((response) => response.json());
     } catch (error) {
+      this.logger.error(
+        `NotchPay unreachable creating recipient for parish ${parishId}: ${
+          error?.message ?? error
+        }`
+      );
       throw new UnprocessableEntityException('withdrawalRecipientFailed', {
         cause: error instanceof Error ? error : new Error(String(error)),
         description: 'Could not reach the payment provider.',
@@ -1158,8 +1199,17 @@ export class PaymentService {
       await this.parishService.update(parishId, {
         receiverId: notchRecipientId,
       });
+      this.logger.log(
+        `NotchPay recipient ${notchRecipientId} created for parish ${parishId} (${channel})`
+      );
       return notchRecipientId;
     }
+
+    this.logger.warn(
+      `NotchPay refused recipient for parish ${parishId}: ${JSON.stringify(
+        createRecipient
+      )}`
+    );
 
     throw new UnprocessableEntityException('withdrawalRecipientFailed', {
       cause: new Error(),
@@ -1195,48 +1245,56 @@ export class PaymentService {
     // query per reversed row — the same pattern notifyPayment uses,
     // reintroduced here after a review found this loop had regressed to
     // the per-row query it was meant to avoid.
-    return this.prismaService.runSerializableTransaction(async (tx) => {
-      const balanceCache = new Map<string, number>();
+    const result = await this.prismaService.runSerializableTransaction(
+      async (tx) => {
+        const balanceCache = new Map<string, number>();
 
-      for (const row of reversibleRows) {
-        const cacheKey = `${row.ownerType}:${row.ownerId}`;
-        const previousBalance =
-          balanceCache.get(cacheKey) ??
-          (await this.transactionsService.getCurrentBalance(
-            tx,
-            row.ownerId,
-            row.ownerType
-          ));
+        for (const row of reversibleRows) {
+          const cacheKey = `${row.ownerType}:${row.ownerId}`;
+          const previousBalance =
+            balanceCache.get(cacheKey) ??
+            (await this.transactionsService.getCurrentBalance(
+              tx,
+              row.ownerId,
+              row.ownerType
+            ));
 
-        const { balanceAfter } = await this.transactionsService.createAtBalance(
+          const { balanceAfter } =
+            await this.transactionsService.createAtBalance(
+              tx,
+              {
+                transactionType: 'INCOME_REVERSAL',
+                ownerId: row.ownerId,
+                ownerType: row.ownerType,
+                amount: -row.amount,
+                payment: { connect: { paymentId } },
+                createdByUser: { connect: { userId: requestUser.id } },
+                note: `Reversal of ${row.transactionType} ${row.transactionId}`,
+              },
+              previousBalance
+            );
+          balanceCache.set(cacheKey, balanceAfter);
+        }
+
+        await tx.payment.update({
+          where: { paymentId },
+          data: { status: 'REFUNDED' },
+        });
+        await this.recordPaymentAudits(
           tx,
-          {
-            transactionType: 'INCOME_REVERSAL',
-            ownerId: row.ownerId,
-            ownerType: row.ownerType,
-            amount: -row.amount,
-            payment: { connect: { paymentId } },
-            createdByUser: { connect: { userId: requestUser.id } },
-            note: `Reversal of ${row.transactionType} ${row.transactionId}`,
-          },
-          previousBalance
+          [paymentId],
+          PaymentStatus.REFUNDED,
+          PaymentAudiAction.UPDATED,
+          requestUser.id
         );
-        balanceCache.set(cacheKey, balanceAfter);
+
+        return { code: 200, message: 'Payment refunded and ledger reversed.' };
       }
+    );
 
-      await tx.payment.update({
-        where: { paymentId },
-        data: { status: 'REFUNDED' },
-      });
-      await this.recordPaymentAudits(
-        tx,
-        [paymentId],
-        PaymentStatus.REFUNDED,
-        PaymentAudiAction.UPDATED,
-        requestUser.id
-      );
-
-      return { code: 200, message: 'Payment refunded and ledger reversed.' };
-    });
+    this.logger.log(
+      `Payment ${paymentId} (${payment.referenceId}) REFUNDED by user ${requestUser.id}`
+    );
+    return result;
   }
 }
