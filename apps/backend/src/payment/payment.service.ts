@@ -33,6 +33,11 @@ import {
   verifyCurrentPassword,
 } from '../common/user.utils';
 import { PLATFORM_OWNER_ID } from '../common/constants';
+import { notchPayHeaders } from './notchpay';
+import {
+  toLocalCameroonNumber,
+  validatePhoneNumber,
+} from '@easy-messe/libs/utils';
 import { PaypalService } from './paypal.service';
 import { SmsService } from '../sms/sms.service';
 import { MailService } from '../mail/mail.service';
@@ -61,6 +66,32 @@ interface PricedMassItem {
   basePrice: number;
   fee: number;
   total: number;
+}
+
+/** validatePhoneNumber's result (0 = MTN, 1 = Orange) → NotchPay channel. */
+const NOTCH_MOBILE_MONEY_CHANNELS: Record<number, string> = {
+  0: 'cm.mtn',
+  1: 'cm.orange',
+};
+
+/** The NotchPay channel for a payout number — both the recipient and every
+ * transfer to it must name it, and NotchPay rejects the generic
+ * "cm.mobile", so it's derived from the number's prefix with the same MTN/
+ * Orange detection the apps use. Throws if the number is neither. */
+function mobileMoneyChannel(payoutNumber: string): {
+  channel: string;
+  localNumber: string;
+} {
+  const localNumber = toLocalCameroonNumber(payoutNumber);
+  const channel = NOTCH_MOBILE_MONEY_CHANNELS[validatePhoneNumber(localNumber)];
+  if (!channel) {
+    throw new BadRequestException('withdrawalRecipientFailed', {
+      cause: new Error(),
+      description:
+        'The payout number is not a Cameroon MTN or Orange mobile money number.',
+    });
+  }
+  return { channel, localNumber };
 }
 
 @Injectable()
@@ -368,10 +399,7 @@ export class PaymentService {
 
     const optionPaymentInit = {
       method: 'POST',
-      headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY ?? '',
-        'Content-Type': 'application/json',
-      },
+      headers: notchPayHeaders(),
       body: JSON.stringify({
         amount,
         currency: paymentInfo.currency,
@@ -475,9 +503,7 @@ export class PaymentService {
   async reconcileNotchPayPayment(reference: string) {
     const checkPayment = {
       method: 'GET',
-      headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY ?? '',
-      },
+      headers: notchPayHeaders(),
     };
 
     const paymentStatus = await fetch(
@@ -956,6 +982,9 @@ export class PaymentService {
       });
     }
 
+    // Resolved before any NotchPay call, so a number that isn't MTN/Orange
+    // is refused up front rather than after a recipient was created.
+    const { channel } = mobileMoneyChannel(parish.payoutNumber);
     const recipientId = await this.createOrRetreiveRecipient(
       parish.parishId,
       parish.payoutNumber
@@ -963,15 +992,13 @@ export class PaymentService {
 
     const optionWithdrawMoney = {
       method: 'POST',
-      headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY || '',
-        'Content-Type': 'application/json',
-      },
+      headers: notchPayHeaders({ granted: true }),
       body: JSON.stringify({
+        recipient: recipientId,
+        channel,
         amount,
         currency: 'XAF',
         description: 'Cash out parish money',
-        reference: recipientId,
       }),
     };
 
@@ -979,7 +1006,13 @@ export class PaymentService {
     // HttpException below (e.g. the "not accepted" case) must propagate
     // as-is, not get caught by this same try and re-wrapped into a
     // malformed, doubly-nested exception body.
-    let withdrawalData: { code?: number; status?: string; transfer?: { amount_total: number; reference: string } };
+    let withdrawalData: {
+      code?: number | string;
+      status?: string;
+      message?: string;
+      errors?: Record<string, string[]>;
+      transfer?: { reference?: string };
+    };
     try {
       withdrawalData = await fetch(
         'https://api.notchpay.co/transfers',
@@ -993,26 +1026,58 @@ export class PaymentService {
     }
 
     if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
-      // Serializable so a withdrawal racing with a concurrent payment/
-      // refund for the same parish can't produce a lost update on the
-      // running balance (see PrismaService.runSerializableTransaction).
-      await this.prismaService.runSerializableTransaction((tx) =>
-        this.transactionsService.createWithBalance(tx, {
-          transactionType: 'WITHDRAWAL',
-          ownerId: parish.parishId,
-          ownerType: 'PARISH',
-          amount: -Math.abs(withdrawalData.transfer.amount_total),
-          externalPayoutId: withdrawalData.transfer.reference,
-          createdByUser: { connect: { userId: requestUser.id } },
-        })
+      const payoutReference = withdrawalData.transfer?.reference;
+      this.logger.log(
+        `NotchPay transfer accepted for parish ${
+          parish.parishId
+        }: ${JSON.stringify(withdrawalData)}`
       );
+
+      // The ledger is debited the amount the parish asked for — the one
+      // the balance check above validated, and always known. NotchPay's
+      // response doesn't reliably carry a total (it had no amount_total,
+      // which turned this debit into NaN and left the payout unrecorded).
+      try {
+        // Serializable so a withdrawal racing with a concurrent payment/
+        // refund for the same parish can't produce a lost update on the
+        // running balance (see PrismaService.runSerializableTransaction).
+        await this.prismaService.runSerializableTransaction((tx) =>
+          this.transactionsService.createWithBalance(tx, {
+            transactionType: 'WITHDRAWAL',
+            ownerId: parish.parishId,
+            ownerType: 'PARISH',
+            amount: -Math.abs(amount),
+            externalPayoutId: payoutReference,
+            createdByUser: { connect: { userId: requestUser.id } },
+          })
+        );
+      } catch (error) {
+        // Money already left NotchPay at this point — make the gap
+        // findable for manual reconciliation instead of a bare 500.
+        this.logger.error(
+          `Payout ${payoutReference} of ${amount} XAF for parish ${
+            parish.parishId
+          } was SENT but NOT recorded in the ledger: ${error?.message ?? error}`
+        );
+        throw error;
+      }
 
       return { code: 201, message: 'Payment initiated successfully' };
     }
 
+    // NotchPay's own reason (validation errors, balance, limits…) is the
+    // only way to tell why a payout was refused — log the full response
+    // and pass its message along, instead of a bare "not accepted".
+    this.logger.warn(
+      `NotchPay transfer not accepted for parish ${
+        parish.parishId
+      }: ${JSON.stringify(withdrawalData)}`
+    );
     throw new UnprocessableEntityException('withdrawalNotAccepted', {
       cause: new Error(),
-      description: 'Withdrawal was not accepted by the payment provider.',
+      description: `Withdrawal was not accepted by the payment provider${
+        withdrawalData.message ? `: ${withdrawalData.message}` : '.'
+      }`,
     });
   }
 
@@ -1022,23 +1087,28 @@ export class PaymentService {
   ): Promise<string> {
     const referenceId = createId();
 
-    const parish = await this.parishService.findParish(parishId);
+    const parish = await this.prismaService.parish.findUnique({
+      where: { parishId },
+      include: { user: { select: { email: true } } },
+    });
 
     if (parish?.receiverId) {
       return parish.receiverId;
     }
 
+    const { channel, localNumber } = mobileMoneyChannel(payoutNumber);
+
     const optionCreateRecipient = {
       method: 'POST',
-      headers: {
-        Authorization: process.env.NOTCH_PUBLIC_KEY || '',
-        'Content-Type': 'application/json',
-      },
+      headers: notchPayHeaders({ granted: true }),
       body: JSON.stringify({
-        channel: 'cm.mobile',
-        number: payoutNumber,
-        phone: parish?.phone,
-        email: 'easyMess@gmail.com',
+        channel,
+        // Both are the payout number: NotchPay checks the recipient's
+        // `phone` when paying out, so the parish's contact phone here would
+        // send the money to the wrong number.
+        account_number: `+237${localNumber}`,
+        phone: `+237${localNumber}`,
+        email: parish?.user.email,
         country: 'CM',
         name: parish?.name,
         description: 'Cash out parish money',
@@ -1049,7 +1119,7 @@ export class PaymentService {
     // Same split as withdrawMoney: only the network call is caught here, so
     // the "creation rejected" business exception below propagates as-is
     // instead of being re-caught and re-wrapped by this same try.
-    let createRecipient: { code?: number };
+    let createRecipient: { code?: number; recipient?: { id?: string } };
     try {
       createRecipient = await fetch(
         'https://api.notchpay.co/recipients',
@@ -1062,12 +1132,21 @@ export class PaymentService {
       });
     }
 
-    if (createRecipient.code === 200) {
+    // NotchPay's own recipient id (e.g. "rcp_…") — what a transfer's
+    // `recipient` field must name. Not our `referenceId`, which is only
+    // the merchant reference we tagged the recipient with.
+    const notchRecipientId = createRecipient.recipient?.id;
+    if (
+      (createRecipient.code === 200 || createRecipient.code === 201) &&
+      notchRecipientId
+    ) {
       // Internal update — this is a system-derived cache of the NotchPay
       // recipient id, not a user-initiated edit, so no requestUser/
       // ownership check applies here.
-      await this.parishService.update(parishId, { receiverId: referenceId });
-      return referenceId;
+      await this.parishService.update(parishId, {
+        receiverId: notchRecipientId,
+      });
+      return notchRecipientId;
     }
 
     throw new UnprocessableEntityException('withdrawalRecipientFailed', {
