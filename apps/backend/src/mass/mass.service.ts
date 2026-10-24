@@ -392,10 +392,20 @@ export class MassService {
     }));
   }
 
-  async markIntentionsSent(massId: string) {
-    await this.prismaService.mass.update({
-      where: { massId },
-      data: { intentionsSentAt: new Date() },
+  /** `readAt` is when the sent PDF's orders were read — if a payment for
+   * this mass completed after that, the PDF missed it, so leave the mass
+   * pending and let the next sweep re-send it. */
+  async markIntentionsSent(massId: string, readAt: Date) {
+    await this.prismaService.mass.updateMany({
+      where: {
+        massId,
+        massOrder: {
+          none: {
+            payments: { some: { status: 'COMPLETED', paidAt: { gt: readAt } } },
+          },
+        },
+      },
+      data: { intentionsSentAt: readAt },
     });
   }
 

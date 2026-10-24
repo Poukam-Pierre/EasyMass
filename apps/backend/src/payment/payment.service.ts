@@ -732,6 +732,19 @@ export class PaymentService {
         PaymentAudiAction.SETTLED
       );
 
+      // A checkout started just before the ordering cutoff can settle
+      // after the scheduler already emailed that mass's intentions PDF
+      // (which only lists COMPLETED orders). Clearing intentionsSentAt
+      // makes the next sweep re-send the full, updated PDF instead of
+      // this intention never reaching the parish.
+      await tx.mass.updateMany({
+        where: {
+          massId: { in: payments.map((p) => p.massOrder.massId) },
+          intentionsSentAt: { not: null },
+        },
+        data: { intentionsSentAt: null },
+      });
+
       const parishId = payments[0].massOrder.mass.parishId;
 
       let parishBalance = await this.transactionsService.getCurrentBalance(
