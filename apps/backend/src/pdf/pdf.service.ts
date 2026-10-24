@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Language, MassType } from '@prisma/client';
 import { join } from 'path';
 import PDFDocument from 'pdfkit';
+import { DISPLAY_TIME_ZONE } from '../common/constants';
 
 export interface IntentionRow {
   believerName: string;
@@ -93,6 +94,7 @@ export function formatMassSubtitle(
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: DISPLAY_TIME_ZONE,
     }
   );
   const label = MASS_TYPE_LABELS[language][massType];
@@ -211,6 +213,7 @@ export class PdfService {
           details.paidAt.toLocaleString('en-US', {
             dateStyle: 'medium',
             timeStyle: 'short',
+            timeZone: DISPLAY_TIME_ZONE,
           }),
         ],
       ];
@@ -287,7 +290,13 @@ export class PdfService {
           .font('Helvetica')
           .fontSize(9.5)
           .fillColor('#333333')
-          .text(line.massDate.toDateString(), cols.date.x, rowTop, { width: cols.date.width });
+          .text(line.massDate.toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: DISPLAY_TIME_ZONE,
+          }), cols.date.x, rowTop, { width: cols.date.width });
         doc
           .font('Helvetica-Bold')
           .fontSize(10.5)

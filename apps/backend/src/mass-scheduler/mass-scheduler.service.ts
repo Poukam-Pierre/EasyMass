@@ -26,21 +26,29 @@ export class MassSchedulerService {
   }
 
   private async sendPendingIntentions() {
+    const readAt = new Date();
     const pending = await this.massService.findPendingIntentions();
 
     for (let i = 0; i < pending.length; i += INTENTIONS_SEND_CONCURRENCY) {
       const batch = pending.slice(i, i + INTENTIONS_SEND_CONCURRENCY);
-      await Promise.all(batch.map((mass) => this.sendOne(mass)));
+      await Promise.all(batch.map((mass) => this.sendOne(mass, readAt)));
     }
   }
 
-  private async sendOne(mass: Awaited<
-    ReturnType<MassService['findPendingIntentions']>
-  >[number]) {
+  private async sendOne(
+    mass: Awaited<ReturnType<MassService['findPendingIntentions']>>[number],
+    readAt: Date
+  ) {
     try {
       const language = mass.parish.user.language;
+      const subtitle = formatMassSubtitle(
+        mass.massType,
+        mass.startAt,
+        mass.parish.name,
+        language
+      );
       const pdf = await this.pdfService.generateIntentionsPdf(
-        formatMassSubtitle(mass.massType, mass.startAt, mass.parish.name, language),
+        subtitle,
         mass.massOrder.map((o) => ({
           believerName: o.orderByBeliever.fullName,
           intension: o.intension,
@@ -50,12 +58,14 @@ export class MassSchedulerService {
 
       await this.mailService.sendWithAttachment(
         mass.parish.user.email,
-        'Mass intentions',
-        `Attached are the gathered intentions for your mass starting ${mass.startAt.toISOString()}.`,
+        language === 'FR' ? 'Intentions de messe' : 'Mass intentions',
+        language === 'FR'
+          ? `Veuillez trouver ci-joint les intentions recueillies pour : ${subtitle}.`
+          : `Attached are the gathered intentions for: ${subtitle}.`,
         { filename: `intentions-${mass.massId}.pdf`, content: pdf }
       );
 
-      await this.massService.markIntentionsSent(mass.massId);
+      await this.massService.markIntentionsSent(mass.massId, readAt);
     } catch (error) {
       this.logger.error(
         `Failed to send intentions for mass ${mass.massId}: ${error?.message ?? error}`
