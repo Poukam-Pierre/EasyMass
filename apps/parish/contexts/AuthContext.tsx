@@ -1,3 +1,4 @@
+import { extractApiErrorKey, LOGIN_ERROR_KEYS, LoginResult } from '@easy-messe/libs/utils';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
@@ -8,7 +9,7 @@ interface AuthContextValue {
     parish: ParishUser | null;
     accessToken: string | null;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>;
+    login: (email: string, password: string) => Promise<LoginResult>;
     logout: () => Promise<void>;
     setParish: (parish: ParishUser) => void;
 }
@@ -30,7 +31,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setIsLoading(false);
     }, []);
 
-    const login = useCallback(async (email: string, password: string) => {
+    const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
         try {
             const { data } = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/auth/login-parish`,
@@ -62,7 +63,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
                     message: 'This account is already logged in elsewhere. Please log out from that session first.',
                 };
             }
-            return { ok: false as const, message: apiErrorMessage(error, 'Login failed.') };
+            const messageId = extractApiErrorKey(error, LOGIN_ERROR_KEYS);
+            return { ok: false as const, message: apiErrorMessage(error, 'Login failed.'), messageId };
         }
     }, []);
 

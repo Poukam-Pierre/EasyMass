@@ -10,7 +10,7 @@ import ParishSelector, { ParishOption } from "../../components/ParishSelector";
 import { withAdminLayout } from "../../components/withAdminLayout";
 import api, { apiErrorMessage } from "../../lib/api";
 
-const TRANSACTION_TYPES = ['INCOME', 'INCOME_REVERSAL', 'WITHDRAWAL', 'PLATFORM_FEE', 'ADMIN_CORRECTION'] as const;
+const TRANSACTION_TYPES = ['INCOME', 'INCOME_REVERSAL', 'WITHDRAWAL', 'PLATFORM_FEE', 'ADMIN_CORRECTION', 'PAYOUT_FEE'] as const;
 
 export default function Finances() {
     const { formatNumber, formatMessage } = useIntl()

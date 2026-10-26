@@ -16,7 +16,6 @@ interface ParishFormValues {
     phone: string;
     managerName: string;
     email: string;
-    password: string;
     city: City | null;
 }
 
@@ -39,30 +38,30 @@ export default function ParishFormDialog({ isOpen, handleClose, onCreated }: Par
 
     const { handleChange, handleSubmit, errors, touched, values, setFieldValue, resetForm, isSubmitting } =
         useFormik<ParishFormValues>({
-            initialValues: { name: '', phone: '', managerName: '', email: '', password: '', city: null },
+            initialValues: { name: '', phone: '', managerName: '', email: '', city: null },
             validationSchema: yup.object().shape({
                 name: yup.string().required(formatMessage({ id: 'parishNameWarningMsg' })),
                 phone: yup.string().required(formatMessage({ id: 'parishPhoneWarningMsg' })),
                 managerName: yup.string().required(formatMessage({ id: 'leadParishNameWarningMsg' })),
                 email: yup.string().email(formatMessage({ id: 'invalidEmail' })).required(formatMessage({ id: 'emailWarningMsg' })),
-                password: yup.string()
-                    .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{4,}$/, {
-                        message: formatMessage({ id: 'passwordCarateristics' })
-                    })
-                    .required(formatMessage({ id: 'fillPassword' })),
                 city: yup.object().nullable().required(formatMessage({ id: 'parishCityWarningMsg' })),
             }),
             onSubmit: async (formValues) => {
                 try {
-                    await api.post('/parishes/new', {
+                    // No password — the parish chooses its own through the
+                    // account-setup link the backend emails it.
+                    const { data } = await api.post('/parishes/new', {
                         name: formValues.name,
                         phone: formValues.phone,
                         managerName: formValues.managerName,
                         email: formValues.email,
-                        password: formValues.password,
                         city: { city_id: formValues.city?.city_id, city_name: formValues.city?.city_name },
                     });
-                    toast.success(formatMessage({ id: 'parishCreatedSuccess' }));
+                    if (data.setupEmailSent) {
+                        toast.success(formatMessage({ id: 'parishCreatedSuccess' }));
+                    } else {
+                        toast.warning(formatMessage({ id: 'setupEmailNotSent' }));
+                    }
                     resetForm();
                     onCreated();
                     handleClose();
@@ -99,11 +98,6 @@ export default function ParishFormDialog({ isOpen, handleClose, onCreated }: Par
                     name="email" type="email" placeholder={formatMessage({ id: 'parishMailAddress' })} size="small"
                     value={values.email} onChange={handleChange}
                     error={!!(errors.email && touched.email)} helperText={touched.email && errors.email}
-                />
-                <TextField
-                    name="password" type="password" placeholder={formatMessage({ id: 'password' })} size="small"
-                    value={values.password} onChange={handleChange}
-                    error={!!(errors.password && touched.password)} helperText={touched.password && errors.password}
                 />
                 <Autocomplete
                     options={cities}

@@ -8,9 +8,8 @@ import {
   Query,
   Request,
   Res,
-  UseGuards,
 } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { RateLimited } from '../common/rate-limited.decorator';
 import { UserRole } from '@prisma/client';
 import { Response } from 'express';
 import { PaymentService } from './payment.service';
@@ -117,10 +116,10 @@ export class PaymentController {
   // opened directly from an SMS. Security relies on `reference` being an
   // unguessable token (NotchPay's own reference / PayPal's order id), the
   // same model Stripe/PayPal use for their own checkout confirmation pages —
-  // rate-limited (see PaymentModule's ThrottlerModule) so that reliance on
+  // rate-limited (see RateLimited) so that reliance on
   // "unguessable" can't be defeated by a script with no lockout.
   @Public()
-  @UseGuards(ThrottlerGuard)
+  @RateLimited(5)
   @Get('/:reference/invoice')
   async downloadInvoice(
     @Param('reference') reference: string,

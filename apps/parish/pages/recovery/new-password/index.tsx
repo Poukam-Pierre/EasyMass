@@ -1,6 +1,6 @@
 import { Footer } from "@easy-messe/shared-ui";
 import { Box } from "@mui/material";
-import PasswordRecoveryUnavailable from "../../../components/PasswordRecoveryUnavailable";
+import StatusScreen from "../../../components/StatusScreen";
 
 export default function ChangePassword() {
     return (
@@ -9,7 +9,9 @@ export default function ChangePassword() {
             display: 'grid',
             gridTemplateRows: '1fr auto'
         }}>
-            <PasswordRecoveryUnavailable />
+            {/* Self-service password recovery has no backend endpoint yet — a
+                working-looking form here would silently do nothing on submit. */}
+            <StatusScreen titleId="recoveryUnavailableTitle" messageId="recoveryUnavailableMessage" />
             <Footer />
         </Box>
 

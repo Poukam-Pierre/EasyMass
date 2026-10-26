@@ -1,8 +1,10 @@
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
+import mailIcon from '@iconify-icons/ph/envelope-simple-light';
 import trashIcon from '@iconify-icons/ph/trash-light';
 import { Icon } from "@iconify/react";
+import { extractApiErrorKey } from "@easy-messe/libs/utils";
 import {
-    Box, Button, IconButton, InputBase, Switch, Table, TableBody,
+    Box, Button, Chip, IconButton, InputBase, Switch, Table, TableBody,
     TableCell, TableHead, TableRow, Tooltip, Typography
 } from "@mui/material";
 import { theme } from "@easy-messe/libs/theme";
@@ -23,8 +25,10 @@ interface ParishRow {
     isBlocked: boolean;
     payoutBlocked: boolean;
     city: { city_name: string } | null;
-    user: { email: string };
+    user: { email: string; emailVerifiedAt: string | null };
 }
+
+const RESEND_SETUP_ERROR_KEYS = new Set(['accountAlreadyActive']);
 
 export default function Parishes() {
     const { formatMessage, formatDate } = useIntl()
@@ -36,6 +40,7 @@ export default function Parishes() {
     const [pendingBlockId, setPendingBlockId] = useState<string | null>(null)
     const [pendingPayoutId, setPendingPayoutId] = useState<string | null>(null)
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+    const [pendingResendId, setPendingResendId] = useState<string | null>(null)
 
     const loadParishes = () => {
         setIsLoading(true)
@@ -70,6 +75,23 @@ export default function Parishes() {
             toast.error(apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
         } finally {
             setPendingPayoutId(null)
+        }
+    }
+
+    const handleResendSetup = async (parish: ParishRow, event: React.MouseEvent) => {
+        event.stopPropagation();
+        setPendingResendId(parish.parishId)
+        try {
+            await api.post(`/parishes/${parish.parishId}/resend-setup`);
+            toast.success(formatMessage({ id: 'setupEmailResent' }));
+        } catch (error) {
+            const key = extractApiErrorKey(error, RESEND_SETUP_ERROR_KEYS);
+            toast.error(key
+                ? formatMessage({ id: key })
+                : apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+            loadParishes();
+        } finally {
+            setPendingResendId(null)
         }
     }
 
@@ -125,7 +147,12 @@ export default function Parishes() {
                             sx={{ cursor: 'pointer' }}
                             onClick={() => push(`/parishes/${parish.parishId}`)}
                         >
-                            <TableCell sx={{ fontWeight: 600 }}>{parish.name}</TableCell>
+                            <TableCell sx={{ fontWeight: 600 }}>
+                                {parish.name}
+                                {!parish.user.emailVerifiedAt && (
+                                    <Chip label={formatMessage({ id: 'pendingSetup' })} size="small" color="warning" variant="outlined" sx={{ marginLeft: 1 }} />
+                                )}
+                            </TableCell>
                             <TableCell>{parish.city?.city_name ?? '-'}</TableCell>
                             <TableCell>{parish.managerName}</TableCell>
                             <TableCell>{parish.phone}</TableCell>
@@ -151,6 +178,13 @@ export default function Parishes() {
                                 </Tooltip>
                             </TableCell>
                             <TableCell align="right">
+                                {!parish.user.emailVerifiedAt && (
+                                    <Tooltip title={formatMessage({ id: 'resendSetupEmail' })}>
+                                        <IconButton size="small" onClick={(e) => handleResendSetup(parish, e)} disabled={pendingResendId === parish.parishId}>
+                                            <Icon icon={mailIcon} fontSize={18} />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                                 <IconButton size="small" onClick={(e) => handleDelete(parish, e)} disabled={pendingDeleteId === parish.parishId}>
                                     <Icon icon={trashIcon} fontSize={18} color="var(--error)" />
                                 </IconButton>

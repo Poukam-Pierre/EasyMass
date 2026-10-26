@@ -6,7 +6,7 @@ export class AdminDashboardService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async moneyOverview() {
-    const [parishIncome, platformFeeRevenue, withdrawals, incomeRows] =
+    const [parishIncome, platformFeeRevenue, payoutFees, withdrawals, incomeRows] =
       await Promise.all([
         this.prismaService.transaction.aggregate({
           where: { ownerType: 'PARISH', transactionType: 'INCOME' },
@@ -14,6 +14,10 @@ export class AdminDashboardService {
         }),
         this.prismaService.transaction.aggregate({
           where: { ownerType: 'ADMIN', transactionType: 'PLATFORM_FEE' },
+          _sum: { amount: true },
+        }),
+        this.prismaService.transaction.aggregate({
+          where: { ownerType: 'ADMIN', transactionType: 'PAYOUT_FEE' },
           _sum: { amount: true },
         }),
         this.prismaService.transaction.aggregate({
@@ -35,6 +39,8 @@ export class AdminDashboardService {
     return {
       totalParishIncome: parishIncome._sum.amount ?? 0,
       totalPlatformFeeRevenue: platformFeeRevenue._sum.amount ?? 0,
+      // Positive figure for display; the ledger rows themselves are negative.
+      totalPayoutFees: Math.abs(payoutFees._sum.amount ?? 0),
       totalWithdrawn: Math.abs(withdrawals._sum.amount ?? 0),
       revenueByMonth: Array.from(revenueByMonth.entries())
         .sort(([a], [b]) => a.localeCompare(b))

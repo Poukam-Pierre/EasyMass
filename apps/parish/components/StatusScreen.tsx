@@ -4,11 +4,15 @@ import { Box, Button, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useIntl } from 'react-intl';
 
-// Self-service password recovery has no backend endpoint (the auth
-// controller only exposes login/signup-admin/refresh/logout) — showing a
-// working-looking form here would silently do nothing on submit, which is
-// worse than being upfront that this isn't built yet.
-export default function PasswordRecoveryUnavailable() {
+interface StatusScreenProps {
+    titleId: string;
+    messageId: string;
+}
+
+/** Full-page "this can't be done here" notice with a way back to login —
+ * shared by every public page that can end in a dead end (recovery not
+ * built yet, an invalid or expired setup link, ...). */
+export default function StatusScreen({ titleId, messageId }: StatusScreenProps) {
   const { formatMessage } = useIntl();
   const { push } = useRouter();
 
@@ -27,10 +31,10 @@ export default function PasswordRecoveryUnavailable() {
     >
       <Icon icon={warningIcon} width={48} height={48} color="var(--warning)" />
       <Typography variant="h2">
-        {formatMessage({ id: 'recoveryUnavailableTitle' })}
+        {formatMessage({ id: titleId })}
       </Typography>
       <Typography variant="body1" sx={{ color: 'var(--body)' }}>
-        {formatMessage({ id: 'recoveryUnavailableMessage' })}
+        {formatMessage({ id: messageId })}
       </Typography>
       <Button variant="contained" onClick={() => push('/login')}>
         {formatMessage({ id: 'backToLogin' })}

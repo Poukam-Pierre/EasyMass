@@ -3,11 +3,13 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
+import { AccountSetupService } from '../account-setup/account-setup.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, UserRole } from '@prisma/client';
 import { SignUpParishDto } from './dto/signupParish.dto';
-import * as bcrypt from 'bcryptjs';
 import {
   findUserByEmail,
   flattenUserRole,
@@ -17,10 +19,16 @@ import {
 
 @Injectable()
 export class ParishService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly logger = new Logger(ParishService.name);
+
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly accountSetupService: AccountSetupService
+  ) {}
 
   async create(parishData: SignUpParishDto, adminId: string) {
-    const { city, email, password, ...rest } = parishData;
+    const { city, email, ...rest } = parishData;
+    const password = await AccountSetupService.unusablePasswordHash();
     return this.prismaService.parish.create({
       data: {
         ...rest,
@@ -66,7 +74,7 @@ export class ParishService {
         isBlocked: true,
         payoutBlocked: true,
         city: { select: { city_name: true } },
-        user: { select: { email: true } },
+        user: { select: { email: true, emailVerifiedAt: true } },
       },
     });
   }
@@ -169,42 +177,49 @@ export class ParishService {
   }
 
   /**
-   * This function passes the input and request to other validation function
-   * and just waits for the result to perfom error action. If any error occurs
-   * the function passes the result to signIn function and returns the result.
-   * @param input receiving value from client side
-   * @param request request object processed in the guard function
-   * @returns successfull result object
+   * Creates the parish account, then emails its owner the account-setup
+   * link (verify email + choose password). A failed email doesn't undo the
+   * creation — the admin sees `setupEmailSent: false` and can resend via
+   * resendSetupLink once the mail problem is fixed.
    */
   async createParish(
     input: SignUpParishDto,
     requestUser: { id: string; role: UserRole }
-  ): Promise<{ code: number; message: string }> {
-    const user = await this.credentialsParishValidation(input, requestUser);
+  ): Promise<{ code: number; message: string; setupEmailSent: boolean }> {
+    const parish = await this.createParishAccount(input, requestUser);
 
-    if (!user) {
+    if (!parish) {
       throw new BadRequestException('This account is already in use.', {
         cause: new Error(),
       });
     }
 
-    return { code: 200, message: 'New parish created successfully' };
+    try {
+      await this.accountSetupService.sendSetupLink(parish.user);
+    } catch (error) {
+      this.logger.error(
+        `Parish ${parish.parishId} created, but its setup email failed: ${error?.message ?? error}`
+      );
+      return {
+        code: 200,
+        message: 'New parish created, but the setup email could not be sent.',
+        setupEmailSent: false,
+      };
+    }
+
+    return {
+      code: 200,
+      message: 'New parish created successfully',
+      setupEmailSent: true,
+    };
   }
 
-  /**
-   * This function verifies that the input from the client exists in the database. If so,
-   * the function returns null. Otherwise, the function hash password and creates a new
-   * user account. Then returns the user object created.
-   * @param input
-   * @param requestUser
-   * @returns
-   */
-  async credentialsParishValidation(
+  /** Returns null if the email is already taken by any account. */
+  private async createParishAccount(
     input: SignUpParishDto,
     requestUser: { id: string; role: UserRole }
   ) {
-    const { email, password } = input;
-    const existing = await findUserByEmail(this.prismaService, email);
+    const existing = await findUserByEmail(this.prismaService, input.email);
     if (existing) return null;
 
     // requestUser.id is the central User.userId (JWT `sub`), not
@@ -214,21 +229,24 @@ export class ParishService {
     const admin = await resolveAdminForUser(this.prismaService, requestUser.id);
 
     try {
-      const hash = await bcrypt.hash(password, 10);
-      input.password = hash;
-
-      await this.create(input, admin.adminId);
-
-      return {
-        statusCode: 200,
-        message: 'Parish created successfully',
-      };
+      return await this.create(input, admin.adminId);
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error appears while processing hash and create new user parish into db.',
+        'Error appears while creating new user parish into db.',
         { cause: new Error() }
       );
     }
+  }
+
+  async resendSetupLink(parishId: string) {
+    const parish = await this.prismaService.parish.findUnique({
+      where: { parishId },
+    });
+    if (!parish) {
+      throw new NotFoundException('Parish not found.', { cause: new Error() });
+    }
+    await this.accountSetupService.resendSetupLink(parish.userId);
+    return { code: 200, message: 'Setup email sent.' };
   }
 
   /** Believer-facing, public: masses still open for ordering, at visible parishes. */

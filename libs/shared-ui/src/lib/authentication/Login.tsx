@@ -52,11 +52,9 @@ export function LoginCretentials({ onSubmit, errorMessage, isSubmitting }: Login
         },
         validationSchema: yup.object().shape({
             email: yup.string().required(formatMessage({ id: 'fillEmail' })),
+            // Presence only — strength is enforced where a password is
+            // chosen (ACCOUNT_PASSWORD_PATTERN), not where it's typed back.
             password: yup.string()
-                .min(5, formatMessage({ id: 'minPassword' }))
-                .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/, {
-                    message: formatMessage({ id: 'passwordCarateristics' })
-                })
                 .required(formatMessage({ id: 'fillPassword' }))
         }),
     })

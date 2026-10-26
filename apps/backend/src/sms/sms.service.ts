@@ -1,3 +1,4 @@
+import { toLocalCameroonNumber } from '@easy-messe/libs/utils';
 import { Injectable, Logger } from '@nestjs/common';
 
 /** Orange SMS Africa & Middle East API — https://developer.orange.com/apis/sms
@@ -20,9 +21,7 @@ export class SmsService {
    * internationally formatted, so a number that already has a country
    * code isn't double-prefixed. */
   private toTelUri(phone: string): string {
-    const digits = phone.replace(/[^\d]/g, '');
-    const withCountryCode = digits.startsWith('237') ? digits : `237${digits.replace(/^0+/, '')}`;
-    return `tel:+${withCountryCode}`;
+    return `tel:+237${toLocalCameroonNumber(phone)}`;
   }
 
   private async getAccessToken(): Promise<string | null> {

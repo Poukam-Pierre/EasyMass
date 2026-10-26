@@ -23,9 +23,14 @@ model User {
   /// formatting) — never applied to free-text user content like a mass
   /// intention, which is whatever language the person who wrote it chose.
   language                Language           @default(EN)
+  /// Null until the owner opens the emailed account-setup link and sets
+  /// their own password — login is refused until then (see
+  /// AccountSetupService). Existing accounts were backfilled as verified.
+  emailVerifiedAt         DateTime?
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
   refreshTokens           RefreshToken[]
+  accountSetupTokens      AccountSetupToken[]
   priest                  Priest?
   parish                  Parish?
   admin                   Administrator?
@@ -226,6 +231,22 @@ model PlatformSettings {
 }
 
 /// An active refresh token for a User's session.
+/// One-time link emailed to a newly created account so its owner can
+/// verify their email and choose their own password in a single step. Only
+/// the SHA-256 of the token is stored — the raw token exists only in the
+/// email, so a database leak can't be replayed as working links.
+model AccountSetupToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime @db.Timestamptz(6)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "fk_AccountSetupToken_User")
+
+  @@index([userId], map: "fk_AccountSetupToken_User_idx")
+  @@map("account_setup_token")
+}
+
 model RefreshToken {
   id           String   @id
   refreshToken String   @unique

@@ -20,6 +20,10 @@ export class AdministratorService {
             email,
             password,
             role: UserRole.ADMIN,
+            // Admin accounts are still created with a password chosen by
+            // the creating admin, not through the account-setup link, so
+            // there's nothing for them to verify before logging in.
+            emailVerifiedAt: new Date(),
           },
         },
       },
