@@ -231,20 +231,27 @@ model PlatformSettings {
 }
 
 /// An active refresh token for a User's session.
-/// One-time link emailed to a newly created account so its owner can
-/// verify their email and choose their own password in a single step. Only
-/// the SHA-256 of the token is stored — the raw token exists only in the
-/// email, so a database leak can't be replayed as working links.
+/// One-time emailed link that lets the owner choose their own password:
+/// SETUP for a newly created account (also verifies its email), RESET for a
+/// forgotten password. Only the SHA-256 of the token is stored — the raw
+/// token exists only in the email, so a database leak can't be replayed as
+/// working links.
 model AccountSetupToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  expiresAt DateTime @db.Timestamptz(6)
-  createdAt DateTime @default(now())
+  id        String              @id @default(cuid())
+  tokenHash String              @unique
+  purpose   AccountTokenPurpose @default(SETUP)
+  expiresAt DateTime            @db.Timestamptz(6)
+  createdAt DateTime            @default(now())
   userId    String
-  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "fk_AccountSetupToken_User")
+  user      User                @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "fk_AccountSetupToken_User")
 
   @@index([userId], map: "fk_AccountSetupToken_User_idx")
   @@map("account_setup_token")
+}
+
+enum AccountTokenPurpose {
+  SETUP @map("setup")
+  RESET @map("reset")
 }
 
 model RefreshToken {
