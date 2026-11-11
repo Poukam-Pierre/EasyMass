@@ -1,19 +1,14 @@
-import { Footer } from "@easy-messe/shared-ui";
-import { Box } from "@mui/material";
-import StatusScreen from "../../../components/StatusScreen";
+import { PasswordLinkPage } from "@easy-messe/shared-ui";
 
-export default function ChangePassword() {
+/** Landing page of the emailed password reset link. */
+export default function ResetPassword() {
     return (
-        <Box sx={{
-            height: '100svh',
-            display: 'grid',
-            gridTemplateRows: '1fr auto'
-        }}>
-            {/* Self-service password recovery has no backend endpoint yet — a
-                working-looking form here would silently do nothing on submit. */}
-            <StatusScreen titleId="recoveryUnavailableTitle" messageId="recoveryUnavailableMessage" />
-            <Footer />
-        </Box>
-
+        <PasswordLinkPage
+            apiPath="/password-reset"
+            invalidLinkKey="resetLinkInvalid"
+            invalidLinkTitleId="setupLinkInvalidTitle"
+            greetingId="resetPasswordTitle"
+            successMsgId="passwordResetSuccess"
+        />
     );
 }
