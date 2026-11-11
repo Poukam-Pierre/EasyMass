@@ -369,6 +369,13 @@ export const website = {
   threeMonths: '3 months',
   sixMonths: '6 months',
   oneYear: '1 year',
+  recurrenceCountHint:
+    '{count, plural, one {# mass} other {# masses}} will be created, the first on the chosen date.',
+  massesCreated: '{created, plural, one {# mass created.} other {# masses created.}}',
+  massesCreatedWithSkipped:
+    '{created, plural, one {# mass created} other {# masses created}}; {skipped, plural, one {# date already had a mass} other {# dates already had a mass}}.',
+  allMassesAlreadyExist:
+    'Every one of these dates already has a mass. Nothing was created.',
   passwordWarningMsg: 'Password is required',
   correctionPasswordHelp: 'Confirm your password to apply this correction.',
   cartSingleParishOnly: 'Your cart already has a mass from',
