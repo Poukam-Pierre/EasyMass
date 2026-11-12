@@ -1,5 +1,6 @@
 import { Role } from '@prisma/client';
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsAccountPassword } from '../../common/account-password';
 
 export class SignUpAdminDto {
   @IsString()
@@ -10,8 +11,7 @@ export class SignUpAdminDto {
   @IsNotEmpty()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsAccountPassword()
   password: string;
 
   @IsString()

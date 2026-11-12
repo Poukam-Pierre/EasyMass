@@ -12,3 +12,9 @@ export const PLATFORM_OWNER_ID = 'platform';
  * in when no explicit MassPrice override exists for the requested
  * currency (matches MassOrder.currency's schema default). */
 export const BASE_CURRENCY: Currency = Currency.XAF;
+
+/** IANA time zone every user-facing date (emails, PDFs) is rendered in —
+ * Mass.startAt is stored in UTC and the server itself runs in UTC, so
+ * without an explicit zone a 13:15 WAT mass would read as 12:15. No
+ * per-parish zone is stored yet; this matches the platform's XAF base. */
+export const DISPLAY_TIME_ZONE = process.env.DISPLAY_TIME_ZONE || 'Africa/Douala';

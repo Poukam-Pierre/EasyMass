@@ -25,6 +25,7 @@ async function seedEasyMass() {
             email: 'admin@easymesse.com',
             password: hashedPassword,
             role: 'ADMIN',
+            emailVerifiedAt: new Date(),
             admin: {
                 create: {
                     name: 'Admin',

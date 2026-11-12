@@ -8,18 +8,22 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { SignUpAdminDto } from './dto/signup.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
 import { Public } from './decorator/public.decorator';
+import { RateLimited } from '../common/rate-limited.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // Rate-limited against password guessing (per client IP).
   @Public()
+  @RateLimited(10)
   @Post('/login-parish')
   loginParish(@Body() input: LoginDataDto) {
     return this.authService.login(input, [UserRole.PARISH]);
   }
 
   @Public()
+  @RateLimited(10)
   @Post('/login-admin')
   loginAdmin(@Body() input: LoginDataDto) {
     return this.authService.login(input, [UserRole.ADMIN]);

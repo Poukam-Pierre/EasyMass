@@ -2,11 +2,13 @@ import { Footer, LoginCretentials } from '@easy-messe/shared-ui';
 import { Box } from "@mui/material";
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Login() {
     const { login, accessToken, isLoading } = useAuth()
     const { push } = useRouter()
+    const { formatMessage } = useIntl()
     const [errorMessage, setErrorMessage] = useState<string>('')
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
@@ -24,7 +26,7 @@ export default function Login() {
         if (result.ok) {
             push('/')
         } else {
-            setErrorMessage(result.message)
+            setErrorMessage(result.messageId ? formatMessage({ id: result.messageId }) : result.message)
         }
     }
 

@@ -1,11 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  IsStrongPassword,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 class CityDto {
   @ApiProperty({
@@ -24,6 +18,9 @@ class CityDto {
   @IsNotEmpty()
   city_name: string;
 }
+/** No password field — the parish chooses its own through the emailed
+ * account-setup link (see AccountSetupService), so the admin creating the
+ * account never knows it. */
 export class SignUpParishDto {
   @ApiProperty({
     description: 'The name of the parish',
@@ -56,33 +53,6 @@ export class SignUpParishDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @ApiProperty({
-    description: 'The password of the account',
-    example: 'password123',
-  })
-  @IsStrongPassword(
-    {
-      minLength: 4,
-      minLowercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-      minUppercase: 1,
-    },
-    {
-      message: () => {
-        throw new BadRequestException(
-          'Password does not meet security requirements.',
-          {
-            cause: new Error(),
-            description:
-              'Provided password not strong enough. Add at least 4 characters, 1 lowercase, 1 number, 1 symbols, 1 uppercase',
-          }
-        );
-      },
-    }
-  )
-  password: string;
 
   @ApiProperty({
     description: 'The city of the parish',

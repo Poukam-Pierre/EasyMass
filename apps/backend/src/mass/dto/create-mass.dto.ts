@@ -6,24 +6,30 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  Max,
   Min,
   ValidateNested,
 } from 'class-validator';
+import { RecurrenceInterval } from '../recurrence.util';
 
-export enum RecurrenceInterval {
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-}
+export { RecurrenceInterval };
+
+/** A year of weekly masses. */
+export const MAX_RECURRENCE_COUNT = 52;
 
 export class RecurrenceDto {
   @IsEnum(RecurrenceInterval)
   interval: RecurrenceInterval;
 
-  /** Inclusive end of the recurrence window — the frontend derives this
-   * from a duration preset (1/3/6 months, 1 year) rather than asking a
-   * parish user to pick an arbitrary date. */
-  @IsDateString()
-  until: string;
+  /** How many masses the series has in total, the first one (startAt)
+   * included. The frontend derives it from a duration preset: weekly 1/3/6
+   * months or 1 year → 4/13/26/52; monthly 3/6 months or 1 year → 3/6/12.
+   * A fixed count, unlike an end date, never depends on the weekday or
+   * month the series starts in. */
+  @IsInt()
+  @Min(2)
+  @Max(MAX_RECURRENCE_COUNT)
+  count: number;
 }
 
 export class CreateMassDto {
@@ -42,10 +48,9 @@ export class CreateMassDto {
   @IsEnum(MassType)
   massType: MassType;
 
-  /** Absent → create just the one mass. Present → also create one mass per
-   * occurrence of this recurrence rule between startAt and until (e.g.
-   * WEEKLY repeats every 7 days; MONTHLY repeats on the same "Nth weekday
-   * of the month" as startAt — see MassService.generateRecurrenceDates). */
+  /** Absent → create just the one mass. Present → create `count` masses
+   * starting at startAt (WEEKLY every 7 days; MONTHLY on the same "Nth
+   * weekday of the month" as startAt — see generateRecurrenceDates). */
   @IsOptional()
   @ValidateNested()
   @Type(() => RecurrenceDto)
