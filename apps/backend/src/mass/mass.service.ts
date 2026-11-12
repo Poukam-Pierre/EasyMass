@@ -82,6 +82,12 @@ export class MassService {
 
     try {
       const created = await this.prismaService.$transaction(async (tx) => {
+        // Mass has no (parishId, startAt) unique constraint, so the
+        // check-then-insert below is only safe if one parish's creations
+        // run one at a time: a double-clicked Save or two open tabs would
+        // otherwise both see no existing rows and insert the same dates.
+        // Transaction-scoped, so it's released on commit or rollback.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('mass-create'), hashtext(${parishId}))`;
         const existing = await tx.mass.findMany({
           where: { parishId, startAt: { in: dates } },
           select: { startAt: true },
@@ -390,20 +396,35 @@ export class MassService {
     }));
   }
 
-  /** `readAt` is when the sent PDF's orders were read — if a payment for
-   * this mass completed after that, the PDF missed it, so leave the mass
-   * pending and let the next sweep re-send it. */
-  async markIntentionsSent(massId: string, readAt: Date) {
-    await this.prismaService.mass.updateMany({
-      where: {
-        massId,
-        massOrder: {
-          none: {
-            payments: { some: { status: 'COMPLETED', paidAt: { gt: readAt } } },
+  /** Marks a mass's intentions as sent, unless an order the sent PDF
+   * didn't list has a COMPLETED payment by now (a checkout that settled
+   * while the PDF was being built or emailed). Then the mass stays pending
+   * and the next sweep re-sends the full list.
+   *
+   * Comparing order ids rather than timestamps doesn't depend on when the
+   * settling transaction commits. The row lock waits for any settle that
+   * already touched this mass (PaymentService.finalizeCheckout always
+   * writes the mass row) to commit, so the check that follows, a fresh
+   * READ COMMITTED snapshot, sees its payments. */
+  async markIntentionsSent(
+    massId: string,
+    sentAt: Date,
+    sentOrderIds: string[]
+  ) {
+    await this.prismaService.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT 1 FROM "mass" WHERE "massId" = ${massId} FOR UPDATE`;
+      await tx.mass.updateMany({
+        where: {
+          massId,
+          massOrder: {
+            none: {
+              massOrderId: { notIn: sentOrderIds },
+              payments: { some: { status: 'COMPLETED' } },
+            },
           },
         },
-      },
-      data: { intentionsSentAt: readAt },
+        data: { intentionsSentAt: sentAt },
+      });
     });
   }
 }

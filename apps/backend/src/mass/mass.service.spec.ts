@@ -28,6 +28,7 @@ describe('MassService.createMasses', () => {
   /** Masses the parish already has, by startAt (ISO). */
   let existing: Set<string>;
   let tx: {
+    $executeRaw: jest.Mock;
     mass: { findMany: jest.Mock; createManyAndReturn: jest.Mock };
     massPrice: { createMany: jest.Mock };
   };
@@ -41,6 +42,7 @@ describe('MassService.createMasses', () => {
   beforeEach(() => {
     existing = new Set();
     tx = {
+      $executeRaw: jest.fn().mockResolvedValue(1),
       mass: {
         // Answers `startAt: { in: [...] }` from `existing`, like the DB would.
         findMany: jest.fn(async ({ where }) =>
@@ -94,6 +96,17 @@ describe('MassService.createMasses', () => {
         amount: 2500,
         setByUserId: 'user-1',
       }))
+    );
+  });
+
+  it("serializes a parish's creations with a lock taken before reading existing dates", async () => {
+    await service.createMasses(weekly(wednesdays[0]), parishUser);
+
+    const [sql, ...params] = tx.$executeRaw.mock.calls[0];
+    expect(sql.join('?')).toContain('pg_advisory_xact_lock');
+    expect(params).toEqual(['parish-1']);
+    expect(tx.$executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.mass.findMany.mock.invocationCallOrder[0]
     );
   });
 
@@ -175,5 +188,40 @@ describe('MassService.createMasses', () => {
       expect.stringContaining('unique violation')
     );
     log.mockRestore();
+  });
+});
+
+describe('MassService.markIntentionsSent', () => {
+  it('locks the mass row, then marks it sent only if no unlisted order has been paid', async () => {
+    const tx = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
+      mass: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+    };
+    const prisma = {
+      $transaction: jest.fn((fn: (client: typeof tx) => unknown) => fn(tx)),
+    };
+    const service = new MassService(prisma as unknown as PrismaService);
+    const sentAt = new Date('2026-11-11T08:30:00.000Z');
+
+    await service.markIntentionsSent('mass-1', sentAt, ['order-1', 'order-2']);
+
+    const [sql, ...params] = tx.$queryRaw.mock.calls[0];
+    expect(sql.join('?')).toContain('FOR UPDATE');
+    expect(params).toEqual(['mass-1']);
+    expect(tx.mass.updateMany).toHaveBeenCalledWith({
+      where: {
+        massId: 'mass-1',
+        massOrder: {
+          none: {
+            massOrderId: { notIn: ['order-1', 'order-2'] },
+            payments: { some: { status: 'COMPLETED' } },
+          },
+        },
+      },
+      data: { intentionsSentAt: sentAt },
+    });
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.mass.updateMany.mock.invocationCallOrder[0]
+    );
   });
 });
