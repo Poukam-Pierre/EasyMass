@@ -3,14 +3,17 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { MassStatus, MassType, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { resolveParishForUser } from '../common/user.utils';
-import { CreateMassDto, RecurrenceInterval } from './dto/create-mass.dto';
+import { CreateMassDto } from './dto/create-mass.dto';
 import { UpdateMassDto } from './dto/update-mass.dto';
 import { maskAnonymousOrders } from '../mass-order/anonymous-believer.util';
 import { PaginatedResult, toSkipTake } from '../common/pagination.utils';
+import { DISPLAY_TIME_ZONE } from '../common/constants';
+import { generateRecurrenceDates } from './recurrence.util';
 
 export interface MassFilters {
   status?: MassStatus;
@@ -19,111 +22,114 @@ export interface MassFilters {
   to?: string;
 }
 
+export interface MassCreationResult {
+  code: number;
+  message: string;
+  /** Masses actually created. */
+  created: number;
+  /** Requested dates the parish already had a mass at. */
+  skipped: number;
+}
+
 @Injectable()
 export class MassService {
+  private readonly logger = new Logger(MassService.name);
+
   constructor(private readonly prismaService: PrismaService) {}
 
   /**
-   * Creates masses for the authenticated parish. If `recurrence` is given,
-   * creates one mass per occurrence between startAt and recurrence.until,
-   * at the same time-of-day (skipping any that already exist); otherwise
-   * creates a single mass, rejecting an exact-timestamp duplicate.
+   * Creates masses for the authenticated parish. Without `recurrence`,
+   * creates the one mass and rejects an exact-timestamp duplicate. With it,
+   * creates `recurrence.count` masses (see generateRecurrenceDates),
+   * skipping any date the parish already has a mass at — so a second
+   * series, or one overlapping single masses, only adds what's missing.
    */
   async createMasses(
     input: CreateMassDto,
     requestUser: { id: string; role: UserRole }
-  ): Promise<{ code: number; message: string }> {
+  ): Promise<MassCreationResult> {
     const parish = await resolveParishForUser(
       this.prismaService,
       requestUser.id
     );
     const parishId = parish.parishId;
-    const { recurrence, startAt, estimatedDurationMinutes, price, massType } =
-      input;
+    // Whole seconds: the duplicate check compares exact timestamps, so a
+    // stray millisecond from the client must not make a duplicate look new.
+    const startAt = new Date(input.startAt);
+    startAt.setUTCMilliseconds(0);
 
-    const existingMass = await this.findAllByParish(parishId);
-
-    if (recurrence) {
-      const allDates = this.generateRecurrenceDates(
-        startAt,
-        recurrence.interval,
-        recurrence.until
-      );
-
-      const uniqueDates = this.getUniqueDate(
-        allDates,
-        existingMass.map((mass) => mass.startAt.toISOString())
-      );
-
-      if (!uniqueDates.length)
-        return { code: 200, message: 'All masses already exist!' };
-
-      const listOfMasses = this.createListOfMasses(
-        uniqueDates,
-        input,
-        parishId
-      );
-
-      try {
-        await this.prismaService.$transaction(async (tx) => {
-          await tx.mass.createMany({ data: listOfMasses });
-          // createMany returns no rows, so the new masses have to be
-          // looked back up by their (parishId, startAt) to seed each one's
-          // MassPrice(XAF) — same purpose as the nested create below, just
-          // done as a second step since createMany can't do nested writes.
-          const created = await tx.mass.findMany({
-            where: { parishId, startAt: { in: uniqueDates.map((d) => new Date(d)) } },
-            select: { massId: true },
-          });
-          await tx.massPrice.createMany({
-            data: created.map(({ massId }) => ({
-              massId,
-              currency: 'XAF' as const,
-              amount: price,
-              setByUserId: requestUser.id,
-            })),
-          });
+    if (!input.recurrence) {
+      const exists = await this.prismaService.mass.findFirst({
+        where: { parishId, startAt },
+        select: { massId: true },
+      });
+      if (exists) {
+        throw new ConflictException('Mass already exists', {
+          cause: new Error(),
+          description: 'Mass already created by the same parish',
         });
-        return { code: 201, message: 'Mass created successfully!' };
-      } catch (error) {
-        throw new InternalServerErrorException();
       }
     }
 
-    const isMassAlreadyExists = existingMass.some(
-      (mass) => mass.startAt.getTime() === new Date(startAt).getTime()
-    );
-
-    if (isMassAlreadyExists) {
-      throw new ConflictException('Mass already exists', {
-        cause: new Error(),
-        description: 'Mass already created by the same parish',
-      });
-    }
-
-    const createInput: Prisma.MassCreateInput = {
-      price,
-      startAt: new Date(startAt),
-      estimatedDurationMinutes,
-      massType,
-      parish: { connect: { parishId } },
-      // Parishes set price in XAF (they're Cameroonian entities) — seed the
-      // authoritative MassPrice(XAF) row at creation so resolvePrices()
-      // resolves from MassPrice consistently, same as any other currency,
-      // rather than only via the Mass.price fallback.
-      massPrices: {
-        create: {
-          currency: 'XAF',
-          amount: price,
-          setByUser: { connect: { userId: requestUser.id } },
-        },
-      },
-    };
+    const dates = input.recurrence
+      ? generateRecurrenceDates(
+          startAt,
+          input.recurrence.interval,
+          input.recurrence.count,
+          DISPLAY_TIME_ZONE
+        )
+      : [startAt];
 
     try {
-      await this.create(createInput);
-      return { code: 200, message: 'Mass created successfully!' };
+      const created = await this.prismaService.$transaction(async (tx) => {
+        // Mass has no (parishId, startAt) unique constraint, so the
+        // check-then-insert below is only safe if one parish's creations
+        // run one at a time: a double-clicked Save or two open tabs would
+        // otherwise both see no existing rows and insert the same dates.
+        // Transaction-scoped, so it's released on commit or rollback.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('mass-create'), hashtext(${parishId}))`;
+        const existing = await tx.mass.findMany({
+          where: { parishId, startAt: { in: dates } },
+          select: { startAt: true },
+        });
+        const taken = new Set(existing.map((mass) => mass.startAt.getTime()));
+        const newDates = dates.filter((date) => !taken.has(date.getTime()));
+        if (!newDates.length) return 0;
+
+        const masses = await tx.mass.createManyAndReturn({
+          data: newDates.map((date) => ({
+            price: input.price,
+            startAt: date,
+            estimatedDurationMinutes: input.estimatedDurationMinutes,
+            massType: input.massType,
+            parishId,
+          })),
+          select: { massId: true },
+        });
+        // Parishes set prices in XAF — seed each new mass's authoritative
+        // MassPrice(XAF) row now, so resolvePrices() always resolves from
+        // MassPrice rather than only via the Mass.price fallback. Only the
+        // masses just created, never ones that already had a price.
+        await tx.massPrice.createMany({
+          data: masses.map(({ massId }) => ({
+            massId,
+            currency: 'XAF' as const,
+            amount: input.price,
+            setByUserId: requestUser.id,
+          })),
+        });
+        return masses.length;
+      });
+
+      const skipped = dates.length - created;
+      return created
+        ? { code: 201, message: 'Mass created successfully!', created, skipped }
+        : { code: 200, message: 'All masses already exist!', created, skipped };
     } catch (error) {
+      this.logger.error(
+        `Creating ${dates.length} mass(es) for parish ${parishId} failed`,
+        error instanceof Error ? error.stack : String(error)
+      );
       throw new InternalServerErrorException();
     }
   }
@@ -239,9 +245,7 @@ export class MassService {
   } as const;
 
   /** Unbounded — kept exactly as-is for existing callers (admin-ui's masses
-   * page/parish-detail tab/mass selector, and this service's own
-   * createMasses "replicate" logic, which needs every existing date to
-   * avoid creating duplicates, not just one page of them). New callers
+   * page/parish-detail tab/mass selector). New callers
    * that need pagination/filtering should use findAllByParishPaginated. */
   async findAllByParish(parishId: string, filters?: MassFilters) {
     return this.prismaService.mass.findMany({
@@ -392,122 +396,35 @@ export class MassService {
     }));
   }
 
-  /** `readAt` is when the sent PDF's orders were read — if a payment for
-   * this mass completed after that, the PDF missed it, so leave the mass
-   * pending and let the next sweep re-send it. */
-  async markIntentionsSent(massId: string, readAt: Date) {
-    await this.prismaService.mass.updateMany({
-      where: {
-        massId,
-        massOrder: {
-          none: {
-            payments: { some: { status: 'COMPLETED', paidAt: { gt: readAt } } },
+  /** Marks a mass's intentions as sent, unless an order the sent PDF
+   * didn't list has a COMPLETED payment by now (a checkout that settled
+   * while the PDF was being built or emailed). Then the mass stays pending
+   * and the next sweep re-sends the full list.
+   *
+   * Comparing order ids rather than timestamps doesn't depend on when the
+   * settling transaction commits. The row lock waits for any settle that
+   * already touched this mass (PaymentService.finalizeCheckout always
+   * writes the mass row) to commit, so the check that follows, a fresh
+   * READ COMMITTED snapshot, sees its payments. */
+  async markIntentionsSent(
+    massId: string,
+    sentAt: Date,
+    sentOrderIds: string[]
+  ) {
+    await this.prismaService.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT 1 FROM "mass" WHERE "massId" = ${massId} FOR UPDATE`;
+      await tx.mass.updateMany({
+        where: {
+          massId,
+          massOrder: {
+            none: {
+              massOrderId: { notIn: sentOrderIds },
+              payments: { some: { status: 'COMPLETED' } },
+            },
           },
         },
-      },
-      data: { intentionsSentAt: readAt },
+        data: { intentionsSentAt: sentAt },
+      });
     });
-  }
-
-  /** Every occurrence of the recurrence rule from startDate through the
-   * inclusive `until` bound, at the same time-of-day as startDate. WEEKLY
-   * steps by 7 days (so the weekday never drifts, by construction).
-   * MONTHLY preserves the "Nth weekday of the month" position of startDate
-   * (e.g. startDate on the 2nd Monday of January → every month's own 2nd
-   * Monday) — a month with no such occurrence (e.g. no 5th Monday) is
-   * skipped rather than snapped to the nearest one, matching how
-   * Google/Outlook handle "monthly on the 5th weekday". */
-  private generateRecurrenceDates(
-    startDate: string,
-    interval: RecurrenceInterval,
-    until: string
-  ): string[] {
-    const start = new Date(startDate);
-    const end = new Date(until);
-    end.setHours(23, 59, 59, 999); // `until` is a date the parish picked, not a timestamp — make it inclusive of that whole day regardless of startAt's time-of-day.
-    const dates: string[] = [];
-
-    if (interval === RecurrenceInterval.WEEKLY) {
-      const current = new Date(start);
-      while (current <= end) {
-        dates.push(new Date(current).toISOString());
-        current.setDate(current.getDate() + 7);
-      }
-      return dates;
-    }
-
-    const weekday = start.getDay();
-    const occurrence = Math.floor((start.getDate() - 1) / 7); // 0 = 1st, 1 = 2nd, ...
-
-    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
-    while (cursor <= end) {
-      const candidate = this.nthWeekdayOfMonth(
-        cursor.getFullYear(),
-        cursor.getMonth(),
-        weekday,
-        occurrence,
-        start
-      );
-      if (candidate && candidate >= start && candidate <= end) {
-        dates.push(candidate.toISOString());
-      }
-      cursor.setMonth(cursor.getMonth() + 1);
-    }
-    return dates;
-  }
-
-  /** The `occurrence`-th (0-indexed) `weekday` of the given year/month, at
-   * `timeSource`'s time-of-day — or null if that occurrence doesn't exist
-   * in this month (e.g. a "5th Monday" in a month that only has 4). */
-  private nthWeekdayOfMonth(
-    year: number,
-    month: number,
-    weekday: number,
-    occurrence: number,
-    timeSource: Date
-  ): Date | null {
-    const firstOfMonth = new Date(year, month, 1);
-    const firstMatchOffset = (weekday - firstOfMonth.getDay() + 7) % 7;
-    const day = 1 + firstMatchOffset + occurrence * 7;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    if (day > daysInMonth) return null;
-    return new Date(
-      year,
-      month,
-      day,
-      timeSource.getHours(),
-      timeSource.getMinutes(),
-      timeSource.getSeconds()
-    );
-  }
-
-  private getUniqueDate(arrayDate1: string[], arrayDate2: string[]): string[] {
-    const elementCount = new Map<string, number>();
-
-    const newArrayDate2 = arrayDate2.filter(
-      (date) => new Date(arrayDate1[0]) <= new Date(date)
-    );
-
-    arrayDate1.concat(newArrayDate2).forEach((date) => {
-      elementCount.set(date, (elementCount.get(date) || 0) + 1);
-    });
-
-    return Array.from(elementCount.entries())
-      .filter(([, count]) => count === 1)
-      .map(([date]) => date);
-  }
-
-  private createListOfMasses(
-    arrayDate: string[],
-    input: CreateMassDto,
-    parishId: string
-  ): Prisma.MassCreateManyInput[] {
-    return arrayDate.map((date) => ({
-      price: input.price,
-      startAt: new Date(date),
-      estimatedDurationMinutes: input.estimatedDurationMinutes,
-      massType: input.massType,
-      parishId,
-    }));
   }
 }

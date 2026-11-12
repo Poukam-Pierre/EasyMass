@@ -1,5 +1,6 @@
 import searchIcon from '@iconify-icons/fluent/search-24-regular';
 import mailIcon from '@iconify-icons/ph/envelope-simple-light';
+import keyIcon from '@iconify-icons/ph/key-light';
 import trashIcon from '@iconify-icons/ph/trash-light';
 import { Icon } from "@iconify/react";
 import { extractApiErrorKey } from "@easy-messe/libs/utils";
@@ -29,6 +30,7 @@ interface ParishRow {
 }
 
 const RESEND_SETUP_ERROR_KEYS = new Set(['accountAlreadyActive']);
+const PASSWORD_RESET_ERROR_KEYS = new Set(['accountPendingSetup']);
 
 export default function Parishes() {
     const { formatMessage, formatDate } = useIntl()
@@ -41,6 +43,7 @@ export default function Parishes() {
     const [pendingPayoutId, setPendingPayoutId] = useState<string | null>(null)
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
     const [pendingResendId, setPendingResendId] = useState<string | null>(null)
+    const [pendingResetId, setPendingResetId] = useState<string | null>(null)
 
     const loadParishes = () => {
         setIsLoading(true)
@@ -92,6 +95,26 @@ export default function Parishes() {
             loadParishes();
         } finally {
             setPendingResendId(null)
+        }
+    }
+
+    // Emails the parish a reset link; the admin never sees or sets the
+    // password. For a parish that forgot it and can't use "Forgot password?".
+    const handleSendPasswordReset = async (parish: ParishRow, event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (!window.confirm(formatMessage({ id: 'sendPasswordResetConfirm' }, { email: parish.user.email }))) return;
+        setPendingResetId(parish.parishId)
+        try {
+            await api.post(`/parishes/${parish.parishId}/send-password-reset`);
+            toast.success(formatMessage({ id: 'passwordResetEmailSent' }));
+        } catch (error) {
+            const key = extractApiErrorKey(error, PASSWORD_RESET_ERROR_KEYS);
+            toast.error(key
+                ? formatMessage({ id: key })
+                : apiErrorMessage(error, formatMessage({ id: 'genericErrorMsg' })));
+            loadParishes();
+        } finally {
+            setPendingResetId(null)
         }
     }
 
@@ -178,7 +201,13 @@ export default function Parishes() {
                                 </Tooltip>
                             </TableCell>
                             <TableCell align="right">
-                                {!parish.user.emailVerifiedAt && (
+                                {parish.user.emailVerifiedAt ? (
+                                    <Tooltip title={formatMessage({ id: 'sendPasswordReset' })}>
+                                        <IconButton size="small" onClick={(e) => handleSendPasswordReset(parish, e)} disabled={pendingResetId === parish.parishId}>
+                                            <Icon icon={keyIcon} fontSize={18} />
+                                        </IconButton>
+                                    </Tooltip>
+                                ) : (
                                     <Tooltip title={formatMessage({ id: 'resendSetupEmail' })}>
                                         <IconButton size="small" onClick={(e) => handleResendSetup(parish, e)} disabled={pendingResendId === parish.parishId}>
                                             <Icon icon={mailIcon} fontSize={18} />

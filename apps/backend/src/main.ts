@@ -8,7 +8,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  // The API is only reachable through Caddy (one hop) — trust its
+  // The API is only reachable through Caddy (one hop; compose.yml publishes
+  // the backend's port on loopback only, so keep it that way) — trust its
   // X-Forwarded-For so req.ip is the real client, not Caddy's container IP.
   // Without this, every @RateLimited route shares one bucket for everyone.
   app.set('trust proxy', 1);

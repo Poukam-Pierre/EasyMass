@@ -66,7 +66,11 @@ export class MassSchedulerService {
         attachments: [{ filename: `intentions-${mass.massId}.pdf`, content: pdf }],
       });
 
-      await this.massService.markIntentionsSent(mass.massId, readAt);
+      await this.massService.markIntentionsSent(
+        mass.massId,
+        readAt,
+        mass.massOrder.map((order) => order.massOrderId)
+      );
     } catch (error) {
       this.logger.error(
         `Failed to send intentions for mass ${mass.massId}: ${error?.message ?? error}`

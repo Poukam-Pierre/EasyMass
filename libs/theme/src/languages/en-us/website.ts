@@ -264,9 +264,6 @@ export const website = {
     "Manually adjust the parish's balance (credit or debit).",
   ledgerCorrectionAmount: 'Amount (positive to credit, negative to debit)',
   ledgerCorrectionNote: 'Reason for the correction',
-  recoveryUnavailableTitle: 'Recovery unavailable',
-  recoveryUnavailableMessage:
-    'Self-service password recovery is not available yet. Please contact a platform administrator.',
   backToLogin: 'Back to login',
   accountSetupTitle: 'Activate your account !',
   accountPasswordRule:
@@ -288,6 +285,23 @@ export const website = {
   setupEmailResent: 'Setup email sent.',
   accountAlreadyActive: 'This account has already been set up.',
   pendingSetup: 'Pending setup',
+  resetRequestHint:
+    'Enter the email address of your account. We will send you a link to choose a new password.',
+  resetEmailSentTitle: 'Check your inbox',
+  resetEmailSentMessage:
+    "If this email belongs to an account, we've sent it a link to choose a new password. The link is valid for 1 hour. Check your spam folder if you don't see it.",
+  resetPasswordTitle: 'Choose a new password !',
+  passwordResetSuccess: 'Your password has been changed. You can now log in.',
+  resetLinkInvalid:
+    'This link is invalid or has expired. Request a new one from the "Forgot password?" page.',
+  accountPendingSetup:
+    'This account has not been set up yet. Resend its setup email instead.',
+  sendPasswordReset: 'Send password reset link',
+  sendPasswordResetConfirm:
+    'Send a password reset link to {email}? The current password keeps working until a new one is chosen.',
+  passwordResetEmailSent: 'Password reset email sent.',
+  linkCheckFailedTitle: "Couldn't check this link",
+  retry: 'Try again',
   totalParishIncome: 'Total parish income',
   platformFeeRevenue: 'Platform fee revenue',
   payoutFeesPaid: 'Payout fees paid',
@@ -369,6 +383,13 @@ export const website = {
   threeMonths: '3 months',
   sixMonths: '6 months',
   oneYear: '1 year',
+  recurrenceCountHint:
+    '{count, plural, one {# mass} other {# masses}} will be created, the first on the chosen date.',
+  massesCreated: '{created, plural, one {# mass created.} other {# masses created.}}',
+  massesCreatedWithSkipped:
+    '{created, plural, one {# mass created} other {# masses created}}; {skipped, plural, one {# date already had a mass} other {# dates already had a mass}}.',
+  allMassesAlreadyExist:
+    'Every one of these dates already has a mass. Nothing was created.',
   passwordWarningMsg: 'Password is required',
   correctionPasswordHelp: 'Confirm your password to apply this correction.',
   cartSingleParishOnly: 'Your cart already has a mass from',

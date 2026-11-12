@@ -429,7 +429,7 @@ export class PaymentService {
         optionPaymentInit
       ).then((response) => response.json());
 
-      if (paymentInit.code === 201 && paymentInit.status === 'Accepted') {
+      if (Number(paymentInit.code) === 201 && paymentInit.status === 'Accepted') {
         // NotchPay assigns its own transaction reference (e.g.
         // "trx.xxx"), distinct from the `reference` we sent (which comes
         // back as transaction.merchant_reference/trxref instead). Both the
@@ -791,11 +791,15 @@ export class PaymentService {
       // (which only lists COMPLETED orders). Clearing intentionsSentAt
       // makes the next sweep re-send the full, updated PDF instead of
       // this intention never reaching the parish.
+      // Deliberately unconditional (no `intentionsSentAt: not null`
+      // filter): writing the row on every settle is what keeps this safe
+      // against a send that's in flight right now. It row-locks the mass
+      // until this transaction commits, which MassService.markIntentionsSent
+      // waits on before checking for orders its PDF missed; and if that
+      // send marked the mass first, this write is a serialization conflict
+      // and the retried transaction clears the fresh mark instead.
       await tx.mass.updateMany({
-        where: {
-          massId: { in: payments.map((p) => p.massOrder.massId) },
-          intentionsSentAt: { not: null },
-        },
+        where: { massId: { in: payments.map((p) => p.massOrder.massId) } },
         data: { intentionsSentAt: null },
       });
 
@@ -1061,7 +1065,10 @@ export class PaymentService {
       });
     }
 
-    if (withdrawalData.code === 201 && withdrawalData.status === 'Accepted') {
+    // Number(): NotchPay's `code` isn't reliably a number, and treating an
+    // accepted transfer as refused would leave the money sent but the
+    // parish ledger never debited.
+    if (Number(withdrawalData.code) === 201 && withdrawalData.status === 'Accepted') {
       const payoutReference = withdrawalData.transfer?.reference;
       // What NotchPay charges the platform for this payout (0 in sandbox).
       // Read per transfer, never assumed — their pricing can change.
@@ -1167,7 +1174,7 @@ export class PaymentService {
     // Same split as withdrawMoney: only the network call is caught here, so
     // the "creation rejected" business exception below propagates as-is
     // instead of being re-caught and re-wrapped by this same try.
-    let createRecipient: { code?: number; recipient?: { id?: string } };
+    let createRecipient: { code?: number | string; recipient?: { id?: string } };
     try {
       createRecipient = await fetch(
         'https://api.notchpay.co/recipients',
@@ -1190,7 +1197,7 @@ export class PaymentService {
     // the merchant reference we tagged the recipient with.
     const notchRecipientId = createRecipient.recipient?.id;
     if (
-      (createRecipient.code === 200 || createRecipient.code === 201) &&
+      [200, 201].includes(Number(createRecipient.code)) &&
       notchRecipientId
     ) {
       // Internal update — this is a system-derived cache of the NotchPay

@@ -239,14 +239,30 @@ export class ParishService {
   }
 
   async resendSetupLink(parishId: string) {
+    await this.accountSetupService.resendSetupLink(
+      await this.parishUserIdOrThrow(parishId)
+    );
+    return { code: 200, message: 'Setup email sent.' };
+  }
+
+  /** Admin help for a parish that forgot its password: emails the parish a
+   * reset link. The admin never sees or sets the password. */
+  async sendPasswordReset(parishId: string) {
+    await this.accountSetupService.sendPasswordResetFor(
+      await this.parishUserIdOrThrow(parishId)
+    );
+    return { code: 200, message: 'Password reset email sent.' };
+  }
+
+  private async parishUserIdOrThrow(parishId: string): Promise<string> {
     const parish = await this.prismaService.parish.findUnique({
       where: { parishId },
+      select: { userId: true },
     });
     if (!parish) {
       throw new NotFoundException('Parish not found.', { cause: new Error() });
     }
-    await this.accountSetupService.resendSetupLink(parish.userId);
-    return { code: 200, message: 'Setup email sent.' };
+    return parish.userId;
   }
 
   /** Believer-facing, public: masses still open for ordering, at visible parishes. */
