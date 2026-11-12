@@ -42,7 +42,7 @@ describe('AccountSetupService', () => {
     sent = [];
     prisma = {
       accountSetupToken: {
-        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
         create: jest.fn().mockResolvedValue({}),
         findUnique: jest.fn(),
         findFirst: jest.fn().mockResolvedValue(null),
@@ -53,7 +53,11 @@ describe('AccountSetupService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       refreshToken: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
-      $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
+      // Both forms Prisma accepts: an array of queries, or a callback that
+      // gets the transaction client (here, the same mock).
+      $transaction: jest.fn((arg: unknown) =>
+        typeof arg === 'function' ? arg(prisma) : Promise.all(arg as Promise<unknown>[])
+      ),
     };
     mail = {
       send: jest.fn(async (message: MailMessage) => {
@@ -77,7 +81,7 @@ describe('AccountSetupService', () => {
     const { tokenHash, purpose, userId } = calls[calls.length - 1][0].data;
     prisma.accountSetupToken.findUnique.mockImplementation(async ({ where }) =>
       where.tokenHash === tokenHash
-        ? { userId, tokenHash, purpose, expiresAt }
+        ? { id: 'token-1', userId, tokenHash, purpose, expiresAt }
         : null
     );
   };
@@ -351,6 +355,28 @@ describe('AccountSetupService', () => {
       expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
         where: { userId: user.userId },
       });
+    });
+
+    it('lets only one of two concurrent submissions of the same link through', async () => {
+      const token = await storedResetToken(new Date(Date.now() + 60_000));
+      // Burning the token row only succeeds once, as in the database.
+      let tokenRowLeft = true;
+      prisma.accountSetupToken.deleteMany.mockImplementation(async ({ where }) => {
+        if (where.id !== 'token-1') return { count: 0 };
+        const count = tokenRowLeft ? 1 : 0;
+        tokenRowLeft = false;
+        return { count };
+      });
+
+      const results = await Promise.allSettled([
+        service.completeReset(token, 'First1!pass'),
+        service.completeReset(token, 'Second1!pass'),
+      ]);
+
+      expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+      const rejected = results.find((r) => r.status === 'rejected') as PromiseRejectedResult;
+      expect(rejected.reason.message).toBe('resetLinkInvalid');
+      expect(prisma.user.update).toHaveBeenCalledTimes(1);
     });
 
     it('rejects an expired link', async () => {

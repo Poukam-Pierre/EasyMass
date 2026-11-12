@@ -294,6 +294,8 @@ export const website = {
   sendPasswordReset: 'Envoyer un lien de réinitialisation du mot de passe',
   sendPasswordResetConfirm: "Envoyer un lien de réinitialisation du mot de passe à {email} ? Le mot de passe actuel reste valable tant qu'un nouveau n'est pas choisi.",
   passwordResetEmailSent: 'E-mail de réinitialisation envoyé.',
+  linkCheckFailedTitle: 'Impossible de vérifier ce lien',
+  retry: 'Réessayer',
   totalParishIncome: 'Revenus total des paroisses',
   platformFeeRevenue: 'Revenus de la plateforme',
   payoutFeesPaid: 'Frais de retrait payés',

@@ -89,12 +89,7 @@ export class AccountSetupService {
    * the account is already set up — from then on, its password belongs to
    * its owner alone (a reset link is the way to help them). */
   async resendSetupLink(userId: string): Promise<void> {
-    const user = await this.prismaService.user.findUnique({
-      where: { userId },
-    });
-    if (!user) {
-      throw new NotFoundException('Account not found.', { cause: new Error() });
-    }
+    const user = await this.findUserOrThrow(userId);
     if (user.emailVerifiedAt) {
       throw new BadRequestException('accountAlreadyActive', {
         cause: new Error(),
@@ -126,12 +121,7 @@ export class AccountSetupService {
    * gets its setup link re-sent instead (resendSetupLink), whose email
    * explains that the account is new. */
   async sendPasswordResetFor(userId: string): Promise<void> {
-    const user = await this.prismaService.user.findUnique({
-      where: { userId },
-    });
-    if (!user) {
-      throw new NotFoundException('Account not found.', { cause: new Error() });
-    }
+    const user = await this.findUserOrThrow(userId);
     if (!user.emailVerifiedAt) {
       throw new BadRequestException('accountPendingSetup', {
         cause: new Error(),
@@ -212,7 +202,12 @@ export class AccountSetupService {
   /** Sets the password and marks the email verified (if it wasn't), then
    * burns every link the account has, of either purpose, so none can be
    * used to change the password again, and ends any session the account
-   * already has — whoever held the old password is logged out. */
+   * already has — whoever held the old password is logged out.
+   *
+   * The link is burned first, in the same transaction: concurrent
+   * submissions of one link (a double-click, or someone racing the owner)
+   * both pass findValidToken, but only one can delete the row — the other
+   * sees count 0 and is refused, so a link really is used only once. */
   private async complete(
     token: string,
     purpose: AccountTokenPurpose,
@@ -222,18 +217,33 @@ export class AccountSetupService {
     const { userId } = record;
 
     const passwordHash = await bcrypt.hash(password, 10);
-    await this.prismaService.$transaction([
-      this.prismaService.user.update({
+    await this.prismaService.$transaction(async (tx) => {
+      const { count } = await tx.accountSetupToken.deleteMany({
+        where: { id: record.id },
+      });
+      if (count === 0) throw invalidLink(purpose);
+
+      await tx.user.update({
         where: { userId },
         data: { password: passwordHash },
-      }),
-      this.prismaService.user.updateMany({
+      });
+      await tx.user.updateMany({
         where: { userId, emailVerifiedAt: null },
         data: { emailVerifiedAt: new Date() },
-      }),
-      this.prismaService.accountSetupToken.deleteMany({ where: { userId } }),
-      this.prismaService.refreshToken.deleteMany({ where: { userId } }),
-    ]);
+      });
+      await tx.accountSetupToken.deleteMany({ where: { userId } });
+      await tx.refreshToken.deleteMany({ where: { userId } });
+    });
+  }
+
+  private async findUserOrThrow(userId: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: { userId },
+    });
+    if (!user) {
+      throw new NotFoundException('Account not found.', { cause: new Error() });
+    }
+    return user;
   }
 
   /** Stores a new token's hash, replacing the user's earlier ones for the
@@ -264,16 +274,20 @@ export class AccountSetupService {
       where: { tokenHash: hashToken(token) },
     });
     if (!record || record.purpose !== purpose || record.expiresAt <= new Date()) {
-      throw new BadRequestException(INVALID_LINK_KEY[purpose], {
-        cause: new Error(),
-        description:
-          purpose === AccountTokenPurpose.SETUP
-            ? 'This account setup link is invalid or has expired. Ask the platform administrator for a new one.'
-            : 'This password reset link is invalid or has expired. Request a new one from the login page.',
-      });
+      throw invalidLink(purpose);
     }
     return record;
   }
+}
+
+function invalidLink(purpose: AccountTokenPurpose): BadRequestException {
+  return new BadRequestException(INVALID_LINK_KEY[purpose], {
+    cause: new Error(),
+    description:
+      purpose === AccountTokenPurpose.SETUP
+        ? 'This account setup link is invalid or has expired. Ask the platform administrator for a new one.'
+        : 'This password reset link is invalid or has expired. Request a new one from the login page.',
+  });
 }
 
 /** Base URL of the app a role's links open in, from its env var. Throws if

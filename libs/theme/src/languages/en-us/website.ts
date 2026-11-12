@@ -300,6 +300,8 @@ export const website = {
   sendPasswordResetConfirm:
     'Send a password reset link to {email}? The current password keeps working until a new one is chosen.',
   passwordResetEmailSent: 'Password reset email sent.',
+  linkCheckFailedTitle: "Couldn't check this link",
+  retry: 'Try again',
   totalParishIncome: 'Total parish income',
   platformFeeRevenue: 'Platform fee revenue',
   payoutFeesPaid: 'Payout fees paid',

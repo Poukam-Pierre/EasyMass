@@ -1,5 +1,5 @@
 import { extractApiErrorKey } from "@easy-messe/libs/utils";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -26,6 +26,9 @@ export interface PasswordLinkPageProps {
 type LinkState =
     | { step: 'checking' }
     | { step: 'invalid' }
+    /** The link couldn't be checked (rate limit, network, server) — it
+     * may be fine, so offer a retry rather than calling it invalid. */
+    | { step: 'error'; message: string }
     | { step: 'ready'; suggestedPassword: string };
 
 /** Readable text of an API error, for errors without a translated key. */
@@ -64,23 +67,25 @@ export function PasswordLinkPage({
             : apiMessage(error) ?? formatMessage({ id: 'genericErrorMsg' })
     }
 
-    useEffect(() => {
-        if (!isReady) return
+    const checkLink = () => {
         if (!token) {
             setState({ step: 'invalid' })
             return
         }
+        setState({ step: 'checking' })
         axios.post(`${url}/preview`, { token })
             .then(({ data }) => setState({ step: 'ready', suggestedPassword: data.suggestedPassword }))
             .catch((error) => {
                 if (extractApiErrorKey(error, knownKeys) === invalidLinkKey) {
                     setState({ step: 'invalid' })
                 } else {
-                    // Rate limit / network: the link itself may be fine, so
-                    // don't call it invalid — let them retry by reloading.
-                    toast.error(messageFor(error))
+                    setState({ step: 'error', message: messageFor(error) })
                 }
             })
+    }
+
+    useEffect(() => {
+        if (isReady) checkLink()
     }, [isReady, token]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = async (password: string) => {
@@ -118,6 +123,28 @@ export function PasswordLinkPage({
             )}
             {state.step === 'invalid' && (
                 <StatusScreen titleId={invalidLinkTitleId} messageId={invalidLinkKey} />
+            )}
+            {state.step === 'error' && (
+                <Box sx={{
+                    display: 'grid',
+                    justifyItems: 'center',
+                    alignContent: 'baseline',
+                    rowGap: 3,
+                    width: 464,
+                    marginTop: '120px',
+                    justifySelf: 'center',
+                    textAlign: 'center',
+                }}>
+                    <Typography variant="h2">
+                        {formatMessage({ id: 'linkCheckFailedTitle' })}
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: 'var(--body)' }}>
+                        {state.message}
+                    </Typography>
+                    <Button variant="contained" onClick={checkLink}>
+                        {formatMessage({ id: 'retry' })}
+                    </Button>
+                </Box>
             )}
             {state.step === 'ready' && (
                 <GetNewPassword
