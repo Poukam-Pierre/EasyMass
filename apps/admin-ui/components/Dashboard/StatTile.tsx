@@ -7,9 +7,11 @@ interface StatTileProps {
     value: string;
     icon: IconifyIcon;
     accentColor: string;
+    /** Optional secondary line under the value (e.g. a related cost). */
+    caption?: string;
 }
 
-export default function StatTile({ label, value, icon, accentColor }: StatTileProps) {
+export default function StatTile({ label, value, icon, accentColor, caption }: StatTileProps) {
     return (
         <Box sx={{
             display: 'grid',
@@ -35,6 +37,9 @@ export default function StatTile({ label, value, icon, accentColor }: StatTilePr
             <Box sx={{ minWidth: 0 }}>
                 <Typography variant="body2" sx={{ color: 'var(--body)' }}>{label}</Typography>
                 <Typography variant="h3" sx={{ paddingBottom: 0, whiteSpace: 'nowrap' }}>{value}</Typography>
+                {caption && (
+                    <Typography variant="caption" sx={{ color: 'var(--body)' }}>{caption}</Typography>
+                )}
             </Box>
         </Box>
     );

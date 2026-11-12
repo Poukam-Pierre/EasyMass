@@ -1,17 +1,6 @@
-import { Footer } from "@easy-messe/shared-ui";
-import { Box } from "@mui/material";
-import PasswordRecoveryUnavailable from "../../../components/PasswordRecoveryUnavailable";
+import { RequestPasswordResetPage } from "@easy-messe/shared-ui";
 
-export default function MailVerification() {
-    return (
-        <Box sx={{
-            height: '100svh',
-            display: 'grid',
-            gridTemplateRows: '1fr auto'
-        }}>
-            <PasswordRecoveryUnavailable />
-            <Footer />
-        </Box>
-
-    );
+/** "Forgot password?" — emails an admin account a reset link. */
+export default function ForgotPassword() {
+    return <RequestPasswordResetPage requestPath="/password-reset/request-admin" />;
 }

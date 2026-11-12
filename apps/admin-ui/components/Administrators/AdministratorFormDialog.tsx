@@ -1,3 +1,4 @@
+import { ACCOUNT_PASSWORD_PATTERN } from "@easy-messe/libs/utils";
 import { Autocomplete, Box, Button, Dialog, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import { useIntl } from "react-intl";
@@ -23,8 +24,7 @@ export default function AdministratorFormDialog({ isOpen, handleClose, onCreated
             email: yup.string().email(formatMessage({ id: 'invalidEmail' })).required(formatMessage({ id: 'emailWarningMsg' })),
             phone: yup.string().required(),
             password: yup.string()
-                .min(5, formatMessage({ id: 'minPassword' }))
-                .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/, { message: formatMessage({ id: 'passwordCarateristics' }) })
+                .matches(ACCOUNT_PASSWORD_PATTERN, { message: formatMessage({ id: 'accountPasswordRule' }) })
                 .required(formatMessage({ id: 'fillPassword' })),
         }),
         onSubmit: async (formValues) => {

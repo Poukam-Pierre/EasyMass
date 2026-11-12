@@ -7,7 +7,7 @@ export interface TransactionRow {
     createdAt: string;
     amount: number;
     balanceAfter: number;
-    transactionType: 'INCOME' | 'INCOME_REVERSAL' | 'WITHDRAWAL' | 'PLATFORM_FEE' | 'ADMIN_CORRECTION';
+    transactionType: 'INCOME' | 'INCOME_REVERSAL' | 'WITHDRAWAL' | 'PLATFORM_FEE' | 'ADMIN_CORRECTION' | 'PAYOUT_FEE';
     payment: { paymentMethod: string; status: string; currency: string } | null;
 }
 
@@ -17,6 +17,7 @@ const statusColor: Record<string, { bg: string; color: string }> = {
     WITHDRAWAL: { bg: 'rgba(255, 184, 0, 0.3)', color: 'var(--warning)' },
     PLATFORM_FEE: { bg: 'rgba(2, 109, 169, 0.3)', color: 'var(--primary)' },
     ADMIN_CORRECTION: { bg: 'rgba(156, 213, 245, 0.3)', color: 'var(--secondary)' },
+    PAYOUT_FEE: { bg: 'rgba(199, 0, 0, 0.15)', color: 'var(--error)' },
 };
 
 export const showTransactionStatus = (label: string) => {

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -19,11 +20,20 @@ import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { MassSchedulerModule } from './mass-scheduler/mass-scheduler.module';
 import { PaymentSchedulerModule } from './payment-scheduler/payment-scheduler.module';
 import { PriestModule } from './priest/priest.module';
+import { AccountSetupModule } from './account-setup/account-setup.module';
 
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    // Storage for @RateLimited routes only (it's a global module, so one
+    // registration serves every module) — no global ThrottlerGuard, each
+    // route opts in with its own limit.
+    // 429 body carries an i18n key, like the app's other API errors.
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ttl: 60_000, limit: 5 }],
+      errorMessage: 'tooManyAttempts',
+    }),
     PrismaModule,
     AuthModule,
     PaymentModule,
@@ -38,6 +48,7 @@ import { PriestModule } from './priest/priest.module';
     MassSchedulerModule,
     PaymentSchedulerModule,
     PriestModule,
+    AccountSetupModule,
   ],
   controllers: [AppController],
   providers: [

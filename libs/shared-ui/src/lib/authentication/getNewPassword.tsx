@@ -1,14 +1,42 @@
-import { Box, Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { ACCOUNT_PASSWORD_PATTERN } from "@easy-messe/libs/utils";
+import checkIcon from '@iconify-icons/ph/check-light';
+import copyIcon from '@iconify-icons/ph/copy-light';
+import { Icon } from "@iconify/react";
+import { Box, Button, Checkbox, FormControlLabel, FormHelperText, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import HeroHeader from "./HeroHeader";
 import { useIntl } from "react-intl";
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as yup from 'yup';
 
+export interface GetNewPasswordProps {
+    /** Receives the confirmed new password. The caller owns the API call
+     * and what happens after it (e.g. redirecting to login). */
+    onSubmit?: (password: string) => void | Promise<void>;
+    errorMessage?: string;
+    isSubmitting?: boolean;
+    /** i18n key for the heading — the same form serves several flows
+     * (account setup, password recovery). */
+    greetingId?: string;
+    /** i18n key for the line under the heading. */
+    actionMsgId?: string;
+    /** A password to pre-fill (both fields) and show in clear, which the
+     * user can keep as-is or overwrite with their own. */
+    initialPassword?: string;
+}
 
-export function GetNewPassword() {
+export function GetNewPassword({
+    onSubmit,
+    errorMessage,
+    isSubmitting,
+    greetingId = 'passwordRecovery',
+    actionMsgId = 'fillPassword',
+    initialPassword = '',
+}: GetNewPasswordProps = {}) {
     const { formatMessage } = useIntl()
-    const [isVisible, setIsVisible] = useState<boolean>(false)
+    // A suggested password is useless if the user can't read it.
+    const [isVisible, setIsVisible] = useState<boolean>(!!initialPassword)
+    const [isCopied, setIsCopied] = useState<boolean>(false)
 
 
     const {
@@ -19,20 +47,17 @@ export function GetNewPassword() {
         values
     } = useFormik({
         initialValues: {
-            newPassword: '',
-            confirmPassword: ''
+            newPassword: initialPassword,
+            confirmPassword: initialPassword
         },
-        onSubmit: (values, { resetForm }) => {
-            // TODO send password data to API to change password
-            console.log(values)
-            resetForm()
+        onSubmit: async (values) => {
+            await onSubmit?.(values.newPassword)
         },
         validationSchema: yup.object().shape({
             newPassword: yup
                 .string()
-                .min(5, formatMessage({ id: 'minPassword' }))
-                .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{5,}$/, {
-                    message: formatMessage({ id: 'passwordCarateristics' })
+                .matches(ACCOUNT_PASSWORD_PATTERN, {
+                    message: formatMessage({ id: 'accountPasswordRule' })
                 })
                 .required(formatMessage({ id: 'fillPassword' })),
             confirmPassword: yup
@@ -41,6 +66,17 @@ export function GetNewPassword() {
                 .required(formatMessage({ id: 'fillPassword' })),
         }),
     })
+
+    const copyPassword = async () => {
+        try {
+            await navigator.clipboard.writeText(values.newPassword)
+            setIsCopied(true)
+            setTimeout(() => setIsCopied(false), 2000)
+        } catch {
+            // Clipboard can be unavailable (permissions, insecure context) —
+            // the password is visible on screen, so copying stays optional.
+        }
+    }
 
     return (
         <Box sx={{
@@ -53,8 +89,8 @@ export function GetNewPassword() {
         }}>
             <HeroHeader
                 slogan={formatMessage({ id: 'slogan' })}
-                greeting={formatMessage({ id: 'passwordRecovery' })}
-                getActionMsg={formatMessage({ id: 'fillPassword' })}
+                greeting={formatMessage({ id: greetingId })}
+                getActionMsg={formatMessage({ id: actionMsgId })}
             />
             <Box
                 sx={{
@@ -71,8 +107,19 @@ export function GetNewPassword() {
                     placeholder={formatMessage({ id: 'newPassword' })}
                     type={isVisible ? 'text' : 'password'}
                     error={errors.newPassword && touched.newPassword ? true : false}
-                    helperText={(errors.newPassword && touched.newPassword) && errors.newPassword}
+                    helperText={(errors.newPassword && touched.newPassword) ? errors.newPassword : formatMessage({ id: 'accountPasswordRule' })}
                     onChange={handleChange}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Tooltip title={formatMessage({ id: isCopied ? 'copied' : 'copy' })}>
+                                    <IconButton size="small" onClick={copyPassword} disabled={!values.newPassword} edge="end">
+                                        <Icon icon={isCopied ? checkIcon : copyIcon} fontSize={18} />
+                                    </IconButton>
+                                </Tooltip>
+                            </InputAdornment>
+                        ),
+                    }}
 
                 />
                 <TextField
@@ -95,11 +142,17 @@ export function GetNewPassword() {
                         />
                     }
                 />
+                {errorMessage && (
+                    <FormHelperText error sx={{ textAlign: 'center', fontSize: '14px' }}>
+                        {errorMessage}
+                    </FormHelperText>
+                )}
                 <Button
                     variant="contained"
                     type="submit"
+                    disabled={isSubmitting}
                 >
-                    {formatMessage({ id: 'save' })}
+                    {formatMessage({ id: isSubmitting ? 'processing' : 'save' })}
                 </Button>
             </Box>
         </Box>

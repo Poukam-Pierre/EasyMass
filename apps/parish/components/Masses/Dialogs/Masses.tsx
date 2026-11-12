@@ -24,25 +24,28 @@ enum RecurrenceInterval {
   Monthly = 'MONTHLY',
 }
 
-// Duration presets rather than a free date picker — the recurrence's
-// `until` is derived from whichever one is picked, computed relative to
-// the mass's own start date so the parish never has to think about actual
-// calendar dates for this.
+// Duration presets rather than a free date picker or end date. Each one
+// stands for a fixed number of masses, the first one included, so "every
+// week for 1 month" is always 4 masses whatever weekday or month it starts
+// in. Monthly has no 1-month preset: that would be just the one mass.
 const DURATION_PRESETS = ['1M', '3M', '6M', '1Y'] as const;
 type DurationPreset = (typeof DURATION_PRESETS)[number];
 
-function addDuration(date: Dayjs, preset: DurationPreset): Dayjs {
-  switch (preset) {
-    case '1M':
-      return date.add(1, 'month');
-    case '3M':
-      return date.add(3, 'month');
-    case '6M':
-      return date.add(6, 'month');
-    case '1Y':
-      return date.add(1, 'year');
-  }
-}
+const OCCURRENCES: Record<
+  RecurrenceInterval,
+  Partial<Record<DurationPreset, number>>
+> = {
+  [RecurrenceInterval.Weekly]: { '1M': 4, '3M': 13, '6M': 26, '1Y': 52 },
+  [RecurrenceInterval.Monthly]: { '3M': 3, '6M': 6, '1Y': 12 },
+};
+
+const presetsFor = (interval: RecurrenceInterval) =>
+  DURATION_PRESETS.filter((preset) => OCCURRENCES[interval][preset]);
+
+const occurrencesOf = (values: {
+  recurrenceInterval: RecurrenceInterval;
+  recurrenceDuration: DurationPreset;
+}) => OCCURRENCES[values.recurrenceInterval][values.recurrenceDuration] ?? 0;
 
 const DURATION_LABEL_IDS: Record<DurationPreset, string> = {
   '1M': 'oneMonth',
@@ -50,6 +53,12 @@ const DURATION_LABEL_IDS: Record<DurationPreset, string> = {
   '6M': 'sixMonths',
   '1Y': 'oneYear',
 };
+
+/** What POST /masses/create reports back. */
+interface MassCreationResult {
+  created: number;
+  skipped: number;
+}
 
 // Matches the backend's MassType enum exactly (Prisma's @map only affects
 // the DB column value, not the string the API actually sends/expects).
@@ -115,6 +124,7 @@ export default function MassesDialog({
         ?.hour(formValues.massTime?.hour() ?? 0)
         .minute(formValues.massTime?.minute() ?? 0)
         .second(0)
+        .millisecond(0)
         .toISOString();
 
       try {
@@ -124,21 +134,42 @@ export default function MassesDialog({
             startAt,
             estimatedDurationMinutes: formValues.estimatedDurationMinutes,
           });
+          toast.success(formatMessage({ id: 'saved' }));
         } else {
-          await api.post('/masses/create', {
-            price: formValues.price,
-            startAt,
-            estimatedDurationMinutes: formValues.estimatedDurationMinutes,
-            massType: MassTypeEnum.Unique,
-            recurrence: formValues.replicate && formValues.dayOfMass
-              ? {
-                  interval: formValues.recurrenceInterval,
-                  until: addDuration(formValues.dayOfMass, formValues.recurrenceDuration).toISOString(),
-                }
-              : undefined,
-          });
+          const { data } = await api.post<MassCreationResult>(
+            '/masses/create',
+            {
+              price: formValues.price,
+              startAt,
+              estimatedDurationMinutes: formValues.estimatedDurationMinutes,
+              massType: MassTypeEnum.Unique,
+              recurrence: formValues.replicate
+                ? {
+                    interval: formValues.recurrenceInterval,
+                    count: occurrencesOf(formValues),
+                  }
+                : undefined,
+            }
+          );
+          if (!data.created) {
+            // Nothing new was added, so don't call it saved; keep the
+            // dialog open so the parish can pick another date.
+            toast.info(formatMessage({ id: 'allMassesAlreadyExist' }));
+            return;
+          }
+          toast.success(
+            formValues.replicate
+              ? formatMessage(
+                  {
+                    id: data.skipped
+                      ? 'massesCreatedWithSkipped'
+                      : 'massesCreated',
+                  },
+                  { created: data.created, skipped: data.skipped }
+                )
+              : formatMessage({ id: 'saved' })
+          );
         }
-        toast.success(formatMessage({ id: 'saved' }));
         resetForm();
         onSaved();
         handleClose();
@@ -159,6 +190,8 @@ export default function MassesDialog({
     }),
     enableReinitialize: true,
   });
+
+  const occurrenceCount = occurrencesOf(values);
 
   if (!isOpen) return null;
 
@@ -278,6 +311,7 @@ export default function MassesDialog({
                   <Checkbox
                     id="replicate"
                     name="replicate"
+                    checked={values.replicate}
                     onChange={(event) =>
                       setFieldValue('replicate', event.target.checked)
                     }
@@ -299,7 +333,18 @@ export default function MassesDialog({
                     size="small"
                     label={formatMessage({ id: 'repeatInterval' })}
                     value={values.recurrenceInterval}
-                    onChange={handleChange}
+                    onChange={(event) => {
+                      const interval = event.target
+                        .value as RecurrenceInterval;
+                      setFieldValue('recurrenceInterval', interval);
+                      // Switching to monthly drops the 1-month preset.
+                      if (!OCCURRENCES[interval][values.recurrenceDuration]) {
+                        setFieldValue(
+                          'recurrenceDuration',
+                          presetsFor(interval)[0]
+                        );
+                      }
+                    }}
                   >
                     <MenuItem value={RecurrenceInterval.Weekly}>
                       {formatMessage({ id: 'weekly' })}
@@ -317,12 +362,21 @@ export default function MassesDialog({
                     value={values.recurrenceDuration}
                     onChange={handleChange}
                   >
-                    {DURATION_PRESETS.map((preset) => (
+                    {presetsFor(values.recurrenceInterval).map((preset) => (
                       <MenuItem key={preset} value={preset}>
                         {formatMessage({ id: DURATION_LABEL_IDS[preset] })}
                       </MenuItem>
                     ))}
                   </TextField>
+                  <Typography
+                    variant="body2"
+                    sx={{ gridColumn: '1 / -1', color: 'var(--body)' }}
+                  >
+                    {formatMessage(
+                      { id: 'recurrenceCountHint' },
+                      { count: occurrenceCount }
+                    )}
+                  </Typography>
                 </Box>
               )}
             </>

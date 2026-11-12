@@ -123,6 +123,9 @@ enum TransactionType {
   WITHDRAWAL       @map("withdrawal")
   PLATFORM_FEE     @map("platform_fee")
   ADMIN_CORRECTION @map("admin_correction")
+  /// What NotchPay charged the platform to send a parish payout — a
+  /// platform cost (negative ADMIN row), never deducted from the parish.
+  PAYOUT_FEE       @map("payout_fee")
 }
 
 enum OwnerType {

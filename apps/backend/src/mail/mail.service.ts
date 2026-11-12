@@ -1,6 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
+export interface MailMessage {
+  to: string;
+  subject: string;
+  text: string;
+  /** Optional rich version — mail clients fall back to `text` without it. */
+  html?: string;
+  attachments?: { filename: string; content: Buffer }[];
+}
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -20,23 +29,18 @@ export class MailService {
     });
   }
 
-  async sendWithAttachment(
-    to: string,
-    subject: string,
-    text: string,
-    attachment: { filename: string; content: Buffer }
-  ): Promise<void> {
+  /** Single delivery path for every email the platform sends, so the
+   * sender address and failure logging exist exactly once. Rethrows after
+   * logging — each caller decides whether a failed send is fatal for it. */
+  async send(message: MailMessage): Promise<void> {
     try {
       await this.transporter.sendMail({
         from: process.env.SMTP_FROM || 'no-reply@easymesse.com',
-        to,
-        subject,
-        text,
-        attachments: [attachment],
+        ...message,
       });
     } catch (error) {
       this.logger.error(
-        `Failed to send email to ${to}: ${error?.message ?? error}`
+        `Failed to send email to ${message.to}: ${error?.message ?? error}`
       );
       throw error;
     }

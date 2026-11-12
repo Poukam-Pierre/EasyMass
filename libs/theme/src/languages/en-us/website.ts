@@ -204,7 +204,7 @@ export const website = {
   paypalRedirectInfo:
     'You will be redirected to a secure PayPal payment page to complete your payment.',
   invoiceEmailHelper: 'Your payment receipt will be sent to this address.',
-  checkoutRequiredFields: 'Please enter your name and phone number.',
+  checkoutRequiredFields: 'Please enter your name, phone number and email.',
   checkoutError: 'Something went wrong during payment. Please try again.',
   estimatedBilling: 'Estimated total',
   checkoutReturnTitle: 'Thank you!',
@@ -253,7 +253,8 @@ export const website = {
   parishBlockedTooltip: 'This parish is blocked. Click to unblock.',
   parishActiveTooltip: 'This parish is active. Click to block.',
   payoutBlockToggleTooltip: "Block or unblock this parish's payouts.",
-  parishCreatedSuccess: 'Parish created successfully.',
+  parishCreatedSuccess:
+    'Parish created. An email was sent so they can set up their account.',
   parishNameWarningMsg: 'Parish name is required',
   parishCityWarningMsg: 'City is required',
   parishPhoneWarningMsg: 'Phone number is required',
@@ -263,12 +264,47 @@ export const website = {
     "Manually adjust the parish's balance (credit or debit).",
   ledgerCorrectionAmount: 'Amount (positive to credit, negative to debit)',
   ledgerCorrectionNote: 'Reason for the correction',
-  recoveryUnavailableTitle: 'Recovery unavailable',
-  recoveryUnavailableMessage:
-    'Self-service password recovery is not available yet. Please contact a platform administrator.',
   backToLogin: 'Back to login',
+  accountSetupTitle: 'Activate your account !',
+  accountPasswordRule:
+    'At least 10 characters, with 1 uppercase, 1 lowercase, 1 digit and 1 symbol.',
+  suggestedPasswordHint:
+    'We generated a strong password for you. Keep it — save it somewhere safe — or replace it with your own.',
+  setupLinkInvalidTitle: 'Link unavailable',
+  tooManyAttempts: 'Too many attempts. Please wait a minute and try again.',
+  copy: 'Copy',
+  copied: 'Copied!',
+  accountSetupSuccess: 'Your account is ready. You can now log in.',
+  setupLinkInvalid:
+    'This link is invalid or has expired. Ask the platform administrator to send you a new one.',
+  emailNotVerified:
+    'Your account is not activated yet. Use the link sent to your email to choose your password.',
+  setupEmailNotSent:
+    'Parish created, but the setup email could not be sent. Use "Resend setup email" from the list.',
+  resendSetupEmail: 'Resend setup email',
+  setupEmailResent: 'Setup email sent.',
+  accountAlreadyActive: 'This account has already been set up.',
+  pendingSetup: 'Pending setup',
+  resetRequestHint:
+    'Enter the email address of your account. We will send you a link to choose a new password.',
+  resetEmailSentTitle: 'Check your inbox',
+  resetEmailSentMessage:
+    "If this email belongs to an account, we've sent it a link to choose a new password. The link is valid for 1 hour. Check your spam folder if you don't see it.",
+  resetPasswordTitle: 'Choose a new password !',
+  passwordResetSuccess: 'Your password has been changed. You can now log in.',
+  resetLinkInvalid:
+    'This link is invalid or has expired. Request a new one from the "Forgot password?" page.',
+  accountPendingSetup:
+    'This account has not been set up yet. Resend its setup email instead.',
+  sendPasswordReset: 'Send password reset link',
+  sendPasswordResetConfirm:
+    'Send a password reset link to {email}? The current password keeps working until a new one is chosen.',
+  passwordResetEmailSent: 'Password reset email sent.',
+  linkCheckFailedTitle: "Couldn't check this link",
+  retry: 'Try again',
   totalParishIncome: 'Total parish income',
   platformFeeRevenue: 'Platform fee revenue',
+  payoutFeesPaid: 'Payout fees paid',
   totalWithdrawn: 'Total withdrawn',
   totalParishes: 'Total parishes',
   activeParishes: 'Active parishes',
@@ -307,12 +343,14 @@ export const website = {
     "This number couldn't be validated as a mobile money recipient. Check the number in your profile and try again.",
   withdrawalBlocked:
     'Withdrawals are currently blocked for your parish. Contact an administrator.',
-  withdrawalInsufficientBalance: 'Insufficient balance to complete this withdrawal.',
+  withdrawalInsufficientBalance:
+    'Insufficient balance to complete this withdrawal.',
   withdrawalNotAccepted:
     'The withdrawal was not accepted by the payment provider. Please try again.',
   withdrawalFailed:
     'Something went wrong with the withdrawal. Please try again.',
-  withdrawalPasswordHelp: 'Confirm your password to proceed with this withdrawal.',
+  withdrawalPasswordHelp:
+    'Confirm your password to proceed with this withdrawal.',
   addCurrencyFee: 'Add a currency',
   currencyWarningMsg: 'Currency is required',
   baseCurrencyCannotBeRemoved:
@@ -330,7 +368,8 @@ export const website = {
   minPrice: 'Minimum price (XAF)',
   maxPrice: 'Maximum price (XAF)',
   setMassPrice: 'Set price',
-  ownPriceHint: "This mass's own price, if set, always overrides any price band for it.",
+  ownPriceHint:
+    "This mass's own price, if set, always overrides any price band for it.",
   transactionType: 'Type',
   allTypes: 'All types',
   filterFrom: 'From',
@@ -344,10 +383,19 @@ export const website = {
   threeMonths: '3 months',
   sixMonths: '6 months',
   oneYear: '1 year',
+  recurrenceCountHint:
+    '{count, plural, one {# mass} other {# masses}} will be created, the first on the chosen date.',
+  massesCreated: '{created, plural, one {# mass created.} other {# masses created.}}',
+  massesCreatedWithSkipped:
+    '{created, plural, one {# mass created} other {# masses created}}; {skipped, plural, one {# date already had a mass} other {# dates already had a mass}}.',
+  allMassesAlreadyExist:
+    'Every one of these dates already has a mass. Nothing was created.',
   passwordWarningMsg: 'Password is required',
   correctionPasswordHelp: 'Confirm your password to apply this correction.',
   cartSingleParishOnly: 'Your cart already has a mass from',
-  cartClearToSwitch: 'Clear your cart first if you want to order from a different parish.',
-  notEnoughOpenMasses: "This parish doesn't have enough open masses left after that date for this option. Pick an earlier date, or choose a different option.",
+  cartClearToSwitch:
+    'Clear your cart first if you want to order from a different parish.',
+  notEnoughOpenMasses:
+    "This parish doesn't have enough open masses left after that date for this option. Pick an earlier date, or choose a different option.",
   massesAddedToCart: 'masses added to your cart.',
 };
